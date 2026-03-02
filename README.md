@@ -57,7 +57,10 @@ python -m wiz scan <path> --workers 8  # Control parallelism (default: 4)
 python -m wiz scan . --ignore todo-marker,console-log
 python -m wiz scan . --min-severity warning
 python -m wiz scan . --min-confidence medium
-python -m wiz scan . --output json
+
+# Output formats
+python -m wiz scan . --output json                # JSON for CI/CD
+python -m wiz scan . --output sarif > report.sarif  # SARIF for GitHub Code Scanning
 
 # Baseline/diff mode (CI/CD)
 python -m wiz scan . --baseline latest           # Compare against latest report
@@ -161,7 +164,12 @@ jobs:
       
       - name: Run security scan
         run: |
-          python -m wiz scan . --baseline latest --min-severity warning --output json > results.json
+          python -m wiz scan . --baseline latest --min-severity warning --output sarif > results.sarif
+      
+      - name: Upload to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
       
       - name: Check for new issues
         run: |
@@ -224,6 +232,21 @@ Critical Issues:
 python -m wiz scan . --output json > report.json
 ```
 
+### SARIF Output
+
+SARIF (Static Analysis Results Interchange Format) is the standard format for GitHub Code Scanning:
+
+```bash
+# Generate SARIF report
+python -m wiz scan . --output sarif > results.sarif
+
+# Upload to GitHub using CLI
+gh api repos/{owner}/{repo}/code-scanning/sarifs \
+  -F sarif=@results.sarif \
+  -F ref=refs/heads/main \
+  -F commit_sha=$(git rev-parse HEAD)
+```
+
 ## Performance
 
 Wiz uses parallel processing by default for 3-4x speedup on multi-core systems:
@@ -270,6 +293,7 @@ Genesis/
 ### v0.3.0 (Current)
 - ✅ Baseline/diff mode for CI/CD (`--baseline` flag)
 - ✅ Config file support (`.wiz.toml`)
+- ✅ SARIF output format for GitHub Code Scanning
 - ✅ Configurable parallelism (`--workers` flag)
 - ✅ Confidence filtering (`--min-confidence` flag)
 - ✅ Block comment support (Python, JS, Go, etc.)
@@ -292,9 +316,9 @@ Genesis/
 ## Roadmap
 
 - [ ] Deep scan caching (respect file hash cache)
-- [ ] SARIF output (GitHub Code Scanning integration)
 - [ ] Parallel deep scanning
 - [ ] Custom rule definitions
+- [ ] Auto-fix capabilities
 - [ ] VSCode extension
 
 ## License
