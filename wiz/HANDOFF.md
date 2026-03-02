@@ -19,28 +19,38 @@ report.py      ANSI console formatting, JSON output mode
 storage.py     SHA256 file hash cache, JSON report persistence, auto-prune
 ```
 
-## What Was Done in v0.2.0 (this commit)
+## Version History
 
+### v0.2.0 — Initial release (Claude)
 1. **False positive reduction** — comment/string skipping, TODO requires comment prefix, fixed branch counting for nested functions, fixed double hash, cache version invalidation, removed dead multiline JS regex
 2. **Deeper Python AST** — exception swallowing, shadowed builtins (19 names), type()==comparison, global keyword
 3. **New patterns** — pickle/yaml unsafe, weak hash, weak random, insertAdjacentHTML, Rust .expect()
 4. **CLI UX** — --ignore, --min-severity, --output json, .wizignore, rule names in output, category breakdown, auto-prune reports (50 max)
 5. **LLM quality** — better prompt with confidence levels, malformed JSON stderr logging, truncated JSON recovery, 5-line bucket dedup, token pre-flight warnings
 
-## Known Bugs
+### v0.2.1 — Bug fixes + tests (Oz + Claude review)
+**Oz:**
+- Fixed yaml-unsafe regex — moved negative lookahead before greedy quantifier
+- Refactored run_python_ast_checks into 6 focused helper functions
+- Removed dead functions from storage.py
+- Added parallel scanning with ThreadPoolExecutor (max_workers=4)
+- Added 120 pytest tests covering all modules
+- Added pyproject.toml, requirements.txt, README.md
 
-1. **yaml-unsafe regex is broken** (languages.py:172) — The negative lookahead inside `[^)]*` doesn't work. The greedy quantifier causes the lookahead to fail at different positions, so it matches even when SafeLoader IS present. Needs a two-step check: match `yaml.load(`, then exclude if SafeLoader found.
+**Claude (review fixes):**
+- Fixed cache-hit files being incorrectly counted as "skipped" — added is_error flag to _analyze_single_file return tuple
+- Added threading.Lock for thread-safe cache dict access in parallel path
 
-2. **run_python_ast_checks is too complex** (detector.py:54) — 33 branches, triggers its own high-complexity warning. Should split into per-check helper functions.
+## Known Issues
 
-3. **Dead functions in storage.py** (lines 49-58) — `is_file_unchanged()` and `update_cache_entry()` are no longer called after analyzer.py refactor. Should be removed.
+1. **No `--workers` CLI flag** — parallel scanning defaults to 4 workers with no way to override from CLI
+2. **Block comments** — only line comments (`#`, `//`) handled. No `/* */`, `""" """`, `<!-- -->`
+3. **Deep scan ignores cache** — rescans everything, doesn't benefit from file hash cache
 
 ## Suggested Improvements (prioritized)
 
-1. **Tests** — Zero tests currently. Regex rules and AST checks are deterministic and easy to test. This is the biggest fragility.
-2. **Baseline/diff mode** (`--baseline latest`) — Only show NEW findings since last scan. Essential for CI use.
-3. **Config file** (`.wiz.toml`) — Project-level severity overrides, ignored rules. Currently --ignore is ephemeral.
-4. **Deep scan cache** — Deep scan rescans everything, ignores the hash cache.
-5. **Block comments** — Only line comments (`#`, `//`) handled. No `/* */`, `""" """`, `<!-- -->`.
-6. **SARIF output** — GitHub Code Scanning integration standard.
-7. **Parallel scanning** — `concurrent.futures` for large repos.
+1. **Baseline/diff mode** (`--baseline latest`) — only show NEW findings since last scan. Essential for CI use.
+2. **Config file** (`.wiz.toml`) — project-level severity overrides, ignored rules. Currently --ignore is ephemeral.
+3. **Deep scan cache** — deep scan rescans everything, ignores the hash cache.
+4. **Block comments** — no `/* */`, `""" """`, `<!-- -->` handling.
+5. **SARIF output** — GitHub Code Scanning integration standard.
