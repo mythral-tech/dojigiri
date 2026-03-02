@@ -14,7 +14,6 @@ def ensure_dirs():
     """Create storage directories if they don't exist."""
     STORAGE_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def file_hash(filepath: str) -> str:
