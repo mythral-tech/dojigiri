@@ -2,10 +2,11 @@
 
 import json
 import sys
+import time
 from typing import Optional
 
 from .config import (
-    Finding, Severity, Category, Source,
+    Finding, Severity, Category, Source, Confidence,
     LLM_MODEL, LLM_MAX_TOKENS, LLM_TEMPERATURE,
     LLM_INPUT_COST_PER_M, LLM_OUTPUT_COST_PER_M,
     get_api_key,
@@ -136,22 +137,37 @@ Be specific — show before/after code."""
 # ─── Helpers ─────────────────────────────────────────────────────────
 
 def _recover_truncated_json(text: str) -> list | None:
-    """Attempt to recover a truncated JSON array by finding the last complete object."""
-    if not text.strip().startswith("["):
+    """Attempt to recover a truncated JSON array by finding the last complete object.
+
+    Strategy: walk backwards through `}` positions, trying to close the array
+    at each one. This finds the longest valid prefix of the array.
+    """
+    stripped = text.strip()
+    if not stripped.startswith("["):
         return None
-    # Find all complete objects via regex
-    # Match }, then optionally more content — keep all complete objects
-    last_brace = text.rfind("}")
-    if last_brace == -1:
+
+    # Find all } positions (potential object-end boundaries)
+    brace_positions = [i for i, c in enumerate(stripped) if c == "}"]
+    if not brace_positions:
         return None
-    candidate = text[:last_brace + 1].rstrip().rstrip(",") + "]"
-    try:
-        result = json.loads(candidate)
-        if isinstance(result, list):
-            print(f"  [llm] Recovered {len(result)} findings from truncated JSON", file=sys.stderr)
-            return result
-    except json.JSONDecodeError:
-        pass
+
+    # Try from the last } backwards — first success is the longest valid prefix
+    for pos in reversed(brace_positions):
+        candidate = stripped[:pos + 1].rstrip().rstrip(",") + "]"
+        try:
+            result = json.loads(candidate)
+            if isinstance(result, list):
+                # Estimate how many objects we dropped
+                remaining = stripped[pos + 1:].strip().rstrip("]").strip()
+                dropped_hint = remaining.count("{")
+                msg = f"  [llm] Recovered {len(result)} findings from truncated JSON"
+                if dropped_hint > 0:
+                    msg += f" (~{dropped_hint} dropped)"
+                print(msg, file=sys.stderr)
+                return result
+        except json.JSONDecodeError:
+            continue
+
     return None
 
 
@@ -163,6 +179,31 @@ def _estimate_chunk_tokens(chunk: Chunk) -> int:
 # ─── API calls ────────────────────────────────────────────────────────
 
 MAX_CHUNK_TOKENS = 100_000  # warn threshold
+_RETRY_DELAYS = [1, 2, 4]  # exponential backoff seconds
+_RETRIABLE_STATUS_CODES = {429, 503, 529}
+
+
+def _api_call_with_retry(client, **kwargs):
+    """Call client.messages.create with exponential backoff on transient errors."""
+    last_err = None
+    for attempt in range(len(_RETRY_DELAYS) + 1):
+        try:
+            return client.messages.create(**kwargs)
+        except Exception as e:
+            # Check if this is a retriable HTTP error
+            status = getattr(e, "status_code", None)
+            is_timeout = "timeout" in str(e).lower() or "timed out" in str(e).lower()
+            is_retriable = status in _RETRIABLE_STATUS_CODES or is_timeout
+
+            if is_retriable and attempt < len(_RETRY_DELAYS):
+                delay = _RETRY_DELAYS[attempt]
+                print(f"  [llm] Retry {attempt + 1}/{len(_RETRY_DELAYS)} after {delay}s "
+                      f"(status={status})", file=sys.stderr)
+                time.sleep(delay)
+                last_err = e
+            else:
+                raise
+    raise last_err  # shouldn't reach here, but safety net
 
 
 def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
@@ -177,7 +218,8 @@ def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
 
     user_msg = f"{chunk.header}\n\n```{chunk.language}\n{chunk.content}\n```"
 
-    response = client.messages.create(
+    response = _api_call_with_retry(
+        client,
         model=LLM_MODEL,
         max_tokens=LLM_MAX_TOKENS,
         temperature=LLM_TEMPERATURE,
@@ -202,7 +244,7 @@ def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
         # Attempt to recover truncated JSON arrays
         raw_findings = _recover_truncated_json(text)
         if raw_findings is None:
-            print(f"  [llm] Malformed JSON response (not valid JSON array)", file=sys.stderr)
+            print("  [llm] Malformed JSON response (not valid JSON array)", file=sys.stderr)
             return []
 
     if not isinstance(raw_findings, list):
@@ -217,6 +259,13 @@ def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
             if chunk.chunk_index > 0:
                 line = line + chunk.start_line - 1
 
+            # Parse confidence (default to medium if not provided)
+            conf_str = rf.get("confidence", "medium")
+            try:
+                confidence = Confidence(conf_str)
+            except ValueError:
+                confidence = Confidence.MEDIUM
+
             findings.append(Finding(
                 file=chunk.filepath,
                 line=line,
@@ -226,6 +275,7 @@ def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
                 rule=rf.get("rule", "llm-finding"),
                 message=rf.get("message", "Issue found by Claude"),
                 suggestion=rf.get("suggestion"),
+                confidence=confidence,
             ))
         except (ValueError, KeyError):
             continue
@@ -248,7 +298,8 @@ def debug_file(
     if error_msg:
         user_msg += f"\n\nError message:\n```\n{error_msg}\n```"
 
-    response = client.messages.create(
+    response = _api_call_with_retry(
+        client,
         model=LLM_MODEL,
         max_tokens=LLM_MAX_TOKENS,
         temperature=LLM_TEMPERATURE,
@@ -272,7 +323,8 @@ def optimize_file(
 
     user_msg = f"File: {filepath} ({language})\n\n```{language}\n{content}\n```"
 
-    response = client.messages.create(
+    response = _api_call_with_retry(
+        client,
         model=LLM_MODEL,
         max_tokens=LLM_MAX_TOKENS,
         temperature=LLM_TEMPERATURE,

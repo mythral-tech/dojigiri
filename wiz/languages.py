@@ -19,9 +19,9 @@ def _compile(rules: list[tuple]) -> list[Rule]:
 # ─── Universal (all languages) ────────────────────────────────────────
 
 UNIVERSAL_RULES: list[Rule] = _compile([
-    # Secrets & credentials
+    # Secrets & credentials — exclude common placeholder values
     (
-        r"""(?i)(?:api[_-]?key|secret[_-]?key|password|passwd|token|auth[_-]?token)\s*[:=]\s*['"][A-Za-z0-9+/=_\-]{8,}['"]""",
+        r"""(?i)(?:api[_-]?key|secret[_-]?key|password|passwd|token|auth[_-]?token)\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|your[_-]?|xxx|TODO|CHANGE|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-]{8,}['"]""",
         Severity.CRITICAL, Category.SECURITY,
         "hardcoded-secret",
         "Possible hardcoded secret or API key",
@@ -58,13 +58,29 @@ UNIVERSAL_RULES: list[Rule] = _compile([
         "Insecure HTTP URL (not localhost)",
         "Use HTTPS instead",
     ),
-    # SQL injection patterns
+    # SQL injection patterns (f-strings, %, +, .format)
     (
         r"""(?i)(?:execute|cursor\.execute|query)\s*\(\s*(?:f['"]|['"].*%s|['"].*\+\s*\w+|['"].*\{)""",
         Severity.CRITICAL, Category.SECURITY,
         "sql-injection",
         "Possible SQL injection — string interpolation in query",
         "Use parameterized queries",
+    ),
+    # SQL injection via .format() on query strings
+    (
+        r"""(?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b[^'"]*['"]\.format\s*\(""",
+        Severity.CRITICAL, Category.SECURITY,
+        "sql-injection",
+        "Possible SQL injection — .format() on SQL string",
+        "Use parameterized queries instead of string formatting",
+    ),
+    # SQL injection via text() wrapping with interpolation
+    (
+        r"""(?i)\btext\s*\(\s*f['"]""",
+        Severity.CRITICAL, Category.SECURITY,
+        "sql-injection",
+        "Possible SQL injection — f-string inside text()",
+        "Use text() with :param bindparams instead",
     ),
 ])
 
@@ -80,7 +96,7 @@ PYTHON_RULES: list[Rule] = _compile([
         "Bare except catches all exceptions including SystemExit and KeyboardInterrupt",
         "Use 'except Exception:' to avoid catching KeyboardInterrupt/SystemExit",
     ),
-    # Mutable default argument
+    # Mutable default argument (simple single-line heuristic; AST check handles multiline)
     (
         r"def\s+\w+\s*\([^)]*=\s*(?:\[\]|\{\}|set\(\))",
         Severity.WARNING, Category.BUG,
@@ -167,10 +183,9 @@ PYTHON_RULES: list[Rule] = _compile([
         "pickle.load()/loads() can execute arbitrary code during deserialization",
         "Use json, msgpack, or a safe serialization format instead",
     ),
-    # Unsafe yaml.load - match yaml.load() calls but not those with SafeLoader
-    # Note: This uses a negative lookahead that checks the entire match
+    # Unsafe yaml.load — flag any yaml.load( call; detector will suppress if SafeLoader found nearby
     (
-        r"\byaml\.load\s*\((?!.*\bLoader\s*=\s*yaml\.SafeLoader)[^)]+\)",
+        r"\byaml\.load\s*\(",
         Severity.CRITICAL, Category.SECURITY,
         "yaml-unsafe",
         "yaml.load() without SafeLoader can execute arbitrary code",
@@ -320,13 +335,45 @@ SECURITY_RULES: list[Rule] = _compile([
         "Possible path traversal attack with ../",
         "Validate and sanitize file paths",
     ),
-    # Private key
+    # Private key (RSA, EC, DSA, OPENSSH)
     (
-        r"-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----",
+        r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----",
         Severity.CRITICAL, Category.SECURITY,
         "private-key",
         "Private key found in source code",
         "Remove immediately and rotate the key",
+    ),
+    # Database connection strings with embedded credentials
+    (
+        r"""(?i)(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp|jdbc:[a-z]+)://[^:]+:[^@]+@""",
+        Severity.CRITICAL, Category.SECURITY,
+        "db-connection-string",
+        "Database connection string with embedded credentials",
+        "Use environment variables for connection strings",
+    ),
+    # Logging sensitive data — require variable/attribute reference, not just keyword mention
+    (
+        r"""(?i)(?:log(?:ger)?\.(?:info|debug|warn|error|critical|warning)|print|console\.log|puts)\s*\(.*\b(?:password|passwd|secret_key|api_key|auth_token|credential)\b""",
+        Severity.WARNING, Category.SECURITY,
+        "logging-sensitive-data",
+        "Possibly logging sensitive data (password, secret, token)",
+        "Redact sensitive values before logging",
+    ),
+    # Insecure crypto: DES
+    (
+        r"""\bDES\b\.new\(|\bDES\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+DES\b""",
+        Severity.WARNING, Category.SECURITY,
+        "insecure-crypto",
+        "DES encryption is broken — 56-bit keys are trivially brute-forced",
+        "Use AES-256 or ChaCha20 instead",
+    ),
+    # Insecure crypto: ECB mode
+    (
+        r"""(?i)(?:MODE_ECB|mode\s*=\s*['"]?ECB|\.ECB\b)""",
+        Severity.WARNING, Category.SECURITY,
+        "insecure-ecb-mode",
+        "ECB mode does not hide data patterns — insecure for most uses",
+        "Use CBC, GCM, or CTR mode instead",
     ),
 ])
 

@@ -5,13 +5,14 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .config import get_api_key, Severity, LANGUAGE_EXTENSIONS
+from .config import get_api_key, Severity, Confidence, LANGUAGE_EXTENSIONS
 from .analyzer import scan_quick, scan_deep, cost_estimate, detect_language, filter_report, diff_reports
 from .detector import analyze_file_static
 from .storage import load_latest_report, load_baseline_report, list_reports
 from . import report as rpt
 
 SEVERITY_MAP = {"critical": Severity.CRITICAL, "warning": Severity.WARNING, "info": Severity.INFO}
+CONFIDENCE_MAP = {"high": Confidence.HIGH, "medium": Confidence.MEDIUM, "low": Confidence.LOW}
 
 
 def cmd_scan(args):
@@ -30,18 +31,23 @@ def cmd_scan(args):
     use_cache = not args.no_cache
     is_json = getattr(args, "output", None) == "json"
 
-    if args.deep:
-        if not is_json:
-            print(f"Deep scanning {root} ...\n")
-        try:
-            report_obj = scan_deep(root, language_filter=lang)
-        except Exception as e:
-            print(f"Error: {e}", file=sys.stderr)
-            return 1
-    else:
-        if not is_json:
-            print(f"Quick scanning {root} ...\n")
-        report_obj = scan_quick(root, language_filter=lang, use_cache=use_cache)
+    try:
+        if args.deep:
+            if not is_json:
+                print(f"Deep scanning {root} ...\n")
+            try:
+                report_obj = scan_deep(root, language_filter=lang)
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                return 1
+        else:
+            if not is_json:
+                print(f"Quick scanning {root} ...\n")
+            report_obj = scan_quick(root, language_filter=lang, use_cache=use_cache)
+    except KeyboardInterrupt:
+        print("\n\nScan interrupted by user.", file=sys.stderr)
+        print("Partial results may have been saved.", file=sys.stderr)
+        return 130  # 128 + SIGINT(2)
 
     # Apply baseline diff if requested
     baseline_arg = getattr(args, "baseline", None)
@@ -57,7 +63,13 @@ def cmd_scan(args):
     # Apply post-scan filters
     ignore_rules = set(args.ignore.split(",")) if getattr(args, "ignore", None) else None
     min_severity = SEVERITY_MAP.get(getattr(args, "min_severity", None))
-    report_obj = filter_report(report_obj, ignore_rules=ignore_rules, min_severity=min_severity)
+    min_confidence = CONFIDENCE_MAP.get(getattr(args, "min_confidence", None))
+    report_obj = filter_report(
+        report_obj,
+        ignore_rules=ignore_rules,
+        min_severity=min_severity,
+        min_confidence=min_confidence,
+    )
 
     if is_json:
         rpt.print_json(report_obj)
@@ -151,7 +163,7 @@ def cmd_report(args):
     print(f"Root: {data.get('root', 'unknown')}")
     print(f"Mode: {data.get('mode', 'unknown')}")
     print(f"Files: {data.get('files_scanned', 0)}")
-    print(f"\nFindings:")
+    print("\nFindings:")
     print(f"  Critical: {data.get('critical', 0)}")
     print(f"  Warnings: {data.get('warnings', 0)}")
     print(f"  Info:     {data.get('info', 0)}")
@@ -228,6 +240,9 @@ def main():
     p_scan.add_argument("--ignore", help="Comma-separated rule names to suppress (e.g., todo-marker,long-line)")
     p_scan.add_argument("--min-severity", choices=["critical", "warning", "info"],
                          help="Minimum severity to display (filters lower)")
+    p_scan.add_argument("--min-confidence", choices=["high", "medium", "low"],
+                         default=None,
+                         help="Minimum LLM confidence to display (default: show all)")
     p_scan.add_argument("--output", choices=["text", "json"], default="text",
                          help="Output format (default: text)")
     p_scan.add_argument("--baseline", help="Compare against baseline (use 'latest' or report path)")
@@ -263,7 +278,11 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    sys.exit(args.func(args))
+    try:
+        sys.exit(args.func(args))
+    except KeyboardInterrupt:
+        print("\nInterrupted.", file=sys.stderr)
+        sys.exit(130)
 
 
 if __name__ == "__main__":

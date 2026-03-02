@@ -8,7 +8,7 @@ from typing import Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .config import (
-    Finding, FileAnalysis, ScanReport, Severity,
+    Finding, FileAnalysis, ScanReport, Severity, Confidence,
     LANGUAGE_EXTENSIONS, SKIP_DIRS, SKIP_FILES, MAX_FILE_SIZE,
     load_ignore_patterns,
 )
@@ -220,28 +220,35 @@ def scan_deep(
     root: Path,
     language_filter: Optional[str] = None,
 ) -> ScanReport:
-    """Deep scan — static + Claude API analysis."""
+    """Deep scan — static + Claude API analysis.
+
+    Runs static analysis first and saves intermediate results,
+    then enriches with LLM. If LLM fails partway through, static
+    findings are still preserved.
+    """
     files, skipped = collect_files(root, language_filter)
     cost_tracker = CostTracker()
-    analyses = []
 
-    for i, filepath in enumerate(files):
+    # Phase 1: Static analysis for all files (always succeeds)
+    file_data = []  # list of (fp_str, lang, content, line_count, static_findings, fhash)
+    for filepath in files:
         fp_str = str(filepath)
         lang = detect_language(filepath)
-
         try:
             content = filepath.read_text(encoding="utf-8", errors="replace")
         except OSError:
             skipped += 1
             continue
-
         line_count = content.count("\n") + 1
-        print(f"  [{i+1}/{len(files)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
-
-        # Static analysis first
         static_findings = analyze_file_static(fp_str, content, lang)
+        fhash = file_hash(fp_str)
+        file_data.append((fp_str, lang, content, line_count, static_findings, fhash))
 
-        # LLM analysis
+    # Phase 2: LLM enrichment (may fail partway)
+    analyses = []
+    for i, (fp_str, lang, content, line_count, static_findings, fhash) in enumerate(file_data):
+        print(f"  [{i+1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
+
         llm_findings = []
         try:
             chunks = chunk_file(content, fp_str, lang)
@@ -256,7 +263,7 @@ def scan_deep(
         except LLMError as e:
             print(f"    LLM error: {e}", file=sys.stderr)
 
-        # Merge: LLM wins on conflicts (same line + similar rule)
+        # Merge: LLM wins on conflicts, static survives if LLM empty
         merged = _merge_findings(static_findings, llm_findings)
 
         fa = FileAnalysis(
@@ -264,7 +271,7 @@ def scan_deep(
             language=lang,
             lines=line_count,
             findings=merged,
-            file_hash=file_hash(fp_str),
+            file_hash=fhash,
         )
         analyses.append(fa)
 
@@ -291,47 +298,70 @@ def scan_deep(
 
 
 def _merge_findings(static: list[Finding], llm: list[Finding]) -> list[Finding]:
-    """Merge static and LLM findings, deduplicating. LLM wins on conflicts.
-    Uses 5-line buckets for dedup: same category within 5 lines = conflict.
+    """Merge static and LLM findings.
+
+    - LLM findings always included.
+    - Static findings included unless an LLM finding covers the same area
+      (5-line bucket + same category) — LLM wins on those conflicts since
+      it has richer context.
+    - Final dedup on exact (file, line, rule) to remove true duplicates.
     """
     merged = []
-    static_lines_covered = set()
+    # Track LLM coverage using 5-line buckets (only for LLM-vs-static merge)
+    llm_buckets = set()
 
     for f in llm:
         merged.append(f)
-        # Mark 5-line bucket as covered (LLM may report same issue nearby)
         bucket = f.line // 5
-        static_lines_covered.add((bucket, f.category))
+        llm_buckets.add((bucket, f.category))
 
     for f in static:
         bucket = f.line // 5
-        if (bucket, f.category) not in static_lines_covered:
+        if (bucket, f.category) not in llm_buckets:
             merged.append(f)
+
+    # Exact dedup: (file, line, rule)
+    seen = set()
+    unique = []
+    for f in merged:
+        key = (f.file, f.line, f.rule)
+        if key not in seen:
+            seen.add(key)
+            unique.append(f)
 
     # Sort by severity then line
     severity_order = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
-    merged.sort(key=lambda f: (severity_order[f.severity], f.line))
-    return merged
+    unique.sort(key=lambda f: (severity_order[f.severity], f.line))
+    return unique
 
 
 def filter_report(
     report: ScanReport,
     ignore_rules: Optional[set[str]] = None,
     min_severity: Optional[Severity] = None,
+    min_confidence: Optional[Confidence] = None,
 ) -> ScanReport:
-    """Apply post-scan filters (ignore rules, min severity) to a report."""
-    if not ignore_rules and not min_severity:
+    """Apply post-scan filters (ignore rules, min severity, min confidence) to a report."""
+    if not ignore_rules and not min_severity and not min_confidence:
         return report
 
     severity_order = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
+    confidence_order = {Confidence.HIGH: 0, Confidence.MEDIUM: 1, Confidence.LOW: 2}
     min_level = severity_order.get(min_severity, 2) if min_severity else 2
+    min_conf = confidence_order.get(min_confidence, 2) if min_confidence else 2
+
+    def _keep(f: Finding) -> bool:
+        if ignore_rules and f.rule in ignore_rules:
+            return False
+        if severity_order[f.severity] > min_level:
+            return False
+        # Confidence filter only applies to LLM findings (static/AST have no confidence)
+        if f.confidence is not None and confidence_order[f.confidence] > min_conf:
+            return False
+        return True
 
     for fa in report.file_analyses:
-        fa.findings = [
-            f for f in fa.findings
-            if (not ignore_rules or f.rule not in ignore_rules)
-            and severity_order[f.severity] <= min_level
-        ]
+        fa.findings = [f for f in fa.findings if _keep(f)]
 
     # Recompute counts
     report.total_findings = sum(len(fa.findings) for fa in report.file_analyses)

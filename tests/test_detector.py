@@ -467,7 +467,105 @@ def clean_function(arg: Optional[int] = None) -> bool:
     return arg > 0
 '''
     findings = analyze_file_static("clean.py", code, "python")
-    
+
     # Might have some minor findings, but should not have critical issues
     critical = [f for f in findings if f.severity == Severity.CRITICAL]
     assert len(critical) == 0
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# REGRESSION TESTS — Phase 1 pattern fixes
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_regression_yaml_safeloader_same_line():
+    """Regression: yaml.load with SafeLoader on same line should NOT be flagged."""
+    code = 'data = yaml.load(f, Loader=yaml.SafeLoader)\n'
+    findings = run_regex_checks(code, "test.py", "python")
+    yaml_findings = [f for f in findings if f.rule == "yaml-unsafe"]
+    assert len(yaml_findings) == 0
+
+
+def test_regression_yaml_safeloader_next_line():
+    """Regression: yaml.load with SafeLoader on next line should NOT be flagged."""
+    code = (
+        'data = yaml.load(\n'
+        '    content,\n'
+        '    Loader=yaml.SafeLoader,\n'
+        ')\n'
+    )
+    findings = run_regex_checks(code, "test.py", "python")
+    yaml_findings = [f for f in findings if f.rule == "yaml-unsafe"]
+    assert len(yaml_findings) == 0
+
+
+def test_regression_yaml_unsafe_no_safeloader():
+    """Regression: yaml.load without SafeLoader SHOULD be flagged."""
+    code = 'data = yaml.load(file_handle)\n'
+    findings = run_regex_checks(code, "test.py", "python")
+    yaml_findings = [f for f in findings if f.rule == "yaml-unsafe"]
+    assert len(yaml_findings) == 1
+
+
+def test_regression_hardcoded_secret_placeholder_excluded():
+    """Regression: Placeholder values should NOT trigger hardcoded-secret."""
+    code = 'api_key = "example_key_here"\n'
+    findings = run_regex_checks(code, "test.py", "python")
+    secret_findings = [f for f in findings if f.rule == "hardcoded-secret"]
+    assert len(secret_findings) == 0
+
+
+def test_regression_hardcoded_secret_real_value_detected():
+    """Regression: Real-looking secrets SHOULD trigger hardcoded-secret."""
+    code = 'api_key = "sk_live_abc123def456ghi789"\n'
+    findings = run_regex_checks(code, "test.py", "python")
+    secret_findings = [f for f in findings if f.rule == "hardcoded-secret"]
+    assert len(secret_findings) == 1
+
+
+def test_regression_sql_injection_format():
+    """Regression: .format() on SQL strings SHOULD be detected."""
+    code = 'query = "SELECT * FROM users WHERE id = {}".format(user_id)\n'
+    findings = run_regex_checks(code, "test.py", "python")
+    sql_findings = [f for f in findings if f.rule == "sql-injection"]
+    assert len(sql_findings) == 1
+
+
+def test_regression_mutable_default_multiline_ast():
+    """Regression: Mutable defaults in multiline defs should be caught by AST."""
+    code = '''
+def func(
+    a,
+    b=[],
+    c=None,
+):
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    mutable = [f for f in findings if f.rule == "mutable-default"]
+    assert len(mutable) == 1
+
+
+def test_regression_shadowed_builtin_in_params():
+    """Regression: Builtin names as function params SHOULD be caught."""
+    code = '''
+def process(list, dict, input):
+    return list
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    shadow = [f for f in findings if f.rule == "shadowed-builtin-param"]
+    assert len(shadow) == 3  # list, dict, input
+
+
+def test_regression_block_comments_skipped():
+    """Regression: Code inside block comments should be skipped."""
+    code = '''/*
+eval("dangerous code inside block comment");
+var x = 5;
+*/
+var y = 10;
+'''
+    findings = run_regex_checks(code, "test.js", "javascript")
+    eval_findings = [f for f in findings if f.rule == "eval-usage"]
+    assert len(eval_findings) == 0  # eval is inside block comment
+    var_findings = [f for f in findings if f.rule == "var-usage"]
+    assert len(var_findings) == 1  # only the var y outside comment

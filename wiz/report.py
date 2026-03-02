@@ -163,8 +163,8 @@ def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est
     print(f"  Est. input tokens: {est_tokens:,}")
     print(f"  Est. output tokens: ~{est_tokens // 4:,}")
     print(f"  {_c('bold', f'Est. cost:           ${est_cost:.4f}')}")
-    print(f"\n  Model: claude-sonnet-4")
-    print(f"  (Actual cost may vary based on findings density)")
+    print("\n  Model: claude-sonnet-4")
+    print("  (Actual cost may vary based on findings density)")
     print()
 
 

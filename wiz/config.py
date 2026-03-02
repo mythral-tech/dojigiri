@@ -68,6 +68,12 @@ SKIP_FILES = {
 MAX_FILE_SIZE = 1_000_000  # 1MB — skip binary/huge files
 
 
+class Confidence(Enum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
 @dataclass
 class Finding:
     file: str
@@ -79,9 +85,10 @@ class Finding:
     message: str
     suggestion: Optional[str] = None
     snippet: Optional[str] = None
+    confidence: Optional[Confidence] = None  # LLM findings only
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "file": self.file,
             "line": self.line,
             "severity": self.severity.value,
@@ -92,6 +99,9 @@ class Finding:
             "suggestion": self.suggestion,
             "snippet": self.snippet,
         }
+        if self.confidence is not None:
+            d["confidence"] = self.confidence.value
+        return d
 
 
 @dataclass

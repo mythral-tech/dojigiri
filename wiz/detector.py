@@ -1,9 +1,40 @@
 """Static analysis engine — regex matching + Python AST parsing."""
 
 import ast
+import re
 
 from .config import Finding, Severity, Category, Source
 from .languages import get_rules_for_language
+
+# Security-related categories where string lines should still be scanned
+_SECURITY_CATEGORIES = {Category.SECURITY}
+
+# Rules that specifically target comments — never skip on comment lines
+_COMMENT_RULES = {"todo-marker"}
+
+# Inline comment patterns per language family
+_INLINE_COMMENT_RE = {
+    "hash": re.compile(r"""(?<!['"\\])#(?![!])"""),  # Python/Ruby/Bash style
+    "slash": re.compile(r"""(?<!['"\\:])//"""),       # C-family style
+}
+
+
+def _strip_inline_comment(line: str, language: str) -> str:
+    """Strip trailing inline comment from a line for non-security checks.
+
+    Conservative: if in doubt, returns the full line (avoids hiding issues).
+    """
+    if language in ("python", "ruby", "bash"):
+        m = _INLINE_COMMENT_RE["hash"].search(line)
+    elif language in ("javascript", "typescript", "go", "rust", "java",
+                      "c", "cpp", "csharp", "swift", "kotlin", "pine"):
+        m = _INLINE_COMMENT_RE["slash"].search(line)
+    else:
+        return line
+
+    if m:
+        return line[:m.start()]
+    return line
 
 
 def run_regex_checks(content: str, filepath: str, language: str) -> list[Finding]:
@@ -12,7 +43,7 @@ def run_regex_checks(content: str, filepath: str, language: str) -> list[Finding
     rules = get_rules_for_language(language)
     lines = content.splitlines()
 
-    # Language-aware comment prefixes
+    # Language-aware comment prefixes for full-line detection
     comment_prefixes = {"#"}
     if language in ("javascript", "typescript", "go", "rust", "java",
                      "c", "cpp", "csharp", "swift", "kotlin", "pine"):
@@ -20,8 +51,48 @@ def run_regex_checks(content: str, filepath: str, language: str) -> list[Finding
     elif language == "python":
         comment_prefixes = {"#"}
 
+    # Block comment state tracking
+    in_block_comment = False
+    # Block comment delimiters by language
+    if language == "python":
+        block_open, block_close = '"""', '"""'
+        alt_block_open, alt_block_close = "'''", "'''"
+    elif language in ("html", "css"):
+        block_open, block_close = "<!--", "-->"
+        alt_block_open, alt_block_close = "/*", "*/"
+    elif language in ("javascript", "typescript", "go", "rust", "java",
+                      "c", "cpp", "csharp", "swift", "kotlin", "pine", "css"):
+        block_open, block_close = "/*", "*/"
+        alt_block_open, alt_block_close = None, None
+    else:
+        block_open, block_close = None, None
+        alt_block_open, alt_block_close = None, None
+
     for line_num, line in enumerate(lines, start=1):
         stripped = line.strip()
+
+        # Track block comments (/* */ style and """ """ style)
+        if block_open and not in_block_comment:
+            if block_open in stripped:
+                # Check if block opens and closes on same line
+                idx = stripped.index(block_open)
+                rest = stripped[idx + len(block_open):]
+                if block_close not in rest:
+                    in_block_comment = True
+                    continue
+            elif alt_block_open and alt_block_open in stripped:
+                idx = stripped.index(alt_block_open)
+                rest = stripped[idx + len(alt_block_open):]
+                if alt_block_close not in rest:
+                    in_block_comment = True
+                    continue
+        elif in_block_comment:
+            if block_close and block_close in stripped:
+                in_block_comment = False
+            elif alt_block_close and alt_block_close in stripped:
+                in_block_comment = False
+            continue  # Skip lines inside block comments entirely
+
         is_comment = any(stripped.startswith(p) for p in comment_prefixes)
         # Skip lines that are purely string content (inside quotes)
         is_string_line = (
@@ -30,13 +101,29 @@ def run_regex_checks(content: str, filepath: str, language: str) -> list[Finding
         )
 
         for pattern, severity, category, rule_name, message, suggestion in rules:
-            # Skip ALL regex rules on comment lines (except todo-marker which targets comments)
-            if is_comment and rule_name != "todo-marker":
+            # Comment lines: only run comment-targeting rules
+            if is_comment and rule_name not in _COMMENT_RULES:
                 continue
-            # Skip security/bug patterns on string-only lines
-            if is_string_line and category in (Category.SECURITY, Category.BUG):
+
+            # String-only lines: skip non-security patterns (secrets DO live in strings)
+            if is_string_line and category not in _SECURITY_CATEGORIES:
                 continue
-            if pattern.search(line):
+
+            # For non-security rules, strip inline comments before matching
+            if category not in _SECURITY_CATEGORIES and rule_name not in _COMMENT_RULES:
+                check_line = _strip_inline_comment(line, language)
+            else:
+                check_line = line
+
+            if pattern.search(check_line):
+                # yaml-unsafe: suppress if SafeLoader appears within ±3 lines
+                if rule_name == "yaml-unsafe":
+                    context_start = max(0, line_num - 2)
+                    context_end = min(len(lines), line_num + 3)
+                    context = "\n".join(lines[context_start:context_end])
+                    if "SafeLoader" in context or "safe_load" in context:
+                        continue
+
                 findings.append(Finding(
                     file=filepath,
                     line=line_num,
@@ -80,6 +167,8 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
     _check_shadowed_builtins(tree, filepath, findings)
     _check_type_comparisons(tree, filepath, findings)
     _check_global_usage(tree, filepath, findings)
+    _check_mutable_defaults(tree, filepath, findings)
+    _check_shadowed_builtin_params(tree, filepath, findings)
 
     return findings
 
@@ -214,6 +303,67 @@ def _check_global_usage(tree: ast.AST, filepath: str, findings: list[Finding]):
                         message=f"'global' keyword used for: {', '.join(stmt.names)}",
                         suggestion="Consider passing values as arguments or using a class",
                     ))
+
+
+def _check_mutable_defaults(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check for mutable default arguments via AST (handles multiline defs)."""
+    _MUTABLE_TYPES = (ast.List, ast.Dict, ast.Set)
+
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for default in node.args.defaults + node.args.kw_defaults:
+            if default is None:
+                continue
+            is_mutable = isinstance(default, _MUTABLE_TYPES)
+            # Also catch set() call
+            if (isinstance(default, ast.Call)
+                    and isinstance(default.func, ast.Name)
+                    and default.func.id == "set"
+                    and not default.args and not default.keywords):
+                is_mutable = True
+            if is_mutable:
+                findings.append(Finding(
+                    file=filepath,
+                    line=node.lineno,
+                    severity=Severity.WARNING,
+                    category=Category.BUG,
+                    source=Source.AST,
+                    rule="mutable-default",
+                    message=f"Mutable default argument in '{node.name}' — shared across all calls",
+                    suggestion="Use None as default and create inside function body",
+                ))
+                break  # One report per function is enough
+
+
+def _check_shadowed_builtin_params(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check for function parameters that shadow Python builtins."""
+    _SHADOW_BUILTINS = {
+        "list", "dict", "type", "str", "int", "float", "set", "tuple",
+        "len", "range", "open", "input", "print", "sum", "min", "max",
+        "id", "sorted", "next", "map", "filter", "zip", "hash", "iter",
+        "bool", "bytes", "complex", "frozenset", "object", "super",
+    }
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        all_args = (
+            node.args.args + node.args.posonlyargs + node.args.kwonlyargs
+        )
+        for arg in all_args:
+            if arg.arg in ("self", "cls"):
+                continue
+            if arg.arg in _SHADOW_BUILTINS:
+                findings.append(Finding(
+                    file=filepath,
+                    line=arg.lineno if hasattr(arg, 'lineno') else node.lineno,
+                    severity=Severity.WARNING,
+                    category=Category.BUG,
+                    source=Source.AST,
+                    rule="shadowed-builtin-param",
+                    message=f"Parameter '{arg.arg}' in '{node.name}' shadows builtin",
+                    suggestion=f"Rename parameter to avoid shadowing builtin '{arg.arg}'",
+                ))
 
 
 def _count_branches(node: ast.AST) -> int:

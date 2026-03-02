@@ -71,16 +71,23 @@ def test_universal_hardcoded_secret():
     """Test detection of hardcoded secrets."""
     rules = get_rules_for_language("python")
     pattern = next(r for r in rules if r[3] == "hardcoded-secret")[0]
-    
-    # Should match
+
+    # Should match (real-looking secrets)
     assert pattern.search('api_key = "abc123defgh456"')
     assert pattern.search('secret_key: "token_xyz_1234567890"')
     assert pattern.search('password="Pass123456"')
     assert pattern.search("TOKEN = 'abcdefgh12345678'")
-    
+
     # Should NOT match (too short)
     assert not pattern.search('api_key = "short"')
     assert not pattern.search('password=""')
+
+    # Should NOT match (common placeholder values)
+    assert not pattern.search('api_key = "example_key_here"')
+    assert not pattern.search('password = "changeme12345"')
+    assert not pattern.search('token = "test_token_value"')
+    assert not pattern.search('api_key = "your_api_key_here"')
+    assert not pattern.search('password = "placeholder_value"')
 
 
 def test_universal_aws_credentials():
@@ -318,18 +325,18 @@ def test_python_pickle_unsafe():
 
 
 def test_python_yaml_unsafe():
-    """Test unsafe yaml.load detection - BUG NOW FIXED."""
+    """Test unsafe yaml.load detection.
+
+    The regex now matches ALL yaml.load( calls — SafeLoader suppression
+    is done at the detector level (context-aware, handles multiline).
+    """
     rules = get_rules_for_language("python")
     pattern = next(r for r in rules if r[3] == "yaml-unsafe")[0]
-    
-    # Should match (unsafe yaml.load without SafeLoader)
+
+    # Regex should match any yaml.load( call
     assert pattern.search("data = yaml.load(file)")
     assert pattern.search("config = yaml.load(content)")
-    
-    # BUG FIX: These should NOT match and now they don't
-    # The negative lookahead now correctly excludes SafeLoader
-    assert not pattern.search("yaml.load(f, Loader=yaml.SafeLoader)")
-    assert not pattern.search("yaml.load(data, Loader=yaml.SafeLoader)")
+    assert pattern.search("yaml.load(f, Loader=yaml.SafeLoader)")  # regex matches; detector suppresses
 
 
 def test_python_weak_hash():
