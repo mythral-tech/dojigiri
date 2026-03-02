@@ -3,7 +3,7 @@
 ## Status
 **Last agent**: Oz
 **Date**: 2026-03-02
-**What they did**: (1) Fixed .wiz.toml config loading bug - all config options now apply correctly. (2) Added --workers CLI flag for configurable parallelism (default: 4). (3) Implemented .wiz.toml config file support with ignore_rules, min_severity, min_confidence, workers. All 181 tests passing.
+**What they did**: (1) Implemented SARIF 2.1.0 output format for GitHub Code Scanning integration. (2) Updated README with comprehensive SARIF documentation and GitHub Actions workflow example. (3) Updated README with all v0.3.0 features. All 181 tests passing.
 
 ## Review
 *Nothing pending.*
@@ -12,10 +12,11 @@
 Priority order — pick from the top:
 
 1. **Deep scan cache** — deep scan rescans everything, should respect file hash cache.
-2. **SARIF output** — GitHub Code Scanning integration standard.
-3. **README improvements** — add comprehensive usage examples for all commands, especially baseline/diff mode for CI/CD.
+2. **Parallel deep scanning** — currently sequential, could parallelize chunk processing.
+3. **Custom rule definitions** — allow users to define their own detection patterns.
 
 ## Log
+- **2026-03-02 [Oz]**: SARIF output format complete. (1) Implemented SARIF 2.1.0 output format (--output sarif) with to_sarif() and print_sarif() in report.py. Includes tool metadata, rules, results with locations, partial fingerprints for deduplication, fixes/suggestions. Maps severity to SARIF levels (error/warning/note). (2) Updated README with SARIF documentation: CLI examples, GitHub Actions workflow with upload-sarif action, SARIF output section. Updated version history and roadmap. All 181 tests passing. GitHub Code Scanning integration ready.
 - **2026-03-02 [Oz]**: Config file support complete. (1) Fixed .wiz.toml loading bug where min_severity/min_confidence filters weren't being applied from config (condition logic error). Now works correctly - tested with .wiz.toml setting min_severity=warning, confirmed filtering applies. (2) Added --workers CLI flag for configurable parallelism (default: 4, addresses HANDOFF.md issue #1). (3) Implemented .wiz.toml config file support via config.py load_project_config() using tomllib. Supports ignore_rules, min_severity, min_confidence, workers. CLI args override config. Created .wiz.toml.example for documentation. All 181 tests passing.
 - **2026-03-02 [Oz]**: Code quality improvements: (1) Added `wiz/.wizignore` to suppress self-referential findings in languages.py (pattern definitions). Self-scan: 0 critical, 4 total (down from 14). (2) Added clarifying comments to intentional exception swallowing (3 locations), explaining why silent failure is acceptable for module availability checks and non-critical file operations.
 - **2026-03-02 [Oz]**: Fixed triple-quote block comment edge case. Python `"""` / `'''` now only enter block comment mode when at line start (docstrings), not mid-line (string assignments like `var = """text"""`). Prevents false negatives where code after string assignments was incorrectly skipped. Added 2 regression tests verifying both behaviors. All 181 tests passing.
