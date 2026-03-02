@@ -74,7 +74,7 @@ def _prune_reports(max_keep: int = 50):
         try:
             old.unlink()
         except OSError:
-            pass
+            pass  # Non-critical: file may be in use or already deleted
 
 
 def load_latest_report() -> Optional[dict]:

@@ -217,7 +217,7 @@ def cmd_setup(args):
         importlib.import_module("anthropic")
         anthropic_installed = True
     except ImportError:
-        pass
+        pass  # Not installed - that's fine, we just report it
 
     rpt.print_setup_status(api_key_set, anthropic_installed)
     return 0
