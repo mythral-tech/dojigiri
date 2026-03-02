@@ -2,8 +2,10 @@
 
 import fnmatch
 import sys
+import threading
 from pathlib import Path
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .config import (
     Finding, FileAnalysis, ScanReport, Severity,
@@ -93,45 +95,102 @@ def collect_files(
     return files, skipped
 
 
+def _analyze_single_file(
+    filepath: Path,
+    cache: dict,
+    use_cache: bool,
+    cache_lock: Optional[threading.Lock] = None,
+) -> tuple[Optional[FileAnalysis], Optional[str], bool]:
+    """Analyze a single file.
+
+    Returns (FileAnalysis, updated_hash, is_error):
+      - (fa, hash, False) on success
+      - (None, None, False) on cache hit (unchanged file)
+      - (None, None, True) on read error
+    """
+    fp_str = str(filepath)
+    lang = detect_language(filepath)
+
+    # Compute hash once and reuse
+    current_hash = file_hash(fp_str)
+
+    # Skip unchanged files (thread-safe cache read)
+    if use_cache:
+        if cache_lock:
+            with cache_lock:
+                cached = cache.get(fp_str)
+        else:
+            cached = cache.get(fp_str)
+        if cached == current_hash:
+            return None, None, False
+
+    try:
+        content = filepath.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None, None, True
+
+    findings = analyze_file_static(fp_str, content, lang)
+    fa = FileAnalysis(
+        path=fp_str,
+        language=lang,
+        lines=content.count("\n") + 1,
+        findings=findings,
+        file_hash=current_hash,
+    )
+    return fa, current_hash, False
+
+
 def scan_quick(
     root: Path,
     language_filter: Optional[str] = None,
     use_cache: bool = True,
+    max_workers: int = 4,
 ) -> ScanReport:
-    """Quick scan — static analysis only (free, instant)."""
+    """Quick scan — static analysis only (free, instant).
+    
+    Args:
+        root: Path to scan
+        language_filter: Optional language to filter by
+        use_cache: Whether to use file hash cache
+        max_workers: Number of parallel workers (1 = sequential, 4 = default parallel)
+    """
     files, skipped = collect_files(root, language_filter)
     cache = load_cache() if use_cache else {}
     analyses = []
 
-    for filepath in files:
-        fp_str = str(filepath)
-        lang = detect_language(filepath)
+    if max_workers == 1:
+        # Sequential processing
+        for filepath in files:
+            fa, updated_hash, is_error = _analyze_single_file(filepath, cache, use_cache)
+            if fa:
+                analyses.append(fa)
+                if use_cache and updated_hash:
+                    cache[str(filepath)] = updated_hash
+            elif is_error:
+                skipped += 1
+    else:
+        # Parallel processing with thread-safe cache access
+        cache_lock = threading.Lock()
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_file = {
+                executor.submit(_analyze_single_file, filepath, cache, use_cache, cache_lock): filepath
+                for filepath in files
+            }
 
-        # Compute hash once and reuse
-        current_hash = file_hash(fp_str)
-
-        # Skip unchanged files
-        if use_cache and cache.get(fp_str) == current_hash:
-            continue
-
-        try:
-            content = filepath.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            skipped += 1
-            continue
-
-        findings = analyze_file_static(fp_str, content, lang)
-        fa = FileAnalysis(
-            path=fp_str,
-            language=lang,
-            lines=content.count("\n") + 1,
-            findings=findings,
-            file_hash=current_hash,
-        )
-        analyses.append(fa)
-
-        if use_cache:
-            cache[fp_str] = current_hash
+            for future in as_completed(future_to_file):
+                filepath = future_to_file[future]
+                try:
+                    fa, updated_hash, is_error = future.result()
+                    if fa:
+                        analyses.append(fa)
+                        if use_cache and updated_hash:
+                            with cache_lock:
+                                cache[str(filepath)] = updated_hash
+                    elif is_error:
+                        skipped += 1
+                except Exception as e:
+                    print(f"Error analyzing {filepath}: {e}", file=sys.stderr)
+                    skipped += 1
 
     if use_cache:
         save_cache(cache)
