@@ -33,7 +33,8 @@ def cmd_scan(args):
     project_config = load_project_config(scan_root)
     
     use_cache = not args.no_cache
-    is_json = getattr(args, "output", None) == "json"
+    output_format = getattr(args, "output", "text")
+    is_json = output_format == "json"
 
     try:
         if args.deep:
@@ -87,8 +88,10 @@ def cmd_scan(args):
         min_confidence=min_confidence,
     )
 
-    if is_json:
+    if output_format == "json":
         rpt.print_json(report_obj)
+    elif output_format == "sarif":
+        rpt.print_sarif(report_obj)
     else:
         rpt.print_report(report_obj)
 
@@ -259,8 +262,8 @@ def main():
     p_scan.add_argument("--min-confidence", choices=["high", "medium", "low"],
                          default=None,
                          help="Minimum LLM confidence to display (default: show all)")
-    p_scan.add_argument("--output", choices=["text", "json"], default="text",
-                         help="Output format (default: text)")
+    p_scan.add_argument("--output", choices=["text", "json", "sarif"], default="text",
+                         help="Output format: text (console), json (CI/CD), sarif (GitHub Code Scanning)")
     p_scan.add_argument("--baseline", help="Compare against baseline (use 'latest' or report path)")
     p_scan.add_argument("--workers", type=int, default=None, metavar="N",
                          help="Number of parallel workers for quick scan (default: 4 or from .wiz.toml, use 1 for sequential)")

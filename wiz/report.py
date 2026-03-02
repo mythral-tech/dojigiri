@@ -198,3 +198,129 @@ def print_setup_status(api_key_set: bool, anthropic_installed: bool):
 def print_json(report: ScanReport):
     """Print report as JSON to stdout (pipe-friendly for CI/CD)."""
     print(json.dumps(report.to_dict(), indent=2))
+
+
+def print_sarif(report: ScanReport):
+    """Print report in SARIF 2.1.0 format for GitHub Code Scanning."""
+    sarif = to_sarif(report)
+    print(json.dumps(sarif, indent=2))
+
+
+def to_sarif(report: ScanReport) -> dict:
+    """Convert ScanReport to SARIF 2.1.0 format.
+    
+    SARIF (Static Analysis Results Interchange Format) is the standard format
+    for GitHub Code Scanning and other result management systems.
+    """
+    # Map our severity to SARIF levels
+    severity_to_level = {
+        Severity.CRITICAL: "error",
+        Severity.WARNING: "warning",
+        Severity.INFO: "note",
+    }
+    
+    # Collect unique rules from all findings
+    rules_map = {}
+    for fa in report.file_analyses:
+        for f in fa.findings:
+            if f.rule not in rules_map:
+                rules_map[f.rule] = {
+                    "id": f.rule,
+                    "name": f.message.split(" ")[0],  # First word as short name
+                    "shortDescription": {
+                        "text": f.message
+                    },
+                    "fullDescription": {
+                        "text": f.message
+                    },
+                    "defaultConfiguration": {
+                        "level": severity_to_level[f.severity]
+                    },
+                    "properties": {
+                        "category": f.category.value,
+                        "source": f.source.value,
+                    }
+                }
+    
+    # Convert findings to SARIF results
+    results = []
+    for fa in report.file_analyses:
+        for f in fa.findings:
+            # Create partial fingerprint for deduplication across runs
+            # Use file + rule + line as fingerprint
+            fingerprint = f"{f.file}:{f.rule}:{f.line}"
+            
+            result = {
+                "ruleId": f.rule,
+                "level": severity_to_level[f.severity],
+                "message": {
+                    "text": f.message
+                },
+                "locations": [
+                    {
+                        "physicalLocation": {
+                            "artifactLocation": {
+                                "uri": f.file,
+                                "uriBaseId": "%SRCROOT%"
+                            },
+                            "region": {
+                                "startLine": f.line,
+                                "startColumn": 1
+                            }
+                        }
+                    }
+                ],
+                "partialFingerprints": {
+                    "primaryLocationLineHash": fingerprint
+                }
+            }
+            
+            # Add snippet if available
+            if f.snippet:
+                result["locations"][0]["physicalLocation"]["region"]["snippet"] = {
+                    "text": f.snippet
+                }
+            
+            # Add suggestion as fix if available
+            if f.suggestion:
+                result["fixes"] = [
+                    {
+                        "description": {
+                            "text": f.suggestion
+                        }
+                    }
+                ]
+            
+            # Add confidence property if available (LLM findings)
+            if f.confidence:
+                result["properties"] = {
+                    "confidence": f.confidence.value
+                }
+            
+            results.append(result)
+    
+    # Build SARIF document
+    sarif = {
+        "version": "2.1.0",
+        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "Wiz",
+                        "informationUri": "https://github.com/Inklling/Genesis",
+                        "semanticVersion": "0.3.0",
+                        "rules": list(rules_map.values())
+                    }
+                },
+                "results": results,
+                "properties": {
+                    "mode": report.mode,
+                    "filesScanned": report.files_scanned,
+                    "filesSkipped": report.files_skipped
+                }
+            }
+        ]
+    }
+    
+    return sarif
