@@ -52,7 +52,10 @@ def run_regex_checks(content: str, filepath: str, language: str) -> list[Finding
 
 
 def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
-    """Run Python-specific AST analysis for structural issues."""
+    """Run Python-specific AST analysis for structural issues.
+    
+    Refactored to reduce complexity by delegating to focused helper functions.
+    """
     findings = []
     try:
         tree = ast.parse(content, filename=filepath)
@@ -70,7 +73,19 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
         ))
         return findings
 
-    # Collect all defined and used names
+    # Run focused checks
+    _check_imports(tree, filepath, findings)
+    _check_functions(tree, filepath, findings)
+    _check_exception_handling(tree, filepath, findings)
+    _check_shadowed_builtins(tree, filepath, findings)
+    _check_type_comparisons(tree, filepath, findings)
+    _check_global_usage(tree, filepath, findings)
+
+    return findings
+
+
+def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check for unused imports."""
     imported_names = {}  # name -> line number
     used_names = set()
 
@@ -86,7 +101,6 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
                     continue
                 name = alias.asname or alias.name
                 imported_names[name] = node.lineno
-
         # Track name usage
         elif isinstance(node, ast.Name):
             used_names.add(node.id)
@@ -98,10 +112,9 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
             if isinstance(root, ast.Name):
                 used_names.add(root.id)
 
-    # Unused imports
+    # Report unused imports
     for name, lineno in imported_names.items():
-        # Skip dunder and underscore names (often intentional)
-        if name.startswith("_"):
+        if name.startswith("_"):  # Skip intentional underscore names
             continue
         if name not in used_names:
             findings.append(Finding(
@@ -115,16 +128,19 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
                 suggestion=f"Remove unused import '{name}'",
             ))
 
-    # Check functions for issues
+
+def _check_functions(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check all functions for common issues."""
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             _check_function(node, filepath, findings)
 
-    # Exception swallowing: except ...: pass
+
+def _check_exception_handling(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check for swallowed exceptions (except: pass)."""
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler):
-            if (len(node.body) == 1
-                    and isinstance(node.body[0], ast.Pass)):
+            if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
                 findings.append(Finding(
                     file=filepath,
                     line=node.lineno,
@@ -136,7 +152,9 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
                     suggestion="Log the exception or handle it explicitly",
                 ))
 
-    # Shadowed builtins
+
+def _check_shadowed_builtins(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check for variables that shadow Python builtins."""
     _SHADOW_BUILTINS = {
         "list", "dict", "type", "str", "int", "float", "set", "tuple",
         "len", "range", "open", "input", "print", "sum", "min", "max",
@@ -157,12 +175,13 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
                         suggestion=f"Rename variable to avoid shadowing builtin '{target.id}'",
                     ))
 
-    # type() == comparison instead of isinstance
+
+def _check_type_comparisons(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check for type() == comparison instead of isinstance()."""
     for node in ast.walk(tree):
         if isinstance(node, ast.Compare):
             for op in node.ops:
                 if isinstance(op, (ast.Eq, ast.NotEq)):
-                    # Check if left side is type() call
                     if (isinstance(node.left, ast.Call)
                             and isinstance(node.left.func, ast.Name)
                             and node.left.func.id == "type"):
@@ -178,7 +197,9 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
                         ))
                         break
 
-    # Global keyword usage
+
+def _check_global_usage(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Check for global keyword usage."""
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             for stmt in ast.walk(node):
@@ -193,8 +214,6 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
                         message=f"'global' keyword used for: {', '.join(stmt.names)}",
                         suggestion="Consider passing values as arguments or using a class",
                     ))
-
-    return findings
 
 
 def _count_branches(node: ast.AST) -> int:

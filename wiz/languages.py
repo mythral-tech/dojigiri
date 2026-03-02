@@ -167,9 +167,10 @@ PYTHON_RULES: list[Rule] = _compile([
         "pickle.load()/loads() can execute arbitrary code during deserialization",
         "Use json, msgpack, or a safe serialization format instead",
     ),
-    # Unsafe yaml.load
+    # Unsafe yaml.load - match yaml.load() calls but not those with SafeLoader
+    # Note: This uses a negative lookahead that checks the entire match
     (
-        r"\byaml\.load\s*\([^)]*(?!\bLoader\s*=\s*yaml\.SafeLoader)[^)]*\)",
+        r"\byaml\.load\s*\((?!.*\bLoader\s*=\s*yaml\.SafeLoader)[^)]+\)",
         Severity.CRITICAL, Category.SECURITY,
         "yaml-unsafe",
         "yaml.load() without SafeLoader can execute arbitrary code",

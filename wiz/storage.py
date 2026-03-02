@@ -46,18 +46,6 @@ def save_cache(cache: dict):
     CACHE_FILE.write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
 
-def is_file_unchanged(filepath: str, cache: dict) -> bool:
-    """Check if file hash matches cached version."""
-    current = file_hash(filepath)
-    return cache.get(filepath) == current
-
-
-def update_cache_entry(filepath: str, cache: dict) -> dict:
-    """Update a single file's hash in cache."""
-    cache[filepath] = file_hash(filepath)
-    return cache
-
-
 def save_report(report: ScanReport):
     """Save scan report as JSON."""
     ensure_dirs()
