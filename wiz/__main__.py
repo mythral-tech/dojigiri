@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .config import get_api_key, Severity, Confidence, LANGUAGE_EXTENSIONS
+from .config import get_api_key, Severity, Confidence, LANGUAGE_EXTENSIONS, load_project_config
 from .analyzer import scan_quick, scan_deep, cost_estimate, detect_language, filter_report, diff_reports
 from .detector import analyze_file_static
 from .storage import load_latest_report, load_baseline_report, list_reports
@@ -28,6 +28,10 @@ def cmd_scan(args):
         print(f"Supported: {', '.join(sorted(set(LANGUAGE_EXTENSIONS.values())))}")
         return 1
 
+    # Load project config from .wiz.toml (if exists)
+    scan_root = root if root.is_dir() else root.parent
+    project_config = load_project_config(scan_root)
+    
     use_cache = not args.no_cache
     is_json = getattr(args, "output", None) == "json"
 
@@ -43,7 +47,10 @@ def cmd_scan(args):
         else:
             if not is_json:
                 print(f"Quick scanning {root} ...\n")
-            workers = getattr(args, "workers", 4)
+            # Use config file workers if not specified on CLI
+            workers = getattr(args, "workers", None)
+            if workers is None:
+                workers = project_config.get("workers", 4)
             report_obj = scan_quick(root, language_filter=lang, use_cache=use_cache, max_workers=workers)
     except KeyboardInterrupt:
         print("\n\nScan interrupted by user.", file=sys.stderr)
@@ -61,10 +68,18 @@ def cmd_scan(args):
         else:
             print(f"Warning: baseline '{baseline_arg}' not found, showing all findings", file=sys.stderr)
     
-    # Apply post-scan filters
+    # Apply post-scan filters (CLI args override config file)
     ignore_rules = set(args.ignore.split(",")) if getattr(args, "ignore", None) else None
+    if not ignore_rules and "ignore_rules" in project_config:
+        ignore_rules = set(project_config["ignore_rules"])
+    
     min_severity = SEVERITY_MAP.get(getattr(args, "min_severity", None))
+    if not min_severity and "min_severity" in project_config:
+        min_severity = SEVERITY_MAP.get(project_config["min_severity"])
+    
     min_confidence = CONFIDENCE_MAP.get(getattr(args, "min_confidence", None))
+    if not min_confidence and "min_confidence" in project_config:
+        min_confidence = CONFIDENCE_MAP.get(project_config["min_confidence"])
     report_obj = filter_report(
         report_obj,
         ignore_rules=ignore_rules,
@@ -247,8 +262,8 @@ def main():
     p_scan.add_argument("--output", choices=["text", "json"], default="text",
                          help="Output format (default: text)")
     p_scan.add_argument("--baseline", help="Compare against baseline (use 'latest' or report path)")
-    p_scan.add_argument("--workers", type=int, default=4, metavar="N",
-                         help="Number of parallel workers for quick scan (default: 4, use 1 for sequential)")
+    p_scan.add_argument("--workers", type=int, default=None, metavar="N",
+                         help="Number of parallel workers for quick scan (default: 4 or from .wiz.toml, use 1 for sequential)")
     p_scan.set_defaults(func=cmd_scan)
 
     # debug

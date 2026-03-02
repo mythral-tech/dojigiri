@@ -1,0 +1,16 @@
+# Wiz Project Configuration
+# Place this file as .wiz.toml in your project root
+# CLI arguments always override config file settings
+
+[wiz]
+# Ignore specific rules (comma-separated list)
+ignore_rules = ["todo-marker", "long-line"]
+
+# Minimum severity level to display (options: "critical", "warning", "info")
+min_severity = "warning"
+
+# Minimum confidence level for LLM findings (options: "high", "medium", "low")
+# min_confidence = "medium"
+
+# Number of parallel workers for quick scans (default: 4)
+workers = 4

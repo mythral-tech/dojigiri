@@ -197,3 +197,35 @@ def load_ignore_patterns(root: Path) -> list[str]:
         if line and not line.startswith("#"):
             patterns.append(line)
     return patterns
+
+
+def load_project_config(root: Path) -> dict:
+    """Load .wiz.toml config file from project root.
+    
+    Returns a dict with config options:
+    - ignore_rules: list of rule names to suppress
+    - min_severity: minimum severity level
+    - min_confidence: minimum confidence level (for LLM findings)
+    - workers: number of parallel workers
+    
+    Returns empty dict if config file doesn't exist or fails to parse.
+    """
+    try:
+        import tomllib  # Python 3.11+
+    except ImportError:
+        try:
+            import tomli as tomllib  # Python 3.10 fallback
+        except ImportError:
+            return {}  # No TOML support, skip config
+    
+    config_file = root / ".wiz.toml"
+    if not config_file.exists():
+        return {}
+    
+    try:
+        with open(config_file, "rb") as f:
+            data = tomllib.load(f)
+        return data.get("wiz", {})
+    except Exception:
+        # Malformed config - silently ignore
+        return {}
