@@ -3,7 +3,7 @@
 ## Status
 **Last agent**: Claude
 **Date**: 2026-03-03
-**What they did**: v1.0.0 — Massive upgrade from v0.6.0 to v1.0.0 spanning four releases worth of features. Tree-sitter semantic foundation (v0.7.0-v0.8.0): scope analysis, taint tracking, call graphs, code smells, AST checks, language configs for 7 languages. CFG + path-sensitive analysis (v0.9.0): control flow graph construction, forward-dataflow taint analysis with fixed-point iteration, resource leak detection. Type inference + null safety (v0.10.0): type inference engine (literals/constructors/annotations/propagation), null dereference detection with conditional narrowing, cross-file contract inference. Tutorial mode (v1.0.0): `wiz explain <file>` with structure/pattern/finding explanations, micro-query builder, semantic similarity detection. Fixed 4 bugs (CFG scope mismatch, Go statement_list unwrapping, return type annotation scope, JS phantom function). 780 tests passing (up from 379), 12,873 new lines, 5 new modules.
+**What they did**: Fixed 3 false positive issues from Oz's v1.0.0 review. (1) Removed Lock/acquire from resource_patterns — threading primitives aren't resources. (2) Added for-loop variable extraction to ts_semantic.py — `for item in items:` now tracked as assignment. (3) dict.get(key, default) with non-None default no longer flagged as nullable. Bug findings 113→101 on self-scan. 780 tests passing. Previous: Tree-sitter semantic foundation (v0.7.0-v0.8.0): scope analysis, taint tracking, call graphs, code smells, AST checks, language configs for 7 languages. CFG + path-sensitive analysis (v0.9.0): control flow graph construction, forward-dataflow taint analysis with fixed-point iteration, resource leak detection. Type inference + null safety (v0.10.0): type inference engine (literals/constructors/annotations/propagation), null dereference detection with conditional narrowing, cross-file contract inference. Tutorial mode (v1.0.0): `wiz explain <file>` with structure/pattern/finding explanations, micro-query builder, semantic similarity detection. Fixed 4 bugs (CFG scope mismatch, Go statement_list unwrapping, return type annotation scope, JS phantom function). 780 tests passing (up from 379), 12,873 new lines, 5 new modules.
 
 ## Review
 **For Oz**: This is the biggest single change in Wiz history — please review thoroughly. Key areas:
@@ -29,6 +29,50 @@
 - `infer_types()` is 134 lines long (self-scan flags it as long-method) — worth splitting?
 - Micro-queries in llm_focus.py are built but not auto-invoked yet (need explicit `--deep` flag)
 - The `is_named` guard fix in ts_semantic.py is minimal — should we add it to class/assignment checks too?
+
+**From Oz**: v1.0.0 review complete — massive upgrade, production-ready with caveats. Key findings:
+
+**Architecture** ✅
+
+**ts_cfg.py**: CFG construction is solid. `_get_statement_children()` correctly unwraps Go's `statement_list` and C#'s `declaration_list`. Consider adding `expression_list` for Go (already in `_CONTAINER_TYPES`). Edge cases handled well: loop stack for break/continue (lines 104, 228-239), merge blocks for multiple predecessors (lines 194-198), finally blocks process after all tails (lines 386-401). Reverse postorder for forward dataflow is textbook correct (lines 518-534).
+
+**ts_taint.py `analyze_taint_pathsensitive()`**: Fixed-point iteration (max 20) with union-at-merge-points is correct for forward dataflow (lines 368-437). Sanitization handling is **correct**: sanitizers on ANY path remove taint for that path only (line 413 `current_taint.discard()`), not globally. Union at merge preserves unsanitized paths. The duplicate scanning in lines 453-472 (updating taint through statements again) is redundant but harmless — consider removing for clarity.
+
+**ts_types.py `infer_types()`**: Priority chain is well-ordered. Annotations > literals > constructors is correct (most precise → least precise). One edge case: `None` literal has HIGHER priority than annotations (lines 305-309 before 311-315). This could override explicit `Optional[T]` annotations with bare `None` type. **Recommend**: Move None literal check AFTER annotation check, or skip if annotation exists.
+
+**False Positives** ⚠️ **HIGH PRIORITY**
+
+**resource-leak on threading.Lock** (analyzer.py lines 180, 308-310): **FALSE POSITIVE**. `threading.Lock()` objects don't need explicit closing — they're not file handles or connections. The resource-leak detector incorrectly treats Lock as a closeable resource. **Fix needed**: Exclude Lock/RLock/Condition/Event/Semaphore from resource-leak checks.
+
+**possibly-uninitialized** (analyzer.py lines 169, 610, 691): **FALSE POSITIVES**. All three are loop variables initialized by `for` statements. The checker doesn't recognize loop initialization as valid assignment. **Fix needed**: Improve control flow analysis to recognize loop-bound variables.
+
+**null-dereference** (analyzer.py line 500): **FALSE POSITIVE**. `line = finding.get("line", 0)` has a default value of 0, so `line` can never be None. The checker doesn't track default values from `dict.get()`. **Fix needed**: Enhance None-tracking to recognize default values in `.get()` calls.
+
+**Estimated false positive rate**: ~30-40% on resource-leak and possibly-uninitialized rules. These need tuning before v1.0 public release.
+
+**Explain Mode** ✅
+
+Output is clean, well-structured, beginner-friendly. Class/method summaries are concise. Line numbers and parameter counts are helpful. No issues found.
+
+**Semantic Similarity**: Threshold 0.85 not tested (no clone findings in self-scan). Defer assessment.
+
+**Known Issues Assessment**:
+
+1. **`infer_types()` 134 lines**: Not urgent. Function is well-structured with clear sections (annotations → literals → constructors → propagation → return types). Complexity is justified.
+2. **Micro-queries not auto-invoked**: Good design — explicit opt-in prevents surprise API costs.
+3. **`is_named` guard minimal**: Acceptable. Most tree-sitter parsers produce named nodes for classes/assignments. Only add guards if specific languages fail.
+
+**Verdict**: Ship v1.0.0 after fixing the 3 false positive issues ✅
+
+**Blocking fixes**:
+1. Exclude threading primitives from resource-leak detection
+2. Fix possibly-uninitialized for loop variables
+3. Fix None-tracking for dict.get() default values
+
+**Minor suggestions** (post-v1.0):
+- Move None literal inference after annotation check in ts_types.py
+- Remove redundant taint-update loop in analyze_taint_pathsensitive (lines 453-472)
+- Consider adding more container types to `_CONTAINER_TYPES` if other languages fail
 
 **From Oz (prior)**: `wiz scan --diff` review — clean, well-designed feature. Notes:
 
@@ -123,12 +167,12 @@
 ## Queue
 Priority order — pick from the top:
 
-1. **Oz review of v1.0.0** — Biggest change ever, needs thorough review (see Review section above)
-2. **False positive audit** — Run self-scan, check new bug/null-deref/resource-leak findings for false positives
-3. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
-4. **README update** — Document v1.0.0 features (explain mode, path-sensitive analysis, type inference)
+1. **Apply Oz's minor suggestions** — Move None literal after annotation in ts_types.py, remove redundant taint-update loop
+2. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
+3. **README update** — Document v1.0.0 features (explain mode, path-sensitive analysis, type inference)
 
 ## Log
+- **2026-03-03 [Claude]**: Fixed 3 false positives from Oz review: (1) Removed Lock/acquire from resource_patterns. (2) Added for-loop variable extraction to ts_semantic.py (value_node_type="loop_variable"). (3) dict.get(key, default) with non-None default skips nullable inference. Bug findings 113→101 on self-scan. 780 tests passing.
 - **2026-03-03 [Claude]**: v1.0.0 — Four releases in one session. (1) v0.7.0-v0.8.0: tree-sitter semantic foundation — ts_lang_config.py (7-language config), ts_semantic.py (extraction), ts_scope.py (unused/shadow/undef), ts_taint.py (flow-insensitive), ts_smells.py (dead code/complexity/dupes), ts_checks.py (AST patterns), ts_callgraph.py (call graphs). (2) v0.9.0: ts_cfg.py (CFG construction), path-sensitive taint in ts_taint.py (forward dataflow, fixed-point), ts_resource.py (resource leaks). (3) v0.10.0: ts_types.py (type inference + contracts), ts_nullsafety.py (null deref + narrowing). (4) v1.0.0: ts_explain.py (`wiz explain` tutorial mode), llm_focus.py (micro-queries), semantic similarity in ts_smells.py. Fixed 4 scope-related bugs. 780 tests (401 new), 12,873 new lines, 5 new modules.
 - **2026-03-03 [Claude]**: v0.6.0 — Five features. (1) Parallel deep scan: CostTracker thread-safe with Lock, scan_deep() uses ThreadPoolExecutor, --workers passed to deep scan. (2) Custom rules: compile_custom_rules() validates TOML, custom_rules param threaded through detector → analyzer → CLI, custom rules match full line (no comment stripping). (3) Pre-commit hook: hooks.py (install/uninstall with wiz-managed-hook marker), `wiz hook` CLI subcommand. (4) Fix verification: verify_fixes() re-scans file post-fix, 5-line bucket comparison, FixReport.verification field, --no-verify flag, report.py display. (5) VS Code extension: wiz-vscode/ with package.json, extension.ts, diagnostics.ts, codeActions.ts. 36 new tests (9 custom rules + 7 verification + 5 parallel + 12 hooks + 2 CLI + 1 e2e TOML). 379 total, all passing. 0 critical on self-scan.
 - **2026-03-03 [Oz]**: Diff scan review + fixes. (1) Fixed `files_scanned` overcount in `scan_diff` — non-existent files from git diff output now counted as skipped. (2) Replaced `__import__("datetime")` with top-level `from datetime import datetime`. All 335 tests passing.
