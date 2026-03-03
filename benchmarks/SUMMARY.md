@@ -4,14 +4,16 @@
 **Wiz version:** 1.0.0
 **Repos tested:** Flask, FastAPI, Express.js
 
-## Results After FP Reduction Sprint
+## Results After FP Reduction (Two Rounds)
 
-| Repo | Language | Files | Before | After | Reduction | Critical |
-|------|----------|-------|--------|-------|-----------|----------|
-| Flask | Python | 24 | 373 | 300 | -73 (20%) | 2 -> 2 |
-| FastAPI | Python | 46 | 739 | 407 | -332 (45%) | 0 -> 0 |
-| Express | JavaScript | 153 | 2028 | 140 | -1888 (93%) | 105 -> 0 |
-| **Total** | | **223** | **3140** | **847** | **-2293 (73%)** | **107 -> 2** |
+| Repo | Language | Files | Baseline | Round 1 | Round 2 | Total Reduction |
+|------|----------|-------|----------|---------|---------|-----------------|
+| Flask | Python | 24 | 373 | 300 | 287 | -86 (23%) |
+| FastAPI | Python | 46 | 739 | 407 | 400 | -339 (46%) |
+| Express | JavaScript | 153 | 2028 | 140 | 140 | -1888 (93%) |
+| **Total** | | **223** | **3140** | **847** | **827** | **-2313 (74%)** |
+
+Critical findings: 107 -> 2 (both are intentional exec/eval in Flask config loading).
 
 ### Per-Rule Impact
 
@@ -23,11 +25,11 @@
 - `eval-usage`: 2 -> 0 (string literal suppression)
 
 **Significantly reduced:**
-- `unused-variable`: 384 -> 49 (87% reduction, class scope skip)
+- `unused-variable`: 384 -> 91 (76% reduction, class scope + TypeVar skip)
 - `insecure-http`: 48 -> 1 (98% reduction, test file skip)
-- `null-dereference`: 136 -> 93 (32% reduction, guard pattern recognition)
+- `null-dereference`: 136 -> 83 (39% reduction, guard patterns + self.attr tracking)
 - `possibly-uninitialized`: 36 -> 20 (44% reduction, param/loop-var skip)
-- `unused-import`: 176 -> 147 (16% reduction, re-export/future/TYPE_CHECKING)
+- `unused-import`: 176 -> 138 (22% reduction, re-export/future/TYPE_CHECKING + submodule tracking)
 
 ### Remaining Findings (847)
 

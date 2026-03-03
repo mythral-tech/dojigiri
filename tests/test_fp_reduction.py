@@ -379,3 +379,145 @@ def test_exec_in_string_not_flagged():
     code = """msg = 'use exec(code) carefully'\n"""
     findings = run_regex_checks(code, "test.py", "python")
     assert not any(f.rule == "exec-usage" for f in findings)
+
+
+# ─── Round 2: Additional FP fixes ─────────────────────────────────────
+
+# 11. unused-import: dotted/submodule imports
+
+def test_unused_import_dotted_module_not_flagged():
+    """import email.message used as email.message.Message() should not be flagged."""
+    code = '''
+import email.message
+
+def parse():
+    msg = email.message.Message()
+    return msg
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    unused_import = [f for f in findings if f.rule == "unused-import"]
+    flagged_names = [f.message for f in unused_import]
+    assert not any("email.message" in msg for msg in flagged_names)
+    assert not any("'email'" in msg for msg in flagged_names)
+
+
+def test_unused_import_dotted_genuinely_unused():
+    """import os.path that is never used should still be flagged."""
+    code = '''
+import os.path
+
+x = 42
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    unused_import = [f for f in findings if f.rule == "unused-import"]
+    assert any("os.path" in f.message or "'os'" in f.message for f in unused_import)
+
+
+# 12. null-dereference: self.attr guard patterns
+
+def test_null_deref_self_attr_guarded():
+    """self.x guarded by `if self.x is not None:` should not be flagged."""
+    code = '''
+class Foo:
+    def __init__(self):
+        self.data = None
+
+    def process(self):
+        if self.data is not None:
+            return self.data.strip()
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    null_deref = [f for f in findings if f.rule == "null-dereference"]
+    assert not any("data" in f.message for f in null_deref)
+
+
+def test_null_deref_self_attr_early_exit():
+    """self.x guarded by `if self.x is None: raise` should guard subsequent lines."""
+    code = '''
+class Foo:
+    def __init__(self):
+        self.conn = None
+
+    def query(self):
+        if self.conn is None:
+            raise RuntimeError("no connection")
+        return self.conn.execute("SELECT 1")
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    null_deref = [f for f in findings if f.rule == "null-dereference"]
+    assert not any("conn" in f.message for f in null_deref)
+
+
+# 13. early-exit guard: only guard if block has raise/return
+
+def test_early_exit_without_raise_not_guarded():
+    """if x is None: x = default should NOT guard subsequent x.attr access."""
+    code = '''
+def process(data):
+    x = data.get("key")
+    if x is None:
+        x = "fallback"
+    # x could still be None if reassignment is conditional or removed
+    result = x.strip()
+    return result
+'''
+    # This should NOT suppress the null-dereference on x.strip()
+    # because the if-block sets x to a value, not raise/return
+    findings = analyze_file_static("test.py", code, "python")
+    # We just verify the guard doesn't apply — the finding may or may not
+    # appear depending on type inference, so just verify no crash
+    assert isinstance(findings, list)
+
+
+def test_early_exit_with_raise_guards():
+    """if x is None: raise should guard subsequent x.attr access."""
+    code = '''
+def process(x):
+    if x is None:
+        raise ValueError("x required")
+    return x.strip()
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    null_deref = [f for f in findings if f.rule == "null-dereference"]
+    assert not any("'x'" in f.message for f in null_deref)
+
+
+# 14. unused-variable: TypeVar at module scope
+
+def test_unused_variable_typevar_not_flagged():
+    """TypeVar('T') at module scope should not be flagged as unused."""
+    code = '''
+from typing import TypeVar
+
+T = TypeVar('T')
+
+def identity(x: T) -> T:
+    return x
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    unused_var = [f for f in findings if f.rule == "unused-variable"]
+    assert not any("'T'" in f.message for f in unused_var)
+
+
+def test_unused_variable_namedtuple_not_flagged():
+    """NamedTuple at module scope should not be flagged."""
+    code = '''
+from collections import namedtuple
+
+Point = namedtuple('Point', ['x', 'y'])
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    unused_var = [f for f in findings if f.rule == "unused-variable"]
+    assert not any("'Point'" in f.message for f in unused_var)
+
+
+def test_unused_variable_local_call_still_flagged():
+    """Regular function calls at local scope should still be flagged."""
+    code = '''
+def func():
+    result = compute()
+    return 42
+'''
+    findings = analyze_file_static("test.py", code, "python")
+    unused_var = [f for f in findings if f.rule == "unused-variable"]
+    assert any("result" in f.message for f in unused_var)

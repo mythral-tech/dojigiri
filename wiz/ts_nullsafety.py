@@ -23,13 +23,19 @@ from .ts_types import FileTypeMap, TypeInfo, InferredType
 # ─── Narrowing detection ─────────────────────────────────────────────
 
 # Pre-compiled guard patterns (avoid recompiling per line)
+# Group 1 captures the variable name being guarded.
+# For self.attr patterns, group 1 captures the attribute name (not 'self').
 _GUARD_PATTERNS = [
+    # Python: if self.x is not None:  (capture attr name for instance attributes)
+    re.compile(r'if\s+self\.(\w+)\s+is\s+not\s+None\b'),
     # Python: if x is not None:
     re.compile(r'if\s+(\w+)\s+is\s+not\s+None\s*:'),
     # Python: if x is not None and ...
     re.compile(r'if\s+(\w+)\s+is\s+not\s+None\b'),
     # Python: if x != None:
     re.compile(r'if\s+(\w+)\s*!=\s*None\s*:'),
+    # Python truthiness: if self.x:
+    re.compile(r'if\s+self\.(\w+)\s*:'),
     # Python truthiness: if x:
     re.compile(r'if\s+(\w+)\s*:'),
     # JS/TS/Java/C#: if (x !== null)
@@ -43,8 +49,12 @@ _GUARD_PATTERNS = [
 # Early-exit patterns: `if x is None: raise/return` eliminates None
 # on the continuation path (all lines after this block are guarded)
 _EARLY_EXIT_PATTERNS = [
+    # Python: if self.x is None:
+    re.compile(r'if\s+self\.(\w+)\s+is\s+None\s*:'),
     # Python: if x is None: raise/return
     re.compile(r'if\s+(\w+)\s+is\s+None\s*:'),
+    # Python: if not self.x:
+    re.compile(r'if\s+not\s+self\.(\w+)\s*:'),
     # Python: if not x:
     re.compile(r'if\s+not\s+(\w+)\s*:'),
     # JS/TS: if (x === null) / if (x == null)
@@ -55,13 +65,18 @@ _EARLY_EXIT_PATTERNS = [
 
 # Assert patterns: `assert x is not None` guards everything after
 _ASSERT_PATTERNS = [
+    re.compile(r'assert\s+self\.(\w+)\s+is\s+not\s+None'),
     re.compile(r'assert\s+(\w+)\s+is\s+not\s+None'),
+    re.compile(r'assert\s+isinstance\s*\(\s*self\.(\w+)\s*,'),
     re.compile(r'assert\s+isinstance\s*\(\s*(\w+)\s*,'),
+    re.compile(r'assert\s+self\.(\w+)\b'),
     re.compile(r'assert\s+(\w+)\b'),
 ]
 
 # Inline guard patterns: short-circuit and ternary on same line
 _INLINE_GUARD_RE = [
+    # self.x and self.x.attr (short-circuit for instance attrs)
+    re.compile(r'\bself\.(\w+)\s+and\s+self\.\1\.'),
     # x and x.attr (short-circuit)
     re.compile(r'\b(\w+)\s+and\s+\1\.'),
     # x if x else default (ternary)
@@ -93,7 +108,7 @@ def _find_guarded_lines(
     # Track if/guard blocks by variable
     active_guards: list[tuple[str, int, int]] = []  # (var_name, guard_indent, start_line)
     # Track early-exit guards: after the if-block ends, all subsequent lines are guarded
-    early_exit_guards: list[tuple[str, int, int]] = []  # (var_name, guard_indent, start_line)
+    early_exit_guards: list[tuple[str, int, int, bool]] = []  # (var_name, guard_indent, start_line, has_exit)
     # Track assert-based guards: all lines after assert are guarded
     assert_guarded_from: dict[str, int] = {}  # var_name -> line number
 
@@ -111,12 +126,18 @@ def _find_guarded_lines(
         # Check if early-exit guards have finished their block — if so,
         # all subsequent lines are guarded (None eliminated by early exit)
         new_early_exits = []
-        for var, gi, sl in early_exit_guards:
+        for var, gi, sl, has_exit in early_exit_guards:
             if indent <= gi and stripped:
-                # Block ended — everything from here on is guarded
-                assert_guarded_from.setdefault(var, lineno)
+                # Block ended — only guard if body contained an exit statement
+                if has_exit:
+                    assert_guarded_from.setdefault(var, lineno)
             else:
-                new_early_exits.append((var, gi, sl))
+                # Still inside the block — check if this line has an exit
+                if not has_exit and stripped.startswith(
+                    ("raise", "return", "continue", "break", "throw")
+                ):
+                    has_exit = True
+                new_early_exits.append((var, gi, sl, has_exit))
         early_exit_guards = new_early_exits
 
         # Mark current line as guarded for active block guards
@@ -150,8 +171,8 @@ def _find_guarded_lines(
             m = pattern.match(stripped)
             if m:
                 var_name = m.group(1)
-                # Check if body contains raise/return (within next few lines)
-                early_exit_guards.append((var_name, indent, lineno))
+                # Track as potential early-exit; body must contain raise/return
+                early_exit_guards.append((var_name, indent, lineno, False))
                 # Also look for single-line: `if x is None: raise ValueError`
                 after_colon = stripped.split(":", 1)
                 if len(after_colon) > 1:
@@ -161,7 +182,7 @@ def _find_guarded_lines(
                         assert_guarded_from.setdefault(var_name, lineno + 1)
                         # Remove from early_exit_guards since it's handled
                         early_exit_guards = [
-                            (v, g, s) for v, g, s in early_exit_guards
+                            (v, g, s, h) for v, g, s, h in early_exit_guards
                             if not (v == var_name and s == lineno)
                         ]
                 break

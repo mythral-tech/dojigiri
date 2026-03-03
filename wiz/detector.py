@@ -312,7 +312,13 @@ def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
         # Skip TYPE_CHECKING-guarded imports (for `import X` style too)
         if lineno in type_checking_lines:
             continue
-        if name not in used_names:
+        # For dotted imports (`import email.message`), check if root is used
+        # via attribute access (e.g., `email.message.Message()` uses `email`)
+        is_used = name in used_names
+        if not is_used and "." in name:
+            root = name.split(".")[0]
+            is_used = root in used_names
+        if not is_used:
             findings.append(Finding(
                 file=filepath,
                 line=lineno,

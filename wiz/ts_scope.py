@@ -66,17 +66,30 @@ _PYTHON_BUILTINS = {
 
 # ─── Check: Unused Variables ─────────────────────────────────────────
 
+# Module-scope call patterns that define type system or framework objects
+# (never flagged as unused — they're consumed by type checkers or external imports)
+_TYPE_DEFINITION_CALLS = (
+    "TypeVar(", "TypeAlias(", "ParamSpec(", "TypeVarTuple(",
+    "NewType(", "NamedTuple(", "TypedDict(",
+    "namedtuple(",
+)
+
+
 def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Finding]:
     """Find variables that are assigned but never read in the same or child scope.
 
     Excludes: _ prefixed names, augmented assignments (x += 1 implies prior use),
-    loop variables used in iteration, parameters, class-scope attributes.
+    loop variables used in iteration, parameters, class-scope attributes,
+    module-scope type definitions (TypeVar, NewType, etc.).
     """
     findings = []
 
     # Build set of class scope IDs to skip class-level attribute declarations
     # (Pydantic fields, dataclass fields, TypeVars, typed annotations, etc.)
     class_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "class"}
+
+    # Build set of module scope IDs
+    module_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "module"}
 
     for asgn in semantics.assignments:
         # Skip parameters (handled differently), augmented, and _ prefixed
@@ -93,6 +106,11 @@ def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Find
         # not unused local variables (Pydantic fields, TypeVars, etc.)
         if asgn.scope_id in class_scope_ids:
             continue
+        # Skip module-scope type definitions (TypeVar, NewType, NamedTuple, etc.)
+        # These are consumed by type checkers or imported by other modules.
+        if asgn.scope_id in module_scope_ids and asgn.value_text:
+            if any(asgn.value_text.startswith(p) for p in _TYPE_DEFINITION_CALLS):
+                continue
 
         # Check if name is referenced in this scope or any child scope
         visible_scopes = _scope_and_children(semantics.scopes, asgn.scope_id)
