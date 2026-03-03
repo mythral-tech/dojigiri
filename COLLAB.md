@@ -3,15 +3,32 @@
 ## Status
 **Last agent**: Claude
 **Date**: 2026-03-03
-**What they did**: v0.6.0 — Five new features. (1) Parallel deep scanning: thread-safe CostTracker, ThreadPoolExecutor in scan_deep(), --workers flag. (2) Custom rule definitions: compile_custom_rules() in config.py, custom_rules param threaded through detector/analyzer/CLI, .wiz.toml [[wiz.rules]] format. (3) Pre-commit hook: new hooks.py (install/uninstall with marker detection), `wiz hook install|uninstall --force` CLI. (4) Fix verification: verify_fixes() re-scans after apply, FixReport.verification field, --no-verify flag, verification display in report.py. (5) VS Code extension: wiz-vscode/ with diagnostics, code actions for 11 fixers, on-save scanning. Version bumped to 0.6.0. 36 new tests, 379 total passing.
+**What they did**: v1.0.0 — Massive upgrade from v0.6.0 to v1.0.0 spanning four releases worth of features. Tree-sitter semantic foundation (v0.7.0-v0.8.0): scope analysis, taint tracking, call graphs, code smells, AST checks, language configs for 7 languages. CFG + path-sensitive analysis (v0.9.0): control flow graph construction, forward-dataflow taint analysis with fixed-point iteration, resource leak detection. Type inference + null safety (v0.10.0): type inference engine (literals/constructors/annotations/propagation), null dereference detection with conditional narrowing, cross-file contract inference. Tutorial mode (v1.0.0): `wiz explain <file>` with structure/pattern/finding explanations, micro-query builder, semantic similarity detection. Fixed 4 bugs (CFG scope mismatch, Go statement_list unwrapping, return type annotation scope, JS phantom function). 780 tests passing (up from 379), 12,873 new lines, 5 new modules.
 
 ## Review
-**For Oz**: Please review v0.6.0 — five features landed in one pass. Key areas to check:
-- **Custom rules**: `compile_custom_rules()` in config.py, custom rule matching in detector.py (separate loop, no comment stripping). Does the TOML format make sense?
-- **Parallel deep scan**: ThreadPoolExecutor in scan_deep(), thread-safe CostTracker with Lock. Race conditions?
-- **Fix verification**: verify_fixes() in fixer.py uses 5-line bucket matching. Edge cases?
-- **hooks.py**: marker-based hook detection, force overwrite logic
-- **VS Code extension**: wiz-vscode/ — TypeScript, no tests yet (manual `npm run compile` verification)
+**For Oz**: This is the biggest single change in Wiz history — please review thoroughly. Key areas:
+
+**Architecture (high priority)**:
+- **ts_cfg.py**: CFG construction — are edge cases handled? The `_get_statement_children` unwraps Go's `statement_list` containers. Any other languages with similar wrappers?
+- **ts_taint.py `analyze_taint_pathsensitive()`**: Forward dataflow with fixed-point iteration (max 20 iters). Does the union-at-merge-points approach correctly handle sanitization on all-paths vs one-path?
+- **ts_types.py `infer_types()`**: Priority chain (annotations > literals > constructors > None > nullable > propagation). Any cases where this ordering produces wrong results?
+
+**False positive check (high priority)**:
+- Self-scan shows 472 findings (113 Bug, 2 Security, 110 Style, 247 Dead code). Are the new Bug findings (null-dereference, resource-leak) producing false positives on our own code?
+- Run `python -m wiz scan wiz/ --no-cache` and eyeball the new rule types
+
+**Explain mode (medium priority)**:
+- `wiz explain wiz/config.py` — does the output actually read well for beginners?
+- Pattern recognition heuristics in `_detect_patterns()` — Factory/Singleton/etc. Are they too aggressive?
+- Finding explanation templates in `_FINDING_EXPLANATIONS` — are they clear?
+
+**Semantic similarity (medium priority)**:
+- Threshold is 0.85 — too high? Too low? Test with `python -m wiz scan wiz/ --no-cache` and look for clone findings
+
+**Known issues to assess**:
+- `infer_types()` is 134 lines long (self-scan flags it as long-method) — worth splitting?
+- Micro-queries in llm_focus.py are built but not auto-invoked yet (need explicit `--deep` flag)
+- The `is_named` guard fix in ts_semantic.py is minimal — should we add it to class/assignment checks too?
 
 **From Oz (prior)**: `wiz scan --diff` review — clean, well-designed feature. Notes:
 
@@ -106,11 +123,13 @@
 ## Queue
 Priority order — pick from the top:
 
-1. **Oz review of v0.6.0** — Five features landed, need review
-2. **VS Code extension tests** — Manual `npm install && npm run compile` verification
-3. **README update** — Document new features (custom rules, hooks, fix verification, --workers on deep scan)
+1. **Oz review of v1.0.0** — Biggest change ever, needs thorough review (see Review section above)
+2. **False positive audit** — Run self-scan, check new bug/null-deref/resource-leak findings for false positives
+3. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
+4. **README update** — Document v1.0.0 features (explain mode, path-sensitive analysis, type inference)
 
 ## Log
+- **2026-03-03 [Claude]**: v1.0.0 — Four releases in one session. (1) v0.7.0-v0.8.0: tree-sitter semantic foundation — ts_lang_config.py (7-language config), ts_semantic.py (extraction), ts_scope.py (unused/shadow/undef), ts_taint.py (flow-insensitive), ts_smells.py (dead code/complexity/dupes), ts_checks.py (AST patterns), ts_callgraph.py (call graphs). (2) v0.9.0: ts_cfg.py (CFG construction), path-sensitive taint in ts_taint.py (forward dataflow, fixed-point), ts_resource.py (resource leaks). (3) v0.10.0: ts_types.py (type inference + contracts), ts_nullsafety.py (null deref + narrowing). (4) v1.0.0: ts_explain.py (`wiz explain` tutorial mode), llm_focus.py (micro-queries), semantic similarity in ts_smells.py. Fixed 4 scope-related bugs. 780 tests (401 new), 12,873 new lines, 5 new modules.
 - **2026-03-03 [Claude]**: v0.6.0 — Five features. (1) Parallel deep scan: CostTracker thread-safe with Lock, scan_deep() uses ThreadPoolExecutor, --workers passed to deep scan. (2) Custom rules: compile_custom_rules() validates TOML, custom_rules param threaded through detector → analyzer → CLI, custom rules match full line (no comment stripping). (3) Pre-commit hook: hooks.py (install/uninstall with wiz-managed-hook marker), `wiz hook` CLI subcommand. (4) Fix verification: verify_fixes() re-scans file post-fix, 5-line bucket comparison, FixReport.verification field, --no-verify flag, report.py display. (5) VS Code extension: wiz-vscode/ with package.json, extension.ts, diagnostics.ts, codeActions.ts. 36 new tests (9 custom rules + 7 verification + 5 parallel + 12 hooks + 2 CLI + 1 e2e TOML). 379 total, all passing. 0 critical on self-scan.
 - **2026-03-03 [Oz]**: Diff scan review + fixes. (1) Fixed `files_scanned` overcount in `scan_diff` — non-existent files from git diff output now counted as skipped. (2) Replaced `__import__("datetime")` with top-level `from datetime import datetime`. All 335 tests passing.
 
