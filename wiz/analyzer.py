@@ -307,10 +307,12 @@ def scan_deep(
     analyses = cached_analyses.copy()  # Start with cached results
     analyses_lock = threading.Lock()
     cache_write_lock = threading.Lock()
+    print_lock = threading.Lock()
 
     def _analyze_file_deep(index, fp_str, lang, content, line_count, static_findings, fhash):
         """Per-file LLM analysis — runs in a thread."""
-        print(f"  [{index+1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
+        with print_lock:
+            print(f"  [{index+1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
 
         llm_findings = []
         try:
@@ -319,12 +321,15 @@ def scan_deep(
                 chunk_findings = analyze_chunk(chunk, cost_tracker)
                 llm_findings.extend(chunk_findings)
                 if len(chunks) > 1:
-                    sys.stdout.write(".")
-                    sys.stdout.flush()
+                    with print_lock:
+                        sys.stdout.write(".")
+                        sys.stdout.flush()
             if len(chunks) > 1:
-                print()
+                with print_lock:
+                    print()
         except LLMError as e:
-            print(f"    LLM error: {e}", file=sys.stderr)
+            with print_lock:
+                print(f"    LLM error: {e}", file=sys.stderr)
 
         merged = _merge_findings(static_findings, llm_findings)
 
