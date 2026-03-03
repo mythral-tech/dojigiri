@@ -476,8 +476,9 @@ def _is_safe_regex(pattern_str: str) -> bool:
     Returns True for patterns that are safe (or merely invalid — invalid
     patterns are handled separately by re.compile error handling).
     """
-    # Reject nested quantifiers: quantifier immediately after a group with a quantifier
-    if re.search(r'[+*?}\)][+*?{]|\([^)]*[+*?{][^)]*\)[+*?{]', pattern_str):
+    # Reject nested quantifiers: a group containing a quantifier, with a
+    # quantifier on the group itself — e.g. (a+)+, (x*){2,}
+    if re.search(r'\([^)]*[+*?{][^)]*\)[+*?{]', pattern_str):
         return False
     # Test-run: compile and match against a 1000-char string
     try:

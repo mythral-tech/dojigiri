@@ -587,10 +587,11 @@ def to_sarif(report: ScanReport) -> dict:
                 }
             }
             
-            # Add snippet if available
-            if f.snippet:
+            # Add snippet if available (redact secrets)
+            snippet = f.to_dict()["snippet"]
+            if snippet:
                 result["locations"][0]["physicalLocation"]["region"]["snippet"] = {
-                    "text": f.snippet
+                    "text": snippet
                 }
             
             # Add suggestion as fix if available

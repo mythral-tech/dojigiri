@@ -18,6 +18,8 @@ from wiz.fixer import (
     _fix_var_usage, _fix_none_comparison, _fix_type_comparison,
     _fix_console_log, _fix_insecure_http, _fix_fstring_no_expr,
     _fix_hardcoded_secret, _fix_open_without_with,
+    _fix_yaml_unsafe, _fix_weak_hash, _fix_unreachable_code,
+    _fix_mutable_default, _fix_exception_swallowed,
     _in_multiline_string, _pattern_outside_strings,
     apply_fixes, fix_file, generate_llm_fixes,
 )
@@ -516,6 +518,317 @@ class TestFixOpenWithoutWith:
         finding = _make_finding("open-without-with", line=1)
         fix = _fix_open_without_with(line, finding, line)
         assert fix is None
+
+
+class TestFixYamlUnsafe:
+    def test_basic_replacement(self):
+        """Replace yaml.load( with yaml.safe_load(."""
+        line = 'data = yaml.load(content)\n'
+        fix = _fix_yaml_unsafe(line, _make_finding("yaml-unsafe"), "")
+        assert fix is not None
+        assert "yaml.safe_load(content)" in fix.fixed_code
+        assert fix.source == FixSource.DETERMINISTIC
+
+    def test_skip_when_safe_loader_present(self):
+        """Skip if SafeLoader already on the line."""
+        line = 'data = yaml.load(content, Loader=yaml.SafeLoader)\n'
+        fix = _fix_yaml_unsafe(line, _make_finding("yaml-unsafe"), "")
+        assert fix is None
+
+    def test_skip_when_loader_kwarg_present(self):
+        """Skip if Loader= kwarg already on the line."""
+        line = 'data = yaml.load(content, Loader=yaml.FullLoader)\n'
+        fix = _fix_yaml_unsafe(line, _make_finding("yaml-unsafe"), "")
+        assert fix is None
+
+    def test_preserves_surrounding_code(self):
+        """Other code on the line is preserved."""
+        line = '    result = yaml.load(f.read())\n'
+        fix = _fix_yaml_unsafe(line, _make_finding("yaml-unsafe"), "")
+        assert fix is not None
+        assert fix.fixed_code == '    result = yaml.safe_load(f.read())\n'
+
+
+class TestFixWeakHash:
+    def test_md5_to_sha256(self):
+        """Replace hashlib.md5( with hashlib.sha256(."""
+        line = 'h = hashlib.md5(data)\n'
+        fix = _fix_weak_hash(line, _make_finding("weak-hash"), "")
+        assert fix is not None
+        assert "hashlib.sha256(data)" in fix.fixed_code
+
+    def test_sha1_to_sha256(self):
+        """Replace hashlib.sha1( with hashlib.sha256(."""
+        line = 'h = hashlib.sha1(data)\n'
+        fix = _fix_weak_hash(line, _make_finding("weak-hash"), "")
+        assert fix is not None
+        assert "hashlib.sha256(data)" in fix.fixed_code
+
+    def test_skip_usedforsecurity_false(self):
+        """Skip when usedforsecurity=False is present."""
+        line = 'h = hashlib.md5(data, usedforsecurity=False)\n'
+        fix = _fix_weak_hash(line, _make_finding("weak-hash"), "")
+        assert fix is None
+
+    def test_skip_usedforsecurity_with_spaces(self):
+        """Skip usedforsecurity = False with spaces."""
+        line = 'h = hashlib.sha1(data, usedforsecurity = False)\n'
+        fix = _fix_weak_hash(line, _make_finding("weak-hash"), "")
+        assert fix is None
+
+
+class TestFixUnreachableCode:
+    def test_delete_dead_line(self):
+        """Delete the unreachable statement."""
+        line = '    print("never runs")\n'
+        fix = _fix_unreachable_code(line, _make_finding("unreachable-code"), "")
+        assert fix is not None
+        assert fix.fixed_code == ""
+
+    def test_skip_block_starters(self):
+        """Don't delete lines that start blocks (if/for/etc)."""
+        line = '    if condition:\n'
+        fix = _fix_unreachable_code(line, _make_finding("unreachable-code"), "")
+        assert fix is None
+
+    def test_preserves_surrounding(self, temp_dir):
+        """Verify that surrounding code is preserved after fix application."""
+        fp = temp_dir / "test.py"
+        code = 'def foo():\n    return 1\n    x = 2\n    y = 3\n'
+        fp.write_text(code, encoding="utf-8")
+        fix = Fix(
+            file=str(fp), line=3, rule="unreachable-code",
+            original_code="    x = 2", fixed_code="",
+            explanation="rm", source=FixSource.DETERMINISTIC,
+        )
+        result = apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        assert result[0].status == FixStatus.APPLIED
+        content = fp.read_text(encoding="utf-8")
+        assert "return 1" in content
+        assert "y = 3" in content
+        assert "x = 2" not in content
+
+
+class TestFixMutableDefault:
+    def test_simple_list(self):
+        """Replace def foo(x=[]) with None + guard."""
+        content = 'def foo(x=[]):\n    x.append(1)\n'
+        fix = _fix_mutable_default(
+            content.splitlines(keepends=True)[0],
+            _make_finding("mutable-default", line=1), content,
+        )
+        assert fix is not None
+        assert "x=None" in fix.fixed_code
+        assert "if x is None:" in fix.fixed_code
+        assert "x = []" in fix.fixed_code
+
+    def test_dict_default(self):
+        """Replace def foo(d={}) with None + guard."""
+        content = 'def foo(d={}):\n    d["key"] = 1\n'
+        fix = _fix_mutable_default(
+            content.splitlines(keepends=True)[0],
+            _make_finding("mutable-default", line=1), content,
+        )
+        assert fix is not None
+        assert "d=None" in fix.fixed_code
+        assert "d = {}" in fix.fixed_code
+
+    def test_set_default(self):
+        """Replace def foo(s=set()) with None + guard."""
+        content = 'def foo(s=set()):\n    s.add(1)\n'
+        fix = _fix_mutable_default(
+            content.splitlines(keepends=True)[0],
+            _make_finding("mutable-default", line=1), content,
+        )
+        assert fix is not None
+        assert "s=None" in fix.fixed_code
+        assert "s = set()" in fix.fixed_code
+
+    def test_preserves_indentation(self):
+        """Guard lines use correct indentation."""
+        content = '    def method(self, items=[]):\n        return items\n'
+        fix = _fix_mutable_default(
+            content.splitlines(keepends=True)[0],
+            _make_finding("mutable-default", line=1), content,
+        )
+        assert fix is not None
+        assert "        if items is None:" in fix.fixed_code
+        assert "            items = []" in fix.fixed_code
+
+    def test_no_match_immutable(self):
+        """Returns None for immutable defaults."""
+        content = 'def foo(x=None):\n    pass\n'
+        fix = _fix_mutable_default(
+            content.splitlines(keepends=True)[0],
+            _make_finding("mutable-default", line=1), content,
+        )
+        assert fix is None
+
+
+class TestFixExceptionSwallowed:
+    def test_adds_todo_comment(self):
+        """Add TODO comment to except: pass."""
+        content = 'try:\n    risky()\nexcept Exception:\n    pass\n'
+        fix = _fix_exception_swallowed(
+            content.splitlines(keepends=True)[2],
+            _make_finding("exception-swallowed", line=3), content,
+        )
+        assert fix is not None
+        assert "# TODO: handle this exception" in fix.fixed_code
+        assert "pass" in fix.fixed_code
+
+    def test_preserves_except_type(self):
+        """The except line itself is not modified."""
+        content = 'try:\n    risky()\nexcept ValueError:\n    pass\n'
+        fix = _fix_exception_swallowed(
+            content.splitlines(keepends=True)[2],
+            _make_finding("exception-swallowed", line=3), content,
+        )
+        assert fix is not None
+        # Fix targets the pass line, not the except line
+        assert fix.line == 4
+
+    def test_skip_non_pass_body(self):
+        """Don't fix if body isn't just `pass`."""
+        content = 'try:\n    risky()\nexcept Exception:\n    log(e)\n'
+        fix = _fix_exception_swallowed(
+            content.splitlines(keepends=True)[2],
+            _make_finding("exception-swallowed", line=3), content,
+        )
+        assert fix is None
+
+    def test_preserves_indentation(self):
+        """TODO comment preserves the pass line's indentation."""
+        content = 'try:\n    risky()\nexcept:\n        pass\n'
+        fix = _fix_exception_swallowed(
+            content.splitlines(keepends=True)[2],
+            _make_finding("exception-swallowed", line=3), content,
+        )
+        assert fix is not None
+        assert fix.fixed_code.startswith("        pass")
+
+
+# ─── Multi-line fix (end_line) tests ─────────────────────────────────
+
+
+class TestMultiLineFix:
+    def test_end_line_deletion(self, temp_dir):
+        """Deletion fix with end_line blanks out entire range."""
+        fp = temp_dir / "test.py"
+        fp.write_text("line1\nline2\nline3\nline4\n", encoding="utf-8")
+        fix = Fix(
+            file=str(fp), line=2, rule="test",
+            original_code="line2", fixed_code="",
+            explanation="rm", source=FixSource.DETERMINISTIC,
+            end_line=3,
+        )
+        result = apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        assert result[0].status == FixStatus.APPLIED
+        assert fp.read_text(encoding="utf-8") == "line1\nline4\n"
+
+    def test_end_line_replacement(self, temp_dir):
+        """Replacement fix with end_line replaces first line, blanks rest."""
+        fp = temp_dir / "test.py"
+        fp.write_text("old1\nold2\nold3\nkeep\n", encoding="utf-8")
+        fix = Fix(
+            file=str(fp), line=1, rule="test",
+            original_code="old1", fixed_code="new_combined\n",
+            explanation="merge", source=FixSource.DETERMINISTIC,
+            end_line=3,
+        )
+        result = apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        assert result[0].status == FixStatus.APPLIED
+        assert fp.read_text(encoding="utf-8") == "new_combined\nkeep\n"
+
+    def test_open_without_with_no_duplication(self, temp_dir):
+        """open-without-with fix doesn't duplicate body lines."""
+        fp = temp_dir / "test.py"
+        code = 'f = open("config.json", "r")\ndata = json.load(f)\nresult = process(data)\n'
+        fp.write_text(code, encoding="utf-8")
+
+        content = fp.read_text(encoding="utf-8")
+        finding = _make_finding("open-without-with", line=1, file=str(fp))
+        fix = _fix_open_without_with(
+            content.splitlines(keepends=True)[0], finding, content,
+        )
+        assert fix is not None
+        assert fix.end_line is not None
+
+        result = apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        assert result[0].status == FixStatus.APPLIED
+        final = fp.read_text(encoding="utf-8")
+        # Body lines should appear exactly once (inside with block)
+        assert final.count("json.load(f)") == 1
+        assert final.count("process(data)") == 1
+        assert "with open" in final
+
+
+# ─── Integration: scan → fix → verify for new rules ──────────────────
+
+
+class TestNewFixerIntegration:
+    def test_yaml_unsafe_pipeline(self, temp_dir):
+        """Scan → fix yaml.load() → verify."""
+        fp = temp_dir / "test.py"
+        fp.write_text('import yaml\ndata = yaml.load(content)\n', encoding="utf-8")
+        content = fp.read_text(encoding="utf-8")
+        from wiz.detector import analyze_file_static
+        findings = analyze_file_static(str(fp), content, "python")
+        yaml_findings = [f for f in findings if f.rule == "yaml-unsafe"]
+        assert len(yaml_findings) >= 1
+        report = fix_file(str(fp), content, "python", yaml_findings, dry_run=True)
+        assert report.applied > 0
+        yaml_fixes = [f for f in report.fixes if f.rule == "yaml-unsafe"]
+        assert len(yaml_fixes) >= 1
+        assert "safe_load" in yaml_fixes[0].fixed_code
+
+    def test_weak_hash_pipeline(self, temp_dir):
+        """Scan → fix hashlib.md5 → verify."""
+        fp = temp_dir / "test.py"
+        fp.write_text('import hashlib\nh = hashlib.md5(data)\n', encoding="utf-8")
+        content = fp.read_text(encoding="utf-8")
+        from wiz.detector import analyze_file_static
+        findings = analyze_file_static(str(fp), content, "python")
+        hash_findings = [f for f in findings if f.rule == "weak-hash"]
+        assert len(hash_findings) >= 1
+        report = fix_file(str(fp), content, "python", hash_findings, dry_run=True)
+        assert report.applied > 0
+
+    def test_unreachable_code_pipeline(self, temp_dir):
+        """Scan → fix unreachable code → verify."""
+        fp = temp_dir / "test.py"
+        fp.write_text('def foo():\n    return 1\n    print("dead")\n', encoding="utf-8")
+        content = fp.read_text(encoding="utf-8")
+        from wiz.detector import analyze_file_static
+        findings = analyze_file_static(str(fp), content, "python")
+        dead_findings = [f for f in findings if f.rule == "unreachable-code"]
+        assert len(dead_findings) >= 1
+        report = fix_file(str(fp), content, "python", dead_findings, dry_run=True)
+        assert report.applied > 0
+
+    def test_exception_swallowed_pipeline(self, temp_dir):
+        """Scan → fix except: pass → verify."""
+        fp = temp_dir / "test.py"
+        fp.write_text('try:\n    risky()\nexcept Exception:\n    pass\n', encoding="utf-8")
+        content = fp.read_text(encoding="utf-8")
+        from wiz.detector import analyze_file_static
+        findings = analyze_file_static(str(fp), content, "python")
+        swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+        assert len(swallowed) >= 1
+        report = fix_file(str(fp), content, "python", swallowed, dry_run=True)
+        assert report.applied > 0
+
+    def test_mutable_default_pipeline(self, temp_dir):
+        """Scan → fix mutable default → verify."""
+        fp = temp_dir / "test.py"
+        fp.write_text('def foo(items=[]):\n    items.append(1)\n    return items\n', encoding="utf-8")
+        content = fp.read_text(encoding="utf-8")
+        from wiz.detector import analyze_file_static
+        findings = analyze_file_static(str(fp), content, "python")
+        mutable = [f for f in findings if f.rule == "mutable-default"]
+        assert len(mutable) >= 1
+        report = fix_file(str(fp), content, "python", mutable, dry_run=True)
+        assert report.applied > 0
 
 
 class TestFixCLI:

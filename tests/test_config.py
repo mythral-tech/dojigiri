@@ -402,6 +402,13 @@ def test_safe_pattern_accepted():
     assert _is_safe_regex(r"TODO|FIXME|HACK") is True
     assert _is_safe_regex(r"password\s*=\s*['\"]") is True
     assert _is_safe_regex(r"\beval\s*\(") is True
+    # Lazy quantifiers are safe and must not be rejected
+    assert _is_safe_regex(r"<.*?>" ) is True
+    assert _is_safe_regex(r"\w+?") is True
+    assert _is_safe_regex(r"'.*?'") is True
+    # Grouped patterns with quantifiers on the group (no internal quantifier)
+    assert _is_safe_regex(r"(error|warning|info)+") is True
+    assert _is_safe_regex(r"(ab)+") is True
 
 
 def test_redos_rejected_in_compile_custom_rules(capsys):
