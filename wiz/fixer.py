@@ -499,6 +499,7 @@ def apply_fixes(
     indexed_fixes = sorted(enumerate(fixes), key=lambda x: x[1].line, reverse=True)
 
     occupied_lines: set[int] = set()
+    deleted_indices: set[int] = set()  # Track lines blanked by fixes (not original blank lines)
 
     for idx, fix in indexed_fixes:
         # Determine the full line range this fix covers
@@ -527,6 +528,7 @@ def apply_fixes(
                 # Blank out all lines in the range
                 for li in range(line_idx, min(line_idx + (end_line - start_line + 1), len(lines))):
                     lines[li] = ""
+                    deleted_indices.add(li)
             fix.status = FixStatus.APPLIED
             occupied_lines.update(fix_range)
 
@@ -545,6 +547,7 @@ def apply_fixes(
                 # Blank out remaining lines in range (line+1..end_line)
                 for li in range(line_idx + 1, min(line_idx + (end_line - start_line + 1), len(lines))):
                     lines[li] = ""
+                    deleted_indices.add(li)
             fix.status = FixStatus.APPLIED
             occupied_lines.update(fix_range)
 
@@ -552,8 +555,8 @@ def apply_fixes(
             fix.status = FixStatus.FAILED
 
     if not dry_run:
-        # Remove empty lines (deleted lines)
-        new_content = "".join(line for line in lines if line != "")
+        # Remove only lines that were blanked by fixes, not original blank lines
+        new_content = "".join(line for i, line in enumerate(lines) if i not in deleted_indices)
 
         # Backup
         if create_backup:

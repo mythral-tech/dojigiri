@@ -22,6 +22,14 @@ from .llm import analyze_chunk, CostTracker, LLMError
 from .storage import file_hash, load_cache, save_cache, save_report
 
 
+def _safe_enum(enum_cls, value):
+    """Safely instantiate an enum, returning None for invalid values."""
+    try:
+        return enum_cls(value)
+    except (ValueError, KeyError):
+        return None
+
+
 def detect_language(filepath: Path) -> Optional[str]:
     """Detect language from file extension."""
     return LANGUAGE_EXTENSIONS.get(filepath.suffix.lower())
@@ -295,7 +303,7 @@ def scan_deep(
                         message=f["message"],
                         suggestion=f.get("suggestion"),
                         snippet=f.get("snippet"),
-                        confidence=Confidence(f["confidence"]) if f.get("confidence") else None,
+                        confidence=_safe_enum(Confidence, f["confidence"]) if f.get("confidence") else None,
                     )
                     for f in cached_data.get("findings", [])
                 ]
@@ -483,37 +491,56 @@ def filter_report(
     return report
 
 
+def _normalize_path(path_str: str, root: Optional[str] = None) -> str:
+    """Normalize a path for baseline comparison.
+
+    Converts absolute paths to relative (using root) and normalizes separators.
+    """
+    import os
+    p = os.path.normpath(path_str)
+    if root and os.path.isabs(p):
+        try:
+            p = os.path.relpath(p, os.path.normpath(root))
+        except ValueError:
+            pass  # Different drive on Windows
+    return p
+
+
 def diff_reports(
     report: ScanReport,
     baseline_dict: dict,
 ) -> ScanReport:
     """Filter report to show only NEW findings not in baseline.
-    
+
     Uses 5-line bucket matching: findings on similar lines (±5) with the same
     rule are considered the same issue.
-    
+
     Args:
         report: Current scan report
         baseline_dict: Baseline report as dict (from load_baseline_report)
-    
+
     Returns:
         Modified report containing only new findings
     """
-    # Build set of baseline finding signatures: (file, line_bucket, rule)
+    baseline_root = baseline_dict.get("root")
+
+    # Build set of baseline finding signatures: (normalized_file, line_bucket, rule)
     baseline_signatures = set()
     for file_data in baseline_dict.get("files", []):
-        file_path = file_data.get("path", "")
+        file_path = _normalize_path(file_data.get("path", ""), baseline_root)
         for finding in file_data.get("findings", []):
             line = finding.get("line", 0)
             rule = finding.get("rule", "")
             bucket = line // 5
             baseline_signatures.add((file_path, bucket, rule))
-    
+
     # Filter out findings that exist in baseline
+    scan_root = report.root
     for fa in report.file_analyses:
+        norm_path = _normalize_path(fa.path, scan_root)
         fa.findings = [
             f for f in fa.findings
-            if (fa.path, f.line // 5, f.rule) not in baseline_signatures
+            if (norm_path, f.line // 5, f.rule) not in baseline_signatures
         ]
     
     # Recompute counts

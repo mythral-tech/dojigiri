@@ -606,9 +606,7 @@ def to_sarif(report: ScanReport) -> dict:
             
             # Add confidence property if available (LLM findings)
             if f.confidence:
-                result["properties"] = {
-                    "confidence": f.confidence.value
-                }
+                result.setdefault("properties", {})["confidence"] = f.confidence.value
             
             results.append(result)
     

@@ -831,6 +831,92 @@ class TestNewFixerIntegration:
         assert report.applied > 0
 
 
+# ─── Blank-line preservation tests (regression for bug #2) ───────────
+
+
+class TestBlankLinePreservation:
+    def test_blank_lines_between_functions_survive(self, temp_dir):
+        """REGRESSION: Blank lines between functions must survive fix application."""
+        fp = temp_dir / "test.py"
+        code = 'import os\n\n\ndef foo():\n    return 1\n\n\ndef bar():\n    return 2\n'
+        fp.write_text(code, encoding="utf-8")
+        fix = Fix(
+            file=str(fp), line=1, rule="unused-import",
+            original_code="import os", fixed_code="",
+            explanation="rm", source=FixSource.DETERMINISTIC,
+        )
+        apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        content = fp.read_text(encoding="utf-8")
+        # The two blank lines between functions must still be there
+        assert "\n\ndef foo():" in content
+        assert "\n\ndef bar():" in content
+
+    def test_blank_lines_in_docstrings_survive(self, temp_dir):
+        """REGRESSION: Blank lines inside docstrings must survive fix application."""
+        fp = temp_dir / "test.py"
+        code = 'import os\n\ndef foo():\n    """Docstring.\n\n    Details.\n    """\n    pass\n'
+        fp.write_text(code, encoding="utf-8")
+        fix = Fix(
+            file=str(fp), line=1, rule="unused-import",
+            original_code="import os", fixed_code="",
+            explanation="rm", source=FixSource.DETERMINISTIC,
+        )
+        apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        content = fp.read_text(encoding="utf-8")
+        # Blank line inside docstring must survive
+        assert '"""Docstring.\n\n    Details.\n    """' in content
+
+    def test_multiple_deletions_preserve_blanks(self, temp_dir):
+        """Multiple deletion fixes don't eat surrounding blank lines."""
+        fp = temp_dir / "test.py"
+        code = 'import os\nimport sys\n\n\ndef main():\n    pass\n'
+        fp.write_text(code, encoding="utf-8")
+        fixes = [
+            Fix(file=str(fp), line=1, rule="unused-import",
+                original_code="import os", fixed_code="",
+                explanation="rm", source=FixSource.DETERMINISTIC),
+            Fix(file=str(fp), line=2, rule="unused-import",
+                original_code="import sys", fixed_code="",
+                explanation="rm", source=FixSource.DETERMINISTIC),
+        ]
+        apply_fixes(str(fp), fixes, dry_run=False, create_backup=False)
+        content = fp.read_text(encoding="utf-8")
+        # Two blank lines before def should still be there
+        assert "\n\ndef main():" in content
+
+    def test_replacement_fix_preserves_blanks(self, temp_dir):
+        """Replacement fix doesn't eat blank lines elsewhere in file."""
+        fp = temp_dir / "test.py"
+        code = '    except:\n        pass\n\n\ndef other():\n    return 1\n'
+        fp.write_text(code, encoding="utf-8")
+        fix = Fix(
+            file=str(fp), line=1, rule="bare-except",
+            original_code="    except:", fixed_code="    except Exception:\n",
+            explanation="fix", source=FixSource.DETERMINISTIC,
+        )
+        apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        content = fp.read_text(encoding="utf-8")
+        assert "except Exception:" in content
+        # Blank lines between except block and def should survive
+        assert "\n\ndef other():" in content
+
+    def test_file_with_only_blank_lines_between_functions(self, temp_dir):
+        """File where blank lines are the majority separator — all should survive."""
+        fp = temp_dir / "test.py"
+        code = 'import os\n\n\n\ndef a():\n    pass\n\n\n\ndef b():\n    pass\n'
+        fp.write_text(code, encoding="utf-8")
+        fix = Fix(
+            file=str(fp), line=1, rule="unused-import",
+            original_code="import os", fixed_code="",
+            explanation="rm", source=FixSource.DETERMINISTIC,
+        )
+        apply_fixes(str(fp), [fix], dry_run=False, create_backup=False)
+        content = fp.read_text(encoding="utf-8")
+        # 3 blank lines before def a and 3 blank lines before def b
+        assert "\n\n\ndef a():" in content
+        assert "\n\n\ndef b():" in content
+
+
 class TestFixCLI:
     def test_fix_dry_run(self, temp_dir):
         """wiz fix <file> --dry-run exits 0."""

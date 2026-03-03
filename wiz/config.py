@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 import os
 import re
+import sys
 from datetime import datetime
 
 
@@ -459,8 +460,8 @@ def load_project_config(root: Path) -> dict:
         with open(config_file, "rb") as f:
             data = tomllib.load(f)
         return data.get("wiz", {})
-    except Exception:
-        # Malformed config - silently ignore
+    except Exception as e:
+        print(f"Warning: could not parse {config_file}: {e}", file=sys.stderr)
         return {}
 
 
