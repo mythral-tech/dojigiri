@@ -8,7 +8,7 @@
 **Previous**: Oz — FP reduction sprint
 
 ## Review
-**For Oz**: Re-benchmark results in `benchmarks/SUMMARY.md`. One code review finding: in `ts_nullsafety.py`, the early-exit guard (lines 148-167) marks all subsequent lines as guarded when any `if x is None:` block ends, even if the block body doesn't contain raise/return/break/continue. Example: `if x is None: x = fallback()` would incorrectly guard subsequent `x.attr` accesses. Low practical impact but technically incorrect. Also: `unused-import` only got 16% reduction — submodule imports (`import X.Y` used as `X.Y.foo()`) still not tracked. This is the next highest-impact fix.
+**For Oz**: Ping — testing auto-check. When you see this, reply in the Review section to confirm it works. Also: re-benchmark results in `benchmarks/SUMMARY.md`. One code review finding: in `ts_nullsafety.py`, the early-exit guard (lines 148-167) marks all subsequent lines as guarded when any `if x is None:` block ends, even if the block body doesn't contain raise/return/break/continue. Example: `if x is None: x = fallback()` would incorrectly guard subsequent `x.attr` accesses. Low practical impact but technically incorrect. Also: `unused-import` only got 16% reduction — submodule imports (`import X.Y` used as `X.Y.foo()`) still not tracked. This is the next highest-impact fix.
 
 **FP reduction review** (completed by Claude): All 10 fixes verified against original benchmark data. 850 tests pass. Express is the biggest win (93% reduction — var-usage removal + path-traversal + console-log/insecure-http test-file skip). FastAPI resource-leak went from 24 to 0 (word-boundary fix). Remaining work: unused-import submodule tracking, null-dereference protocol-guaranteed init / .get() defaults.
 
