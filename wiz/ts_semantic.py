@@ -128,6 +128,7 @@ class _Extractor:
         self._call_types = set(config.call_node_types)
         self._class_types = set(config.class_node_types)
         self._func_types = set(config.function_node_types)
+        self._for_types = set(config.cfg_for_node_types)
         self._scope_boundary_types = set(config.scope_boundary_types)
         self._attr_types = set(config.attribute_access_types)
         self._block_types = set(config.block_node_types)
@@ -179,6 +180,10 @@ class _Extractor:
         # ── Assignments ───────────────────────────────────────────
         if ntype in self._assignment_types:
             self._handle_assignment(node)
+
+        # ── For-loop variables (treated as assignments) ───────────
+        if ntype in self._for_types:
+            self._handle_for_loop_var(node)
 
         # ── Function calls ────────────────────────────────────────
         if ntype in self._call_types:
@@ -323,6 +328,41 @@ class _Extractor:
             self._handle_java_assignment(node, is_augmented)
         elif lang == "csharp":
             self._handle_csharp_assignment(node, is_augmented)
+
+    def _handle_for_loop_var(self, node):
+        """Extract for-loop target variable as an assignment.
+
+        Python: for item in items → 'left' field is the loop variable
+        JS/TS:  for (var x of items) → 'left' field
+        Java:   for (Type x : items) → enhanced_for, name field
+        Go:     for i, v := range items → 'left' field
+        """
+        # Try 'left' field first (Python, JS, Go)
+        left = node.child_by_field_name("left")
+        if left is None:
+            # Java enhanced_for: try 'name' field
+            left = node.child_by_field_name("name")
+        if left is None:
+            return
+
+        # Extract identifier(s) from the loop target
+        if left.type == "identifier":
+            name = _get_text(left, self.src)
+            self.result.assignments.append(Assignment(
+                name=name, line=_line(node), scope_id=self._current_scope,
+                value_node_type="loop_variable", value_text="",
+                is_parameter=False, is_augmented=False,
+            ))
+        elif left.type in ("pattern_list", "tuple_pattern", "expression_list"):
+            # Tuple unpacking in for: for a, b in items
+            for child in left.children:
+                if child.type == "identifier":
+                    name = _get_text(child, self.src)
+                    self.result.assignments.append(Assignment(
+                        name=name, line=_line(node), scope_id=self._current_scope,
+                        value_node_type="loop_variable", value_text="",
+                        is_parameter=False, is_augmented=False,
+                    ))
 
     def _handle_python_assignment(self, node, is_augmented: bool):
         if is_augmented:

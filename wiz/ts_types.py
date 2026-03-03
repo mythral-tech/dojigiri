@@ -152,9 +152,22 @@ def _infer_from_annotation(value_text: str, language: str) -> Optional[TypeInfo]
 
 
 def _infer_nullable_from_call(value_text: str, config: LanguageConfig) -> Optional[TypeInfo]:
-    """Rule 5: Infer nullable from known nullable-return patterns."""
+    """Rule 5: Infer nullable from known nullable-return patterns.
+
+    Special case: .get(key, default) with a non-None default is NOT nullable.
+    """
+    import re
     for pattern in config.nullable_return_patterns:
         if pattern in value_text:
+            # Check for .get() with a non-None default value
+            if pattern.endswith(".get") or pattern == ".get":
+                # Match .get(key, default) — if there's a second arg, check if it's None
+                m = re.search(r'\.get\s*\([^,]+,\s*(.+?)\s*\)', value_text)
+                if m:
+                    default_val = m.group(1).strip()
+                    if default_val not in ("None", "null", "nil"):
+                        # Has a non-None default — not nullable
+                        return None
             return TypeInfo(
                 inferred_type=InferredType.OPTIONAL,
                 nullable=True,

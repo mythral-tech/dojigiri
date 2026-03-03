@@ -120,9 +120,10 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
             ("open", "close", True, "file"),
             ("connect", "close", True, "connection"),
             ("cursor", "close", True, "cursor"),
-            ("Lock", "release", True, "lock"),
-            ("acquire", "release", True, "lock"),
             ("socket", "close", True, "socket"),
+            # Note: Lock/RLock/Semaphore/Event are synchronization primitives,
+            # not resources that leak. acquire/release imbalance is a deadlock
+            # issue requiring different analysis.
         ],
         # Type inference
         literal_type_map={
