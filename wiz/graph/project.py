@@ -6,12 +6,12 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .config import (
+from ..config import (
     FileAnalysis, CrossFileFinding, ProjectAnalysis,
     Severity, Category, Confidence,
 )
-from .analyzer import collect_files, detect_language
-from .detector import analyze_file_static
+from ..analyzer import collect_files, detect_language
+from ..detector import analyze_file_static
 from .depgraph import build_dependency_graph, build_call_graph, compute_metrics, DepGraph, GraphMetrics
 
 
@@ -214,7 +214,7 @@ def analyze_project(
     graph_summary = _format_graph_summary(graph, metrics)
 
     # 4b. Semantic extraction + cross-file analysis (v0.8.0)
-    from .ts_semantic import extract_semantics
+    from ..semantic.core import extract_semantics
     semantics_by_file = {}
     for rel, content in file_contents.items():
         lang = detect_language(root_path / rel)
@@ -229,8 +229,8 @@ def analyze_project(
     if semantics_by_file:
         call_graph = build_call_graph(graph, semantics_by_file)
 
-        from .ts_callgraph import find_dead_functions, find_arg_count_mismatches
-        from .ts_smells import check_near_duplicate_functions
+        from .callgraph import find_dead_functions, find_arg_count_mismatches
+        from ..semantic.smells import check_near_duplicate_functions
 
         cross_file_static_findings.extend(find_dead_functions(call_graph, graph))
         cross_file_static_findings.extend(find_arg_count_mismatches(call_graph, semantics_by_file))
@@ -238,8 +238,8 @@ def analyze_project(
 
         # v0.10.0: Cross-file contract inference
         try:
-            from .ts_types import infer_types
-            from .ts_lang_config import get_config as get_lang_config
+            from ..semantic.types import infer_types
+            from ..semantic.lang_config import get_config as get_lang_config
             type_maps = {}
             for rel, sem in semantics_by_file.items():
                 lang_cfg = get_lang_config(sem.language)
@@ -280,8 +280,8 @@ def analyze_project(
         )
 
     # 6. LLM analysis
-    from .llm import CostTracker, analyze_file_with_context, synthesize_project
-    from .llm_focus import build_focus_areas
+    from ..llm import CostTracker, analyze_file_with_context, synthesize_project
+    from ..llm_focus import build_focus_areas
 
     cost_tracker = CostTracker()
 

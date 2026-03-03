@@ -17,9 +17,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from .config import Finding, Severity, Category
-from .ts_semantic import FileSemantics, FunctionDef, ClassDef, Assignment
-from .ts_types import FileTypeMap, InferredType
+from ..config import Finding, Severity, Category
+from .core import FileSemantics, FunctionDef, ClassDef, Assignment
+from .types import FileTypeMap, InferredType
 
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -442,7 +442,7 @@ def explain_file(
     """
     # Extract semantics if not provided
     if semantics is None:
-        from .ts_semantic import extract_semantics
+        from .core import extract_semantics
         semantics = extract_semantics(content, filepath, language)
 
     lines = content.splitlines()

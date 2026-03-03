@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import patch
 
-from wiz.ts_semantic import (
+from wiz.semantic.core import (
     extract_semantics,
     FileSemantics,
     Assignment,
@@ -74,7 +74,7 @@ class TestBasicExtraction:
         """When tree-sitter import fails, extract_semantics returns None."""
         with patch.dict("sys.modules", {"tree_sitter_language_pack": None}):
             import importlib
-            from wiz import ts_semantic
+            from wiz.semantic import core as ts_semantic
             importlib.reload(ts_semantic)
             result = ts_semantic.extract_semantics("x = 1\n", "test.py", "python")
             importlib.reload(ts_semantic)

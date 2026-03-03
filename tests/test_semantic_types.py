@@ -6,9 +6,9 @@ nullable patterns, propagation, return type inference, and edge cases.
 
 import pytest
 
-from wiz.ts_semantic import extract_semantics
-from wiz.ts_types import infer_types, InferredType, TypeInfo, FileTypeMap, infer_contracts
-from wiz.ts_lang_config import get_config
+from wiz.semantic.core import extract_semantics
+from wiz.semantic.types import infer_types, InferredType, TypeInfo, FileTypeMap, infer_contracts
+from wiz.semantic.lang_config import get_config
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -265,7 +265,7 @@ def f():
 def foo() -> str:
     return "hello"
 '''
-        from wiz.ts_types import _extract_annotations_from_tree
+        from wiz.semantic.types import _extract_annotations_from_tree
         config = get_config("python")
         sem = extract_semantics(code, "test.py", "python")
         if sem is None:
@@ -288,7 +288,7 @@ def foo() -> str:
 def foo() -> Optional[int]:
     return None
 '''
-        from wiz.ts_types import _extract_annotations_from_tree
+        from wiz.semantic.types import _extract_annotations_from_tree
         config = get_config("python")
         sem = extract_semantics(code, "test.py", "python")
         if sem is None:

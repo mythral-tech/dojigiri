@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from wiz.project import (
+from wiz.graph.project import (
     analyze_project,
     _extract_signatures_python,
     _extract_signatures_js,
@@ -13,7 +13,7 @@ from wiz.project import (
     _select_context_for_file,
     _format_graph_summary,
 )
-from wiz.depgraph import build_dependency_graph, compute_metrics, DepGraph, FileNode
+from wiz.graph.depgraph import build_dependency_graph, compute_metrics, DepGraph, FileNode
 from wiz.config import ProjectAnalysis, CrossFileFinding, Severity, Category
 
 

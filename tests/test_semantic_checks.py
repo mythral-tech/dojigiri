@@ -4,8 +4,8 @@ import pytest
 from unittest.mock import patch
 
 from wiz.config import Severity, Category, Source
-from wiz.ts_lang_config import get_config, LANGUAGE_CONFIGS
-from wiz.ts_checks import (
+from wiz.semantic.lang_config import get_config, LANGUAGE_CONFIGS
+from wiz.semantic.checks import (
     run_tree_sitter_checks,
     check_unused_imports,
     check_unreachable_code,
@@ -349,7 +349,7 @@ class TestFallback:
         with patch.dict("sys.modules", {"tree_sitter_language_pack": None}):
             # Force reimport to pick up the mock
             import importlib
-            from wiz import ts_checks
+            from wiz.semantic import checks as ts_checks
             importlib.reload(ts_checks)
             result = ts_checks.run_tree_sitter_checks(
                 "import os\n", "test.py", "python"

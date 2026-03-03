@@ -14,10 +14,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from .config import Finding, Severity, Category, Source
-from .ts_lang_config import LanguageConfig
-from .ts_semantic import FileSemantics, FunctionDef
-from .ts_types import FileTypeMap, TypeInfo, InferredType
+from ..config import Finding, Severity, Category, Source
+from .lang_config import LanguageConfig
+from .core import FileSemantics, FunctionDef
+from .types import FileTypeMap, TypeInfo, InferredType
 
 
 # ─── Narrowing detection ─────────────────────────────────────────────

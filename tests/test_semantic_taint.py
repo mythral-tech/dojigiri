@@ -6,9 +6,9 @@ taint propagation, sanitization, end-to-end scenarios, and cross-language suppor
 
 import pytest
 
-from wiz.ts_semantic import extract_semantics
-from wiz.ts_taint import analyze_taint, TaintSource, TaintSink, TaintPath
-from wiz.ts_lang_config import get_config, LanguageConfig
+from wiz.semantic.core import extract_semantics
+from wiz.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath
+from wiz.semantic.lang_config import get_config, LanguageConfig
 from wiz.config import Severity, Category, Source
 
 try:

@@ -3,10 +3,10 @@
 import pytest
 
 from wiz.config import Severity, Category, Source
-from wiz.ts_semantic import extract_semantics
-from wiz.ts_cfg import build_cfg
-from wiz.ts_resource import check_resource_leaks
-from wiz.ts_lang_config import get_config
+from wiz.semantic.core import extract_semantics
+from wiz.semantic.cfg import build_cfg
+from wiz.semantic.resource import check_resource_leaks
+from wiz.semantic.lang_config import get_config
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -306,7 +306,7 @@ def noop():
 
     def test_no_cfg_available_returns_empty(self):
         """When no CFG is available, check_resource_leaks should return []."""
-        from wiz.ts_semantic import FileSemantics
+        from wiz.semantic.core import FileSemantics
         config = get_config("python")
         sem = FileSemantics(filepath="test.py", language="python")
         source_bytes = b"def f(): pass"

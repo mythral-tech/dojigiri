@@ -7,10 +7,10 @@ sanitization, propagation, loops, cross-language, and edge cases.
 
 import pytest
 
-from wiz.ts_semantic import extract_semantics
-from wiz.ts_cfg import build_cfg
-from wiz.ts_taint import analyze_taint_pathsensitive
-from wiz.ts_lang_config import get_config
+from wiz.semantic.core import extract_semantics
+from wiz.semantic.cfg import build_cfg
+from wiz.semantic.taint import analyze_taint_pathsensitive
+from wiz.semantic.lang_config import get_config
 from wiz.config import Severity, Category, Source
 
 try:
@@ -425,7 +425,7 @@ def handler():
 
     def test_no_cfg_returns_empty(self):
         """When no CFG is produced, path-sensitive analysis should return []."""
-        from wiz.ts_lang_config import LanguageConfig
+        from wiz.semantic.lang_config import LanguageConfig
         config = LanguageConfig(
             ts_language_name="python",
             taint_source_patterns=[("input", "user_input")],

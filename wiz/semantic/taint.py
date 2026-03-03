@@ -14,9 +14,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from .config import Finding, Severity, Category, Source
-from .ts_lang_config import LanguageConfig, get_config
-from .ts_semantic import FileSemantics, Assignment, FunctionCall
+from ..config import Finding, Severity, Category, Source
+from .lang_config import LanguageConfig, get_config
+from .core import FileSemantics, Assignment, FunctionCall
 
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -371,7 +371,7 @@ def analyze_taint_pathsensitive(
 
     Falls back to flow-insensitive analyze_taint() for functions without CFGs.
     """
-    from .ts_cfg import get_reverse_postorder, FunctionCFG
+    from .cfg import get_reverse_postorder, FunctionCFG
 
     if not config.taint_source_patterns or not config.taint_sink_patterns:
         return []

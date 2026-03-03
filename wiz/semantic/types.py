@@ -13,8 +13,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
-from .ts_lang_config import LanguageConfig, get_config
-from .ts_semantic import FileSemantics, Assignment, FunctionDef, ScopeInfo
+from .lang_config import LanguageConfig, get_config
+from .core import FileSemantics, Assignment, FunctionDef, ScopeInfo
 
 
 # ─── Type model ──────────────────────────────────────────────────────

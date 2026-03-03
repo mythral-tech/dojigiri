@@ -6,8 +6,8 @@ Install with: pip install wiz[ast]
 
 import re
 
-from .config import Finding, Severity, Category, Source
-from .ts_lang_config import get_config, LanguageConfig
+from ..config import Finding, Severity, Category, Source
+from .lang_config import get_config, LanguageConfig
 
 
 def _get_named_children(node) -> list:

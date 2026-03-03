@@ -8,9 +8,9 @@ Covers:
 
 import pytest
 
-from wiz.ts_semantic import extract_semantics
-from wiz.depgraph import DepGraph, FileNode, build_call_graph, CallGraph, FunctionNode
-from wiz.ts_callgraph import find_dead_functions, find_arg_count_mismatches
+from wiz.semantic.core import extract_semantics
+from wiz.graph.depgraph import DepGraph, FileNode, build_call_graph, CallGraph, FunctionNode
+from wiz.graph.callgraph import find_dead_functions, find_arg_count_mismatches
 from wiz.config import Severity, Category, Source
 
 try:

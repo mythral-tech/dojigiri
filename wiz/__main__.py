@@ -204,7 +204,7 @@ def _auto_discover_imports_v2(filepath: str, content: str, lang: str) -> dict[st
     Works for Python, JS, and TS (not just Python).
     """
     try:
-        from .depgraph import build_dependency_graph
+        from .graph.depgraph import build_dependency_graph
         from .analyzer import collect_files
 
         fp = Path(filepath).resolve()
@@ -587,7 +587,7 @@ def cmd_analyze(args):
         print(f"Analyzing project {root} [{mode}] ...\n")
 
     try:
-        from .project import analyze_project
+        from .graph.project import analyze_project
         analysis = analyze_project(
             str(root),
             language_filter=lang,
@@ -718,21 +718,21 @@ def cmd_explain(args):
     static_findings = analyze_file_static(str(filepath), content, lang)
 
     # Extract semantics
-    from .ts_semantic import extract_semantics
+    from .semantic.core import extract_semantics
     semantics = extract_semantics(content, str(filepath), lang)
 
     # Type inference
     type_map = None
     if semantics:
-        from .ts_lang_config import get_config
+        from .semantic.lang_config import get_config
         config = get_config(lang)
         if config:
-            from .ts_types import infer_types
+            from .semantic.types import infer_types
             source_bytes = content.encode("utf-8")
             type_map = infer_types(semantics, source_bytes, config)
 
     # Generate explanation
-    from .ts_explain import explain_file
+    from .semantic.explain import explain_file
     explanation = explain_file(
         content, str(filepath), lang,
         semantics=semantics,

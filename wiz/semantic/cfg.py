@@ -12,8 +12,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from .ts_lang_config import LanguageConfig, get_config
-from .ts_semantic import FileSemantics, FunctionDef
+from .lang_config import LanguageConfig, get_config
+from .core import FileSemantics, FunctionDef
 
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -50,7 +50,7 @@ class FunctionCFG:
 
 # ─── Helpers ─────────────────────────────────────────────────────────
 
-from ._ts_utils import _get_text, _line, _end_line  # noqa: E402
+from ._utils import _get_text, _line, _end_line  # noqa: E402
 
 
 # ─── CFG Builder ─────────────────────────────────────────────────────

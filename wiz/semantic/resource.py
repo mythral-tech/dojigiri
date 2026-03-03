@@ -12,10 +12,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from .config import Finding, Severity, Category, Source
-from .ts_lang_config import LanguageConfig
-from .ts_semantic import FileSemantics, FunctionDef
-from .ts_cfg import FunctionCFG, get_reverse_postorder
+from ..config import Finding, Severity, Category, Source
+from .lang_config import LanguageConfig
+from .core import FileSemantics, FunctionDef
+from .cfg import FunctionCFG, get_reverse_postorder
 
 
 # ─── Data structures ─────────────────────────────────────────────────

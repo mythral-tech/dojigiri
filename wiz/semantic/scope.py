@@ -6,8 +6,8 @@ Returns [] when tree-sitter is not available.
 
 from __future__ import annotations
 
-from .config import Finding, Severity, Category, Source
-from .ts_semantic import FileSemantics, ScopeInfo
+from ..config import Finding, Severity, Category, Source
+from .core import FileSemantics, ScopeInfo
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────

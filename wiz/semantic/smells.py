@@ -14,8 +14,8 @@ import hashlib
 from collections import Counter
 from dataclasses import dataclass
 
-from .config import Finding, Severity, Category, Source
-from .ts_semantic import FileSemantics, FunctionDef, ClassDef
+from ..config import Finding, Severity, Category, Source
+from .core import FileSemantics, FunctionDef, ClassDef
 
 
 # ─── Check: God Class ────────────────────────────────────────────────

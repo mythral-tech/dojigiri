@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from .config import LANGUAGE_EXTENSIONS
+from ..config import LANGUAGE_EXTENSIONS
 
 
 @dataclass

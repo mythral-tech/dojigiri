@@ -9,10 +9,10 @@ import tempfile
 
 import pytest
 
-from wiz.ts_semantic import extract_semantics
-from wiz.ts_types import infer_types, FileTypeMap
-from wiz.ts_nullsafety import check_null_safety
-from wiz.ts_lang_config import get_config
+from wiz.semantic.core import extract_semantics
+from wiz.semantic.types import infer_types, FileTypeMap
+from wiz.semantic.nullsafety import check_null_safety
+from wiz.semantic.lang_config import get_config
 from wiz.config import Severity, Category, Source
 
 try:
@@ -321,7 +321,7 @@ def f():
         the annotation key and the function definition scope. This test
         verifies the annotation is correctly extracted.
         """
-        from wiz.ts_types import _extract_annotations_from_tree
+        from wiz.semantic.types import _extract_annotations_from_tree
         code = '''\
 def get_name() -> Optional[str]:
     return None

@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from .ts_lang_config import get_config, LanguageConfig
+from .lang_config import get_config, LanguageConfig
 
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -93,7 +93,7 @@ class FileSemantics:
 
 # ─── Helpers ─────────────────────────────────────────────────────────
 
-from ._ts_utils import _get_text, _line, _end_line  # noqa: E402
+from ._utils import _get_text, _line, _end_line  # noqa: E402
 
 
 # ─── Extraction engine ───────────────────────────────────────────────

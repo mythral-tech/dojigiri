@@ -2,9 +2,9 @@
 
 import pytest
 
-from wiz.ts_semantic import extract_semantics
-from wiz.ts_types import infer_types, infer_contracts, FunctionContract, FileTypeMap
-from wiz.ts_lang_config import get_config
+from wiz.semantic.core import extract_semantics
+from wiz.semantic.types import infer_types, infer_contracts, FunctionContract, FileTypeMap
+from wiz.semantic.lang_config import get_config
 
 try:
     from tree_sitter_language_pack import get_parser

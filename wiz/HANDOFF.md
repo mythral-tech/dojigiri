@@ -2,31 +2,45 @@
 
 ## What This Is
 
-Python static analysis + LLM-powered code audit tool. 16 modules, ~4000 lines.
+Python static analysis + LLM-powered code audit tool. 28 modules across 3 packages, ~4000 lines.
 Run with: `python -m wiz scan <path> [--no-cache] [--deep] [--output json] [--ignore rules] [--min-severity level]`
 
 ## Architecture
 
 ```
-__main__.py      CLI (argparse, 6 subcommands: scan, debug, optimize, report, cost, setup)
-config.py        Enums (Severity, Source, Category), dataclasses (Finding, FileAnalysis, ScanReport), constants
-languages.py     50+ regex rules across 5 language groups (universal, python, js/ts, go, rust, security)
-detector.py      Regex engine + Python AST checks + semantic analysis integration
-analyzer.py      Orchestrator: collect files -> static analysis -> LLM chunks -> merge -> save report
-chunker.py       Split large files into overlapping chunks for LLM context limits
-llm.py           Anthropic SDK wrapper, system prompts, cost tracking, JSON recovery
-report.py        ANSI console formatting, JSON output mode
-storage.py       SHA256 file hash cache, JSON report persistence, auto-prune
-ts_lang_config.py  Per-language tree-sitter node type mappings (7 languages)
-ts_checks.py     Cross-language AST checks (unused imports, unreachable code, etc.)
-ts_semantic.py   Single-pass AST extraction: assignments, calls, scopes, classes (v0.8.0)
-ts_scope.py      Scope analysis: unused vars, shadowing, uninitialized (v0.8.0)
-ts_callgraph.py  Call graph checks: dead functions, arg mismatches (v0.8.0)
-ts_taint.py      Intra-procedural taint analysis: source → sink tracking (v0.8.0)
-ts_smells.py     Architectural smells: god class, feature envy, duplicates (v0.8.0)
-llm_focus.py     Smart LLM: build focused prompts from static findings (v0.8.0)
-depgraph.py      Dependency graph + call graph engine (v0.8.0: FunctionNode, CallGraph)
-project.py       Project analysis orchestrator with cross-file checks
+wiz/
+  __init__.py      Public API exports (Finding, ScanReport, Severity, etc.)
+  __main__.py      CLI (argparse, 6 subcommands: scan, debug, optimize, report, cost, setup)
+  config.py        Enums (Severity, Source, Category), dataclasses (Finding, FileAnalysis, ScanReport), constants
+  languages.py     50+ regex rules across 5 language groups (universal, python, js/ts, go, rust, security)
+  detector.py      Regex engine + Python AST checks + semantic analysis integration
+  analyzer.py      Orchestrator: collect files -> static analysis -> LLM chunks -> merge -> save report
+  chunker.py       Split large files into overlapping chunks for LLM context limits
+  llm.py           Anthropic SDK wrapper, system prompts, cost tracking, JSON recovery
+  llm_focus.py     Smart LLM: build focused prompts from static findings (v0.8.0)
+  fixer.py         Auto-fix engine: deterministic fixers + LLM orchestration
+  report.py        ANSI console formatting, JSON/SARIF output
+  storage.py       SHA256 file hash cache, JSON report persistence, auto-prune
+  hooks.py         Pre-commit hook install/uninstall
+
+  semantic/        Tree-sitter semantic analysis subsystem (12 modules)
+    _utils.py        Shared helpers (_get_text, _line, _end_line)
+    lang_config.py   Per-language tree-sitter node type mappings (7 languages)
+    core.py          Single-pass AST extraction: assignments, calls, scopes, classes
+    checks.py        Cross-language AST checks (unused imports, unreachable code, etc.)
+    cfg.py           Control flow graph construction + reverse postorder
+    types.py         Type inference + function contracts
+    taint.py         Intra-procedural taint analysis: source → sink tracking
+    scope.py         Scope analysis: unused vars, shadowing, uninitialized
+    smells.py        Architectural smells: god class, feature envy, duplicates
+    nullsafety.py    Null dereference detection + type narrowing
+    resource.py      Resource leak detection (file handles, connections)
+    explain.py       Tutorial-mode file explanation (wiz explain)
+
+  graph/           Dependency + project analysis (3 modules)
+    depgraph.py      Dependency graph + call graph engine
+    project.py       Project analysis orchestrator with cross-file checks
+    callgraph.py     Call graph checks: dead functions, arg mismatches
 ```
 
 ## Version History

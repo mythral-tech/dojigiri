@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from wiz.depgraph import (
+from wiz.graph.depgraph import (
     build_dependency_graph, compute_metrics,
     DepGraph, FileNode, GraphMetrics,
     _resolve_python_imports, _resolve_js_ts_imports,
