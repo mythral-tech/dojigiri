@@ -1,355 +1,232 @@
-# Wiz
+# wiz
 
-Python static analysis + LLM-powered code audit tool.
+Static analysis + LLM-powered code audit tool. 820+ tests, 12,500 lines, 28 modules.
 
-## Features
-
-- 🔍 **Static Analysis** - 50+ regex rules + Python AST checks across 5+ languages
-- 🤖 **LLM Integration** - Optional Claude AI analysis for deeper insights
-- ⚡ **Fast** - Parallel scanning (3-4x faster on large repos)
-- 💾 **Smart Caching** - Skip unchanged files automatically
-- 📊 **Multiple Output Formats** - Console ANSI or JSON
-- 🎯 **Language Support** - Python, JavaScript, TypeScript, Go, Rust, Java, C/C++, and more
-
-## Installation
-
-```bash
-# Clone the repository
-git clone <repo-url>
-cd Genesis
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Optional: Install anthropic for LLM features
-pip install anthropic
-```
+Wiz combines regex pattern matching, Python AST checks, and tree-sitter semantic analysis with optional Claude AI deep scans. It catches bugs, security issues, performance problems, and code smells across 7 languages — then optionally fixes them.
 
 ## Quick Start
 
-### Basic Usage
-
 ```bash
-# Quick scan (static analysis only - free, instant)
-python -m wiz scan .
+pip install wiz-scan
 
-# Scan specific directory
-python -m wiz scan ./src
+# Scan a project (free, instant)
+wiz scan .
 
-# Scan with language filter
-python -m wiz scan . --lang python
+# Scan with auto-fix (dry run by default)
+wiz fix .
 
-# Deep scan (includes LLM analysis - requires API key)
-export ANTHROPIC_API_KEY="your-key-here"
-python -m wiz scan . --deep
+# Deep scan with Claude AI (requires API key)
+export ANTHROPIC_API_KEY="sk-..."
+wiz scan . --deep --accept-remote
 ```
 
-### CLI Commands
+## What Wiz Catches That Others Don't
+
+| Capability | ruff | semgrep | wiz |
+|---|---|---|---|
+| Regex pattern rules | - | Yes | Yes (50+) |
+| AST-based checks | Yes | Yes | Yes |
+| Cross-file taint flow | - | Yes | Yes (path-sensitive) |
+| Null dereference tracking | - | - | Yes |
+| Type inference | - | - | Yes |
+| Resource leak detection | - | - | Yes |
+| Dependency graph analysis | - | - | Yes |
+| LLM-powered deep analysis | - | - | Yes |
+| Auto-fix (deterministic + LLM) | Yes | - | Yes |
+| SARIF output for GitHub | - | Yes | Yes |
+
+Wiz's tree-sitter engine builds control flow graphs, runs fixed-point dataflow analysis, and tracks taint through branches and sanitizers. The LLM layer adds context-aware analysis that static tools can't do.
+
+## Languages
+
+Python, JavaScript, TypeScript, Go, Rust, Java, C/C++, Ruby, PHP, C#, Swift, Kotlin, SQL, HTML, CSS, Bash, Pine Script.
+
+Tree-sitter semantic analysis (taint flow, null safety, type inference, CFG) is available for Python, JavaScript, TypeScript, Go, Rust, Java, and C/C++.
+
+## Commands
 
 ```bash
-# Scan commands
-python -m wiz scan <path>              # Quick scan
-python -m wiz scan <path> --deep       # Deep scan with LLM
-python -m wiz scan <path> --no-cache   # Disable file caching
-python -m wiz scan <path> --workers 8  # Control parallelism (default: 4)
+# Scanning
+wiz scan <path>                    # Quick scan (static only, free)
+wiz scan <path> --deep             # Deep scan (static + Claude AI)
+wiz scan <path> --diff             # Only scan lines changed vs git main/master
+wiz scan <path> --lang python      # Filter by language
+wiz scan <path> --no-cache         # Skip file hash cache
 
-# Filter results
-python -m wiz scan . --ignore todo-marker,console-log
-python -m wiz scan . --min-severity warning
-python -m wiz scan . --min-confidence medium
+# Filtering
+wiz scan . --ignore todo-marker,console-log
+wiz scan . --min-severity warning
+wiz scan . --min-confidence medium
+wiz scan . --baseline latest       # Show only NEW findings vs last scan
 
 # Output formats
-python -m wiz scan . --output json                # JSON for CI/CD
-python -m wiz scan . --output sarif > report.sarif  # SARIF for GitHub Code Scanning
+wiz scan . --output json           # JSON for CI/CD
+wiz scan . --output sarif          # SARIF for GitHub Code Scanning
 
-# Baseline/diff mode (CI/CD)
-python -m wiz scan . --baseline latest           # Compare against latest report
-python -m wiz scan . --baseline path/to/baseline.json  # Compare against specific report
+# Auto-fix
+wiz fix <path>                     # Dry run — show what would change
+wiz fix <path> --apply             # Apply fixes
+wiz fix <path> --apply --llm       # Include LLM-generated fixes
+wiz fix <path> --rules bare-except,unused-import
 
-# Project analysis (cross-file issues)
-python -m wiz analyze <directory>                # Full analysis (graph + LLM)
-python -m wiz analyze <directory> --no-llm       # Dependency graph only (free)
-python -m wiz analyze <directory> --output json  # JSON output for CI/CD
-python -m wiz analyze <directory> --depth 3      # Deeper dependency traversal
+# Project analysis (cross-file)
+wiz analyze <dir>                  # Dependency graph + cross-file issues
+wiz analyze <dir> --no-llm         # Graph only (free, no API key)
 
-# Debug specific file
-python -m wiz debug <file>
-python -m wiz debug <file> --error "error message"
-python -m wiz debug <file> --context auto              # Auto-discover related files
+# Single-file deep dive
+wiz debug <file>                   # Bug hunting with Claude
+wiz debug <file> --context auto    # Include related files automatically
+wiz optimize <file>                # Performance suggestions
+wiz explain <file>                 # Beginner-friendly code walkthrough
 
-# Optimize file
-python -m wiz optimize <file>
-python -m wiz optimize <file> --context auto           # With dependency context
-
-# View reports
-python -m wiz report                   # Show latest scan
-python -m wiz cost <path>              # Estimate deep scan cost
-python -m wiz setup                    # Check environment
+# Utilities
+wiz report                         # Show latest scan results
+wiz cost <path>                    # Estimate deep scan cost
+wiz hook install                   # Add pre-commit hook
+wiz setup                          # Check environment
 ```
+
+## What It Detects
+
+### Security
+- Hardcoded secrets and API keys (redacted in reports)
+- SQL injection (string formatting, f-strings, .format())
+- XSS (innerHTML, eval, document.write)
+- Path traversal, shell injection
+- Unsafe deserialization (pickle, yaml.load)
+- Weak cryptography (MD5, SHA1, DES, ECB)
+- AWS credential patterns
+- Taint flow from user input to dangerous sinks (path-sensitive)
+
+### Bugs
+- Null/None dereference with branch-aware narrowing
+- Mutable default arguments
+- Bare except clauses
+- Type confusion (type() vs isinstance)
+- Shadowed builtins
+- Resource leaks (files, connections, sockets)
+- Unused variables and imports
+- Unreachable code
+
+### Performance & Style
+- High cyclomatic complexity
+- Too many function parameters
+- Semantic code clones (similarity > 0.85)
+- Dead code detection
+- TODO/FIXME tracking
 
 ## Configuration
 
 ### .wiz.toml
 
-Create a `.wiz.toml` file in your project root for persistent project-level settings:
-
 ```toml
-# Filter settings
+[wiz]
 ignore_rules = ["todo-marker", "console-log"]
-min_severity = "warning"      # low, medium, high, critical
-min_confidence = "medium"     # low, medium, high
+min_severity = "warning"
+workers = 8
 
-# Performance
-workers = 8                   # Parallel scanning workers (default: 4)
+[[wiz.rules]]
+pattern = "<<<<<<< "
+name = "merge-conflict"
+message = "Unresolved merge conflict marker"
+severity = "critical"
+category = "bug"
 ```
 
-CLI arguments override config file settings.
-
 ### .wizignore
-
-Create a `.wizignore` file in your project root to exclude files:
 
 ```
 *.log
 test_*.py
-node_modules/
-*.tmp
+vendor/
 ```
-
-### Environment Variables
-
-- `ANTHROPIC_API_KEY` - Required for deep scans and LLM features
-
-## What Wiz Detects
-
-### Security Issues
-- Hardcoded secrets and API keys
-- SQL injection vulnerabilities
-- XSS risks (innerHTML, eval, document.write)
-- Unsafe deserialization (pickle, yaml.load)
-- Path traversal vulnerabilities
-- Weak cryptography (MD5, SHA1)
-- Shell injection risks
-
-### Code Quality
-- **Python**: Unused imports, bare except, mutable defaults, type() comparisons, shadowed builtins
-- **JavaScript**: var usage, loose equality (==), console.log leftovers
-- **Go**: Unchecked errors, fmt.Print in production
-- **Rust**: .unwrap() and .expect() panics, unsafe blocks
-
-### Performance & Style
-- High cyclomatic complexity
-- Too many function arguments
-- Dead/unreachable code
-- TODO/FIXME markers
-- Long lines (>200 chars)
 
 ## CI/CD Integration
 
-Baseline/diff mode is essential for CI/CD pipelines - it shows only new findings compared to a baseline, preventing noise from pre-existing issues.
-
-### GitHub Actions Example
+### GitHub Actions with SARIF
 
 ```yaml
-name: Security Scan
-
+name: Code Scan
 on: [pull_request]
 
 jobs:
-  wiz-scan:
+  wiz:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
-      - name: Install Wiz
-        run: |
-          pip install -r requirements.txt
-      
-      - name: Run security scan
-        run: |
-          python -m wiz scan . --baseline latest --min-severity warning --output sarif > results.sarif
-      
-      - name: Upload to GitHub Code Scanning
+          python-version: "3.12"
+
+      - run: pip install wiz-scan
+
+      - name: Scan for issues
+        run: wiz scan . --output sarif --accept-remote > results.sarif
+
+      - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
-      
-      - name: Check for new issues
-        run: |
-          # Fail if any new critical/high severity issues found
-          if [ $(jq '.summary.critical + .summary.high' results.json) -gt 0 ]; then
-            echo "New security issues detected!"
-            exit 1
-          fi
 ```
 
-### How Baseline/Diff Works
-
-1. **First scan**: Creates baseline report in `~/.wiz/reports/`
-2. **Subsequent scans**: Use `--baseline latest` to compare against most recent report
-3. **Matching**: Uses 5-line bucket signatures (file, line_bucket, rule) to identify findings - tolerates minor line shifts without losing track
-4. **Result**: Only shows findings not present in baseline
-
-### Local Development Workflow
+### Baseline mode (only new findings)
 
 ```bash
-# 1. Establish baseline on main branch
-git checkout main
-python -m wiz scan .
+# On main branch — establish baseline
+wiz scan .
 
-# 2. Switch to feature branch
-git checkout feature-branch
-
-# 3. Scan for new issues only
-python -m wiz scan . --baseline latest
-
-# Only new findings introduced in feature-branch are shown
+# On feature branch — show only new issues
+wiz scan . --baseline latest
 ```
 
-## Output Examples
-
-### Console Output
-
-```
-Quick scanning /project ...
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Scan Results
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Files scanned: 42
-Total findings: 23
-
-  Critical: 3
-  Warnings: 15
-  Info: 5
-
-Critical Issues:
-  src/app.py:45 - Hardcoded API key detected
-  src/db.py:78 - SQL injection risk in query
-```
-
-### JSON Output
+### Pre-commit hook
 
 ```bash
-python -m wiz scan . --output json > report.json
+wiz hook install    # Adds wiz to .git/hooks/pre-commit
+wiz hook uninstall  # Removes it
 ```
 
-### SARIF Output
+## Architecture
 
-SARIF (Static Analysis Results Interchange Format) is the standard format for GitHub Code Scanning:
-
-```bash
-# Generate SARIF report
-python -m wiz scan . --output sarif > results.sarif
-
-# Upload to GitHub using CLI
-gh api repos/{owner}/{repo}/code-scanning/sarifs \
-  -F sarif=@results.sarif \
-  -F ref=refs/heads/main \
-  -F commit_sha=$(git rev-parse HEAD)
 ```
-
-## Performance
-
-Wiz uses parallel processing by default for 3-4x speedup on multi-core systems:
-
-- **Small repos** (<10 files): ~instant
-- **Medium repos** (50-100 files): ~2-3 seconds
-- **Large repos** (500+ files): ~5-10 seconds
+wiz/
+├── __main__.py          CLI: scan, debug, optimize, analyze, fix, explain
+├── analyzer.py          Scan orchestration, file collection, caching
+├── detector.py          Static analysis engine (regex + AST + tree-sitter)
+├── languages.py         50+ regex pattern rules
+├── fixer.py             9 deterministic fixers + LLM fix orchestration
+├── depgraph.py          Dependency graph (import resolution, cycles, metrics)
+├── project.py           Cross-file analysis orchestration
+├── ts_semantic.py       Tree-sitter: function/class/variable extraction
+├── ts_cfg.py            Control flow graph construction
+├── ts_taint.py          Taint analysis (flow-insensitive + path-sensitive)
+├── ts_types.py          Type inference + contract checking
+├── ts_nullsafety.py     Null dereference + narrowing
+├── ts_resource.py       Resource leak detection
+├── ts_scope.py          Unused vars, shadowing, undefined references
+├── ts_smells.py         Dead code, complexity, semantic clones
+├── ts_checks.py         AST pattern checks
+├── ts_callgraph.py      Call graph construction
+├── ts_explain.py        Beginner-friendly code explanation
+├── ts_lang_config.py    Language configs for 7 tree-sitter grammars
+├── llm.py               Claude API: scan, debug, optimize, analyze, explain
+├── llm_focus.py         Micro-queries for targeted LLM analysis
+├── chunker.py           File splitting for LLM context windows
+├── config.py            Data structures, enums, constants
+├── storage.py           JSON reports, file hash cache
+├── report.py            Output formatting (ANSI, JSON, SARIF)
+└── hooks.py             Pre-commit hook management
+```
 
 ## Development
 
-### Running Tests
-
 ```bash
-# Install test dependencies
-pip install pytest pytest-cov
-
-# Run all tests
-pytest tests -v
-
-# Run with coverage
-pytest tests --cov=wiz --cov-report=html
+git clone https://github.com/Inklling/Genesis
+cd Genesis
+pip install -e ".[dev]"
+pytest tests/ -q         # 820 tests, ~8s
 ```
-
-### Project Structure
-
-```
-Genesis/
-├── wiz/                    # Main package
-│   ├── __main__.py        # CLI entry point (scan, debug, optimize, analyze)
-│   ├── analyzer.py        # Scan orchestration
-│   ├── detector.py        # Static analysis engine
-│   ├── languages.py       # Pattern rules (50+ rules)
-│   ├── chunker.py         # File splitting for LLM
-│   ├── llm.py             # Claude API integration
-│   ├── depgraph.py        # Dependency graph engine (import resolution, cycle detection)
-│   ├── project.py         # Project-level cross-file analysis
-│   ├── storage.py         # Caching & reports
-│   ├── report.py          # Output formatting (ANSI, JSON, SARIF)
-│   └── config.py          # Data structures & enums
-├── tests/                 # Test suite (275 tests)
-└── README.md             # This file
-```
-
-## Version History
-
-### v0.4.0 (Current)
-- ✅ **Project-level cross-file analysis** (`wiz analyze <dir>`)
-- ✅ Dependency graph engine — maps imports across Python, JS, and TS files
-- ✅ Cycle detection, dead module detection, hub file identification
-- ✅ Cross-file finding detection (interface mismatches, contract violations, dead exports)
-- ✅ Project synthesis with architecture health scoring (1-10)
-- ✅ Free `--no-llm` mode shows dependency graph without API key
-- ✅ Smart context selection — ranks files by importance, extracts signatures for large files
-- ✅ Enhanced `--context auto` — uses dependency graph for transitive deps (all languages)
-- ✅ `--context` flag added to `optimize` command
-- ✅ 275 comprehensive tests (up from 181)
-
-### v0.3.0
-- ✅ Baseline/diff mode for CI/CD (`--baseline` flag)
-- ✅ Config file support (`.wiz.toml`)
-- ✅ SARIF output format for GitHub Code Scanning
-- ✅ Configurable parallelism (`--workers` flag)
-- ✅ Confidence filtering (`--min-confidence` flag)
-- ✅ Block comment support (Python, JS, Go, etc.)
-- ✅ 181 comprehensive tests (up from 120)
-- ✅ Detection accuracy improvements
-- ✅ LLM retry logic with exponential backoff
-- ✅ Static-before-LLM pipeline (partial results survive)
-- ✅ Improved JSON recovery and error handling
-- ✅ .wizignore support for self-referential findings
-
-### v0.2.0
-- Comprehensive test suite (120 tests)
-- Fixed yaml-unsafe regex bug
-- Refactored AST checks for maintainability
-- Added parallel scanning (3-4x speedup)
-- CLI improvements (--ignore, --min-severity, --output json)
-- .wizignore support
-- Auto-prune old reports (keep 50 max)
-
-## Roadmap
-
-- [ ] Parallel deep scanning
-- [ ] Custom rule definitions
-- [ ] Auto-fix capabilities
-- [ ] VSCode extension
 
 ## License
 
-[Add your license here]
-
-## Contributing
-
-[Add contribution guidelines]
-
-## Support
-
-For issues, questions, or contributions, please [add contact info or issue tracker].
+MIT

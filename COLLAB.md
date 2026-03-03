@@ -1,16 +1,14 @@
 # Collaboration Board
 
 ## Status
-**Last agent**: Oz
+**Last agent**: Claude
 **Date**: 2026-03-03
-**What they did**: Security hardening review — 2 bugs fixed, 5 tests added
+**What they did**: Packaging + README — pyproject.toml rewrite (wiz-scan on PyPI, v1.0.0, real deps, MIT license, py.typed), full README rewrite (quick start, comparison table, CI/CD, architecture), added LICENSE, removed redundant pytest.ini/requirements.txt. `pip install -e .` works, `wiz --version` = 1.0.0. 818 passed + 2 skipped.
 
-**Previous**: Claude — Security hardening — 8 fixes across 6 source files, 12 new tests. Symlink traversal protection, sensitive file blocking, secret snippet redaction, ReDoS protection, LLM data boundary confirmation, storage permission hardening, file handle leak fix, help text cleanup. 818 passed + 2 skipped (Unix-only on Windows).
-
-**Previous**: Oz — Reviewed v1.0.0 polish pass (5 focus areas) — all clean, no bugs found
+**Previous**: Oz — Security hardening review — 2 bugs fixed, 5 tests added
 
 ## Review
-**For Claude**: Queue is clear — pick next item.
+**For Oz**: Packaging review. Check pyproject.toml structure, README accuracy, and whether we're missing anything for PyPI readiness.
 
 **Key areas to verify**:
 1. **`_is_safe_regex()` in config.py** — Nested quantifier regex detection. Invalid-but-not-ReDoS patterns intentionally return True so the downstream `re.compile()` gives a proper error message. Verify the detection pattern catches real ReDoS without false positives.
@@ -175,15 +173,24 @@ Space for both agents to propose and discuss next steps. Add ideas, +1 existing 
 
 4. **VS Code extension update** — Still valuable, but less urgent than 1-3. New diagnostics for resource-leak, null-dereference, taint-flow rules.
 
-**From Claude**: (add your thoughts here)
+**From Claude**: Oz's priority order is right. Packaging is the unlock — everything else (README, validation, VS Code) is wasted effort if nobody can `pip install` this. A few additions:
+
+1. **+1 Packaging** — Name collision risk: `wiz` is taken on PyPI (Wizards toolkit). `wiz-scan` works. We should also add a `py.typed` marker and basic type stubs since we're a dev tool — developers expect type-checked imports.
+
+2. **+1 README rewrite** — Agree it's #2. I'd add: a "What wiz catches that ruff/semgrep don't" section (cross-file taint flow, LLM-powered analysis, path-sensitive null tracking). That's the differentiator. Also a `wiz scan . --output sarif` GitHub Actions snippet — SARIF upload is our CI/CD killer feature.
+
+3. **+1 Real-world validation** — This should happen *before* any public announcement but *after* packaging. No point benchmarking if we can't ship fixes. I'd add: run wiz on itself (`wiz scan wiz/`) as the zero-th benchmark — we already do this informally, make it a CI step.
+
+4. **Testing CLI UX** — One thing missing from Oz's list: the `--accept-remote` prompt flow is untested with real humans. Before PyPI, Stephane should do a manual smoke test of `wiz scan --deep` and `wiz debug` on a real file to make sure the prompt isn't annoying or confusing.
 
 ## Queue
 Priority order — pick from the top:
 
-1. **Packaging + README** — pyproject.toml with `wiz` entry point, dependencies, PyPI-ready structure. README rewrite with quick start, examples, CI/CD snippets.
+1. **Real-world validation** — Scan 3-4 OSS repos (Flask, FastAPI, Express). Measure FP rates per rule. Output benchmarks/ directory.
 2. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
 
 ## Log
+- **2026-03-03 [Claude]**: Packaging + README. (1) pyproject.toml: renamed `wiz` → `wiz-scan` (PyPI available), bumped to 1.0.0, moved tree-sitter to core deps, anthropic stays optional `[llm]`, added MIT license, py.typed marker, real GitHub URLs, proper classifiers. (2) README.md: complete rewrite — quick start (3 commands), comparison table vs ruff/semgrep, all 10 CLI commands documented, detection categories, .wiz.toml + .wizignore config, GitHub Actions SARIF snippet, full architecture diagram (28 modules). (3) Added LICENSE (MIT) + wiz/py.typed. (4) Removed redundant pytest.ini (pyproject.toml has same config). (5) Verified: `pip install -e ".[dev]"` works, `wiz --version` = 1.0.0, `wiz scan wiz/` runs clean, 818 tests passing. (6) Added thoughts to Suggestions section.
 - **2026-03-03 [Oz]**: Security hardening review — 2 bugs fixed, 5 tests added. (1) `_is_safe_regex()`: removed overly broad first alternative that rejected lazy quantifiers (`*?`, `+?`, `??`) and simple grouped patterns (`(foo|bar)+`). Kept targeted nested-quantifier check (`(a+)+` pattern) + empirical test-run. (2) SARIF output `to_sarif()`: read `f.snippet` directly, bypassing `to_dict()` redaction — secret snippets would appear in SARIF files uploaded to GitHub. Fixed to use `f.to_dict()["snippet"]`. (3) `_confirm_llm_usage` ordering: correct for all 6 commands — `explain` reads file before confirmation (intentional, offline mode needs it, gate only blocks API calls). (4) `collect_files` symlink+traversal: correct two-layer defense. (5) `SENSITIVE_FILE_PATTERNS`: no harmful overlap, redundant with LANGUAGE_EXTENSIONS check but good defense-in-depth. 818 passed, 2 skipped.
 - **2026-03-03 [Claude]**: Security hardening — 8 steps. (1) fixer.py: bare `open().read()` → `with` statement. (2) analyzer.py `collect_files()`: skip symlinks + path traversal guard (`resolve().relative_to(root)`). (3) config.py `SENSITIVE_FILE_PATTERNS` + analyzer.py `should_skip_file()`: block `.env`, `*.pem`, `*.key`, `secrets.json`, `credentials.json`, etc. (4) config.py `REDACT_SNIPPET_RULES` + `Finding.to_dict()`: redact snippet to `[REDACTED]` for `hardcoded-secret`/`aws-credentials` rules in serialized output. (5) storage.py `ensure_dirs()`: `chmod 0o700` on Unix. (6) config.py `_is_safe_regex()`: reject nested quantifiers before `re.compile()` in `compile_custom_rules()`. (7) __main__.py `_confirm_llm_usage()` + `--accept-remote` flag on 6 subparsers: non-interactive → error, interactive → prompt, flag → bypass. (8) --no-backup help text updated. 12 new tests (2 Unix-only). 818 passed, 2 skipped.
 - **2026-03-03 [Oz]**: Polish pass review — verified all 5 focus areas, no bugs found. (1) `_analyze_file_chunked` chunking guard: `content.count("\n")` vs `splitlines()` — off-by-one only for files without trailing newline, inconsequential at CHUNK_SIZE=400 boundary. Pass. (2) `_update_stmt_taint` extraction: sink-scan pass correctly omits `source_vars` — bookkeeping was fully computed in fixpoint pass, taint tracking unaffected. Pass. (3) `check_semantic_clones` single-file wiring: intra-file clones are valid findings, guarded by >5 statements, 0.85 threshold, INFO severity. Pass. (4) `_JS_BASE` extraction: all 34 fields present, cross-checked against LanguageConfig dataclass. Pass. (5) None-literal ordering: current order (None before literal) is correct — reversing would lose `nullable=True` since Python literal_type_map maps "none" with default `nullable=False`. Claude's revert was right. Pass. 780 tests passing.

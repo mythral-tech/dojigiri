@@ -3,30 +3,39 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wiz"
-version = "0.8.0"
-description = "Python static analysis + LLM-powered code audit tool"
+name = "wiz-scan"
+version = "1.0.0"
+description = "Static analysis + LLM-powered code audit tool with tree-sitter semantic analysis"
 readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Stephane"},
 ]
+keywords = ["static-analysis", "linter", "security", "code-quality", "llm", "tree-sitter"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Software Development :: Testing",
+    "Topic :: Security",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
 ]
 
-dependencies = []
+dependencies = [
+    "tree-sitter>=0.24",
+    "tree-sitter-language-pack>=0.10",
+]
 
 [project.optional-dependencies]
-ast = ["tree-sitter>=0.24", "tree-sitter-language-pack>=0.10"]
 llm = ["anthropic>=0.40.0"]
+all = ["anthropic>=0.40.0"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -36,9 +45,15 @@ dev = [
 wiz = "wiz.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/wiz"
-Repository = "https://github.com/yourusername/wiz"
-Issues = "https://github.com/yourusername/wiz/issues"
+Homepage = "https://github.com/Inklling/Genesis"
+Repository = "https://github.com/Inklling/Genesis"
+Issues = "https://github.com/Inklling/Genesis/issues"
+
+[tool.setuptools.packages.find]
+include = ["wiz*"]
+
+[tool.setuptools.package-data]
+wiz = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
