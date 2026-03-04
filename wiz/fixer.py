@@ -129,8 +129,10 @@ def _fix_var_usage(line: str, finding: Finding, content: str) -> Optional[Fix]:
         prev_indent = len(prev) - len(prev.lstrip())
         if prev_indent < indent_len:
             # We found a line at a shallower indent — check if it's a block opener
-            if re.match(r'\s*(?:if|for|while|switch)\b', prev):
+            if re.match(r'\s*(?:if|else|for|while|switch|try|catch|finally|do)\b', prev):
                 return None  # var is inside a block scope, skip
+            if stripped == '{':
+                return None  # bare block scope
             break
 
     new_line = re.sub(r'^(\s*)var\b', r'\1let', line)
@@ -409,10 +411,11 @@ def _fix_mutable_default(line: str, finding: Finding, content: str) -> Optional[
     next_idx = sig_end + 1
     if next_idx < len(lines):
         next_stripped = lines[next_idx].strip()
-        if next_stripped.startswith('"""') or next_stripped.startswith("'''"):
-            quote = next_stripped[:3]
+        ds_match = re.match(r'^[brufBRUF]{0,2}("""|\'\'\')', next_stripped)
+        if ds_match:
+            quote = ds_match.group(1)
             # Check if docstring closes on same line (after the opening)
-            rest = next_stripped[3:]
+            rest = next_stripped[ds_match.end():]
             if quote in rest:
                 # Single-line docstring — include it in new_sig, guards go after
                 new_sig += lines[next_idx]
@@ -983,16 +986,23 @@ def _validate_syntax(filepath: str, content: str, language: str) -> Optional[str
             return f"Python syntax error: {e.msg} (line {e.lineno})"
     elif language in ("javascript", "typescript"):
         # Lightweight check: balanced braces, parens, brackets
+        # Strip string literals, template literals, and comments first
+        # to avoid counting delimiters inside non-code regions.
+        stripped = re.sub(r'`(?:[^`\\]|\\.)*`', '', content)        # template literals
+        stripped = re.sub(r'"(?:[^"\\]|\\.)*"', '', stripped)        # double-quoted strings
+        stripped = re.sub(r"'(?:[^'\\]|\\.)*'", '', stripped)        # single-quoted strings
+        stripped = re.sub(r'/\*.*?\*/', '', stripped, flags=re.DOTALL)  # block comments
+        stripped = re.sub(r'//[^\n]*', '', stripped)                  # line comments
         counts = {'(': 0, '[': 0, '{': 0}
         closers = {')': '(', ']': '[', '}': '{'}
-        for ch in content:
+        for ch in stripped:
             if ch in counts:
                 counts[ch] += 1
             elif ch in closers:
                 counts[closers[ch]] -= 1
         for opener, count in counts.items():
             if count != 0:
-                closer = {v: k for k, v in closers.items()}[opener] if opener in closers.values() else {'(': ')', '[': ']', '{': '}'}[opener]
+                closer = {'(': ')', '[': ']', '{': '}'}[opener]
                 return f"Unbalanced '{opener}'/'{closer}' (off by {count})"
     return None
 
@@ -1142,6 +1152,8 @@ def fix_file(
             _rollback_from_backup(filepath, all_fixes)
             applied = 0
             failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
+            verification = {"rolled_back": True,
+                            "reason": f"{verification.get('new_issues', 0)} new issue(s) introduced"}
 
     return FixReport(
         root=filepath,
