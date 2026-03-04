@@ -5,7 +5,7 @@ import sys
 import pytest
 import json
 from pathlib import Path
-from wiz.storage import (
+from dojigiri.storage import (
     file_hash,
     load_cache,
     save_cache,
@@ -15,8 +15,8 @@ from wiz.storage import (
     list_reports,
     ensure_dirs,
 )
-from wiz.config import CACHE_FILE, REPORTS_DIR
-from wiz import __version__
+from dojigiri.config import CACHE_FILE, REPORTS_DIR
+from dojigiri import __version__
 
 
 def test_file_hash_consistency(temp_dir):
@@ -63,7 +63,7 @@ def test_load_cache_nonexistent():
     """Test loading cache when file doesn't exist."""
     # Ensure cache doesn't exist by checking a non-standard location
     import tempfile
-    from wiz import storage
+    from dojigiri import storage
     
     # Temporarily override CACHE_FILE
     original_cache = storage.CACHE_FILE
@@ -82,7 +82,7 @@ def test_load_cache_nonexistent():
 
 def test_save_and_load_cache(temp_dir):
     """Test saving and loading cache."""
-    from wiz import storage
+    from dojigiri import storage
     
     # Override cache location
     original_cache = storage.CACHE_FILE
@@ -112,7 +112,7 @@ def test_save_and_load_cache(temp_dir):
 
 def test_cache_version_invalidation(temp_dir):
     """Test that cache is invalidated when version changes."""
-    from wiz import storage
+    from dojigiri import storage
     
     original_cache = storage.CACHE_FILE
     original_storage = storage.STORAGE_DIR
@@ -140,7 +140,7 @@ def test_cache_version_invalidation(temp_dir):
 
 def test_save_report(sample_scan_report, temp_dir):
     """Test saving a scan report."""
-    from wiz import storage
+    from dojigiri import storage
     
     original_reports = storage.REPORTS_DIR
     original_storage = storage.STORAGE_DIR
@@ -171,7 +171,7 @@ def test_save_report(sample_scan_report, temp_dir):
 
 def test_load_latest_report(sample_scan_report, temp_dir):
     """Test loading the latest report."""
-    from wiz import storage
+    from dojigiri import storage
     
     original_reports = storage.REPORTS_DIR
     original_storage = storage.STORAGE_DIR
@@ -196,7 +196,7 @@ def test_load_latest_report(sample_scan_report, temp_dir):
 
 def test_load_latest_report_nonexistent():
     """Test loading latest report when none exists."""
-    from wiz import storage
+    from dojigiri import storage
     import tempfile
     
     original_reports = storage.REPORTS_DIR
@@ -213,7 +213,7 @@ def test_load_latest_report_nonexistent():
 
 def test_list_reports(sample_scan_report, temp_dir):
     """Test listing reports."""
-    from wiz import storage
+    from dojigiri import storage
     import time
     
     original_reports = storage.REPORTS_DIR
@@ -245,7 +245,7 @@ def test_list_reports(sample_scan_report, temp_dir):
 
 def test_report_auto_prune(sample_scan_report, temp_dir):
     """Test that old reports are auto-pruned."""
-    from wiz import storage
+    from dojigiri import storage
     
     original_reports = storage.REPORTS_DIR
     original_storage = storage.STORAGE_DIR
@@ -268,7 +268,7 @@ def test_report_auto_prune(sample_scan_report, temp_dir):
 
 def test_ensure_dirs(temp_dir):
     """Test that ensure_dirs creates directories."""
-    from wiz import storage
+    from dojigiri import storage
     
     original_reports = storage.REPORTS_DIR
     original_storage = storage.STORAGE_DIR
@@ -294,7 +294,7 @@ def test_ensure_dirs(temp_dir):
 
 def test_load_baseline_report_latest(sample_scan_report, temp_dir):
     """Test loading baseline report using 'latest' keyword."""
-    from wiz import storage
+    from dojigiri import storage
     
     original_reports = storage.REPORTS_DIR
     original_storage = storage.STORAGE_DIR
@@ -319,7 +319,7 @@ def test_load_baseline_report_latest(sample_scan_report, temp_dir):
 
 def test_load_baseline_report_specific_path(sample_scan_report, temp_dir):
     """Test loading baseline report from specific file path."""
-    from wiz import storage
+    from dojigiri import storage
     
     original_reports = storage.REPORTS_DIR
     original_storage = storage.STORAGE_DIR
@@ -360,7 +360,7 @@ def test_load_baseline_report_malformed_json(temp_dir):
 
 def test_load_baseline_report_latest_nonexistent():
     """Test load_baseline_report with 'latest' when no reports exist."""
-    from wiz import storage
+    from dojigiri import storage
     import tempfile
     
     original_reports = storage.REPORTS_DIR
@@ -386,7 +386,7 @@ def test_load_baseline_report_latest_nonexistent():
 @pytest.mark.skipif(sys.platform == "win32", reason="Unix permissions test")
 def test_ensure_dirs_sets_permissions_unix(temp_dir):
     """Test that ensure_dirs sets 0o700 permissions on Unix."""
-    from wiz import storage
+    from dojigiri import storage
 
     original_storage = storage.STORAGE_DIR
     original_reports = storage.REPORTS_DIR

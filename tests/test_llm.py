@@ -4,15 +4,15 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 
-from wiz.llm import (
+from dojigiri.llm import (
     analyze_chunk,
     _recover_truncated_json,
     CostTracker,
     LLMError,
     _api_call_with_retry,
 )
-from wiz.chunker import Chunk
-from wiz.config import Severity, Category, Source, Confidence
+from dojigiri.chunker import Chunk
+from dojigiri.config import Severity, Category, Source, Confidence
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────────
@@ -123,7 +123,7 @@ def test_recover_no_complete_objects():
 
 # ─── analyze_chunk with mocked API ────────────────────────────────────
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_analyze_chunk_valid_json(mock_get_client, sample_chunk, mock_response):
     """Test analyze_chunk with valid JSON response."""
     findings_json = json.dumps([
@@ -153,7 +153,7 @@ def test_analyze_chunk_valid_json(mock_get_client, sample_chunk, mock_response):
     assert ct.total_output_tokens == 50
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_analyze_chunk_empty_array(mock_get_client, sample_chunk, mock_response):
     """Test analyze_chunk with empty findings."""
     mock_client = MagicMock()
@@ -166,7 +166,7 @@ def test_analyze_chunk_empty_array(mock_get_client, sample_chunk, mock_response)
     assert len(findings) == 0
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_analyze_chunk_malformed_json(mock_get_client, sample_chunk, mock_response):
     """Test analyze_chunk with completely malformed response."""
     mock_client = MagicMock()
@@ -179,7 +179,7 @@ def test_analyze_chunk_malformed_json(mock_get_client, sample_chunk, mock_respon
     assert len(findings) == 0  # Should gracefully return empty
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_analyze_chunk_truncated_json(mock_get_client, sample_chunk, mock_response):
     """Test analyze_chunk with truncated JSON (recovery should work)."""
     # Two objects, second is truncated
@@ -196,7 +196,7 @@ def test_analyze_chunk_truncated_json(mock_get_client, sample_chunk, mock_respon
     assert findings[0].rule == "r1"
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_analyze_chunk_markdown_fences(mock_get_client, sample_chunk, mock_response):
     """Test analyze_chunk strips markdown code fences."""
     text = '```json\n[{"line": 1, "severity": "info", "category": "style", "rule": "r1", "message": "m1", "confidence": "low"}]\n```'
@@ -211,7 +211,7 @@ def test_analyze_chunk_markdown_fences(mock_get_client, sample_chunk, mock_respo
     assert findings[0].confidence == Confidence.LOW
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_analyze_chunk_confidence_default(mock_get_client, sample_chunk, mock_response):
     """Test that missing confidence field defaults to MEDIUM."""
     text = json.dumps([{
@@ -233,7 +233,7 @@ def test_analyze_chunk_confidence_default(mock_get_client, sample_chunk, mock_re
     assert findings[0].confidence == Confidence.MEDIUM
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_analyze_chunk_line_offset(mock_get_client, mock_response):
     """Test that line numbers are adjusted for chunk offset."""
     chunk = Chunk(
@@ -265,7 +265,7 @@ def test_analyze_chunk_line_offset(mock_get_client, mock_response):
 
 # ─── Retry logic ──────────────────────────────────────────────────────
 
-@patch("wiz.llm.time.sleep")
+@patch("dojigiri.llm.time.sleep")
 def test_api_call_retry_on_429(mock_sleep):
     """Test that 429 errors trigger retry with backoff."""
     mock_client = MagicMock()
@@ -287,7 +287,7 @@ def test_api_call_retry_on_429(mock_sleep):
     mock_sleep.assert_called_once_with(1)  # First retry = 1s
 
 
-@patch("wiz.llm.time.sleep")
+@patch("dojigiri.llm.time.sleep")
 def test_api_call_retry_exhausted(mock_sleep):
     """Test that non-retriable errors raise immediately."""
     mock_client = MagicMock()

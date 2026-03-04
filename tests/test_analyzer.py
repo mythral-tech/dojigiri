@@ -4,7 +4,7 @@ import os
 import sys
 import pytest
 from pathlib import Path
-from wiz.analyzer import (
+from dojigiri.analyzer import (
     detect_language,
     should_skip_dir,
     should_skip_file,
@@ -15,7 +15,7 @@ from wiz.analyzer import (
     _find_git_root,
     _HUNK_RE,
 )
-from wiz.config import Severity, Finding, Category, Source
+from dojigiri.config import Severity, Finding, Category, Source
 
 
 def test_detect_language():
@@ -138,9 +138,9 @@ def test_collect_files_with_language_filter(temp_dir):
 
 
 def test_collect_files_with_wizignore(temp_dir):
-    """Test that .wizignore patterns are respected."""
-    # Create .wizignore
-    (temp_dir / ".wizignore").write_text("*.log\ntest_*\n")
+    """Test that .doji-ignore patterns are respected."""
+    # Create .doji-ignore
+    (temp_dir / ".doji-ignore").write_text("*.log\ntest_*\n")
     
     # Create files
     (temp_dir / "main.py").write_text("code")
@@ -157,7 +157,7 @@ def test_collect_files_with_wizignore(temp_dir):
 def test_filter_report_ignore_rules(sample_scan_report):
     """Test filtering report by ignored rules."""
     # Add some findings with different rules
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     findings = [
         Finding("test.py", 1, Severity.CRITICAL, Category.BUG, Source.STATIC, "rule1", "msg1"),
         Finding("test.py", 2, Severity.WARNING, Category.BUG, Source.STATIC, "rule2", "msg2"),
@@ -182,7 +182,7 @@ def test_filter_report_ignore_rules(sample_scan_report):
 
 def test_filter_report_min_severity(sample_scan_report):
     """Test filtering report by minimum severity."""
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     findings = [
         Finding("test.py", 1, Severity.CRITICAL, Category.BUG, Source.STATIC, "r1", "msg1"),
         Finding("test.py", 2, Severity.WARNING, Category.BUG, Source.STATIC, "r2", "msg2"),
@@ -206,7 +206,7 @@ def test_filter_report_min_severity(sample_scan_report):
 
 def test_filter_report_updates_counts(sample_scan_report):
     """Test that filtering updates the total counts."""
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     findings = [
         Finding("test.py", 1, Severity.CRITICAL, Category.BUG, Source.STATIC, "r1", "msg1"),
         Finding("test.py", 2, Severity.WARNING, Category.BUG, Source.STATIC, "r2", "msg2"),
@@ -230,7 +230,7 @@ def test_filter_report_updates_counts(sample_scan_report):
 
 def test_diff_reports_removes_known_findings(sample_scan_report):
     """Test that diff_reports filters out findings in baseline."""
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     
     # Current report has 3 findings
     current_findings = [
@@ -273,7 +273,7 @@ def test_diff_reports_removes_known_findings(sample_scan_report):
 
 def test_diff_reports_preserves_new_findings(sample_scan_report):
     """Test that diff_reports preserves findings not in baseline."""
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     
     # Current report has findings
     current_findings = [
@@ -313,7 +313,7 @@ def test_diff_reports_preserves_new_findings(sample_scan_report):
 
 def test_diff_reports_uses_bucket_matching(sample_scan_report):
     """Test that diff_reports uses 5-line bucket matching."""
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     
     # Current finding at line 12
     current_findings = [
@@ -347,7 +347,7 @@ def test_diff_reports_uses_bucket_matching(sample_scan_report):
 
 def test_diff_reports_empty_baseline(sample_scan_report):
     """Test diff_reports with empty baseline (all findings are new)."""
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     
     current_findings = [
         Finding("test.py", 10, Severity.WARNING, Category.BUG, Source.STATIC, "rule1", "msg1"),
@@ -373,7 +373,7 @@ def test_diff_reports_empty_baseline(sample_scan_report):
 
 def test_diff_reports_updates_counts(sample_scan_report):
     """Test that diff_reports updates totals correctly."""
-    from wiz.config import FileAnalysis
+    from dojigiri.config import FileAnalysis
     
     current_findings = [
         Finding("test.py", 10, Severity.CRITICAL, Category.BUG, Source.STATIC, "r1", "msg1"),
@@ -458,16 +458,16 @@ class TestDiffScanCLI:
         """--diff flag appears in scan help."""
         import subprocess, sys
         result = subprocess.run(
-            [sys.executable, "-m", "wiz", "scan", "--help"],
+            [sys.executable, "-m", "dojigiri", "scan", "--help"],
             capture_output=True, text=True, timeout=10,
         )
         assert "--diff" in result.stdout
 
     def test_diff_scan_runs(self):
-        """wiz scan . --diff runs without error in the Genesis repo."""
+        """doji scan . --diff runs without error in the Genesis repo."""
         import subprocess, sys
         result = subprocess.run(
-            [sys.executable, "-m", "wiz", "scan", "wiz/", "--diff"],
+            [sys.executable, "-m", "dojigiri", "scan", "dojigiri/", "--diff"],
             capture_output=True, timeout=30,
             cwd=str(Path(__file__).parent.parent),
         )
@@ -476,10 +476,10 @@ class TestDiffScanCLI:
         assert "DIFF" in stdout
 
     def test_diff_scan_json(self):
-        """wiz scan . --diff --output json produces valid JSON."""
+        """doji scan . --diff --output json produces valid JSON."""
         import subprocess, sys, json as json_mod
         result = subprocess.run(
-            [sys.executable, "-m", "wiz", "scan", "wiz/", "--diff", "--output", "json"],
+            [sys.executable, "-m", "dojigiri", "scan", "dojigiri/", "--diff", "--output", "json"],
             capture_output=True, timeout=30,
             cwd=str(Path(__file__).parent.parent),
         )

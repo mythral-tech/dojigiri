@@ -1,14 +1,14 @@
-"""MCP server exposing wiz static analysis tools to Claude Code.
+"""MCP server exposing Dojigiri static analysis tools to Claude Code.
 
-Start with: python -m wiz mcp
-Configure with: python -m wiz setup-claude
+Start with: python -m dojigiri mcp
+Configure with: python -m dojigiri setup-claude
 
 Tools:
-  wiz_scan         — Scan files/dirs for issues (the workhorse)
-  wiz_scan_file    — Quick single-file scan
-  wiz_fix          — Show before/after fixes without applying
-  wiz_explain      — Structural understanding of a file
-  wiz_analyze_project — Cross-file: deps, dead code, cycles
+  doji_scan         — Scan files/dirs for issues (the workhorse)
+  doji_scan_file    — Quick single-file scan
+  doji_fix          — Show before/after fixes without applying
+  doji_explain      — Structural understanding of a file
+  doji_analyze_project — Cross-file: deps, dead code, cycles
 
 All tools return concise text, not JSON. Errors return as strings.
 """
@@ -22,14 +22,14 @@ from mcp.server.fastmcp import FastMCP
 from .config import Severity
 
 mcp = FastMCP(
-    "wiz",
+    "dojigiri",
     instructions=(
-        "Wiz is a static analyzer with 40+ rules, tree-sitter semantic analysis, "
+        "Dojigiri is a static analyzer with 40+ rules, tree-sitter semantic analysis, "
         "taint tracking, null safety, and cross-file analysis. "
-        "Use wiz_scan for broad scans, wiz_scan_file for single files, "
-        "wiz_fix to preview fixes (then apply with Edit tool), "
-        "wiz_explain to understand file structure, "
-        "wiz_analyze_project for cross-file dependency analysis."
+        "Use doji_scan for broad scans, doji_scan_file for single files, "
+        "doji_fix to preview fixes (then apply with Edit tool), "
+        "doji_explain to understand file structure, "
+        "doji_analyze_project for cross-file dependency analysis."
     ),
 )
 
@@ -94,7 +94,7 @@ def _filter_findings_by_severity(findings: list, min_severity: Severity) -> list
 # ─── Tools ───────────────────────────────────────────────────────────
 
 @mcp.tool()
-def wiz_scan(
+def doji_scan(
     path: str,
     language: str | None = None,
     diff_only: bool = False,
@@ -156,8 +156,8 @@ def wiz_scan(
 
 
 @mcp.tool()
-def wiz_scan_file(path: str) -> str:
-    """Quick scan of a single file. Faster than wiz_scan for one file.
+def doji_scan_file(path: str) -> str:
+    """Quick scan of a single file. Faster than doji_scan for one file.
 
     Args:
         path: Path to the file to scan.
@@ -180,7 +180,7 @@ def wiz_scan_file(path: str) -> str:
 
 
 @mcp.tool()
-def wiz_fix(
+def doji_fix(
     path: str,
     rules: str | None = None,
     min_severity: str = "warning",
@@ -268,7 +268,7 @@ def wiz_fix(
 
 
 @mcp.tool()
-def wiz_explain(path: str) -> str:
+def doji_explain(path: str) -> str:
     """Get a structural explanation of a code file.
 
     Returns: summary, structure breakdown, design patterns, and learning notes.
@@ -315,7 +315,7 @@ def wiz_explain(path: str) -> str:
 
 
 @mcp.tool()
-def wiz_analyze_project(
+def doji_analyze_project(
     path: str,
     language: str | None = None,
     depth: int = 2,

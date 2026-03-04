@@ -1,7 +1,7 @@
 """Tests for chunker module - file splitting and token estimation."""
 
 import pytest
-from wiz.chunker import chunk_file, estimate_tokens, Chunk
+from dojigiri.chunker import chunk_file, estimate_tokens, Chunk
 
 
 def test_chunk_small_file():
@@ -130,7 +130,7 @@ def test_estimate_tokens():
 
 def test_chunk_default_parameters():
     """Test that default chunk_size and overlap from config are used."""
-    from wiz.config import CHUNK_SIZE, CHUNK_OVERLAP
+    from dojigiri.config import CHUNK_SIZE, CHUNK_OVERLAP
     
     # Create file larger than default CHUNK_SIZE
     lines = [f"line {i}" for i in range(CHUNK_SIZE + 100)]

@@ -1,4 +1,4 @@
-"""wiz — Static analysis + LLM-powered code audit tool."""
+"""dojigiri — Static analysis + LLM-powered code audit tool."""
 
 __version__ = "1.0.0"
 

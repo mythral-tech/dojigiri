@@ -1,10 +1,10 @@
-"""Tests for function contract inference (wiz.ts_types.infer_contracts)."""
+"""Tests for function contract inference (dojigiri.semantic.types.infer_contracts)."""
 
 import pytest
 
-from wiz.semantic.core import extract_semantics
-from wiz.semantic.types import infer_types, infer_contracts, FunctionContract, FileTypeMap
-from wiz.semantic.lang_config import get_config
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.types import infer_types, infer_contracts, FunctionContract, FileTypeMap
+from dojigiri.semantic.lang_config import get_config
 
 try:
     from tree_sitter_language_pack import get_parser

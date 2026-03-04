@@ -7,7 +7,7 @@ import re
 import shutil
 import sys
 import tempfile
-from typing import Optional, Protocol
+from typing import Optional, Protocol, Union
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +41,21 @@ def _in_multiline_string(content: str, line_num: int) -> bool:
     return False
 
 
+def _sub_outside_strings(line: str, pattern: str, replacement: str) -> str:
+    """Apply regex substitution only to code segments (outside string literals)."""
+    parts = []
+    last_end = 0
+    for m in _STRING_LITERAL_RE.finditer(line):
+        # Apply substitution to code segment before this string literal
+        code_seg = line[last_end:m.start()]
+        parts.append(re.sub(pattern, replacement, code_seg))
+        parts.append(m.group())  # preserve string literal unchanged
+        last_end = m.end()
+    # Handle trailing code segment after last string literal
+    parts.append(re.sub(pattern, replacement, line[last_end:]))
+    return "".join(parts)
+
+
 def _pattern_outside_strings(line: str, pattern: re.Pattern) -> bool:
     """Check if pattern matches in code portions of a line (outside string literals)."""
     code_only = _STRING_LITERAL_RE.sub(lambda m: ' ' * len(m.group()), line)
@@ -48,9 +63,9 @@ def _pattern_outside_strings(line: str, pattern: re.Pattern) -> bool:
 
 
 class FixerFn(Protocol):
-    """Deterministic fix generator: receives a single line + context, returns a fix or None."""
+    """Deterministic fix generator: receives a single line + context, returns fix(es) or None."""
 
-    def __call__(self, line: str, finding: Finding, content: str) -> Optional[Fix]: ...
+    def __call__(self, line: str, finding: Finding, content: str) -> Optional[Union[Fix, list[Fix]]]: ...
 
 
 # ─── Deterministic fixers ────────────────────────────────────────────
@@ -95,8 +110,8 @@ def _fix_loose_equality(line: str, finding: Finding, content: str) -> Optional[F
         return None
     new_line = line
     # Replace != before == to avoid double-replacing !== back
-    new_line = re.sub(r'(?<!=)!=(?!=)', '!==', new_line)
-    new_line = re.sub(r'(?<!=)==(?!=)', '===', new_line)
+    new_line = _sub_outside_strings(new_line, r'(?<!=)!=(?!=)', '!==')
+    new_line = _sub_outside_strings(new_line, r'(?<!=)==(?!=)', '===')
     if new_line != line:
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
@@ -107,43 +122,6 @@ def _fix_loose_equality(line: str, finding: Finding, content: str) -> Optional[F
     return None
 
 
-def _fix_var_usage(line: str, finding: Finding, content: str) -> Optional[Fix]:
-    """Replace `var` with `let`."""
-    m = re.match(r'^(\s*)var\s+(\w+)', line)
-    if not m:
-        return None
-    var_name = m.group(2)
-    indent = m.group(1)
-
-    # Skip if var is inside a block scope (if/for/while/switch) — let would
-    # break references outside the block since let has block scoping.
-    lines = content.splitlines()
-    line_idx = finding.line - 1
-    indent_len = len(indent)
-    # Walk backwards to see if we're inside a block
-    for i in range(line_idx - 1, -1, -1):
-        prev = lines[i]
-        stripped = prev.strip()
-        if not stripped:
-            continue
-        prev_indent = len(prev) - len(prev.lstrip())
-        if prev_indent < indent_len:
-            # We found a line at a shallower indent — check if it's a block opener
-            if re.match(r'\s*(?:if|else|for|while|switch|try|catch|finally|do)\b', prev):
-                return None  # var is inside a block scope, skip
-            if stripped == '{':
-                return None  # bare block scope
-            break
-
-    new_line = re.sub(r'^(\s*)var\b', r'\1let', line)
-    return Fix(
-        file=finding.file, line=finding.line, rule=finding.rule,
-        original_code=line, fixed_code=new_line,
-        explanation="Replaced 'var' with 'let' for block scoping",
-        source=FixSource.DETERMINISTIC,
-    )
-
-
 def _fix_none_comparison(line: str, finding: Finding, content: str) -> Optional[Fix]:
     """Replace `== None` with `is None`, `!= None` with `is not None`."""
     # Skip if match is inside a string literal or multiline string
@@ -152,8 +130,8 @@ def _fix_none_comparison(line: str, finding: Finding, content: str) -> Optional[
     if _in_multiline_string(content, finding.line):
         return None
     new_line = line
-    new_line = re.sub(r'!=\s*None\b', 'is not None', new_line)
-    new_line = re.sub(r'==\s*None\b', 'is None', new_line)
+    new_line = _sub_outside_strings(new_line, r'!=\s*None\b', 'is not None')
+    new_line = _sub_outside_strings(new_line, r'==\s*None\b', 'is None')
     if new_line != line:
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
@@ -225,7 +203,7 @@ def _fix_insecure_http(line: str, finding: Finding, content: str) -> Optional[Fi
 def _fix_fstring_no_expr(line: str, finding: Finding, content: str) -> Optional[Fix]:
     """Remove f-prefix from f-strings with no expressions."""
     # Match f"..." or f'...' where content has no { }
-    new_line = re.sub(r"""\bf(["'])([^{}]*?)\1""", r'\1\2\1', line)
+    new_line = re.sub(r"""\bf(["'])((?:[^{}\\]|\\.)*?)\1""", r'\1\2\1', line)
     if new_line != line:
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
@@ -250,11 +228,17 @@ def _fix_hardcoded_secret(line: str, finding: Finding, content: str) -> Optional
         return None
     indent = m.group(1)
     var_name = m.group(2)
-    new_line = f'{indent}{var_name} = os.environ["{var_name}"]\n'
+    is_js = finding.file.endswith(('.js', '.ts', '.jsx', '.tsx'))
+    if is_js:
+        new_line = f'{indent}{var_name} = process.env.{var_name}\n'
+        explanation = f"Replaced hardcoded secret with process.env.{var_name}"
+    else:
+        new_line = f'{indent}{var_name} = os.environ["{var_name}"]\n'
+        explanation = f'Replaced hardcoded secret with os.environ["{var_name}"]'
     return Fix(
         file=finding.file, line=finding.line, rule=finding.rule,
         original_code=line, fixed_code=new_line,
-        explanation=f"Replaced hardcoded secret with os.environ[\"{var_name}\"]",
+        explanation=explanation,
         source=FixSource.DETERMINISTIC,
     )
 
@@ -268,27 +252,39 @@ def _fix_open_without_with(line: str, finding: Finding, content: str) -> Optiona
     var_name = m.group(2)
     open_args = m.group(3)
 
-    # Find subsequent lines that use this variable, up to the next blank/return/def
+    # Find subsequent lines that belong to the body of this open() usage
     lines = content.splitlines(keepends=True)
     line_idx = finding.line - 1
     body_lines = []
+    var_pat = re.compile(r'\b' + re.escape(var_name) + r'\b')
+    indent_len = len(indent)
     for i in range(line_idx + 1, len(lines)):
         subsequent = lines[i]
         stripped = subsequent.strip()
-        if not stripped or stripped.startswith("def ") or stripped.startswith("class "):
+        # Stop on def/class boundaries
+        if stripped.startswith("def ") or stripped.startswith("class "):
             break
-        # Check if this line is at the same or deeper indentation
-        if subsequent.rstrip() and not subsequent.startswith(indent + " ") and not subsequent.startswith(indent + "\t"):
-            if not subsequent.startswith(indent):
-                break
-            # Same indent level — include if it uses the variable, else stop
-            if var_name not in subsequent:
+        # Blank lines are collected as body (don't break on them)
+        if not stripped:
+            body_lines.append(subsequent)
+            continue
+        # Check indentation
+        cur_indent = len(subsequent) - len(subsequent.lstrip())
+        if cur_indent < indent_len:
+            break  # shallower indent — left the scope
+        if cur_indent == indent_len:
+            # Same indent — include only if it uses the variable
+            if not var_pat.search(subsequent):
                 break
         body_lines.append(subsequent)
 
+    # Strip trailing blank lines from collected body
+    while body_lines and not body_lines[-1].strip():
+        body_lines.pop()
+
     if not body_lines:
-        # Can't determine the body — just wrap the single line
-        new_code = f"{indent}with open({open_args}) as {var_name}:\n"
+        # No body found — emit with ... as f:\n    pass
+        new_code = f"{indent}with open({open_args}) as {var_name}:\n{indent}    pass\n"
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
             original_code=line, fixed_code=new_code,
@@ -296,12 +292,16 @@ def _fix_open_without_with(line: str, finding: Finding, content: str) -> Optiona
             source=FixSource.DETERMINISTIC,
         )
 
-    # Build the with block with re-indented body
+    # Build the with block with re-indented body (preserve relative indentation)
     new_code = f"{indent}with open({open_args}) as {var_name}:\n"
     for bl in body_lines:
-        # Add one level of indentation
         if bl.strip():
-            new_code += indent + "    " + bl.lstrip()
+            # Preserve indentation relative to the original indent level
+            if bl.startswith(indent):
+                relative = bl[len(indent):]
+            else:
+                relative = bl.lstrip()
+            new_code += indent + "    " + relative
         else:
             new_code += bl
 
@@ -489,7 +489,7 @@ def _fix_os_system(line: str, finding: Finding, content: str) -> Optional[Fix]:
         return None
     cmd_arg = m.group(1).strip()
     indent = re.match(r'^(\s*)', line).group(1)
-    new_line = f"{indent}subprocess.run({cmd_arg}, shell=True)\n"
+    new_line = f"{indent}subprocess.run(shlex.split({cmd_arg}))\n"
     return Fix(
         file=finding.file, line=finding.line, rule=finding.rule,
         original_code=line, fixed_code=new_line,
@@ -498,7 +498,7 @@ def _fix_os_system(line: str, finding: Finding, content: str) -> Optional[Fix]:
     )
 
 
-def _fix_eval_usage(line: str, finding: Finding, content: str) -> Optional[Fix]:
+def _fix_eval_usage(line: str, finding: Finding, content: str) -> Optional[Union[Fix, list[Fix]]]:
     """Replace eval() with safe alternative: ast.literal_eval (Python), JSON.parse (JS/TS)."""
     m = re.search(r'\beval\s*\((.+)\)', line)
     if not m:
@@ -511,15 +511,38 @@ def _fix_eval_usage(line: str, finding: Finding, content: str) -> Optional[Fix]:
         # Add inline warning if not already commented
         if '#' not in new_line:
             new_line = new_line.rstrip('\n') + "  # NOTE: only works for literal expressions\n"
-        return Fix(
+        eval_fix = Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
             original_code=line, fixed_code=new_line,
             explanation="Replaced eval() with ast.literal_eval() (safe for literals, rejects arbitrary code)",
             source=FixSource.DETERMINISTIC,
         )
+        # Ensure 'import ast' exists — if not, add it after the last existing import
+        if not re.search(r'^\s*import\s+ast\b', content, re.MULTILINE):
+            content_lines = content.splitlines(keepends=True)
+            last_import_idx = 0
+            for i, cl in enumerate(content_lines):
+                if re.match(r'^\s*(import |from \S+ import )', cl):
+                    last_import_idx = i
+            import_line = content_lines[last_import_idx]
+            import_fix = Fix(
+                file=finding.file, line=last_import_idx + 1, rule=finding.rule,
+                original_code=import_line,
+                fixed_code=import_line.rstrip('\n') + "\nimport ast\n",
+                explanation="Added 'import ast' required by ast.literal_eval()",
+                source=FixSource.DETERMINISTIC,
+            )
+            return [import_fix, eval_fix]
+        return eval_fix
 
     if finding.file.endswith(('.js', '.ts', '.jsx', '.tsx')):
-        new_line = line[:m.start()] + f"JSON.parse({eval_arg})" + line[m.end():]
+        # Strip the eval-idiom parens wrapper: eval("(" + x + ")") → JSON.parse(x)
+        stripped_arg = re.sub(
+            r'^(["\'])\(\1\s*\+\s*(.+?)\s*\+\s*(["\'])\)\3$',
+            r'\2',
+            eval_arg,
+        )
+        new_line = line[:m.start()] + f"JSON.parse({stripped_arg})" + line[m.end():]
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
             original_code=line, fixed_code=new_line,
@@ -558,19 +581,11 @@ def _fix_sql_injection(line: str, finding: Finding, content: str) -> Optional[Fi
             source=FixSource.DETERMINISTIC,
         )
 
-    # Pattern 2: "SELECT ... WHERE x = " + var
+    # Pattern 2: "SELECT ... WHERE x = " + var — skip, incomplete fix
+    # (adds ? placeholder but doesn't modify execute() call to pass params)
     m = re.match(r'^(\s*)(\w+)\s*=\s*(["\'])(.+?)\3\s*\+\s*(\w+)', line.rstrip())
     if m:
-        var_name = m.group(2)
-        sql_body = m.group(4)
-        param_var = m.group(5)
-        new_line = f'{indent}{var_name} = "{sql_body} ?"\n'
-        return Fix(
-            file=finding.file, line=finding.line, rule=finding.rule,
-            original_code=line, fixed_code=new_line,
-            explanation=f"Replaced string concatenation with ? placeholder (pass ({param_var},) as second arg to execute())",
-            source=FixSource.DETERMINISTIC,
-        )
+        return None
 
     # Pattern 3: conn.execute("..." + var)
     m = re.match(r'^(\s*)(\w+)\.execute\((["\'])(.+?)\3\s*\+\s*(\w+)\)', line.rstrip())
@@ -599,11 +614,12 @@ def _fix_resource_leak(line: str, finding: Finding, content: str) -> Optional[Fi
     if line_idx < 0 or line_idx >= len(lines):
         return None
 
-    # Extract the variable name from the source line: var = something(...)
+    # Extract the variable name and its indentation from the source line: var = something(...)
     src = lines[line_idx]
     m = re.match(r'^(\s*)(\w+)\s*=\s*', src)
     if not m:
         return None
+    creation_indent = m.group(1)  # actual indent where the resource is created
     var_name = m.group(2)
 
     # Find the containing function
@@ -616,7 +632,7 @@ def _fix_resource_leak(line: str, finding: Finding, content: str) -> Optional[Fi
     if func_indent is None:
         return None
 
-    body_indent = func_indent + "    "
+    body_indent = creation_indent  # use the indent of where the resource was created
 
     # Scan forward to find the function body lines and the last return
     body_lines = []  # (index, stripped) for lines in this function body
@@ -651,9 +667,10 @@ def _fix_resource_leak(line: str, finding: Finding, content: str) -> Optional[Fi
             last_return_idx = idx
 
     if last_return_idx is not None:
-        # Insert .close() BEFORE the return
+        # Insert .close() BEFORE the return — use the return line's indentation
         return_line = lines[last_return_idx]
-        close_line = f"{body_indent}{var_name}.close()\n"
+        return_indent = re.match(r'^(\s*)', return_line).group(1)
+        close_line = f"{return_indent}{var_name}.close()\n"
         new_code = close_line + return_line
         return Fix(
             file=finding.file, line=last_return_idx + 1, rule=finding.rule,
@@ -713,7 +730,7 @@ DETERMINISTIC_FIXERS: dict[str, FixerFn] = {
     "unused-variable": _fix_unused_variable,
     "bare-except": _fix_bare_except,
     "loose-equality": _fix_loose_equality,
-    "var-usage": _fix_var_usage,
+
     "none-comparison": _fix_none_comparison,
     "type-comparison": _fix_type_comparison,
     "console-log": _fix_console_log,
@@ -807,6 +824,7 @@ def apply_fixes(
     except OSError as e:
         for fix in fixes:
             fix.status = FixStatus.FAILED
+            fix.fail_reason = f"cannot read file: {e}"
         logger.warning("Cannot read %s: %s", filepath, e)
         return fixes
 
@@ -826,20 +844,23 @@ def apply_fixes(
 
         if fix_range & occupied_lines:
             fix.status = FixStatus.SKIPPED
+            fix.fail_reason = "overlaps with another fix on the same line(s)"
             continue
 
         # Validate: check that original_code matches the actual file content
         line_idx = fix.line - 1  # 0-based
         if line_idx < 0 or line_idx >= len(lines):
             fix.status = FixStatus.FAILED
+            fix.fail_reason = f"line {fix.line} out of range (file has {len(lines)} lines)"
             continue
 
         # For deletion fixes (empty fixed_code), remove the line(s)
         if fix.original_code and not fix.fixed_code:
             # Verify original matches
             actual = lines[line_idx]
-            if fix.original_code.strip() and fix.original_code.strip() not in actual:
+            if fix.original_code.strip() and fix.original_code.strip() != actual.strip():
                 fix.status = FixStatus.FAILED
+                fix.fail_reason = "original code not found at this line (already fixed?)"
                 continue
             if not dry_run:
                 # Blank out all lines in the range
@@ -852,8 +873,9 @@ def apply_fixes(
         elif fix.original_code and fix.fixed_code:
             # Replacement fix — verify original is present
             actual = lines[line_idx]
-            if fix.original_code.strip() and fix.original_code.strip() not in actual:
+            if fix.original_code.strip() and fix.original_code.strip() != actual.strip():
                 fix.status = FixStatus.FAILED
+                fix.fail_reason = "original code not found at this line (already fixed?)"
                 continue
             if not dry_run:
                 # Replace the first line with fixed_code
@@ -870,6 +892,7 @@ def apply_fixes(
 
         else:
             fix.status = FixStatus.FAILED
+            fix.fail_reason = "missing original or replacement code"
 
     if not dry_run:
         # Remove only lines that were blanked by fixes, not original blank lines
@@ -877,7 +900,7 @@ def apply_fixes(
 
         # Backup
         if create_backup:
-            backup_path = filepath + ".wiz.bak"
+            backup_path = filepath + ".doji.bak"
             try:
                 shutil.copy2(filepath, backup_path)
             except OSError as e:
@@ -886,7 +909,7 @@ def apply_fixes(
         # Atomic write: write to temp file, then rename
         try:
             dir_name = os.path.dirname(filepath) or "."
-            fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".wiz.tmp")
+            fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".doji.tmp")
             try:
                 with os.fdopen(fd, "w", encoding="utf-8") as f:
                     f.write(new_content)
@@ -906,6 +929,7 @@ def apply_fixes(
             for fix in fixes:
                 if fix.status == FixStatus.APPLIED:
                     fix.status = FixStatus.FAILED
+                    fix.fail_reason = f"cannot write file: {e}"
 
     return fixes
 
@@ -977,6 +1001,81 @@ def verify_fixes(filepath: str, language: str,
 # ─── Post-fix validation & rollback ──────────────────────────────────
 
 
+def _strip_template_literals(content: str) -> str:
+    """Replace template literal content (including nested ${} expressions) with spaces.
+
+    Uses a stack-based state machine to handle nested backticks inside ${} expressions.
+    Preserves string length so positions remain valid for brace counting.
+    """
+    result = list(content)
+    i = 0
+    n = len(content)
+    # Stack tracks nesting: 'T' = inside template literal, 'E' = inside ${} expression
+    stack: list[str] = []
+
+    while i < n:
+        ch = content[i]
+
+        if not stack:
+            # Outside any template literal
+            if ch == '`':
+                stack.append('T')
+                result[i] = ' '
+            i += 1
+            continue
+
+        top = stack[-1]
+
+        if top == 'T':
+            # Inside template literal body
+            if ch == '\\' and i + 1 < n:
+                result[i] = ' '
+                result[i + 1] = ' '
+                i += 2
+                continue
+            if ch == '$' and i + 1 < n and content[i + 1] == '{':
+                # Enter ${} expression
+                result[i] = ' '
+                result[i + 1] = ' '
+                stack.append('E')
+                i += 2
+                continue
+            if ch == '`':
+                # End of template literal
+                result[i] = ' '
+                stack.pop()
+                i += 1
+                continue
+            # Regular template content — blank it
+            result[i] = ' '
+            i += 1
+            continue
+
+        if top == 'E':
+            # Inside ${} expression — code is valid here, but track nesting
+            if ch == '}':
+                result[i] = ' '
+                stack.pop()
+                i += 1
+                continue
+            if ch == '`':
+                # Nested template literal inside ${}
+                result[i] = ' '
+                stack.append('T')
+                i += 1
+                continue
+            if ch == '{':
+                # Nested object literal / block inside expression
+                stack.append('E')
+            # Don't blank expression code (braces need counting) except template parts
+            i += 1
+            continue
+
+        i += 1
+
+    return "".join(result)
+
+
 def _validate_syntax(filepath: str, content: str, language: str) -> Optional[str]:
     """Validate syntax of fixed file. Returns error message or None if valid."""
     if language == "python":
@@ -988,11 +1087,11 @@ def _validate_syntax(filepath: str, content: str, language: str) -> Optional[str
         # Lightweight check: balanced braces, parens, brackets
         # Strip string literals, template literals, and comments first
         # to avoid counting delimiters inside non-code regions.
-        stripped = re.sub(r'`(?:[^`\\]|\\.)*`', '', content)        # template literals
-        stripped = re.sub(r'"(?:[^"\\]|\\.)*"', '', stripped)        # double-quoted strings
-        stripped = re.sub(r"'(?:[^'\\]|\\.)*'", '', stripped)        # single-quoted strings
+        stripped = _strip_template_literals(content)                    # template literals (nested-safe)
+        stripped = re.sub(r'"(?:[^"\\]|\\.)*"', '', stripped)          # double-quoted strings
+        stripped = re.sub(r"'(?:[^'\\]|\\.)*'", '', stripped)          # single-quoted strings
         stripped = re.sub(r'/\*.*?\*/', '', stripped, flags=re.DOTALL)  # block comments
-        stripped = re.sub(r'//[^\n]*', '', stripped)                  # line comments
+        stripped = re.sub(r'//[^\n]*', '', stripped)                    # line comments
         counts = {'(': 0, '[': 0, '{': 0}
         closers = {')': '(', ']': '[', '}': '{'}
         for ch in stripped:
@@ -1007,9 +1106,9 @@ def _validate_syntax(filepath: str, content: str, language: str) -> Optional[str
     return None
 
 
-def _rollback_from_backup(filepath: str, fixes: list[Fix]) -> None:
-    """Restore file from .wiz.bak backup and mark all applied fixes as FAILED."""
-    backup_path = filepath + ".wiz.bak"
+def _rollback_from_backup(filepath: str, fixes: list[Fix], reason: str = "") -> None:
+    """Restore file from .doji.bak backup and mark all applied fixes as FAILED."""
+    backup_path = filepath + ".doji.bak"
     if os.path.exists(backup_path):
         try:
             shutil.copy2(backup_path, filepath)
@@ -1019,6 +1118,8 @@ def _rollback_from_backup(filepath: str, fixes: list[Fix]) -> None:
     for fix in fixes:
         if fix.status == FixStatus.APPLIED:
             fix.status = FixStatus.FAILED
+            if reason:
+                fix.fail_reason = reason
 
 
 # ─── Main orchestrator ────────────────────────────────────────────────
@@ -1066,9 +1167,12 @@ def fix_file(
         if fixer:
             line_idx = finding.line - 1
             if 0 <= line_idx < len(lines):
-                fix = fixer(lines[line_idx], finding, content)
-                if fix:
-                    all_fixes.append(fix)
+                result = fixer(lines[line_idx], finding, content)
+                if result:
+                    if isinstance(result, list):
+                        all_fixes.extend(result)
+                    else:
+                        all_fixes.append(result)
                     continue
         remaining.append(finding)
 
@@ -1099,6 +1203,22 @@ def fix_file(
         if not (fix.rule == "hardcoded-secret" and fix.line in unused_var_lines)
     ]
 
+    # 3. If both open-without-with and resource-leak target the same variable in
+    #    the same file, drop the resource-leak fix (the with block subsumes .close()).
+    oww_vars: set[tuple[str, str]] = set()
+    for fix in all_fixes:
+        if fix.rule == "open-without-with" and fix.fixed_code:
+            vm = re.search(r'as\s+(\w+)\s*:', fix.fixed_code)
+            if vm:
+                oww_vars.add((fix.file, vm.group(1)))
+    if oww_vars:
+        all_fixes = [
+            fix for fix in all_fixes
+            if not (fix.rule == "resource-leak" and fix.original_code and
+                    any((fix.file, var) in oww_vars
+                        for var in re.findall(r'(\w+)\.close\(\)', fix.fixed_code or "")))
+        ]
+
     # Check which modules surviving fixes still need
     modules_needed: set[str] = set()
     for fix in all_fixes:
@@ -1109,6 +1229,8 @@ def fix_file(
                 modules_needed.add("ast")
             if "subprocess.run" in fix.fixed_code:
                 modules_needed.add("subprocess")
+            if "shlex.split" in fix.fixed_code:
+                modules_needed.add("shlex")
     if modules_needed:
         all_fixes = [
             fix for fix in all_fixes
@@ -1131,7 +1253,7 @@ def fix_file(
             syntax_err = _validate_syntax(filepath, fixed_content, language)
             if syntax_err:
                 logger.warning("Syntax validation failed after fix: %s — rolling back", syntax_err)
-                _rollback_from_backup(filepath, all_fixes)
+                _rollback_from_backup(filepath, all_fixes, reason=f"rolled back — {syntax_err}")
                 applied = 0
                 failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
         except OSError:
@@ -1149,7 +1271,7 @@ def fix_file(
         # Auto-rollback if fixes introduced new issues
         if verification and verification.get("new_issues", 0) > 0:
             logger.warning("Fixes introduced %d new issue(s) — rolling back", verification["new_issues"])
-            _rollback_from_backup(filepath, all_fixes)
+            _rollback_from_backup(filepath, all_fixes, reason=f"rolled back — fixes introduced {verification['new_issues']} new issue(s)")
             applied = 0
             failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
             verification = {"rolled_back": True,

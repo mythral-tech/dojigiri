@@ -2,7 +2,7 @@
 
 import pytest
 
-from wiz.config import Severity, Category, Source
+from dojigiri.config import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -17,7 +17,7 @@ needs_tree_sitter = pytest.mark.skipif(
 
 def _semantics(code: str, filepath: str = "test.py", language: str = "python"):
     """Extract semantics from a Python code string."""
-    from wiz.semantic.core import extract_semantics
+    from dojigiri.semantic.core import extract_semantics
     result = extract_semantics(code, filepath, language)
     assert result is not None, "extract_semantics returned None — tree-sitter may not be available"
     return result
@@ -33,7 +33,7 @@ class TestUnusedVariables:
 
     def test_assigned_but_never_used(self):
         """Variable assigned but never referenced should produce a finding."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f():
     x = 42
@@ -50,7 +50,7 @@ def f():
 
     def test_assigned_and_used_no_finding(self):
         """Variable assigned and later used should not be flagged."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f():
     x = 42
@@ -62,7 +62,7 @@ def f():
 
     def test_underscore_prefixed_excluded(self):
         """Variables with _ prefix should not be flagged as unused."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f():
     _unused = 42
@@ -75,7 +75,7 @@ def f():
 
     def test_augmented_assignment_excluded(self):
         """Augmented assignment (x += 1) implies prior use and should not be flagged."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f():
     x = 0
@@ -89,7 +89,7 @@ def f():
 
     def test_variable_used_in_child_scope(self):
         """Variable assigned in outer scope and used in inner scope should not be flagged."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def outer():
     data = [1, 2, 3]
@@ -105,7 +105,7 @@ def outer():
 
     def test_parameter_not_flagged(self):
         """Function parameters should not be flagged by unused variables check."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f(x, y, z):
     return None
@@ -117,7 +117,7 @@ def f(x, y, z):
 
     def test_self_attr_assignment_not_flagged(self):
         """self.attr = value assignments should not be flagged as unused."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 class MyClass:
     def __init__(self):
@@ -133,7 +133,7 @@ class MyClass:
 
     def test_multiple_unused_variables(self):
         """Multiple unused variables should produce multiple findings."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f():
     a = 1
@@ -151,7 +151,7 @@ def f():
 
     def test_loop_variable_used_in_body(self):
         """Loop variable used inside the loop body should not be flagged."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f():
     total = 0
@@ -168,7 +168,7 @@ def f():
 
     def test_variable_used_as_function_call(self):
         """Variable assigned a callable and then called should not be flagged."""
-        from wiz.semantic.scope import check_unused_variables
+        from dojigiri.semantic.scope import check_unused_variables
         code = """\
 def f():
     callback = lambda: 42
@@ -192,7 +192,7 @@ class TestVariableShadowing:
 
     def test_inner_function_shadows_outer(self):
         """Variable in inner function shadowing outer should produce INFO finding."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def outer():
     x = 10
@@ -213,7 +213,7 @@ def outer():
 
     def test_no_shadowing(self):
         """No shadowing should produce no findings."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def outer():
     x = 10
@@ -228,7 +228,7 @@ def outer():
 
     def test_underscore_prefixed_not_flagged(self):
         """Underscore-prefixed variables should not be flagged for shadowing."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def outer():
     _temp = 10
@@ -244,7 +244,7 @@ def outer():
 
     def test_same_scope_redefinition_not_shadowing(self):
         """Reassignment in the same scope is not shadowing."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def f():
     x = 10
@@ -258,7 +258,7 @@ def f():
 
     def test_parameter_shadows_outer_variable(self):
         """Parameter in inner function shadowing an outer variable should be flagged."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def outer():
     data = [1, 2, 3]
@@ -274,7 +274,7 @@ def outer():
 
     def test_multiple_levels_of_shadowing(self):
         """Multiple nesting levels with shadowing should produce findings for each."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def level_one():
     val = 1
@@ -294,7 +294,7 @@ def level_one():
 
     def test_class_scope_vs_function_scope(self):
         """Variable in a method that shadows a class-level name should be flagged."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 class MyClass:
     count = 0
@@ -309,7 +309,7 @@ class MyClass:
 
     def test_module_level_shadowed_by_function(self):
         """Module-level variable shadowed by a function-level variable should be flagged."""
-        from wiz.semantic.scope import check_variable_shadowing
+        from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 result = None
 
@@ -335,7 +335,7 @@ class TestUninitializedVariables:
 
     def test_used_before_assignment(self):
         """Variable used before assignment in a function should produce a finding."""
-        from wiz.semantic.scope import check_uninitialized_variables
+        from dojigiri.semantic.scope import check_uninitialized_variables
         code = """\
 def f():
     y = x + 1
@@ -353,7 +353,7 @@ def f():
 
     def test_assigned_before_use_no_finding(self):
         """Variable assigned before use should not be flagged."""
-        from wiz.semantic.scope import check_uninitialized_variables
+        from dojigiri.semantic.scope import check_uninitialized_variables
         code = """\
 def f():
     x = 10
@@ -366,7 +366,7 @@ def f():
 
     def test_parameter_not_flagged(self):
         """Function parameters are considered assigned and should not be flagged."""
-        from wiz.semantic.scope import check_uninitialized_variables
+        from dojigiri.semantic.scope import check_uninitialized_variables
         code = """\
 def f(x, y):
     z = x + y
@@ -378,7 +378,7 @@ def f(x, y):
 
     def test_builtin_name_not_flagged(self):
         """Builtin names (len, print, range, etc.) should not be flagged."""
-        from wiz.semantic.scope import check_uninitialized_variables
+        from dojigiri.semantic.scope import check_uninitialized_variables
         code = """\
 def f():
     n = len([1, 2, 3])
@@ -397,7 +397,7 @@ def f():
 
     def test_underscore_prefixed_not_flagged(self):
         """Underscore-prefixed names should not be flagged for uninitialized access."""
-        from wiz.semantic.scope import check_uninitialized_variables
+        from dojigiri.semantic.scope import check_uninitialized_variables
         code = """\
 def f():
     y = _helper + 1
@@ -411,7 +411,7 @@ def f():
 
     def test_module_level_reference_not_checked(self):
         """Module-level references should not be checked (only function scopes)."""
-        from wiz.semantic.scope import check_uninitialized_variables
+        from dojigiri.semantic.scope import check_uninitialized_variables
         code = """\
 y = x + 1
 x = 10
@@ -423,7 +423,7 @@ x = 10
 
     def test_used_at_same_line_as_assignment_no_finding(self):
         """Variable used on the same line as its assignment should not be flagged."""
-        from wiz.semantic.scope import check_uninitialized_variables
+        from dojigiri.semantic.scope import check_uninitialized_variables
         code = """\
 def f():
     x = 10

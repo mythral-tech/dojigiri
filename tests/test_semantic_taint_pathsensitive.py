@@ -1,4 +1,4 @@
-"""Tests for path-sensitive taint analysis (wiz.ts_taint.analyze_taint_pathsensitive).
+"""Tests for path-sensitive taint analysis (dojigiri.semantic.taint.analyze_taint_pathsensitive).
 
 Uses CFG-based forward dataflow to track taint through conditional paths,
 loops, and sanitization. ~25 tests covering basic flow, path-sensitive
@@ -7,11 +7,11 @@ sanitization, propagation, loops, cross-language, and edge cases.
 
 import pytest
 
-from wiz.semantic.core import extract_semantics
-from wiz.semantic.cfg import build_cfg
-from wiz.semantic.taint import analyze_taint_pathsensitive
-from wiz.semantic.lang_config import get_config
-from wiz.config import Severity, Category, Source
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.cfg import build_cfg
+from dojigiri.semantic.taint import analyze_taint_pathsensitive
+from dojigiri.semantic.lang_config import get_config
+from dojigiri.config import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -425,7 +425,7 @@ def handler():
 
     def test_no_cfg_returns_empty(self):
         """When no CFG is produced, path-sensitive analysis should return []."""
-        from wiz.semantic.lang_config import LanguageConfig
+        from dojigiri.semantic.lang_config import LanguageConfig
         config = LanguageConfig(
             ts_language_name="python",
             taint_source_patterns=[("input", "user_input")],

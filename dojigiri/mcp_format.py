@@ -1,6 +1,6 @@
 """AI-friendly output formatting for MCP tool responses.
 
-Transforms wiz dataclasses into concise text optimized for LLM consumption.
+Transforms dojigiri dataclasses into concise text optimized for LLM consumption.
 No ANSI colors, no JSON nesting — just clean, scannable text.
 """
 

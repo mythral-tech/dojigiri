@@ -3,12 +3,29 @@
 ## Status
 **Last agent**: Claude
 **Date**: 2026-03-04
-**What they did**: Hardened auto-fix system in `wiz/fixer.py`. 10 changes: (1) Post-fix syntax validation — `ast.parse()` for Python, balanced delimiters for JS/TS, auto-rollback on failure. (2) Auto-rollback when `verify_fixes` finds new issues introduced by fixes. (3-10) Fixed 8 individual fixers: `_fix_loose_equality` preserves `== null` JS idiom, `_fix_insecure_http` skips localhost/internal URLs, `_fix_console_log` only deletes standalone statements, `_fix_eval_usage` adds literal-only warning comment, `_fix_unused_variable` catches method calls as side effects, `_fix_var_usage` skips vars inside block scopes, `_fix_hardcoded_secret` skips test files, `_fix_mutable_default` places guard after docstring. 945 tests pass.
+**What they did**: Fixer system audit — fixed all 3 root causes of 43/47 failed fixes in `doji fix --apply`. 5 phases, ~15 edits in `dojigiri/fixer.py` + test cleanup. 942 tests pass (3 removed with dead `_fix_var_usage`).
 
-**Previous**: Oz — .exe distribution build review (all 5 areas verified, no bugs)
+**Previous**: Claude — Full rename Wiz → Dojigiri (945 tests pass)
 
 ## Review
-**Fixer hardening** (Claude → Oz for review). 10 changes in `wiz/fixer.py`:
+**Fixer system audit** (Claude → Oz for review). Fixed 3 root causes killing 43/47 fixes + 12 medium-severity bugs in `dojigiri/fixer.py`. Key areas to verify:
+
+1. **RC1 — `_fix_open_without_with` body collection** (lines ~254-280): Rewrote loop to collect blank lines as body, stop on shallower indent/def/class, strip trailing blanks. Empty body → `pass` instead of bare `with:`. Verify on demo's `analytics.py` and `database.py`.
+2. **RC2 — `_fix_os_system`** (line ~497): Now emits `shlex.split(cmd)` instead of `shell=True`. Added `shlex` to modules_needed. Verify no `shell-true` finding on re-scan.
+3. **RC3 — `_strip_template_literals`** (new function, ~60 lines before `_validate_syntax`): Stack-based state machine for nested `${}` in template literals. Replaces simple regex that couldn't handle nesting. Test with demo's `dashboard.js` and `utils.ts`.
+4. **`_sub_outside_strings` helper** (new, after line ~27): Used by `_fix_loose_equality` and `_fix_none_comparison` to avoid corrupting string literals. Verify `==`/`!=` inside strings are preserved.
+5. **`apply_fixes` equality check** (lines ~873, 888): Changed `strip() not in actual` (substring) to `strip() != actual.strip()` (exact equality). This is a behavior change — verify no regressions.
+6. **Dead code removal**: `_fix_var_usage` deleted (rule removed from detector). 3 tests removed from `test_fixer.py`.
+7. **Conflict resolution**: New `open-without-with` vs `resource-leak` dedup (lines ~1210-1220). If both target same file+variable, resource-leak is dropped.
+8. **`_fix_sql_injection` Pattern 2** now returns `None` (was incomplete — added `?` but didn't modify `execute()` call).
+9. **`_fix_hardcoded_secret`** emits `process.env.VAR` for JS/TS files.
+10. **`_fix_resource_leak`** uses return line's indentation for `.close()`, not creation indent.
+11. **`_fix_fstring_no_expr`** regex handles escaped quotes.
+12. **`fail_reason`** now set in OSError write handler (was missing).
+
+**Ideal test**: Restore demo backups, run `doji fix "...\webapp" --apply`, target 0 failed fixes.
+
+**Previous: Rename Wiz → Dojigiri** (Claude → Oz for review). Full rename completed. Key areas to verify:
 
 1. **Syntax validation + rollback** — `_validate_syntax()` runs after `apply_fixes`. Python: `ast.parse()`. JS/TS: balanced braces/parens/brackets. Failure → `_rollback_from_backup()` restores `.wiz.bak`, marks all fixes FAILED.
 2. **New-issues rollback** — If `verify_fixes` reports `new_issues > 0`, same rollback logic fires. Previously new issues were reported but broken file stayed.
@@ -226,9 +243,13 @@ Space for both agents to propose and discuss next steps. Add ideas, +1 existing 
 ## Queue
 Priority order — pick from the top:
 
-1. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
+1. **Review fixer audit** — Oz: verify all 12 changes, run demo project fix, check for regressions
+2. **Rebuild exe + demo validation** — After review: `python build_exe.py`, test `Dojigiri.bat`, run fix on fresh demo
+3. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
 
 ## Log
+- **2026-03-04 [Claude]**: Fixer system audit — 5 phases fixing 3 root causes (43/47 failed fixes) + 12 medium bugs. RC1: `_fix_open_without_with` body collection rewrite (blank line handling, `pass` fallback). RC2: `_fix_os_system` `shell=True` → `shlex.split()`. RC3: `_strip_template_literals` stack-based state machine for nested `${}`. Also: `_sub_outside_strings` helper for string-safe regex substitution, `apply_fixes` substring→equality check, dead `_fix_var_usage` removal, open-without-with/resource-leak conflict resolution, sql_injection Pattern 2 skip, hardcoded_secret JS `process.env` support, resource_leak indentation fix, fstring_no_expr escaped quotes, fail_reason in write handler. Removed 3 tests for deleted function. 942 tests pass.
+- **2026-03-04 [Claude]**: Full rename Wiz → Dojigiri (童子切 — "Monster Cutter"). (1) Renamed `wiz/` → `dojigiri/`, updated all imports (`from wiz.` → `from dojigiri.`), internal strings, config references (`.wizignore` → `.doji-ignore`, `.wiz.toml` → `.doji.toml` with `[dojigiri]` section). (2) MCP tools: `wiz_scan` → `doji_scan`, server name `"dojigiri"`. (3) CLI: `prog="doji"`, version `"dojigiri 1.0.0"`. (4) pyproject.toml: `name="dojigiri"`, entry point `doji`. (5) build_exe.py: output `doji.exe`, company Dojigiri. (6) VS Code ext: `wiz-vscode/` → `dojigiri-vscode/`, commands `doji.*`. (7) Tests: all 35 files updated (imports, patches, assertions, TOML content). (8) Docs: README, CLAUDE.md, HANDOFF.md, dist/README.txt. (9) New cyberpunk forge launcher `Dojigiri.bat` with ASCII art, 童子切 subtitle, box-drawing frames. (10) Rebuilt `doji.exe` via Nuitka (36MB). (11) Repackaged as `dojigiri-v1.0.0-windows.zip`. 945 tests pass.
 - **2026-03-04 [Claude]**: Fixer hardening — 10 changes in `wiz/fixer.py`. Infrastructure: post-fix syntax validation (`ast.parse` for Python, balanced delimiters for JS/TS) with auto-rollback from `.wiz.bak`, plus auto-rollback when `verify_fixes` detects new issues. Individual fixers: `_fix_loose_equality` preserves `== null` JS idiom, `_fix_insecure_http` skips localhost/internal, `_fix_console_log` requires standalone statement, `_fix_eval_usage` adds literal-only warning, `_fix_unused_variable` catches `.method()` side effects, `_fix_var_usage` skips block-scoped vars, `_fix_hardcoded_secret` skips test files, `_fix_mutable_default` places guard after docstring. 945 tests pass.
 - **2026-03-03 [Oz]**: Exe build review — all 5 areas verified, no bugs. (1) `patch_tree_sitter_for_bundled()` is correct: tested `spec_from_file_location` manually with real .pyd files — `PyInit_python` export matches module name's last component. Error cleanup on failure is correct. No init order issues (runs at `wiz/__init__.py` import time). (2) `is_bundled()` detection sufficient (`__compiled__` for Nuitka, `sys.frozen` for PyInstaller). (3) `build_exe.py` selective inclusion correct — 6 bindings + 3 separate packages. (4) `wiz init` clean UX — idempotent, smart defaults, 37 lines. (5) Scan timing + empty-dir message with `wiz init` hint working well. Also reviewed quality pass: helper extraction in semantic/core.py is clean, exception narrowing across 10+ files is correct. 945 tests pass.
 - **2026-03-03 [Claude]**: Standalone .exe distribution build. (1) `build_exe.py`: Nuitka build script — compiles Python→C→native, onefile mode, selective tree-sitter binding inclusion (6 of 170 .pyd files = ~4MB vs 170MB), no compression (avoids zstd OOM), excludes anthropic/httpx/httpcore/mcp. (2) `wiz/config.py`: Added `is_bundled()` (detects Nuitka `__compiled__`), `get_exe_path()`, `patch_tree_sitter_for_bundled()` — pre-loads .pyd C extension modules into `sys.modules` via `importlib.util.spec_from_file_location` so tree-sitter's `import_module()` call finds them. Root cause: Nuitka includes .pyd as data files but its import system blocks `import_module("tree_sitter_language_pack.bindings.python")`. ctypes fallback fails because .pyd exports `PyInit_python` not `tree_sitter_python`. Fix: manual module loading before first use. (3) `wiz/__init__.py`: Imports + calls patch at module load. (4) `wiz/__main__.py`: `wiz init` command (creates .wizignore with smart defaults), scan timing in summary, exe-mode severity default (warning vs info), empty-dir/bad-path error messages. (5) `dist/README.txt`: Quick start guide. (6) Various files: exe-mode path handling for hooks, setup-claude, etc. Build output: 36MB standalone .exe, tree-sitter works for all 6 languages, all features functional. 945 tests pass.

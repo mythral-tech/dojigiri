@@ -1,4 +1,4 @@
-"""wiz.semantic — Tree-sitter based semantic analysis subsystem."""
+"""dojigiri.semantic — Tree-sitter based semantic analysis subsystem."""
 
 from .lang_config import LanguageConfig, LANGUAGE_CONFIGS, get_config
 from .core import (

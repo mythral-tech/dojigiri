@@ -1,6 +1,6 @@
 """Tutorial mode: generate beginner-friendly explanations of code files.
 
-`wiz explain <file>` generates:
+`doji explain <file>` generates:
 - File summary (what this file does)
 - Structure breakdown (what each function/class does)
 - Design pattern recognition

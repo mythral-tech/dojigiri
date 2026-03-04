@@ -1,9 +1,9 @@
 # Genesis — Project Instructions
 
 ## What This Is
-Genesis is a shared workspace for multi-agent development. Currently contains **Wiz**, a Python static analysis + LLM code audit tool. Two Claude Code agents — **Claude** and **Oz** — collaborate here under Stephane's direction.
+Genesis is a shared workspace for multi-agent development. Currently contains **Dojigiri**, a Python static analysis + LLM code audit tool. Two Claude Code agents — **Claude** and **Oz** — collaborate here under Stephane's direction.
 
-For Wiz architecture and technical details, see `wiz/HANDOFF.md`.
+For Dojigiri architecture and technical details, see `dojigiri/HANDOFF.md`.
 
 ## Agent Collaboration Protocol
 

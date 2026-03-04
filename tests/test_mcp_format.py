@@ -1,13 +1,13 @@
 """Tests for MCP output formatting — no MCP dependency needed."""
 
 import pytest
-from wiz.config import (
+from dojigiri.config import (
     Finding, FileAnalysis, ScanReport, FixReport, Fix,
     ProjectAnalysis, CrossFileFinding,
     Severity, Category, Source, FixSource, FixStatus,
 )
-from wiz.semantic.explain import FileExplanation, ExplainSection
-from wiz.mcp_format import (
+from dojigiri.semantic.explain import FileExplanation, ExplainSection
+from dojigiri.mcp_format import (
     format_scan_report,
     format_file_findings,
     format_fix_report,

@@ -1,4 +1,4 @@
-"""Tests for the type inference engine (wiz.ts_types).
+"""Tests for the type inference engine (dojigiri.semantic.types).
 
 ~30 tests covering literal inference, constructor inference, annotation inference,
 nullable patterns, propagation, return type inference, and edge cases.
@@ -6,9 +6,9 @@ nullable patterns, propagation, return type inference, and edge cases.
 
 import pytest
 
-from wiz.semantic.core import extract_semantics
-from wiz.semantic.types import infer_types, InferredType, TypeInfo, FileTypeMap, infer_contracts
-from wiz.semantic.lang_config import get_config
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.types import infer_types, InferredType, TypeInfo, FileTypeMap, infer_contracts
+from dojigiri.semantic.lang_config import get_config
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -265,7 +265,7 @@ def f():
 def foo() -> str:
     return "hello"
 '''
-        from wiz.semantic.types import _extract_annotations_from_tree
+        from dojigiri.semantic.types import _extract_annotations_from_tree
         config = get_config("python")
         sem = extract_semantics(code, "test.py", "python")
         if sem is None:
@@ -288,7 +288,7 @@ def foo() -> str:
 def foo() -> Optional[int]:
     return None
 '''
-        from wiz.semantic.types import _extract_annotations_from_tree
+        from dojigiri.semantic.types import _extract_annotations_from_tree
         config = get_config("python")
         sem = extract_semantics(code, "test.py", "python")
         if sem is None:

@@ -1,4 +1,4 @@
-"""Tests for wiz/fixer.py — deterministic fixers, fix application, integration."""
+"""Tests for dojigiri/fixer.py — deterministic fixers, fix application, integration."""
 
 import json
 import os
@@ -8,14 +8,14 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from wiz.config import (
+from dojigiri.config import (
     Finding, Fix, FixReport, FixSource, FixStatus,
     Severity, Category, Source,
 )
-from wiz.fixer import (
+from dojigiri.fixer import (
     DETERMINISTIC_FIXERS,
     _fix_unused_import, _fix_bare_except, _fix_loose_equality,
-    _fix_var_usage, _fix_none_comparison, _fix_type_comparison,
+    _fix_none_comparison, _fix_type_comparison,
     _fix_console_log, _fix_insecure_http, _fix_fstring_no_expr,
     _fix_hardcoded_secret, _fix_open_without_with,
     _fix_yaml_unsafe, _fix_weak_hash, _fix_unreachable_code,
@@ -100,22 +100,6 @@ class TestFixLooseEquality:
 
     def test_ignores_already_strict(self):
         fix = _fix_loose_equality("    if (x === 5) {\n", _make_finding("loose-equality"), "")
-        assert fix is None
-
-
-class TestFixVarUsage:
-    def test_var_to_let(self):
-        fix = _fix_var_usage("var x = 1;\n", _make_finding("var-usage"), "")
-        assert fix is not None
-        assert fix.fixed_code.startswith("let x")
-
-    def test_preserves_indentation(self):
-        fix = _fix_var_usage("  var y = 2;\n", _make_finding("var-usage"), "")
-        assert fix is not None
-        assert fix.fixed_code.startswith("  let")
-
-    def test_ignores_non_var(self):
-        fix = _fix_var_usage("let z = 3;\n", _make_finding("var-usage"), "")
         assert fix is None
 
 
@@ -298,7 +282,7 @@ class TestApplyFixes:
         assert fp.read_text(encoding="utf-8") == original  # unchanged
 
     def test_creates_backup(self, temp_dir):
-        """Apply mode creates .wiz.bak backup."""
+        """Apply mode creates .doji.bak backup."""
         fp = temp_dir / "test.py"
         fp.write_text("import os\nx = 1\n", encoding="utf-8")
         fix = Fix(
@@ -307,7 +291,7 @@ class TestApplyFixes:
             explanation="rm", source=FixSource.DETERMINISTIC,
         )
         apply_fixes(str(fp), [fix], dry_run=False, create_backup=True)
-        backup = Path(str(fp) + ".wiz.bak")
+        backup = Path(str(fp) + ".doji.bak")
         assert backup.exists()
         assert backup.read_text(encoding="utf-8") == "import os\nx = 1\n"
 
@@ -354,7 +338,7 @@ class TestFixFile:
         fp = temp_dir / "test.py"
         fp.write_text('import os\n\ntry:\n    x = 1\nexcept:\n    pass\n', encoding="utf-8")
 
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         content = fp.read_text(encoding="utf-8")
         findings = analyze_file_static(str(fp), content, "python")
 
@@ -370,7 +354,7 @@ class TestFixFile:
         fp = temp_dir / "test.py"
         fp.write_text('import os\n\ntry:\n    x = 1\nexcept:\n    pass\n', encoding="utf-8")
 
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         content = fp.read_text(encoding="utf-8")
         findings = analyze_file_static(str(fp), content, "python")
 
@@ -393,7 +377,7 @@ class TestFixFile:
         fp = temp_dir / "test.py"
         fp.write_text('import os\nx = 1\n', encoding="utf-8")
 
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         content = fp.read_text(encoding="utf-8")
         findings = analyze_file_static(str(fp), content, "python")
 
@@ -410,8 +394,8 @@ class TestFixFile:
 
 
 def _run_wiz(*args, cwd=None, timeout=30):
-    """Run wiz CLI as subprocess."""
-    cmd = [sys.executable, "-m", "wiz"] + list(args)
+    """Run doji CLI as subprocess."""
+    cmd = [sys.executable, "-m", "dojigiri"] + list(args)
     result = subprocess.run(cmd, capture_output=True, timeout=timeout, cwd=cwd)
     stdout = result.stdout.decode("utf-8", errors="replace") if result.stdout else ""
     stderr = result.stderr.decode("utf-8", errors="replace") if result.stderr else ""
@@ -772,7 +756,7 @@ class TestNewFixerIntegration:
         fp = temp_dir / "test.py"
         fp.write_text('import yaml\ndata = yaml.load(content)\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         findings = analyze_file_static(str(fp), content, "python")
         yaml_findings = [f for f in findings if f.rule == "yaml-unsafe"]
         assert len(yaml_findings) >= 1
@@ -787,7 +771,7 @@ class TestNewFixerIntegration:
         fp = temp_dir / "test.py"
         fp.write_text('import hashlib\nh = hashlib.md5(data)\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         findings = analyze_file_static(str(fp), content, "python")
         hash_findings = [f for f in findings if f.rule == "weak-hash"]
         assert len(hash_findings) >= 1
@@ -799,7 +783,7 @@ class TestNewFixerIntegration:
         fp = temp_dir / "test.py"
         fp.write_text('def foo():\n    return 1\n    print("dead")\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         findings = analyze_file_static(str(fp), content, "python")
         dead_findings = [f for f in findings if f.rule == "unreachable-code"]
         assert len(dead_findings) >= 1
@@ -811,7 +795,7 @@ class TestNewFixerIntegration:
         fp = temp_dir / "test.py"
         fp.write_text('try:\n    risky()\nexcept Exception:\n    pass\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         findings = analyze_file_static(str(fp), content, "python")
         swallowed = [f for f in findings if f.rule == "exception-swallowed"]
         assert len(swallowed) >= 1
@@ -823,7 +807,7 @@ class TestNewFixerIntegration:
         fp = temp_dir / "test.py"
         fp.write_text('def foo(items=[]):\n    items.append(1)\n    return items\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
         findings = analyze_file_static(str(fp), content, "python")
         mutable = [f for f in findings if f.rule == "mutable-default"]
         assert len(mutable) >= 1
@@ -919,23 +903,23 @@ class TestBlankLinePreservation:
 
 class TestFixCLI:
     def test_fix_dry_run(self, temp_dir):
-        """wiz fix <file> --dry-run exits 0."""
+        """doji fix <file> --dry-run exits 0."""
         fp = temp_dir / "test.py"
         fp.write_text('import os\nx = 1\n', encoding="utf-8")
         rc, out, err = _run_wiz("fix", str(fp))
         assert rc == 0
 
     def test_fix_apply(self, temp_dir):
-        """wiz fix <file> --apply creates backup and modifies file."""
+        """doji fix <file> --apply creates backup and modifies file."""
         fp = temp_dir / "test.py"
         fp.write_text('import os\nx = 1\n', encoding="utf-8")
         rc, out, err = _run_wiz("fix", str(fp), "--apply")
         assert rc == 0
-        backup = Path(str(fp) + ".wiz.bak")
+        backup = Path(str(fp) + ".doji.bak")
         assert backup.exists()
 
     def test_fix_help(self):
-        """wiz fix --help shows all flags."""
+        """doji fix --help shows all flags."""
         rc, out, err = _run_wiz("fix", "--help")
         assert rc == 0
         assert "--apply" in out

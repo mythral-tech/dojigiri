@@ -41,7 +41,7 @@ def _confirm_llm_usage(args) -> bool:
     return response in ("y", "yes")
 
 
-_DEFAULT_WIZIGNORE = """\
+_DEFAULT_DOJI_IGNORE = """\
 # Build artifacts
 build/
 dist/
@@ -83,16 +83,16 @@ __pycache__/
 
 
 def cmd_init(args: argparse.Namespace) -> int:
-    """Create starter .wizignore in the current directory."""
+    """Create starter .doji-ignore in the current directory."""
     root = Path(".").resolve()
 
-    wizignore = root / ".wizignore"
-    if wizignore.exists():
-        print(f".wizignore already exists at {wizignore}")
+    ignorefile = root / ".doji-ignore"
+    if ignorefile.exists():
+        print(f".doji-ignore already exists at {ignorefile}")
         return 0
 
-    wizignore.write_text(_DEFAULT_WIZIGNORE, encoding="utf-8")
-    print(f"Created {wizignore}")
+    ignorefile.write_text(_DEFAULT_DOJI_IGNORE, encoding="utf-8")
+    print(f"Created {ignorefile}")
     print("Edit it to exclude folders you don't want scanned.")
     return 0
 
@@ -110,7 +110,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
         print(f"Supported: {', '.join(sorted(set(LANGUAGE_EXTENSIONS.values())))}")
         return 1
 
-    # Load project config from .wiz.toml (if exists)
+    # Load project config from .doji.toml (if exists)
     scan_root = root if root.is_dir() else root.parent
     project_config = load_project_config(scan_root)
     custom_rules = compile_custom_rules(project_config)
@@ -276,7 +276,7 @@ def _auto_discover_imports_v2(filepath: str, content: str, lang: str) -> dict[st
         # Try to find the actual project root (look for common markers)
         for parent in [fp.parent] + list(fp.parents):
             if any((parent / marker).exists() for marker in
-                   [".git", "pyproject.toml", "setup.py", "package.json", ".wiz.toml"]):
+                   [".git", "pyproject.toml", "setup.py", "package.json", ".doji.toml"]):
                 project_root = parent
                 break
 
@@ -676,7 +676,7 @@ def cmd_report(args: argparse.Namespace) -> int:
     data = load_latest_report()
     if not data:
         print("No scan reports found. Run a scan first:")
-        print("  python -m wiz scan .")
+        print("  python -m dojigiri scan .")
         return 1
 
     print(f"\nLatest report: {data.get('timestamp', 'unknown')}")
@@ -728,7 +728,7 @@ def cmd_cost(args: argparse.Namespace) -> int:
 
 
 def cmd_hook(args: argparse.Namespace) -> int:
-    """Install or uninstall wiz pre-commit hook."""
+    """Install or uninstall doji pre-commit hook."""
     from .hooks import install_hook, uninstall_hook
 
     root = Path(".").resolve()
@@ -859,7 +859,7 @@ def cmd_mcp(args: argparse.Namespace) -> int:
         from .mcp_server import mcp as mcp_app
     except ImportError:
         print("Error: MCP support requires the 'mcp' package.", file=sys.stderr)
-        print("Install with: pip install wiz-scan[mcp]", file=sys.stderr)
+        print("Install with: pip install dojigiri[mcp]", file=sys.stderr)
         return 1
     mcp_app.run()
     return 0
@@ -872,7 +872,7 @@ def cmd_setup_claude(args: argparse.Namespace) -> int:
     if is_bundled():
         config = {
             "mcpServers": {
-                "wiz": {
+                "dojigiri": {
                     "command": str(get_exe_path()),
                     "args": ["mcp"],
                 }
@@ -881,9 +881,9 @@ def cmd_setup_claude(args: argparse.Namespace) -> int:
     else:
         config = {
             "mcpServers": {
-                "wiz": {
+                "dojigiri": {
                     "command": "python",
-                    "args": ["-m", "wiz", "mcp"],
+                    "args": ["-m", "dojigiri", "mcp"],
                 }
             }
         }
@@ -894,35 +894,35 @@ def cmd_setup_claude(args: argparse.Namespace) -> int:
     print("---")
     print()
     print("Optionally add this to your CLAUDE.md:\n")
-    print("""## Wiz Static Analyzer (MCP)
+    print("""## Dojigiri Static Analyzer (MCP)
 
-You have access to Wiz via MCP tools. Use them proactively:
+You have access to Dojigiri via MCP tools. Use them proactively:
 
-- **wiz_scan** — Scan files/dirs for bugs, security issues, code quality.
+- **doji_scan** — Scan files/dirs for bugs, security issues, code quality.
   Use after writing code or when reviewing a project.
-- **wiz_scan_file** — Quick single-file scan. Faster for one file.
-- **wiz_fix** — Preview available auto-fixes (dry run). Apply with Edit tool.
-- **wiz_explain** — Understand file structure, patterns, and design.
-- **wiz_analyze_project** — Cross-file analysis: dependencies, dead code, cycles.
+- **doji_scan_file** — Quick single-file scan. Faster for one file.
+- **doji_fix** — Preview available auto-fixes (dry run). Apply with Edit tool.
+- **doji_explain** — Understand file structure, patterns, and design.
+- **doji_analyze_project** — Cross-file analysis: dependencies, dead code, cycles.
 
-When to use Wiz vs your own analysis:
-- Wiz catches systematic issues (taint flow, null deref, scope bugs) that are
+When to use Dojigiri vs your own analysis:
+- Dojigiri catches systematic issues (taint flow, null deref, scope bugs) that are
   easy to miss in manual review. Use it as a second pair of eyes.
-- For security-sensitive code, always run wiz_scan.
+- For security-sensitive code, always run doji_scan.
 - After fixing issues, re-scan to verify they're resolved.""")
     return 0
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        prog="wiz",
-        description="Code debugging & optimization agent",
+        prog="doji",
+        description="Dojigiri — static analysis engine",
     )
-    parser.add_argument("--version", action="version", version=f"wiz {__version__}")
+    parser.add_argument("--version", action="version", version=f"dojigiri {__version__}")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # init
-    p_init = subparsers.add_parser("init", help="Create starter .wizignore file")
+    p_init = subparsers.add_parser("init", help="Create starter .doji-ignore file")
     p_init.set_defaults(func=cmd_init)
 
     # scan
@@ -943,7 +943,7 @@ def main() -> None:
                          help="Output format: text (console), json (CI/CD), sarif (GitHub Code Scanning)")
     p_scan.add_argument("--baseline", help="Compare against baseline (use 'latest' or report path)")
     p_scan.add_argument("--workers", type=int, default=None, metavar="N",
-                         help="Number of parallel workers for quick scan (default: 4 or from .wiz.toml, use 1 for sequential)")
+                         help="Number of parallel workers for quick scan (default: 4 or from .doji.toml, use 1 for sequential)")
     p_scan.add_argument("--accept-remote", action="store_true",
                          help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_scan.set_defaults(func=cmd_scan)
@@ -979,7 +979,7 @@ def main() -> None:
     p_fix.add_argument("--llm", action="store_true",
                         help="Include LLM-generated fixes (costs money)")
     p_fix.add_argument("--no-backup", action="store_true",
-                        help="Skip creating .wiz.bak backup files (backups accumulate and are not auto-cleaned)")
+                        help="Skip creating .doji.bak backup files (backups accumulate and are not auto-cleaned)")
     p_fix.add_argument("--no-verify", action="store_true",
                         help="Skip re-scanning file after applying fixes")
     p_fix.add_argument("--rules",
@@ -1031,9 +1031,9 @@ def main() -> None:
     # hook
     p_hook = subparsers.add_parser("hook", help="Manage pre-commit hook")
     p_hook.add_argument("hook_action", choices=["install", "uninstall"],
-                         help="Install or uninstall wiz pre-commit hook")
+                         help="Install or uninstall doji pre-commit hook")
     p_hook.add_argument("--force", action="store_true",
-                         help="Overwrite existing non-wiz hooks")
+                         help="Overwrite existing non-doji hooks")
     p_hook.set_defaults(func=cmd_hook)
 
     # setup

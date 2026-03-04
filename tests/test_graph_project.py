@@ -1,11 +1,11 @@
-"""Tests for wiz/project.py — project analysis orchestrator."""
+"""Tests for dojigiri/project.py — project analysis orchestrator."""
 
 import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from wiz.graph.project import (
+from dojigiri.graph.project import (
     analyze_project,
     _extract_signatures_python,
     _extract_signatures_js,
@@ -13,8 +13,8 @@ from wiz.graph.project import (
     _select_context_for_file,
     _format_graph_summary,
 )
-from wiz.graph.depgraph import build_dependency_graph, compute_metrics, DepGraph, FileNode
-from wiz.config import ProjectAnalysis, CrossFileFinding, Severity, Category
+from dojigiri.graph.depgraph import build_dependency_graph, compute_metrics, DepGraph, FileNode
+from dojigiri.config import ProjectAnalysis, CrossFileFinding, Severity, Category
 
 
 # ─── No-LLM mode ────────────────────────────────────────────────────
@@ -186,14 +186,14 @@ class TestGraphSummary:
 # ─── Mocked LLM analysis ────────────────────────────────────────────
 
 class TestMockedLLMAnalysis:
-    @patch("wiz.llm.analyze_file_with_context")
-    @patch("wiz.llm.synthesize_project")
+    @patch("dojigiri.llm.analyze_file_with_context")
+    @patch("dojigiri.llm.synthesize_project")
     def test_cross_file_findings_parsed(self, mock_synth, mock_analyze, temp_dir):
         """Cross-file findings from LLM are correctly parsed."""
         (temp_dir / "a.py").write_text("import b\nfoo()\n")
         (temp_dir / "b.py").write_text("def foo(x): return x\n")
 
-        from wiz.llm import CostTracker
+        from dojigiri.llm import CostTracker
         tracker = CostTracker()
 
         # First call (b.py, no deps) returns nothing, second call (a.py) returns finding
@@ -231,13 +231,13 @@ class TestMockedLLMAnalysis:
         assert cf.rule == "missing-argument"
         assert cf.severity == Severity.CRITICAL
 
-    @patch("wiz.llm.analyze_file_with_context")
-    @patch("wiz.llm.synthesize_project")
+    @patch("dojigiri.llm.analyze_file_with_context")
+    @patch("dojigiri.llm.synthesize_project")
     def test_synthesis_returned(self, mock_synth, mock_analyze, temp_dir):
         """Synthesis dict is included in result."""
         (temp_dir / "a.py").write_text("x = 1\n")
 
-        from wiz.llm import CostTracker
+        from dojigiri.llm import CostTracker
         tracker = CostTracker()
 
         mock_analyze.return_value = ({"cross_file_findings": [], "local_findings": []}, tracker)

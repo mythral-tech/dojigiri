@@ -333,6 +333,7 @@ class Fix:
     source: FixSource
     end_line: Optional[int] = None  # last line of range (inclusive), None = single line
     status: FixStatus = FixStatus.PENDING
+    fail_reason: Optional[str] = None  # why the fix failed (for user diagnostics)
 
     def to_dict(self) -> dict:
         d = {
@@ -347,6 +348,8 @@ class Fix:
         }
         if self.end_line is not None:
             d["end_line"] = self.end_line
+        if self.fail_reason is not None:
+            d["fail_reason"] = self.fail_reason
         return d
 
 
@@ -407,7 +410,7 @@ CHUNK_SIZE = 400  # lines per chunk
 CHUNK_OVERLAP = 30  # overlap lines between chunks
 
 # Storage
-STORAGE_DIR = Path.home() / ".wiz"
+STORAGE_DIR = Path.home() / ".dojigiri"
 REPORTS_DIR = STORAGE_DIR / "reports"
 CACHE_FILE = STORAGE_DIR / "file_cache.json"
 
@@ -482,8 +485,8 @@ def get_api_key() -> Optional[str]:
 
 
 def load_ignore_patterns(root: Path) -> list[str]:
-    """Load .wizignore file from project root. Returns fnmatch patterns."""
-    ignore_file = root / ".wizignore"
+    """Load .doji-ignore file from project root. Returns fnmatch patterns."""
+    ignore_file = root / ".doji-ignore"
     if not ignore_file.exists():
         return []
     patterns = []
@@ -495,7 +498,7 @@ def load_ignore_patterns(root: Path) -> list[str]:
 
 
 def load_project_config(root: Path) -> dict:
-    """Load .wiz.toml config file from project root.
+    """Load .doji.toml config file from project root.
 
     Returns a dict with config options:
     - ignore_rules: list of rule names to suppress
@@ -514,14 +517,14 @@ def load_project_config(root: Path) -> dict:
         except ImportError:
             return {}  # No TOML support, skip config
 
-    config_file = root / ".wiz.toml"
+    config_file = root / ".doji.toml"
     if not config_file.exists():
         return {}
 
     try:
         with open(config_file, "rb") as f:
             data = tomllib.load(f)
-        return data.get("wiz", {})
+        return data.get("dojigiri", {})
     except (ValueError, OSError, KeyError) as e:  # TOMLDecodeError is subclass of ValueError
         logger.warning("Could not parse %s: %s", config_file, e)
         return {}
@@ -556,7 +559,7 @@ def _is_safe_regex(pattern_str: str) -> bool:
 
 
 def compile_custom_rules(config: dict) -> list[CustomRule]:
-    """Compile custom rules from .wiz.toml config into regex tuples.
+    """Compile custom rules from .doji.toml config into regex tuples.
 
     Each rule in config["rules"] should have:
       - pattern: str (regex pattern, required)

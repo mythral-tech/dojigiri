@@ -1,9 +1,9 @@
-"""Tests for wiz/depgraph.py — dependency graph engine."""
+"""Tests for dojigiri/depgraph.py — dependency graph engine."""
 
 import pytest
 from pathlib import Path
 
-from wiz.graph.depgraph import (
+from dojigiri.graph.depgraph import (
     build_dependency_graph, compute_metrics,
     DepGraph, FileNode, GraphMetrics,
     _resolve_python_imports, _resolve_js_ts_imports,

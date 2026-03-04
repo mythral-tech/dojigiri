@@ -1,9 +1,9 @@
-"""Tests for micro-query features in wiz.llm_focus."""
+"""Tests for micro-query features in dojigiri.llm_focus."""
 
 import pytest
 
-from wiz.config import Finding, Severity, Category, Source
-from wiz.llm_focus import build_micro_queries, MicroQuery
+from dojigiri.config import Finding, Severity, Category, Source
+from dojigiri.llm_focus import build_micro_queries, MicroQuery
 
 
 def _make_finding(

@@ -1,7 +1,7 @@
 """Cross-language AST checks powered by tree-sitter.
 
 Optional dependency — returns empty results when tree-sitter is not installed.
-Install with: pip install wiz[ast]
+Install with: pip install dojigiri[ast]
 """
 
 import re

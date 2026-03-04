@@ -2,11 +2,11 @@
 
 import pytest
 
-from wiz.config import Severity, Category, Source
-from wiz.semantic.core import extract_semantics
-from wiz.semantic.cfg import build_cfg
-from wiz.semantic.resource import check_resource_leaks
-from wiz.semantic.lang_config import get_config
+from dojigiri.config import Severity, Category, Source
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.cfg import build_cfg
+from dojigiri.semantic.resource import check_resource_leaks
+from dojigiri.semantic.lang_config import get_config
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -306,7 +306,7 @@ def noop():
 
     def test_no_cfg_available_returns_empty(self):
         """When no CFG is available, check_resource_leaks should return []."""
-        from wiz.semantic.core import FileSemantics
+        from dojigiri.semantic.core import FileSemantics
         config = get_config("python")
         sem = FileSemantics(filepath="test.py", language="python")
         source_bytes = b"def f(): pass"

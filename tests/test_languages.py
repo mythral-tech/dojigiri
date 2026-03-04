@@ -2,7 +2,7 @@
 
 import pytest
 import re
-from wiz.languages import (
+from dojigiri.languages import (
     get_rules_for_language,
     UNIVERSAL_RULES,
     PYTHON_RULES,
@@ -11,7 +11,7 @@ from wiz.languages import (
     RUST_RULES,
     SECURITY_RULES,
 )
-from wiz.config import Severity, Category
+from dojigiri.config import Severity, Category
 
 
 def test_get_rules_for_language_python():
@@ -372,7 +372,7 @@ def test_python_weak_random():
 def test_javascript_var_usage_removed():
     """Test that var-usage rule has been removed (it's a style opinion, not a bug).
 
-    Users who want it can add it as a custom rule via .wiz.toml.
+    Users who want it can add it as a custom rule via .doji.toml.
     """
     rules = get_rules_for_language("javascript")
     rule_names = {r[3] for r in rules}

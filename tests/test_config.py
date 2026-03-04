@@ -3,7 +3,7 @@
 import pytest
 import os
 from pathlib import Path
-from wiz.config import (
+from dojigiri.config import (
     Finding, FileAnalysis, ScanReport,
     Severity, Category, Source,
     get_api_key, load_ignore_patterns,
@@ -271,14 +271,14 @@ def test_get_api_key_set():
 
 
 def test_load_ignore_patterns_no_file(temp_dir):
-    """Test load_ignore_patterns when .wizignore doesn't exist."""
+    """Test load_ignore_patterns when .doji-ignore doesn't exist."""
     patterns = load_ignore_patterns(temp_dir)
     assert patterns == []
 
 
 def test_load_ignore_patterns_with_patterns(temp_dir):
-    """Test load_ignore_patterns with a .wizignore file."""
-    wizignore = temp_dir / ".wizignore"
+    """Test load_ignore_patterns with a .doji-ignore file."""
+    wizignore = temp_dir / ".doji-ignore"
     wizignore.write_text(
         "*.log\n"
         "test_*.py\n"
@@ -302,7 +302,7 @@ def test_load_ignore_patterns_with_patterns(temp_dir):
 
 def test_load_ignore_patterns_whitespace_handling(temp_dir):
     """Test that load_ignore_patterns strips whitespace."""
-    wizignore = temp_dir / ".wizignore"
+    wizignore = temp_dir / ".doji-ignore"
     wizignore.write_text(
         "  *.log  \n"
         "\t*.tmp\t\n"
@@ -420,7 +420,7 @@ def test_redos_rejected_in_compile_custom_rules(caplog):
             "message": "This is unsafe",
         }]
     }
-    with caplog.at_level("WARNING", logger="wiz.config"):
+    with caplog.at_level("WARNING", logger="dojigiri.config"):
         rules = compile_custom_rules(config)
     assert len(rules) == 0
     assert "ReDoS" in caplog.text

@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import patch
 
-from wiz.config import Severity, Category, Source
-from wiz.semantic.lang_config import get_config, LANGUAGE_CONFIGS
-from wiz.semantic.checks import (
+from dojigiri.config import Severity, Category, Source
+from dojigiri.semantic.lang_config import get_config, LANGUAGE_CONFIGS
+from dojigiri.semantic.checks import (
     run_tree_sitter_checks,
     check_unused_imports,
     check_unreachable_code,
@@ -349,7 +349,7 @@ class TestFallback:
         with patch.dict("sys.modules", {"tree_sitter_language_pack": None}):
             # Force reimport to pick up the mock
             import importlib
-            from wiz.semantic import checks as ts_checks
+            from dojigiri.semantic import checks as ts_checks
             importlib.reload(ts_checks)
             result = ts_checks.run_tree_sitter_checks(
                 "import os\n", "test.py", "python"
@@ -412,7 +412,7 @@ class TestIntegration:
 
     def test_python_parity_unused_imports(self):
         """Tree-sitter should find the same unused imports as Python AST."""
-        from wiz.detector import run_python_ast_checks
+        from dojigiri.detector import run_python_ast_checks
 
         code = "import os\nimport sys\nimport json\nresult = os.getcwd()\n"
 
@@ -430,7 +430,7 @@ class TestIntegration:
 
     def test_python_parity_unreachable_code(self):
         """Tree-sitter should find unreachable code same as Python AST."""
-        from wiz.detector import run_python_ast_checks
+        from dojigiri.detector import run_python_ast_checks
 
         code = "def f():\n    return 1\n    print('dead')\n"
 
@@ -445,7 +445,7 @@ class TestIntegration:
 
     def test_detector_integration_with_tree_sitter(self):
         """analyze_file_static should use tree-sitter when available."""
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
 
         code = (
             "import os\nimport sys\n\n"
@@ -459,7 +459,7 @@ class TestIntegration:
 
     def test_javascript_gets_ast_findings(self):
         """JavaScript should get AST findings from tree-sitter."""
-        from wiz.detector import analyze_file_static
+        from dojigiri.detector import analyze_file_static
 
         code = "function f() {\n    return 1;\n    console.log('dead');\n}\n"
         findings = analyze_file_static("test.js", code, "javascript")

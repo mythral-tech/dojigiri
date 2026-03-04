@@ -2,9 +2,9 @@
 
 import pytest
 
-from wiz.semantic.core import extract_semantics
-from wiz.semantic.cfg import build_cfg, get_reverse_postorder, BasicBlock, FunctionCFG, CfgStatement
-from wiz.semantic.lang_config import get_config
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.cfg import build_cfg, get_reverse_postorder, BasicBlock, FunctionCFG, CfgStatement
+from dojigiri.semantic.lang_config import get_config
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -169,8 +169,8 @@ def bar():
 
     def test_no_cfg_types_configured_returns_empty(self):
         """When no cfg_if/for node types are configured, should return empty."""
-        from wiz.semantic.lang_config import LanguageConfig
-        from wiz.semantic.core import FileSemantics
+        from dojigiri.semantic.lang_config import LanguageConfig
+        from dojigiri.semantic.core import FileSemantics
 
         # Create a minimal config with no CFG types
         config = LanguageConfig(ts_language_name="python")

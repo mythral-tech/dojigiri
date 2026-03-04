@@ -1,4 +1,4 @@
-"""Build Wiz as a standalone .exe using Nuitka.
+"""Build Dojigiri as a standalone .exe using Nuitka.
 
 Prerequisites:
     pip install nuitka zstandard
@@ -8,14 +8,14 @@ Usage:
     python build_exe.py
 
 Output:
-    dist/wiz.exe
+    dist/doji.exe
 """
 
 import subprocess
 import sys
 from pathlib import Path
 
-# The 6 language bindings Wiz uses from tree_sitter_language_pack/bindings/
+# The 6 language bindings Dojigiri uses from tree_sitter_language_pack/bindings/
 # (csharp comes from the separate tree_sitter_c_sharp package)
 NEEDED_BINDINGS = ["python", "javascript", "typescript", "go", "rust", "java"]
 
@@ -48,13 +48,13 @@ cmd = [
     sys.executable, "-m", "nuitka",
     "--mode=onefile",
     "--output-dir=dist",
-    "--output-filename=wiz.exe",
+    "--output-filename=doji.exe",
     "--python-flag=-m",
     "--assume-yes-for-downloads",
     "--onefile-no-compression",
 
-    # Bundle all wiz code (compiled to C)
-    "--include-package=wiz",
+    # Bundle all dojigiri code (compiled to C)
+    "--include-package=dojigiri",
 
     # Bundle tree-sitter core
     "--include-package=tree_sitter",
@@ -88,8 +88,8 @@ cmd += _build_data_file_args()
 
 cmd += [
     # Product metadata (Windows)
-    "--company-name=Wiz",
-    "--product-name=Wiz Code Scanner",
+    "--company-name=Dojigiri",
+    "--product-name=Dojigiri Static Analyzer",
     "--product-version=1.0.0",
     "--file-description=Static analysis and code quality tool",
 
@@ -97,16 +97,16 @@ cmd += [
     "--windows-console-mode=force",
 
     # Entry point
-    "wiz",
+    "dojigiri",
 ]
 
-print("Building wiz.exe with Nuitka...")
+print("Building doji.exe with Nuitka...")
 print("This takes 5-10 minutes on first build.\n")
 print(f"Command: {' '.join(cmd)}\n")
 
 result = subprocess.run(cmd)
 if result.returncode == 0:
-    print("\nBuild successful! Output: dist/wiz.exe")
+    print("\nBuild successful! Output: dist/doji.exe")
 else:
     print(f"\nBuild failed with exit code {result.returncode}", file=sys.stderr)
     sys.exit(result.returncode)

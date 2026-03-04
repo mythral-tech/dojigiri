@@ -1,28 +1,28 @@
-# wiz
+# dojigiri
 
 Static analysis + LLM-powered code audit tool. 820+ tests, 12,500 lines, 28 modules.
 
-Wiz combines regex pattern matching, Python AST checks, and tree-sitter semantic analysis with optional Claude AI deep scans. It catches bugs, security issues, performance problems, and code smells across 7 languages — then optionally fixes them.
+Dojigiri combines regex pattern matching, Python AST checks, and tree-sitter semantic analysis with optional Claude AI deep scans. It catches bugs, security issues, performance problems, and code smells across 7 languages — then optionally fixes them.
 
 ## Quick Start
 
 ```bash
-pip install wiz-scan
+pip install dojigiri
 
 # Scan a project (free, instant)
-wiz scan .
+doji scan .
 
 # Scan with auto-fix (dry run by default)
-wiz fix .
+doji fix .
 
 # Deep scan with Claude AI (requires API key)
 export ANTHROPIC_API_KEY="sk-..."
-wiz scan . --deep --accept-remote
+doji scan . --deep --accept-remote
 ```
 
-## What Wiz Catches That Others Don't
+## What Dojigiri Catches That Others Don't
 
-| Capability | ruff | semgrep | wiz |
+| Capability | ruff | semgrep | dojigiri |
 |---|---|---|---|
 | Regex pattern rules | - | Yes | Yes (40+) |
 | AST-based checks | Yes | Yes | Yes |
@@ -35,7 +35,7 @@ wiz scan . --deep --accept-remote
 | Auto-fix (deterministic + LLM) | Yes | Yes | Yes |
 | SARIF output for GitHub | - | Yes | Yes |
 
-Wiz's tree-sitter engine builds control flow graphs, runs fixed-point dataflow analysis, and tracks taint through branches and sanitizers. The LLM layer adds context-aware analysis that static tools can't do.
+Dojigiri's tree-sitter engine builds control flow graphs, runs fixed-point dataflow analysis, and tracks taint through branches and sanitizers. The LLM layer adds context-aware analysis that static tools can't do.
 
 ## Languages
 
@@ -47,43 +47,43 @@ Tree-sitter semantic analysis (taint flow, null safety, type inference, CFG) is 
 
 ```bash
 # Scanning
-wiz scan <path>                    # Quick scan (static only, free)
-wiz scan <path> --deep             # Deep scan (static + Claude AI)
-wiz scan <path> --diff             # Only scan lines changed vs git main/master
-wiz scan <path> --lang python      # Filter by language
-wiz scan <path> --no-cache         # Skip file hash cache
+doji scan <path>                    # Quick scan (static only, free)
+doji scan <path> --deep             # Deep scan (static + Claude AI)
+doji scan <path> --diff             # Only scan lines changed vs git main/master
+doji scan <path> --lang python      # Filter by language
+doji scan <path> --no-cache         # Skip file hash cache
 
 # Filtering
-wiz scan . --ignore todo-marker,console-log
-wiz scan . --min-severity warning
-wiz scan . --min-confidence medium
-wiz scan . --baseline latest       # Show only NEW findings vs last scan
+doji scan . --ignore todo-marker,console-log
+doji scan . --min-severity warning
+doji scan . --min-confidence medium
+doji scan . --baseline latest       # Show only NEW findings vs last scan
 
 # Output formats
-wiz scan . --output json           # JSON for CI/CD
-wiz scan . --output sarif          # SARIF for GitHub Code Scanning
+doji scan . --output json           # JSON for CI/CD
+doji scan . --output sarif          # SARIF for GitHub Code Scanning
 
 # Auto-fix
-wiz fix <path>                     # Dry run — show what would change
-wiz fix <path> --apply             # Apply fixes
-wiz fix <path> --apply --llm       # Include LLM-generated fixes
-wiz fix <path> --rules bare-except,unused-import
+doji fix <path>                     # Dry run — show what would change
+doji fix <path> --apply             # Apply fixes
+doji fix <path> --apply --llm       # Include LLM-generated fixes
+doji fix <path> --rules bare-except,unused-import
 
 # Project analysis (cross-file)
-wiz analyze <dir>                  # Dependency graph + cross-file issues
-wiz analyze <dir> --no-llm         # Graph only (free, no API key)
+doji analyze <dir>                  # Dependency graph + cross-file issues
+doji analyze <dir> --no-llm         # Graph only (free, no API key)
 
 # Single-file deep dive
-wiz debug <file>                   # Bug hunting with Claude
-wiz debug <file> --context auto    # Include related files automatically
-wiz optimize <file>                # Performance suggestions
-wiz explain <file>                 # Beginner-friendly code walkthrough
+doji debug <file>                   # Bug hunting with Claude
+doji debug <file> --context auto    # Include related files automatically
+doji optimize <file>                # Performance suggestions
+doji explain <file>                 # Beginner-friendly code walkthrough
 
 # Utilities
-wiz report                         # Show latest scan results
-wiz cost <path>                    # Estimate deep scan cost
-wiz hook install                   # Add pre-commit hook
-wiz setup                          # Check environment
+doji report                         # Show latest scan results
+doji cost <path>                    # Estimate deep scan cost
+doji hook install                   # Add pre-commit hook
+doji setup                          # Check environment
 ```
 
 ## What It Detects
@@ -117,15 +117,15 @@ wiz setup                          # Check environment
 
 ## Configuration
 
-### .wiz.toml
+### .doji.toml
 
 ```toml
-[wiz]
+[dojigiri]
 ignore_rules = ["todo-marker", "console-log"]
 min_severity = "warning"
 workers = 8
 
-[[wiz.rules]]
+[[dojigiri.rules]]
 pattern = "<<<<<<< "
 name = "merge-conflict"
 message = "Unresolved merge conflict marker"
@@ -133,7 +133,7 @@ severity = "critical"
 category = "bug"
 ```
 
-### .wizignore
+### .doji-ignore
 
 ```
 *.log
@@ -150,7 +150,7 @@ name: Code Scan
 on: [pull_request]
 
 jobs:
-  wiz:
+  dojigiri:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -158,10 +158,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: pip install wiz-scan
+      - run: pip install dojigiri
 
       - name: Scan for issues
-        run: wiz scan . --output sarif --accept-remote > results.sarif
+        run: doji scan . --output sarif --accept-remote > results.sarif
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
@@ -173,23 +173,23 @@ jobs:
 
 ```bash
 # On main branch — establish baseline
-wiz scan .
+doji scan .
 
 # On feature branch — show only new issues
-wiz scan . --baseline latest
+doji scan . --baseline latest
 ```
 
 ### Pre-commit hook
 
 ```bash
-wiz hook install    # Adds wiz to .git/hooks/pre-commit
-wiz hook uninstall  # Removes it
+doji hook install    # Adds doji to .git/hooks/pre-commit
+doji hook uninstall  # Removes it
 ```
 
 ## Architecture
 
 ```
-wiz/
+dojigiri/
 ├── __main__.py          CLI: scan, debug, optimize, analyze, fix, explain
 ├── analyzer.py          Scan orchestration, file collection, caching
 ├── detector.py          Static analysis engine (regex + AST + tree-sitter)

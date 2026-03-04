@@ -6,7 +6,7 @@ import sys
 import pytest
 from unittest.mock import patch, MagicMock
 
-from wiz.llm import (
+from dojigiri.llm import (
     _parse_python_traceback,
     _format_static_findings_for_llm,
     _parse_debug_response,
@@ -15,7 +15,7 @@ from wiz.llm import (
     optimize_file,
     CostTracker,
 )
-from wiz.config import Finding, Severity, Category, Source, Confidence
+from dojigiri.config import Finding, Severity, Category, Source, Confidence
 
 
 # ─── Fixtures ──────────────────────────────────────────────────────────
@@ -215,7 +215,7 @@ def test_merge_deduplicates_findings():
 
 # ─── debug_file Mocked ─────────────────────────────────────────────────
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_basic(mock_get_client, mock_response):
     """Test basic debug_file returns structured result."""
     llm_output = json.dumps({
@@ -240,7 +240,7 @@ def test_debug_file_basic(mock_get_client, mock_response):
     assert tracker.total_input_tokens == 100
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_with_error(mock_get_client, mock_response):
     """Test debug_file includes error message in prompt."""
     llm_output = json.dumps({"summary": "TypeError", "findings": [], "quick_wins": []})
@@ -258,7 +258,7 @@ def test_debug_file_with_error(mock_get_client, mock_response):
     assert "TypeError" in user_msg
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_with_traceback(mock_get_client, mock_response):
     """Test debug_file parses Python traceback and highlights lines."""
     traceback = '''Traceback (most recent call last):
@@ -278,7 +278,7 @@ ValueError: nope'''
     assert "10" in user_msg
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_with_static_findings(mock_get_client, mock_response, sample_findings):
     """Test debug_file includes static findings in prompt."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
@@ -294,7 +294,7 @@ def test_debug_file_with_static_findings(mock_get_client, mock_response, sample_
     assert "Static analysis already found" in user_msg
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_raw_markdown_fallback(mock_get_client, mock_response):
     """Test debug_file falls back to raw_markdown when JSON parsing fails."""
     mock_client = MagicMock()
@@ -308,7 +308,7 @@ def test_debug_file_raw_markdown_fallback(mock_get_client, mock_response):
     assert "Root Cause" in result["raw_markdown"]
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_uses_8192_tokens(mock_get_client, mock_response):
     """Test debug_file uses LLM_DEBUG_MAX_TOKENS (8192)."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
@@ -322,7 +322,7 @@ def test_debug_file_uses_8192_tokens(mock_get_client, mock_response):
     assert call_kwargs.kwargs["max_tokens"] == 8192
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_includes_language_hints(mock_get_client, mock_response):
     """Test debug_file injects language-specific hints into system prompt."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
@@ -339,7 +339,7 @@ def test_debug_file_includes_language_hints(mock_get_client, mock_response):
 
 # ─── optimize_file Mocked ──────────────────────────────────────────────
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_optimize_file_basic(mock_get_client, mock_response):
     """Test basic optimize_file returns structured result."""
     llm_output = json.dumps({
@@ -362,7 +362,7 @@ def test_optimize_file_basic(mock_get_client, mock_response):
     assert result["findings"][0]["title"] == "Slow loop"
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_optimize_file_with_static_findings(mock_get_client, mock_response, sample_perf_findings):
     """Test optimize_file only passes perf-relevant static findings."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
@@ -382,7 +382,7 @@ def test_optimize_file_with_static_findings(mock_get_client, mock_response, samp
         # (it might still appear if it matched the rule filter, but the key is the filter ran)
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_optimize_file_uses_8192_tokens(mock_get_client, mock_response):
     """Test optimize_file uses LLM_OPTIMIZE_MAX_TOKENS (8192)."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
@@ -396,7 +396,7 @@ def test_optimize_file_uses_8192_tokens(mock_get_client, mock_response):
     assert call_kwargs.kwargs["max_tokens"] == 8192
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_optimize_file_raw_markdown_fallback(mock_get_client, mock_response):
     """Test optimize_file falls back to raw_markdown when JSON fails."""
     mock_client = MagicMock()
@@ -411,7 +411,7 @@ def test_optimize_file_raw_markdown_fallback(mock_get_client, mock_response):
 
 # ─── Chunking Integration ──────────────────────────────────────────────
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_debug_file_chunks_large_file(mock_get_client, mock_response):
     """Test debug_file chunks large files (>400 lines) into multiple API calls."""
     # Create a 500-line file
@@ -428,7 +428,7 @@ def test_debug_file_chunks_large_file(mock_get_client, mock_response):
     assert mock_client.messages.create.call_count >= 2
 
 
-@patch("wiz.llm._get_client")
+@patch("dojigiri.llm._get_client")
 def test_optimize_file_chunks_large_file(mock_get_client, mock_response):
     """Test optimize_file chunks large files into multiple API calls."""
     code = "\n".join([f"y_{i} = {i}" for i in range(500)])
@@ -446,8 +446,8 @@ def test_optimize_file_chunks_large_file(mock_get_client, mock_response):
 # ─── CLI Integration ──────────────────────────────────────────────────
 
 def _run_wiz(*args, timeout=30):
-    """Run wiz CLI as subprocess."""
-    cmd = [sys.executable, "-m", "wiz"] + list(args)
+    """Run doji CLI as subprocess."""
+    cmd = [sys.executable, "-m", "dojigiri"] + list(args)
     result = subprocess.run(cmd, capture_output=True, timeout=timeout)
     stdout = result.stdout.decode("utf-8", errors="replace") if result.stdout else ""
     stderr = result.stderr.decode("utf-8", errors="replace") if result.stderr else ""

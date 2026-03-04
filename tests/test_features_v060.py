@@ -13,13 +13,13 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from wiz.config import (
+from dojigiri.config import (
     Finding, FileAnalysis, Fix, FixReport, FixSource, FixStatus,
     Severity, Category, Source, Confidence,
     compile_custom_rules, load_project_config,
 )
-from wiz.detector import run_regex_checks, analyze_file_static
-from wiz.llm import CostTracker
+from dojigiri.detector import run_regex_checks, analyze_file_static
+from dojigiri.llm import CostTracker
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -102,7 +102,7 @@ class TestCompileCustomRules:
                 "message": "Bad regex",
             }]
         }
-        with caplog.at_level("WARNING", logger="wiz.config"):
+        with caplog.at_level("WARNING", logger="dojigiri.config"):
             rules = compile_custom_rules(config)
         assert len(rules) == 0
         assert "invalid regex" in caplog.text
@@ -199,7 +199,7 @@ class TestFixVerification:
 
     def test_no_new_issues(self, tmp_path):
         """File with fixed issue shows resolved count and no new issues."""
-        from wiz.fixer import verify_fixes
+        from dojigiri.fixer import verify_fixes
 
         filepath = tmp_path / "test.py"
         filepath.write_text("x = 1\nprint(x)\n", encoding="utf-8")
@@ -217,7 +217,7 @@ class TestFixVerification:
 
     def test_detects_new_issue(self, tmp_path):
         """File that introduces a new issue is detected."""
-        from wiz.fixer import verify_fixes
+        from dojigiri.fixer import verify_fixes
 
         filepath = tmp_path / "test.py"
         # Write code that has a known issue (eval)
@@ -235,7 +235,7 @@ class TestFixVerification:
 
     def test_counts_resolved(self, tmp_path):
         """Pre-findings that no longer appear are counted as resolved."""
-        from wiz.fixer import verify_fixes
+        from dojigiri.fixer import verify_fixes
 
         filepath = tmp_path / "clean.py"
         filepath.write_text("x = 1\n", encoding="utf-8")
@@ -254,14 +254,14 @@ class TestFixVerification:
 
     def test_unreadable_file(self, tmp_path):
         """Verify handles unreadable file gracefully."""
-        from wiz.fixer import verify_fixes
+        from dojigiri.fixer import verify_fixes
 
         result = verify_fixes("/nonexistent/file.py", "python", [])
         assert "error" in result
 
     def test_dry_run_skips_verification(self, tmp_path):
         """Dry-run mode should not produce verification."""
-        from wiz.fixer import fix_file as fixer_fix_file
+        from dojigiri.fixer import fix_file as fixer_fix_file
 
         filepath = tmp_path / "test.py"
         filepath.write_text("import unused_mod\nx = 1\n", encoding="utf-8")
@@ -343,19 +343,19 @@ class TestParallelDeepScan:
     def test_scan_deep_accepts_max_workers(self):
         """scan_deep() accepts max_workers parameter."""
         import inspect
-        from wiz.analyzer import scan_deep
+        from dojigiri.analyzer import scan_deep
         sig = inspect.signature(scan_deep)
         assert "max_workers" in sig.parameters
 
     def test_scan_deep_sequential_fallback(self, tmp_path):
         """scan_deep with max_workers=1 works (sequential mode)."""
-        from wiz.analyzer import scan_deep
+        from dojigiri.analyzer import scan_deep
         test_file = tmp_path / "test.py"
         test_file.write_text("x = 1\n", encoding="utf-8")
 
         # Mock the LLM to avoid actual API calls
-        with patch("wiz.analyzer.analyze_chunk", return_value=[]):
-            with patch("wiz.analyzer.chunk_file", return_value=[]):
+        with patch("dojigiri.analyzer.analyze_chunk", return_value=[]):
+            with patch("dojigiri.analyzer.chunk_file", return_value=[]):
                 report = scan_deep(tmp_path, max_workers=1, use_cache=False)
                 assert report.files_scanned >= 0
 
@@ -376,7 +376,7 @@ class TestHookInstall:
 
     def test_install_creates_hook(self, git_repo):
         """install_hook creates pre-commit file."""
-        from wiz.hooks import install_hook, HOOK_MARKER
+        from dojigiri.hooks import install_hook, HOOK_MARKER
         msg = install_hook(git_repo)
         hook = git_repo / ".git" / "hooks" / "pre-commit"
         assert hook.exists()
@@ -386,14 +386,14 @@ class TestHookInstall:
 
     def test_install_idempotent(self, git_repo):
         """Installing twice updates existing hook."""
-        from wiz.hooks import install_hook
+        from dojigiri.hooks import install_hook
         install_hook(git_repo)
         msg = install_hook(git_repo)
         assert "Updated" in msg
 
     def test_uninstall_removes_hook(self, git_repo):
-        """uninstall_hook removes wiz hook."""
-        from wiz.hooks import install_hook, uninstall_hook
+        """uninstall_hook removes doji hook."""
+        from dojigiri.hooks import install_hook, uninstall_hook
         install_hook(git_repo)
         msg = uninstall_hook(git_repo)
         hook = git_repo / ".git" / "hooks" / "pre-commit"
@@ -402,13 +402,13 @@ class TestHookInstall:
 
     def test_uninstall_no_hook(self, git_repo):
         """uninstall_hook raises FileNotFoundError when no hook exists."""
-        from wiz.hooks import uninstall_hook
+        from dojigiri.hooks import uninstall_hook
         with pytest.raises(FileNotFoundError):
             uninstall_hook(git_repo)
 
     def test_foreign_hook_blocked(self, git_repo):
         """install_hook refuses to overwrite foreign hook without --force."""
-        from wiz.hooks import install_hook
+        from dojigiri.hooks import install_hook
         hook = git_repo / ".git" / "hooks" / "pre-commit"
         hook.write_text("#!/bin/sh\necho foreign\n", encoding="utf-8")
         with pytest.raises(FileExistsError):
@@ -416,7 +416,7 @@ class TestHookInstall:
 
     def test_force_overwrites_foreign(self, git_repo):
         """install_hook with force=True overwrites foreign hook."""
-        from wiz.hooks import install_hook, HOOK_MARKER
+        from dojigiri.hooks import install_hook, HOOK_MARKER
         hook = git_repo / ".git" / "hooks" / "pre-commit"
         hook.write_text("#!/bin/sh\necho foreign\n", encoding="utf-8")
         install_hook(git_repo, force=True)
@@ -425,7 +425,7 @@ class TestHookInstall:
 
     def test_uninstall_refuses_foreign(self, git_repo):
         """uninstall_hook refuses to remove foreign hook."""
-        from wiz.hooks import uninstall_hook
+        from dojigiri.hooks import uninstall_hook
         hook = git_repo / ".git" / "hooks" / "pre-commit"
         hook.write_text("#!/bin/sh\necho foreign\n", encoding="utf-8")
         with pytest.raises(PermissionError):
@@ -433,22 +433,22 @@ class TestHookInstall:
 
     def test_not_git_repo(self, tmp_path):
         """install_hook raises FileNotFoundError for non-git directory."""
-        from wiz.hooks import install_hook
+        from dojigiri.hooks import install_hook
         with pytest.raises(FileNotFoundError):
             install_hook(tmp_path)
 
     def test_hook_script_content(self, git_repo):
-        """Hook script contains wiz scan command."""
-        from wiz.hooks import install_hook
+        """Hook script contains doji scan command."""
+        from dojigiri.hooks import install_hook
         install_hook(git_repo)
         hook = git_repo / ".git" / "hooks" / "pre-commit"
         content = hook.read_text(encoding="utf-8")
-        assert "wiz scan" in content
+        assert "dojigiri" in content
         assert "--diff" in content
 
     def test_hook_is_executable(self, git_repo):
         """Hook file has executable permission on Unix."""
-        from wiz.hooks import install_hook
+        from dojigiri.hooks import install_hook
         install_hook(git_repo)
         hook = git_repo / ".git" / "hooks" / "pre-commit"
         if sys.platform != "win32":
@@ -456,7 +456,7 @@ class TestHookInstall:
 
 
 class TestHookCLI:
-    """Tests for 'wiz hook' CLI subcommand."""
+    """Tests for 'doji hook' CLI subcommand."""
 
     def test_hook_install_cli(self, tmp_path):
         """CLI 'hook install' command works."""
@@ -465,7 +465,7 @@ class TestHookCLI:
         git_dir.mkdir(parents=True)
 
         result = subprocess.run(
-            [sys.executable, "-m", "wiz", "hook", "install"],
+            [sys.executable, "-m", "dojigiri", "hook", "install"],
             capture_output=True, text=True, cwd=str(tmp_path),
         )
         assert result.returncode == 0
@@ -478,12 +478,12 @@ class TestHookCLI:
 
         # Install first
         subprocess.run(
-            [sys.executable, "-m", "wiz", "hook", "install"],
+            [sys.executable, "-m", "dojigiri", "hook", "install"],
             capture_output=True, text=True, cwd=str(tmp_path),
         )
         # Then uninstall
         result = subprocess.run(
-            [sys.executable, "-m", "wiz", "hook", "uninstall"],
+            [sys.executable, "-m", "dojigiri", "hook", "uninstall"],
             capture_output=True, text=True, cwd=str(tmp_path),
         )
         assert result.returncode == 0
@@ -495,21 +495,21 @@ class TestHookCLI:
 # ═══════════════════════════════════════════════════════════════════════
 
 class TestCustomRulesToml:
-    """End-to-end test: load from .wiz.toml, detect custom rule."""
+    """End-to-end test: load from .doji.toml, detect custom rule."""
 
     def test_e2e_toml_custom_rule(self, tmp_path):
-        """Load custom rule from .wiz.toml and detect it in a file."""
+        """Load custom rule from .doji.toml and detect it in a file."""
         toml_content = '''\
-[wiz]
+[dojigiri]
 
-[[wiz.rules]]
+[[dojigiri.rules]]
 pattern = "NOCOMMIT"
 severity = "critical"
 category = "bug"
 name = "nocommit-marker"
 message = "NOCOMMIT marker found"
 '''
-        (tmp_path / ".wiz.toml").write_text(toml_content, encoding="utf-8")
+        (tmp_path / ".doji.toml").write_text(toml_content, encoding="utf-8")
 
         py_file = tmp_path / "test.py"
         py_file.write_text("x = 1  # NOCOMMIT\n", encoding="utf-8")

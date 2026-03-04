@@ -1,8 +1,8 @@
-"""Tests for semantic similarity features in wiz.ts_smells."""
+"""Tests for semantic similarity features in dojigiri.semantic.smells."""
 
 import pytest
 
-from wiz.config import Severity, Category, Source
+from dojigiri.config import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -17,7 +17,7 @@ needs_tree_sitter = pytest.mark.skipif(
 
 def _sem(code: str, filepath: str = "test.py"):
     """Parse Python code and return FileSemantics."""
-    from wiz.semantic.core import extract_semantics
+    from dojigiri.semantic.core import extract_semantics
     sem = extract_semantics(code, filepath, "python")
     assert sem is not None, "tree-sitter failed to extract semantics"
     return sem
@@ -47,7 +47,7 @@ class TestSignatureConstruction:
 
     def test_simple_function_signature(self):
         """A function with enough statements produces a SemanticSignature."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         code = _make_function("process", ["fetch", "parse", "validate", "transform", "save"])
         sem = _sem(code)
         fdef = sem.function_defs[0]
@@ -59,7 +59,7 @@ class TestSignatureConstruction:
 
     def test_function_with_many_statements(self):
         """A function with many calls builds a signature with call sequence."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         calls = [f"func_{i}" for i in range(8)]
         code = _make_function("big_fn", calls, param_count=2)
         sem = _sem(code)
@@ -72,7 +72,7 @@ class TestSignatureConstruction:
 
     def test_function_with_few_statements_returns_none(self):
         """A function with <5 statements returns None (too small to matter)."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         code = (
             "def tiny(a, b):\n"
             "    return a + b\n"
@@ -85,7 +85,7 @@ class TestSignatureConstruction:
 
     def test_call_sequence_captured_and_sorted(self):
         """Call names in the signature are captured and sorted alphabetically."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         # Use calls in non-alphabetical order
         code = _make_function("pipeline", ["zebra", "alpha", "mango", "bravo", "delta", "echo"])
         sem = _sem(code)
@@ -97,7 +97,7 @@ class TestSignatureConstruction:
 
     def test_identical_functions_same_data_flow_hash(self):
         """Two identical functions produce the same data_flow_hash."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         calls = ["read", "process", "write", "log", "cleanup"]
         code_a = _make_function("func_a", calls)
         code_b = _make_function("func_b", calls)
@@ -121,7 +121,7 @@ class TestSimilarityScoring:
 
     def test_identical_signatures_score_one(self):
         """Two identical signatures have similarity 1.0."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         calls = ["init", "load", "parse", "validate", "execute"]
         code_a = _make_function("dup_a", calls)
         code_b = _make_function("dup_b", calls)
@@ -137,7 +137,7 @@ class TestSimilarityScoring:
 
     def test_completely_different_score_low(self):
         """Two very different signatures have similarity near 0."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         code_a = _make_function("alpha", ["aaa", "bbb", "ccc", "ddd", "eee"], param_count=0)
         code_b = _make_function("omega", ["zzz", "yyy", "xxx", "www", "vvv", "uuu", "ttt", "sss"], param_count=5)
 
@@ -152,7 +152,7 @@ class TestSimilarityScoring:
 
     def test_same_calls_different_params_high_similarity(self):
         """Same call sequence with different param count is still fairly similar."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         calls = ["fetch", "parse", "validate", "transform", "save"]
         code_a = _make_function("fn_a", calls, param_count=1)
         code_b = _make_function("fn_b", calls, param_count=4)
@@ -169,7 +169,7 @@ class TestSimilarityScoring:
 
     def test_same_params_different_calls_lower_similarity(self):
         """Same param count but entirely different calls yields lower similarity."""
-        from wiz.semantic.smells import build_semantic_signature
+        from dojigiri.semantic.smells import build_semantic_signature
         code_a = _make_function("fn_a", ["read", "parse", "validate", "store", "notify"], param_count=3)
         code_b = _make_function("fn_b", ["init", "create", "build", "deploy", "cleanup"], param_count=3)
 
@@ -185,7 +185,7 @@ class TestSimilarityScoring:
 
     def test_edit_distance_correctness(self):
         """_edit_distance computes correct Levenshtein distance."""
-        from wiz.semantic.smells import _edit_distance
+        from dojigiri.semantic.smells import _edit_distance
 
         assert _edit_distance("", "") == 0
         assert _edit_distance("abc", "") == 3
@@ -205,7 +205,7 @@ class TestCloneDetection:
 
     def test_similar_functions_across_files_detected(self):
         """Two semantically similar functions in different files produce a finding."""
-        from wiz.semantic.smells import check_semantic_clones
+        from dojigiri.semantic.smells import check_semantic_clones
         calls = ["init", "load", "parse", "validate", "execute"]
         code_a = _make_function("worker_a", calls)
         code_b = _make_function("worker_b", calls)
@@ -223,7 +223,7 @@ class TestCloneDetection:
 
     def test_different_functions_no_finding(self):
         """Two very different functions do not trigger a clone finding."""
-        from wiz.semantic.smells import check_semantic_clones
+        from dojigiri.semantic.smells import check_semantic_clones
         code_a = _make_function("alpha", ["aaa", "bbb", "ccc", "ddd", "eee"], param_count=0)
         code_b = _make_function("omega", ["zzz", "yyy", "xxx", "www", "vvv", "uuu", "ttt", "sss"], param_count=5)
 
@@ -236,7 +236,7 @@ class TestCloneDetection:
 
     def test_same_function_same_file_no_self_comparison(self):
         """A single function should not be compared with itself."""
-        from wiz.semantic.smells import check_semantic_clones
+        from dojigiri.semantic.smells import check_semantic_clones
         calls = ["init", "load", "parse", "validate", "execute"]
         code = _make_function("solo", calls)
         sem = _sem(code, "solo.py")
@@ -247,7 +247,7 @@ class TestCloneDetection:
 
     def test_below_threshold_no_finding(self):
         """With a very high threshold, even somewhat similar functions are not flagged."""
-        from wiz.semantic.smells import check_semantic_clones
+        from dojigiri.semantic.smells import check_semantic_clones
         # Same calls but different param counts
         code_a = _make_function("fn_a", ["read", "parse", "validate", "store", "done"], param_count=1)
         code_b = _make_function("fn_b", ["read", "parse", "validate", "store", "done"], param_count=5)
@@ -265,7 +265,7 @@ class TestCloneDetection:
 
     def test_multiple_clones_multiple_findings(self):
         """Three similar functions across files produce multiple findings."""
-        from wiz.semantic.smells import check_semantic_clones
+        from dojigiri.semantic.smells import check_semantic_clones
         calls = ["fetch", "decode", "validate", "transform", "persist"]
         code_a = _make_function("proc_a", calls)
         code_b = _make_function("proc_b", calls)

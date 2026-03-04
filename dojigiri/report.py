@@ -103,7 +103,7 @@ def print_scan_summary(report: ScanReport, duration: float | None = None) -> Non
         print()
         print(f"  {_c('yellow', 'No supported files found.')}")
         print(f"  Wiz scans: Python, JavaScript, TypeScript, C#, Java, Go, Rust, C/C++, and more.")
-        print(f"  Use 'wiz init' to create a .wizignore, or check your --lang filter.")
+        print(f"  Use 'doji init' to create a .doji-ignore, or check your --lang filter.")
     print()
     print(f"  {_c('red', f'Critical:  {report.critical}')}")
     print(f"  {_c('yellow', f'Warnings:  {report.warnings}')}")
@@ -316,7 +316,7 @@ def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est
 
 def print_setup_status(api_key_set: bool, anthropic_installed: bool) -> None:
     """Print setup check results."""
-    print(f"\n{_c('bold', 'wiz — Environment Check')}")
+    print(f"\n{_c('bold', 'dojigiri — Environment Check')}")
     print("─" * 40)
 
     if api_key_set:
@@ -690,6 +690,8 @@ def print_fix_report(report: FixReport, dry_run: bool = True) -> None:
             print(f"  {_c('green', '+ (removed)')}")
 
         print(f"  {_c('dim', fix.explanation)}")
+        if fix.status == FixStatus.FAILED and getattr(fix, 'fail_reason', None):
+            print(f"  {_c('red', '^ ' + fix.fail_reason)}")
 
     # Summary
     print(f"\n{'─' * 70}")

@@ -1,4 +1,4 @@
-"""Tests for intra-procedural taint analysis (wiz.ts_taint).
+"""Tests for intra-procedural taint analysis (dojigiri.semantic.taint).
 
 ~30 comprehensive tests covering source detection, sink detection,
 taint propagation, sanitization, end-to-end scenarios, and cross-language support.
@@ -6,10 +6,10 @@ taint propagation, sanitization, end-to-end scenarios, and cross-language suppor
 
 import pytest
 
-from wiz.semantic.core import extract_semantics
-from wiz.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath
-from wiz.semantic.lang_config import get_config, LanguageConfig
-from wiz.config import Severity, Category, Source
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath
+from dojigiri.semantic.lang_config import get_config, LanguageConfig
+from dojigiri.config import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser

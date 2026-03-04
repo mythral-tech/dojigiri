@@ -3,7 +3,7 @@
 import pytest
 import tempfile
 from pathlib import Path
-from wiz.config import Finding, FileAnalysis, ScanReport, Severity, Category, Source
+from dojigiri.config import Finding, FileAnalysis, ScanReport, Severity, Category, Source
 
 
 @pytest.fixture

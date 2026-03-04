@@ -5,9 +5,9 @@ in the real-world benchmarks (Flask, FastAPI, Express) is now suppressed.
 """
 
 import pytest
-from wiz.detector import run_regex_checks, run_python_ast_checks, analyze_file_static
-from wiz.config import Finding, Severity, Category, Source
-from wiz.languages import get_rules_for_language
+from dojigiri.detector import run_regex_checks, run_python_ast_checks, analyze_file_static
+from dojigiri.config import Finding, Severity, Category, Source
+from dojigiri.languages import get_rules_for_language
 
 
 # ─── 1. unused-variable: skip class-scope assignments ────────────────
@@ -128,7 +128,7 @@ x = os.path.exists("file.txt")
 def test_null_deref_early_exit_guard():
     """if x is None: raise should guard subsequent lines."""
     # This tests the guard pattern detection at the source level
-    from wiz.semantic.nullsafety import _find_guarded_lines
+    from dojigiri.semantic.nullsafety import _find_guarded_lines
 
     code = b'''def func(x):
     if x is None:
@@ -143,7 +143,7 @@ def test_null_deref_early_exit_guard():
 
 def test_null_deref_single_line_early_exit():
     """if x is None: return should guard subsequent lines."""
-    from wiz.semantic.nullsafety import _find_guarded_lines
+    from dojigiri.semantic.nullsafety import _find_guarded_lines
 
     code = b'''def func(x):
     if x is None: return None
@@ -156,7 +156,7 @@ def test_null_deref_single_line_early_exit():
 
 def test_null_deref_assert_guard():
     """assert x is not None should guard subsequent lines."""
-    from wiz.semantic.nullsafety import _find_guarded_lines
+    from dojigiri.semantic.nullsafety import _find_guarded_lines
 
     code = b'''def func(x):
     assert x is not None
@@ -169,7 +169,7 @@ def test_null_deref_assert_guard():
 
 def test_null_deref_assert_isinstance_guard():
     """assert isinstance(x, T) should guard subsequent lines."""
-    from wiz.semantic.nullsafety import _find_guarded_lines
+    from dojigiri.semantic.nullsafety import _find_guarded_lines
 
     code = b'''def func(x):
     assert isinstance(x, str)
@@ -182,7 +182,7 @@ def test_null_deref_assert_isinstance_guard():
 
 def test_null_deref_short_circuit_guard():
     """x and x.attr should be guarded on same line."""
-    from wiz.semantic.nullsafety import _find_guarded_lines
+    from dojigiri.semantic.nullsafety import _find_guarded_lines
 
     code = b'''def func(x):
     result = x and x.strip()
@@ -194,7 +194,7 @@ def test_null_deref_short_circuit_guard():
 
 def test_null_deref_ternary_guard():
     """x if x else default should be guarded on same line."""
-    from wiz.semantic.nullsafety import _find_guarded_lines
+    from dojigiri.semantic.nullsafety import _find_guarded_lines
 
     code = b'''def func(x):
     result = x.strip() if x else ""
@@ -206,7 +206,7 @@ def test_null_deref_ternary_guard():
 
 def test_null_deref_block_guard_still_works():
     """Original if x is not None: block guard should still work."""
-    from wiz.semantic.nullsafety import _find_guarded_lines
+    from dojigiri.semantic.nullsafety import _find_guarded_lines
 
     code = b'''def func(x):
     if x is not None:

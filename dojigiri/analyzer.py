@@ -72,7 +72,7 @@ def collect_files(
     files = []
     skipped = 0
 
-    # Load .wizignore patterns
+    # Load .doji-ignore patterns
     ignore_root = root if root.is_dir() else root.parent
     ignore_patterns = load_ignore_patterns(ignore_root)
 
@@ -107,7 +107,7 @@ def collect_files(
         if should_skip_file(item):
             skipped += 1
             continue
-        # Check .wizignore patterns
+        # Check .doji-ignore patterns
         rel = str(item.relative_to(root))
         if any(fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(item.name, pat)
                for pat in ignore_patterns):

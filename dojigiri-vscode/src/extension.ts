@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
 import { refreshDiagnostics, subscribeToDocumentChanges } from './diagnostics';
-import { WizCodeActionProvider } from './codeActions';
+import { DojiCodeActionProvider } from './codeActions';
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
 export function activate(context: vscode.ExtensionContext) {
-    diagnosticCollection = vscode.languages.createDiagnosticCollection('wiz');
+    diagnosticCollection = vscode.languages.createDiagnosticCollection('doji');
     context.subscriptions.push(diagnosticCollection);
 
     // Register code action provider for quick fixes
-    const codeActionProvider = new WizCodeActionProvider();
+    const codeActionProvider = new DojiCodeActionProvider();
     const selector = [
         { language: 'python' },
         { language: 'javascript' },
@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Scan on save
     context.subscriptions.push(
         vscode.workspace.onDidSaveTextDocument((document) => {
-            const config = vscode.workspace.getConfiguration('wiz');
+            const config = vscode.workspace.getConfiguration('doji');
             if (config.get<boolean>('scanOnSave', true)) {
                 refreshDiagnostics(document, diagnosticCollection);
             }
@@ -57,24 +57,24 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Manual scan command
     context.subscriptions.push(
-        vscode.commands.registerCommand('wiz.scanFile', () => {
+        vscode.commands.registerCommand('doji.scanFile', () => {
             const editor = vscode.window.activeTextEditor;
             if (editor) {
                 refreshDiagnostics(editor.document, diagnosticCollection);
-                vscode.window.showInformationMessage('Wiz: Scan complete');
+                vscode.window.showInformationMessage('Dojigiri: Scan complete');
             }
         })
     );
 
     // Workspace scan command
     context.subscriptions.push(
-        vscode.commands.registerCommand('wiz.scanWorkspace', async () => {
+        vscode.commands.registerCommand('doji.scanWorkspace', async () => {
             const folders = vscode.workspace.workspaceFolders;
             if (!folders) {
                 vscode.window.showWarningMessage('No workspace folder open');
                 return;
             }
-            vscode.window.showInformationMessage('Wiz: Scanning workspace...');
+            vscode.window.showInformationMessage('Dojigiri: Scanning workspace...');
             for (const folder of folders) {
                 // Scan each open document in the workspace
                 for (const doc of vscode.workspace.textDocuments) {
@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 }
             }
-            vscode.window.showInformationMessage('Wiz: Workspace scan complete');
+            vscode.window.showInformationMessage('Dojigiri: Workspace scan complete');
         })
     );
 }

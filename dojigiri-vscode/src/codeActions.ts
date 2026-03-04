@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 /**
- * Rules that have deterministic fixers in wiz.
+ * Rules that have deterministic fixers in doji.
  * Maps rule name to a description of the fix.
  */
 const FIXABLE_RULES: Record<string, string> = {
@@ -18,7 +18,7 @@ const FIXABLE_RULES: Record<string, string> = {
     'open-without-with': 'Wrap in with statement',
 };
 
-export class WizCodeActionProvider implements vscode.CodeActionProvider {
+export class DojiCodeActionProvider implements vscode.CodeActionProvider {
     provideCodeActions(
         document: vscode.TextDocument,
         range: vscode.Range | vscode.Selection,
@@ -27,7 +27,7 @@ export class WizCodeActionProvider implements vscode.CodeActionProvider {
         const actions: vscode.CodeAction[] = [];
 
         for (const diagnostic of context.diagnostics) {
-            if (diagnostic.source !== 'wiz') {
+            if (diagnostic.source !== 'doji') {
                 continue;
             }
 
@@ -38,16 +38,16 @@ export class WizCodeActionProvider implements vscode.CodeActionProvider {
 
             const fixDescription = FIXABLE_RULES[rule];
             const action = new vscode.CodeAction(
-                `Wiz: ${fixDescription}`,
+                `Dojigiri: ${fixDescription}`,
                 vscode.CodeActionKind.QuickFix
             );
 
             action.diagnostics = [diagnostic];
             action.isPreferred = true;
 
-            // Run wiz fix for this specific rule on the file
+            // Run doji fix for this specific rule on the file
             action.command = {
-                command: 'wiz.fixRule',
+                command: 'doji.fixRule',
                 title: fixDescription,
                 arguments: [document.uri, rule, diagnostic.range.start.line + 1],
             };
@@ -55,19 +55,19 @@ export class WizCodeActionProvider implements vscode.CodeActionProvider {
             actions.push(action);
         }
 
-        // Add "Fix all wiz issues" action if there are multiple fixable diagnostics
-        const wizDiagnostics = context.diagnostics.filter(
-            (d) => d.source === 'wiz' && d.code && (d.code as string) in FIXABLE_RULES
+        // Add "Fix all doji issues" action if there are multiple fixable diagnostics
+        const dojiDiagnostics = context.diagnostics.filter(
+            (d) => d.source === 'doji' && d.code && (d.code as string) in FIXABLE_RULES
         );
 
-        if (wizDiagnostics.length > 1) {
+        if (dojiDiagnostics.length > 1) {
             const fixAll = new vscode.CodeAction(
-                'Wiz: Fix all auto-fixable issues',
+                'Dojigiri: Fix all auto-fixable issues',
                 vscode.CodeActionKind.QuickFix
             );
             fixAll.command = {
-                command: 'wiz.fixAll',
-                title: 'Fix all wiz issues',
+                command: 'doji.fixAll',
+                title: 'Fix all doji issues',
                 arguments: [document.uri],
             };
             actions.push(fixAll);
@@ -84,14 +84,14 @@ export function registerFixCommands(context: vscode.ExtensionContext): void {
     // Fix a single rule at a specific line
     context.subscriptions.push(
         vscode.commands.registerCommand(
-            'wiz.fixRule',
+            'doji.fixRule',
             async (uri: vscode.Uri, rule: string, _line: number) => {
-                const config = vscode.workspace.getConfiguration('wiz');
+                const config = vscode.workspace.getConfiguration('doji');
                 const pythonPath = config.get<string>('pythonPath', 'python');
 
-                const terminal = vscode.window.createTerminal('Wiz Fix');
+                const terminal = vscode.window.createTerminal('Doji Fix');
                 terminal.sendText(
-                    `${pythonPath} -m wiz fix "${uri.fsPath}" --apply --rules ${rule}`
+                    `${pythonPath} -m dojigiri fix "${uri.fsPath}" --apply --rules ${rule}`
                 );
                 terminal.show();
             }
@@ -101,14 +101,14 @@ export function registerFixCommands(context: vscode.ExtensionContext): void {
     // Fix all auto-fixable issues in a file
     context.subscriptions.push(
         vscode.commands.registerCommand(
-            'wiz.fixAll',
+            'doji.fixAll',
             async (uri: vscode.Uri) => {
-                const config = vscode.workspace.getConfiguration('wiz');
+                const config = vscode.workspace.getConfiguration('doji');
                 const pythonPath = config.get<string>('pythonPath', 'python');
 
-                const terminal = vscode.window.createTerminal('Wiz Fix');
+                const terminal = vscode.window.createTerminal('Doji Fix');
                 terminal.sendText(
-                    `${pythonPath} -m wiz fix "${uri.fsPath}" --apply`
+                    `${pythonPath} -m dojigiri fix "${uri.fsPath}" --apply`
                 );
                 terminal.show();
             }

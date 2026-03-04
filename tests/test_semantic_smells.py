@@ -2,7 +2,7 @@
 
 import pytest
 
-from wiz.config import Severity, Category, Source
+from dojigiri.config import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -17,7 +17,7 @@ needs_tree_sitter = pytest.mark.skipif(
 
 def _sem(code: str, filepath: str = "test.py"):
     """Parse Python code and return FileSemantics."""
-    from wiz.semantic.core import extract_semantics
+    from dojigiri.semantic.core import extract_semantics
     sem = extract_semantics(code, filepath, "python")
     assert sem is not None, "tree-sitter failed to extract semantics"
     return sem
@@ -32,7 +32,7 @@ class TestGodClassManyMethods:
     """Class with >15 methods triggers god-class finding."""
 
     def test_class_with_many_methods(self):
-        from wiz.semantic.smells import check_god_class
+        from dojigiri.semantic.smells import check_god_class
 
         code = "class Big:\n" + "\n".join(
             f"    def method_{i}(self):\n        pass\n" for i in range(20)
@@ -49,7 +49,7 @@ class TestGodClassManyMethods:
 
     def test_class_with_many_attributes(self):
         """Class with >10 self.attr assignments triggers god-class finding."""
-        from wiz.semantic.smells import check_god_class
+        from dojigiri.semantic.smells import check_god_class
 
         attrs = "\n".join(
             f"        self.attr_{i} = {i}" for i in range(15)
@@ -69,7 +69,7 @@ class TestGodClassManyMethods:
 
     def test_small_class_no_finding(self):
         """A class with few methods and attributes should not be flagged."""
-        from wiz.semantic.smells import check_god_class
+        from dojigiri.semantic.smells import check_god_class
 
         code = (
             "class Small:\n"
@@ -85,7 +85,7 @@ class TestGodClassManyMethods:
 
     def test_custom_lower_thresholds(self):
         """Lowered thresholds should flag a smaller class."""
-        from wiz.semantic.smells import check_god_class
+        from dojigiri.semantic.smells import check_god_class
 
         code = (
             "class Medium:\n"
@@ -116,7 +116,7 @@ class TestGodClassManyMethods:
 
     def test_multiple_god_classes(self):
         """Multiple god classes in one file produce multiple findings."""
-        from wiz.semantic.smells import check_god_class
+        from dojigiri.semantic.smells import check_god_class
 
         code_a = "class GodA:\n" + "\n".join(
             f"    def m_{i}(self):\n        pass\n" for i in range(5)
@@ -145,7 +145,7 @@ class TestFeatureEnvy:
 
     def test_method_with_external_access(self):
         """Method referencing many external attributes should be flagged."""
-        from wiz.semantic.smells import check_feature_envy
+        from dojigiri.semantic.smells import check_feature_envy
 
         code = (
             "class MyClass:\n"
@@ -172,7 +172,7 @@ class TestFeatureEnvy:
 
     def test_method_with_internal_access_no_finding(self):
         """Method mainly using self attributes should not be flagged."""
-        from wiz.semantic.smells import check_feature_envy
+        from dojigiri.semantic.smells import check_feature_envy
 
         code = (
             "class MyClass:\n"
@@ -190,7 +190,7 @@ class TestFeatureEnvy:
 
     def test_standalone_function_not_checked(self):
         """Non-method (module-level) functions should never be flagged."""
-        from wiz.semantic.smells import check_feature_envy
+        from dojigiri.semantic.smells import check_feature_envy
 
         code = (
             "def standalone(obj):\n"
@@ -208,7 +208,7 @@ class TestFeatureEnvy:
 
     def test_feature_envy_with_low_thresholds(self):
         """With very low thresholds, even moderate external access triggers."""
-        from wiz.semantic.smells import check_feature_envy
+        from dojigiri.semantic.smells import check_feature_envy
 
         code = (
             "class Worker:\n"
@@ -241,7 +241,7 @@ class TestLongMethod:
 
     def test_function_over_50_lines(self):
         """A standalone function >50 lines should be flagged."""
-        from wiz.semantic.smells import check_long_method
+        from dojigiri.semantic.smells import check_long_method
 
         body = "\n".join(f"    x_{i} = {i}" for i in range(60))
         code = f"def long_func():\n{body}\n"
@@ -257,7 +257,7 @@ class TestLongMethod:
 
     def test_short_function_no_finding(self):
         """A short function should not be flagged."""
-        from wiz.semantic.smells import check_long_method
+        from dojigiri.semantic.smells import check_long_method
 
         code = (
             "def short_func():\n"
@@ -271,7 +271,7 @@ class TestLongMethod:
 
     def test_method_in_class_uses_method_label(self):
         """A long method inside a class should use 'Method' label."""
-        from wiz.semantic.smells import check_long_method
+        from dojigiri.semantic.smells import check_long_method
 
         body = "\n".join(f"        self.x_{i} = {i}" for i in range(55))
         code = (
@@ -288,7 +288,7 @@ class TestLongMethod:
 
     def test_custom_lower_threshold(self):
         """Lower threshold should flag shorter functions."""
-        from wiz.semantic.smells import check_long_method
+        from dojigiri.semantic.smells import check_long_method
 
         body = "\n".join(f"    x_{i} = {i}" for i in range(8))
         code = f"def medium_func():\n{body}\n"
@@ -306,7 +306,7 @@ class TestLongMethod:
 
     def test_multiple_long_functions(self):
         """Multiple long functions produce multiple findings."""
-        from wiz.semantic.smells import check_long_method
+        from dojigiri.semantic.smells import check_long_method
 
         body_a = "\n".join(f"    a_{i} = {i}" for i in range(12))
         body_b = "\n".join(f"    b_{i} = {i}" for i in range(15))
@@ -339,7 +339,7 @@ class TestNearDuplicates:
 
     def test_similar_functions_across_files(self):
         """Two structurally similar functions in different files should be flagged."""
-        from wiz.semantic.smells import check_near_duplicate_functions
+        from dojigiri.semantic.smells import check_near_duplicate_functions
 
         code_a = _make_similar_code("func_a")
         code_b = _make_similar_code("func_b")
@@ -357,7 +357,7 @@ class TestNearDuplicates:
 
     def test_different_functions_no_finding(self):
         """Two structurally different functions should not be flagged."""
-        from wiz.semantic.smells import check_near_duplicate_functions
+        from dojigiri.semantic.smells import check_near_duplicate_functions
 
         code_a = (
             "def compute(a, b, c):\n"
@@ -380,7 +380,7 @@ class TestNearDuplicates:
 
     def test_small_function_not_flagged(self):
         """Functions with <10 statements should be ignored (too small to matter)."""
-        from wiz.semantic.smells import check_near_duplicate_functions
+        from dojigiri.semantic.smells import check_near_duplicate_functions
 
         body = "\n".join(f"    x_{i} = {i}" for i in range(5))
         code_a = f"def small_a(a, b):\n{body}\n    return x_0\n"
@@ -399,7 +399,7 @@ class TestNearDuplicates:
         In practice this means the same function -- the dedup check skips
         pairs with (same file, same line).
         """
-        from wiz.semantic.smells import check_near_duplicate_functions
+        from dojigiri.semantic.smells import check_near_duplicate_functions
 
         code = _make_similar_code("only_one")
         sem = _sem(code, "single.py")
@@ -411,7 +411,7 @@ class TestNearDuplicates:
 
     def test_three_duplicates_multiple_findings(self):
         """Three structurally identical functions should produce multiple pair findings."""
-        from wiz.semantic.smells import check_near_duplicate_functions
+        from dojigiri.semantic.smells import check_near_duplicate_functions
 
         code_a = _make_similar_code("dup_a")
         code_b = _make_similar_code("dup_b")
@@ -435,7 +435,7 @@ class TestNearDuplicates:
 
     def test_empty_semantics_no_findings(self):
         """Empty semantics dict should produce no findings."""
-        from wiz.semantic.smells import check_near_duplicate_functions
+        from dojigiri.semantic.smells import check_near_duplicate_functions
 
         findings = check_near_duplicate_functions({})
         assert len(findings) == 0
@@ -451,7 +451,7 @@ class TestEdgeCases:
 
     def test_all_findings_have_correct_source(self):
         """All smell findings should have Source.AST."""
-        from wiz.semantic.smells import check_god_class, check_long_method
+        from dojigiri.semantic.smells import check_god_class, check_long_method
 
         # God class
         code = "class Huge:\n" + "\n".join(
@@ -470,7 +470,7 @@ class TestEdgeCases:
 
     def test_findings_have_suggestions(self):
         """All smell findings should include a non-empty suggestion."""
-        from wiz.semantic.smells import check_god_class, check_long_method
+        from dojigiri.semantic.smells import check_god_class, check_long_method
 
         code = "class Huge:\n" + "\n".join(
             f"    def m_{i}(self):\n        pass\n" for i in range(20)

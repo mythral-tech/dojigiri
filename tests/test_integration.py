@@ -3,8 +3,8 @@
 import pytest
 from pathlib import Path
 
-from wiz.analyzer import scan_quick
-from wiz.config import Severity, Category, Source, Finding
+from dojigiri.analyzer import scan_quick
+from dojigiri.config import Severity, Category, Source, Finding
 
 
 @pytest.fixture
@@ -211,7 +211,7 @@ def test_scan_report_structure(python_security_dir):
 
 def test_scan_fix_rescan_cycle(temp_dir):
     """Scan → fix → rescan: fixed issues should not reappear."""
-    from wiz.fixer import fix_file
+    from dojigiri.fixer import fix_file
     fp = temp_dir / "fixable.py"
     fp.write_text('import os\n\nx = 1\n', encoding="utf-8")
 
@@ -242,8 +242,8 @@ def test_scan_fix_rescan_cycle(temp_dir):
 
 def test_baseline_absolute_vs_relative_paths(sample_scan_report):
     """REGRESSION: diff_reports matches findings regardless of abs/rel path format."""
-    from wiz.config import FileAnalysis
-    from wiz.analyzer import diff_reports
+    from dojigiri.config import FileAnalysis
+    from dojigiri.analyzer import diff_reports
 
     # Current report uses absolute path
     current_findings = [
@@ -278,8 +278,8 @@ def test_baseline_absolute_vs_relative_paths(sample_scan_report):
 
 def test_baseline_both_absolute_paths(sample_scan_report):
     """diff_reports works when both sides use absolute paths from the same root."""
-    from wiz.config import FileAnalysis
-    from wiz.analyzer import diff_reports
+    from dojigiri.config import FileAnalysis
+    from dojigiri.analyzer import diff_reports
 
     current_findings = [
         Finding("/project/test.py", 10, Severity.WARNING, Category.BUG,
@@ -311,8 +311,8 @@ def test_baseline_both_absolute_paths(sample_scan_report):
 
 def test_cache_with_corrupted_enum():
     """REGRESSION: Cached findings with invalid confidence don't crash the scan."""
-    from wiz.analyzer import _safe_enum
-    from wiz.config import Confidence
+    from dojigiri.analyzer import _safe_enum
+    from dojigiri.config import Confidence
 
     # Valid enum value
     assert _safe_enum(Confidence, "high") == Confidence.HIGH
@@ -328,7 +328,7 @@ def test_cache_with_corrupted_enum():
 
 def test_cache_corrupted_enum_in_scan_context(temp_dir):
     """Cache with bad enum values doesn't crash scan_quick."""
-    from wiz.storage import save_cache, load_cache
+    from dojigiri.storage import save_cache, load_cache
 
     # Write a file to scan
     fp = temp_dir / "test.py"

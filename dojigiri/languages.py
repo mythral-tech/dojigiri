@@ -215,7 +215,7 @@ PYTHON_RULES: list[Rule] = _compile([
 JAVASCRIPT_RULES: list[Rule] = _compile([
     # Note: var-usage rule removed — it's a style opinion, not a correctness issue.
     # Projects using var intentionally (Express, CommonJS) get massive noise.
-    # Users who want it can add it as a custom rule via .wiz.toml.
+    # Users who want it can add it as a custom rule via .doji.toml.
     # == instead of ===
     (
         r"(?<![=!])={2}(?!=)",

@@ -1,9 +1,9 @@
 {
-  "name": "wiz-code-analyzer",
-  "displayName": "Wiz Code Analyzer",
-  "description": "Static analysis with inline diagnostics and one-click fixes powered by Wiz",
+  "name": "dojigiri-code-analyzer",
+  "displayName": "Dojigiri Code Analyzer",
+  "description": "Static analysis with inline diagnostics and one-click fixes powered by Dojigiri",
   "version": "0.1.0",
-  "publisher": "wiz",
+  "publisher": "dojigiri",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -24,28 +24,28 @@
   "contributes": {
     "commands": [
       {
-        "command": "wiz.scanFile",
-        "title": "Wiz: Scan Current File"
+        "command": "doji.scanFile",
+        "title": "Dojigiri: Scan Current File"
       },
       {
-        "command": "wiz.scanWorkspace",
-        "title": "Wiz: Scan Workspace"
+        "command": "doji.scanWorkspace",
+        "title": "Dojigiri: Scan Workspace"
       }
     ],
     "configuration": {
-      "title": "Wiz",
+      "title": "Dojigiri",
       "properties": {
-        "wiz.pythonPath": {
+        "doji.pythonPath": {
           "type": "string",
           "default": "python",
-          "description": "Path to Python interpreter with wiz installed"
+          "description": "Path to Python interpreter with dojigiri installed"
         },
-        "wiz.scanOnSave": {
+        "doji.scanOnSave": {
           "type": "boolean",
           "default": true,
           "description": "Automatically scan files on save"
         },
-        "wiz.minSeverity": {
+        "doji.minSeverity": {
           "type": "string",
           "default": "warning",
           "enum": [

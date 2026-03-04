@@ -1,8 +1,8 @@
-"""Tests for tutorial mode explanation generation (wiz.ts_explain)."""
+"""Tests for tutorial mode explanation generation (dojigiri.semantic.explain)."""
 
 import pytest
 
-from wiz.config import Finding, Severity, Category, Source
+from dojigiri.config import Finding, Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -17,7 +17,7 @@ needs_tree_sitter = pytest.mark.skipif(
 
 def _sem(code: str, filepath: str = "test.py"):
     """Parse Python code and return FileSemantics."""
-    from wiz.semantic.core import extract_semantics
+    from dojigiri.semantic.core import extract_semantics
     sem = extract_semantics(code, filepath, "python")
     assert sem is not None, "tree-sitter failed to extract semantics"
     return sem
@@ -25,7 +25,7 @@ def _sem(code: str, filepath: str = "test.py"):
 
 def _explain(code: str, filepath: str = "test.py", findings=None):
     """Generate explanation from Python code."""
-    from wiz.semantic.explain import explain_file
+    from dojigiri.semantic.explain import explain_file
     return explain_file(code, filepath, "python", findings=findings)
 
 
@@ -178,7 +178,7 @@ class TestPatternRecognition:
 
     def test_factory_function_detected(self):
         """Function named create_X with multiple returns is detected as Factory."""
-        from wiz.semantic.explain import _detect_patterns
+        from dojigiri.semantic.explain import _detect_patterns
         code = (
             "def create_shape(kind):\n"
             "    if kind == 'circle':\n"
@@ -196,7 +196,7 @@ class TestPatternRecognition:
 
     def test_singleton_class_detected(self):
         """Class with _instance attribute is detected as Singleton."""
-        from wiz.semantic.explain import _detect_patterns
+        from dojigiri.semantic.explain import _detect_patterns
         code = (
             "class Logger:\n"
             "    _instance = None\n"
@@ -213,7 +213,7 @@ class TestPatternRecognition:
 
     def test_decorator_function_detected(self):
         """Function with nested wrapper function is detected as Decorator."""
-        from wiz.semantic.explain import _detect_patterns
+        from dojigiri.semantic.explain import _detect_patterns
         code = (
             "def log_calls(func):\n"
             "    def wrapper(*args, **kwargs):\n"
@@ -229,7 +229,7 @@ class TestPatternRecognition:
 
     def test_builder_class_detected(self):
         """Class with 3+ return self methods is detected as Builder."""
-        from wiz.semantic.explain import _detect_patterns
+        from dojigiri.semantic.explain import _detect_patterns
         code = (
             "class QueryBuilder:\n"
             "    def select(self, fields):\n"
@@ -253,7 +253,7 @@ class TestPatternRecognition:
 
     def test_observer_class_detected(self):
         """Class with subscribe/emit methods is detected as Observer."""
-        from wiz.semantic.explain import _detect_patterns
+        from dojigiri.semantic.explain import _detect_patterns
         code = (
             "class EventBus:\n"
             "    def __init__(self):\n"
@@ -272,7 +272,7 @@ class TestPatternRecognition:
 
     def test_iterator_class_detected(self):
         """Class with __iter__/__next__ is detected as Iterator."""
-        from wiz.semantic.explain import _detect_patterns
+        from dojigiri.semantic.explain import _detect_patterns
         code = (
             "class Range:\n"
             "    def __init__(self, start, end):\n"
@@ -349,7 +349,7 @@ class TestFindingExplanations:
 
     def test_unknown_rule_gets_default_explanation(self):
         """An unrecognized rule gets the default explanation text."""
-        from wiz.semantic.explain import _FINDING_EXPLANATIONS
+        from dojigiri.semantic.explain import _FINDING_EXPLANATIONS
         code = "x = 1\n"
         findings = [Finding(
             file="test.py", line=1, severity=Severity.INFO,

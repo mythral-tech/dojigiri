@@ -1,4 +1,4 @@
-"""Tests for wiz/report.py — SARIF, JSON, ANSI console output."""
+"""Tests for dojigiri/report.py — SARIF, JSON, ANSI console output."""
 
 import json
 import sys
@@ -6,11 +6,11 @@ import pytest
 from io import StringIO
 from unittest.mock import patch
 
-from wiz.config import (
+from dojigiri.config import (
     Finding, FileAnalysis, ScanReport, FixReport, Fix,
     Severity, Category, Source, Confidence, FixSource, FixStatus,
 )
-from wiz.report import (
+from dojigiri.report import (
     to_sarif, print_sarif, print_json, print_report,
     print_finding, print_file_analysis, print_scan_summary,
     print_fix_report, print_fix_json, _c,

@@ -1,13 +1,13 @@
 """Tests for detector module - static analysis engine."""
 
 import pytest
-from wiz.detector import (
+from dojigiri.detector import (
     run_regex_checks,
     run_python_ast_checks,
     analyze_file_static,
     _count_branches,
 )
-from wiz.config import Severity, Category, Source
+from dojigiri.config import Severity, Category, Source
 
 
 def test_run_regex_checks_python(sample_python_code):

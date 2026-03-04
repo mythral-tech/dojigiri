@@ -1,4 +1,4 @@
-"""wiz.graph — Dependency graph and project-level analysis."""
+"""dojigiri.graph — Dependency graph and project-level analysis."""
 
 from .depgraph import (
     FileNode,

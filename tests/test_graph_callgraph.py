@@ -8,10 +8,10 @@ Covers:
 
 import pytest
 
-from wiz.semantic.core import extract_semantics
-from wiz.graph.depgraph import DepGraph, FileNode, build_call_graph, CallGraph, FunctionNode
-from wiz.graph.callgraph import find_dead_functions, find_arg_count_mismatches
-from wiz.config import Severity, Category, Source
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.graph.depgraph import DepGraph, FileNode, build_call_graph, CallGraph, FunctionNode
+from dojigiri.graph.callgraph import find_dead_functions, find_arg_count_mismatches
+from dojigiri.config import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser

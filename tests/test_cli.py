@@ -8,8 +8,8 @@ from pathlib import Path
 
 
 def _run_wiz(*args, cwd=None, timeout=30):
-    """Run wiz CLI as a subprocess and return (returncode, stdout, stderr)."""
-    cmd = [sys.executable, "-m", "wiz"] + list(args)
+    """Run doji CLI as a subprocess and return (returncode, stdout, stderr)."""
+    cmd = [sys.executable, "-m", "dojigiri"] + list(args)
     result = subprocess.run(
         cmd,
         capture_output=True,
@@ -28,7 +28,7 @@ def test_cli_version():
     """Test --version flag."""
     rc, out, err = _run_wiz("--version")
     assert rc == 0
-    assert "wiz" in out
+    assert "doji" in out
 
 
 def test_cli_no_command():
@@ -137,7 +137,7 @@ def test_cli_cost_no_files(temp_dir):
 def test_cli_report_no_reports():
     """Test report command when no reports exist.
 
-    Note: This may pass or fail depending on whether ~/.wiz/reports/ has data.
+    Note: This may pass or fail depending on whether ~/.dojigiri/reports/ has data.
     We just verify the command doesn't crash.
     """
     rc, out, err = _run_wiz("report")
@@ -203,7 +203,7 @@ def test_llm_requires_remote_confirmation_in_ci(temp_dir):
     """Test that LLM commands fail in non-interactive (CI) mode without --accept-remote."""
     (temp_dir / "test.py").write_text("x = 1\n")
     # debug is always LLM — pipe stdin to make it non-interactive
-    cmd = [sys.executable, "-m", "wiz", "debug", str(temp_dir / "test.py")]
+    cmd = [sys.executable, "-m", "dojigiri", "debug", str(temp_dir / "test.py")]
     result = subprocess.run(cmd, capture_output=True, timeout=10,
                             stdin=subprocess.DEVNULL)
     err = result.stderr.decode("utf-8", errors="replace")

@@ -476,5 +476,5 @@ LANGUAGE_CONFIGS.update({
 
 
 def get_config(language: str) -> LanguageConfig | None:
-    """Get tree-sitter config for a wiz language name. Returns None if unsupported."""
+    """Get tree-sitter config for a dojigiri language name. Returns None if unsupported."""
     return LANGUAGE_CONFIGS.get(language)

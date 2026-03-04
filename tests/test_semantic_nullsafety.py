@@ -1,4 +1,4 @@
-"""Tests for null safety checks (wiz.ts_nullsafety.check_null_safety).
+"""Tests for null safety checks (dojigiri.semantic.nullsafety.check_null_safety).
 
 ~25 tests covering nullable access detection, guarded access (narrowing),
 annotation-based nullability, cross-language support, and edge cases.
@@ -9,11 +9,11 @@ import tempfile
 
 import pytest
 
-from wiz.semantic.core import extract_semantics
-from wiz.semantic.types import infer_types, FileTypeMap
-from wiz.semantic.nullsafety import check_null_safety
-from wiz.semantic.lang_config import get_config
-from wiz.config import Severity, Category, Source
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.types import infer_types, FileTypeMap
+from dojigiri.semantic.nullsafety import check_null_safety
+from dojigiri.semantic.lang_config import get_config
+from dojigiri.config import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser
@@ -321,7 +321,7 @@ def f():
         the annotation key and the function definition scope. This test
         verifies the annotation is correctly extracted.
         """
-        from wiz.semantic.types import _extract_annotations_from_tree
+        from dojigiri.semantic.types import _extract_annotations_from_tree
         code = '''\
 def get_name() -> Optional[str]:
     return None

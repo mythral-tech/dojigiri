@@ -1,8 +1,8 @@
-# Wiz Project Configuration
-# Place this file as .wiz.toml in your project root
+# Dojigiri Project Configuration
+# Place this file as .doji.toml in your project root
 # CLI arguments always override config file settings
 
-[wiz]
+[dojigiri]
 # Ignore specific rules (comma-separated list)
 ignore_rules = ["todo-marker", "long-line"]
 
