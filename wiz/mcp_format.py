@@ -204,18 +204,30 @@ def format_project_analysis(analysis: ProjectAnalysis) -> str:
     # Dependency graph summary
     dep = analysis.dependency_graph
     if dep:
-        nodes = dep.get("nodes", [])
-        edges = dep.get("edges", [])
-        parts.append(f"\nDependency graph: {len(nodes)} modules, {len(edges)} edges")
+        nodes_raw = dep.get("nodes", {})
+        circular = dep.get("circular_deps", [])
+        # nodes can be dict[str, dict] (real) or list[dict] (legacy/mock)
+        if isinstance(nodes_raw, dict):
+            node_list = [{"path": p, **v} if isinstance(v, dict) else {"path": p}
+                         for p, v in nodes_raw.items()]
+        else:
+            node_list = nodes_raw if isinstance(nodes_raw, list) else []
+        parts.append(f"\nDependency graph: {len(node_list)} modules")
+        if circular:
+            parts.append(f"Circular dependencies: {len(circular)}")
+            for cycle in circular[:5]:
+                parts.append(f"  {' -> '.join(cycle)}")
         # Show high fan-in nodes (most depended on)
-        if nodes:
-            sorted_nodes = sorted(nodes, key=lambda n: n.get("fan_in", 0), reverse=True)
+        if node_list:
+            sorted_nodes = sorted(node_list, key=lambda n: n.get("fan_in", 0) if isinstance(n, dict) else 0, reverse=True)
             top = sorted_nodes[:5]
-            if any(n.get("fan_in", 0) > 0 for n in top):
+            if any((n.get("fan_in", 0) if isinstance(n, dict) else 0) > 0 for n in top):
                 parts.append("Most depended-on:")
                 for n in top:
-                    if n.get("fan_in", 0) > 0:
-                        parts.append(f"  {n.get('path', '?')} (fan_in={n.get('fan_in', 0)})")
+                    fan_in = n.get("fan_in", 0) if isinstance(n, dict) else 0
+                    path = n.get("path", "?") if isinstance(n, dict) else str(n)
+                    if fan_in > 0:
+                        parts.append(f"  {path} (fan_in={fan_in})")
 
     # Per-file findings summary
     total_findings = sum(len(fa.findings) for fa in analysis.per_file_findings)

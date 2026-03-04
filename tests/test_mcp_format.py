@@ -251,11 +251,11 @@ class TestFormatProjectAnalysis:
             files_analyzed=15,
             graph_metrics={"total_modules": 15, "total_edges": 22},
             dependency_graph={
-                "nodes": [
-                    {"path": "core.py", "fan_in": 8},
-                    {"path": "utils.py", "fan_in": 5},
-                ],
-                "edges": [{"from": "app.py", "to": "core.py"}] * 8,
+                "nodes": {
+                    "core.py": {"language": "python", "fan_in": 8, "fan_out": 2},
+                    "utils.py": {"language": "python", "fan_in": 5, "fan_out": 1},
+                },
+                "circular_deps": [],
             },
         )
         result = format_project_analysis(analysis)
