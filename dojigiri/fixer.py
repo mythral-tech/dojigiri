@@ -79,6 +79,15 @@ def _fix_unused_import(line: str, finding: Finding, content: str) -> Optional[Fi
         # Skip multiline imports — opening paren without closing on same line
         if '(' in stripped and ')' not in stripped:
             return None
+        # Skip if this import is the sole body of a try block (optional import pattern)
+        lines = content.splitlines()
+        line_idx = finding.line - 1
+        for i in range(line_idx - 1, -1, -1):
+            prev = lines[i].strip()
+            if prev:
+                if prev == "try:":
+                    return None
+                break
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
             original_code=line, fixed_code="",
@@ -252,10 +261,12 @@ def _fix_open_without_with(line: str, finding: Finding, content: str) -> Optiona
     var_name = m.group(2)
     open_args = m.group(3)
 
-    # Find subsequent lines that belong to the body of this open() usage
+    # Find subsequent lines that belong to the body of this open() usage.
+    # Collect all lines at same-or-deeper indent until we hit a scope boundary.
+    # Then trim from the end: drop lines after the last use of the variable.
     lines = content.splitlines(keepends=True)
     line_idx = finding.line - 1
-    body_lines = []
+    candidate_lines = []
     var_pat = re.compile(r'\b' + re.escape(var_name) + r'\b')
     indent_len = len(indent)
     for i in range(line_idx + 1, len(lines)):
@@ -264,23 +275,32 @@ def _fix_open_without_with(line: str, finding: Finding, content: str) -> Optiona
         # Stop on def/class boundaries
         if stripped.startswith("def ") or stripped.startswith("class "):
             break
-        # Blank lines are collected as body (don't break on them)
+        # Blank lines are collected
         if not stripped:
-            body_lines.append(subsequent)
+            candidate_lines.append(subsequent)
             continue
         # Check indentation
         cur_indent = len(subsequent) - len(subsequent.lstrip())
         if cur_indent < indent_len:
             break  # shallower indent — left the scope
-        if cur_indent == indent_len:
-            # Same indent — include only if it uses the variable
-            if not var_pat.search(subsequent):
-                break
-        body_lines.append(subsequent)
+        candidate_lines.append(subsequent)
 
-    # Strip trailing blank lines from collected body
+    # Trim from the end: find the last line that uses the variable
+    last_var_use = -1
+    for j, cl in enumerate(candidate_lines):
+        if var_pat.search(cl):
+            last_var_use = j
+    body_lines = candidate_lines[:last_var_use + 1] if last_var_use >= 0 else []
+
+    # Strip leading and trailing blank lines from collected body
+    while body_lines and not body_lines[0].strip():
+        body_lines.pop(0)
     while body_lines and not body_lines[-1].strip():
         body_lines.pop()
+
+    # Remove explicit .close() calls on the variable — the with block handles it
+    close_pat = re.compile(r'^\s*' + re.escape(var_name) + r'\.close\(\)\s*$')
+    body_lines = [bl for bl in body_lines if not close_pat.match(bl)]
 
     if not body_lines:
         # No body found — emit with ... as f:\n    pass
@@ -542,7 +562,7 @@ def _fix_eval_usage(line: str, finding: Finding, content: str) -> Optional[Union
             content_lines = content.splitlines(keepends=True)
             last_import_idx = 0
             for i, cl in enumerate(content_lines):
-                if re.match(r'^\s*(import |from \S+ import )', cl):
+                if re.match(r'^(import |from \S+ import )', cl):
                     last_import_idx = i
             import_line = content_lines[last_import_idx]
             import_fix = Fix(
@@ -988,12 +1008,17 @@ def verify_fixes(filepath: str, language: str,
     from collections import Counter
     pre_counts = Counter(f.rule for f in pre_findings)
     post_counts = Counter(f.rule for f in post_findings)
+    # Rules that fixers intentionally introduce (e.g., TODO markers) should
+    # not trigger rollback. Track info-only new rules separately.
+    info_only_rules = {f.rule for f in post_findings if getattr(f.severity, 'value', f.severity) == "info"} - set(pre_counts)
 
     all_rules = set(pre_counts) | set(post_counts)
     resolved = 0
     remaining = 0
     new_issues = 0
     for rule in all_rules:
+        if rule in info_only_rules:
+            continue  # skip info-only rules that fixers intentionally introduce
         before = pre_counts.get(rule, 0)
         after = post_counts.get(rule, 0)
         if after <= before:
@@ -1072,7 +1097,8 @@ def _strip_template_literals(content: str) -> str:
             continue
 
         if top == 'E':
-            # Inside ${} expression — code is valid here, but track nesting
+            # Inside ${} expression — blank everything (braces here are
+            # template-internal and must not be counted by the validator)
             if ch == '}':
                 result[i] = ' '
                 stack.pop()
@@ -1086,8 +1112,12 @@ def _strip_template_literals(content: str) -> str:
                 continue
             if ch == '{':
                 # Nested object literal / block inside expression
+                result[i] = ' '
                 stack.append('E')
-            # Don't blank expression code (braces need counting) except template parts
+                i += 1
+                continue
+            # Blank all expression content (parens, brackets, code)
+            result[i] = ' '
             i += 1
             continue
 
