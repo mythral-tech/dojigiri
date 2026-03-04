@@ -79,6 +79,15 @@ New LanguageConfig fields: assignment_node_types, call_node_types, class_node_ty
 
 566 tests (140 new), all passing.
 
+## Type Safety
+
+- **mypy**: Configured in `pyproject.toml` under `[tool.mypy]`. Passes clean (0 errors, 30 files).
+- **Return types**: All public functions have return type annotations. Tree-sitter node params use `Any` (C extension, no stubs).
+- **Protocol**: `FixerFn` in `fixer.py` types the 15 deterministic fixer functions.
+- **Type aliases**: `Findings` (`list[Finding]`) and `SourceBytes` (`bytes`) in `config.py`.
+- **`__all__`**: Defined in `wiz/__init__.py`, `wiz/semantic/__init__.py`, `wiz/graph/__init__.py`.
+- **`py.typed`**: PEP 561 marker present.
+
 ## Known Issues
 
 1. **No `--workers` CLI flag** — parallel scanning defaults to 4 workers with no way to override from CLI

@@ -4,13 +4,14 @@ import json
 import sys
 import textwrap
 from collections import Counter
+from typing import Any, Optional
 from .config import (
     Finding, FileAnalysis, ScanReport, Severity, Source, Category,
     ProjectAnalysis, FixReport, FixSource, FixStatus,
 )
 
 
-def _ensure_utf8():
+def _ensure_utf8() -> None:
     """Reconfigure stdout for UTF-8 on Windows if possible."""
     if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
         try:
@@ -54,7 +55,7 @@ def _c(color: str, text: str) -> str:
     return f"{COLORS.get(color, '')}{text}{COLORS['reset']}"
 
 
-def print_finding(f: Finding, show_file: bool = True):
+def print_finding(f: Finding, show_file: bool = True) -> None:
     """Print a single finding."""
     color, label = SEVERITY_STYLE[f.severity]
     src = SOURCE_LABEL.get(f.source, f.source.value)
@@ -69,7 +70,7 @@ def print_finding(f: Finding, show_file: bool = True):
     print()
 
 
-def print_file_analysis(fa: FileAnalysis):
+def print_file_analysis(fa: FileAnalysis) -> None:
     """Print findings for a single file."""
     if not fa.findings:
         return
@@ -88,7 +89,7 @@ def print_file_analysis(fa: FileAnalysis):
         print_finding(f, show_file=False)
 
 
-def print_scan_summary(report: ScanReport):
+def print_scan_summary(report: ScanReport) -> None:
     """Print the scan summary."""
     print()
     print(_c("bold", "═" * 70))
@@ -105,7 +106,7 @@ def print_scan_summary(report: ScanReport):
     print(f"  Total:     {report.total_findings}")
 
     # Category breakdown
-    cat_counts = Counter()
+    cat_counts: Counter[Category] = Counter()
     for fa in report.file_analyses:
         for f in fa.findings:
             cat_counts[f.category] += 1
@@ -124,7 +125,7 @@ def print_scan_summary(report: ScanReport):
     print()
 
 
-def print_report(report: ScanReport, verbose: bool = False):
+def print_report(report: ScanReport, verbose: bool = False) -> None:
     """Print full report — file analyses + summary."""
     # Show files with findings (or all files in verbose mode)
     for fa in report.file_analyses:
@@ -141,7 +142,7 @@ CONFIDENCE_BADGE = {
 }
 
 
-def _print_debug_finding(f: dict, index: int):
+def _print_debug_finding(f: dict, index: int) -> None:
     """Render a single structured debug/optimize finding."""
     severity = f.get("severity", "info")
     sev_color = {"critical": "red", "warning": "yellow", "info": "blue"}.get(severity, "blue")
@@ -176,7 +177,7 @@ def _print_debug_finding(f: dict, index: int):
 
 
 def print_debug_result(filepath: str, static_findings: list[Finding],
-                       llm_result: "Optional[dict]" = None):
+                       llm_result: "Optional[dict]" = None) -> None:
     """Print debug command output.
 
     llm_result can be:
@@ -226,7 +227,7 @@ def print_debug_result(filepath: str, static_findings: list[Finding],
 
 
 def print_optimize_result(filepath: str, static_findings: list[Finding],
-                          llm_result: "Optional[dict]" = None):
+                          llm_result: "Optional[dict]" = None) -> None:
     """Print optimize command output.
 
     Same structured/raw_markdown/None handling as debug.
@@ -276,7 +277,7 @@ def print_optimize_result(filepath: str, static_findings: list[Finding],
 
 
 def print_analysis_json(filepath: str, static_findings: list[Finding],
-                        llm_result: "Optional[dict]", tracker=None):
+                        llm_result: "Optional[dict]", tracker: "Optional[Any]" = None) -> None:
     """Print analysis result as JSON to stdout."""
     output = {
         "filepath": filepath,
@@ -293,7 +294,7 @@ print_debug_json = print_analysis_json
 print_optimize_json = print_analysis_json
 
 
-def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est_cost: float):
+def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est_cost: float) -> None:
     """Print cost estimate for deep scan."""
     print(f"\n{_c('bold', 'Cost Estimate — Deep Scan')}")
     print("─" * 40)
@@ -307,7 +308,7 @@ def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est
     print()
 
 
-def print_setup_status(api_key_set: bool, anthropic_installed: bool):
+def print_setup_status(api_key_set: bool, anthropic_installed: bool) -> None:
     """Print setup check results."""
     print(f"\n{_c('bold', 'wiz — Environment Check')}")
     print("─" * 40)
@@ -336,7 +337,7 @@ def print_setup_status(api_key_set: bool, anthropic_installed: bool):
 
 # ─── Project analysis rendering ──────────────────────────────────────
 
-def print_graph_summary(graph_dict: dict, metrics_dict: dict):
+def print_graph_summary(graph_dict: dict, metrics_dict: dict) -> None:
     """ASCII dependency graph summary with fan-in/fan-out, hubs, cycles, dead modules."""
     print(f"\n{_c('bold', 'Dependency Graph')}")
     print("=" * 70)
@@ -401,7 +402,7 @@ def print_graph_summary(graph_dict: dict, metrics_dict: dict):
     print()
 
 
-def print_cross_file_finding(cf: dict):
+def print_cross_file_finding(cf: dict) -> None:
     """Print a single cross-file finding: source_file:line -> target_file:line."""
     sev = cf.get("severity", "warning")
     sev_color = {"critical": "red", "warning": "yellow", "info": "blue"}.get(sev, "yellow")
@@ -427,7 +428,7 @@ def print_cross_file_finding(cf: dict):
     print()
 
 
-def print_project_analysis(analysis: ProjectAnalysis):
+def print_project_analysis(analysis: ProjectAnalysis) -> None:
     """Full project analysis report."""
     print(f"\n{_c('bold', '=' * 70)}")
     print(f"{_c('bold', '  Project Analysis')}")
@@ -502,17 +503,17 @@ def print_project_analysis(analysis: ProjectAnalysis):
     print()
 
 
-def print_project_json(analysis: ProjectAnalysis):
+def print_project_json(analysis: ProjectAnalysis) -> None:
     """JSON output for CI/CD."""
     print(json.dumps(analysis.to_dict(), indent=2))
 
 
-def print_json(report: ScanReport):
+def print_json(report: ScanReport) -> None:
     """Print report as JSON to stdout (pipe-friendly for CI/CD)."""
     print(json.dumps(report.to_dict(), indent=2))
 
 
-def print_sarif(report: ScanReport):
+def print_sarif(report: ScanReport) -> None:
     """Print report in SARIF 2.1.0 format for GitHub Code Scanning."""
     sarif = to_sarif(report)
     print(json.dumps(sarif, indent=2))
@@ -590,7 +591,7 @@ def to_sarif(report: ScanReport) -> dict:
             # Add snippet if available (redact secrets)
             snippet = f.to_dict()["snippet"]
             if snippet:
-                result["locations"][0]["physicalLocation"]["region"]["snippet"] = {
+                result["locations"][0]["physicalLocation"]["region"]["snippet"] = {  # type: ignore[index]
                     "text": snippet
                 }
             
@@ -606,7 +607,7 @@ def to_sarif(report: ScanReport) -> dict:
             
             # Add confidence property if available (LLM findings)
             if f.confidence:
-                result.setdefault("properties", {})["confidence"] = f.confidence.value
+                result.setdefault("properties", {})["confidence"] = f.confidence.value  # type: ignore[index]
             
             results.append(result)
     
@@ -652,7 +653,7 @@ STATUS_BADGE = {
 }
 
 
-def print_fix_report(report: FixReport, dry_run: bool = True):
+def print_fix_report(report: FixReport, dry_run: bool = True) -> None:
     """Display fixes with diff-style output."""
     mode = "DRY RUN" if dry_run else "APPLIED"
     print(f"\n{_c('bold', f'Fix Report — {mode}')}")
@@ -716,14 +717,14 @@ def print_fix_report(report: FixReport, dry_run: bool = True):
     print()
 
 
-def print_fix_json(report: FixReport):
+def print_fix_json(report: FixReport) -> None:
     """JSON output for CI/CD."""
     print(json.dumps(report.to_dict(), indent=2))
 
 
 # ─── Explain output (v1.0.0) ────────────────────────────────────────
 
-def print_explanation(explanation):
+def print_explanation(explanation: Any) -> None:
     """Print a FileExplanation in beginner-friendly format."""
     print()
     print(_c("bold", "=" * 70))
@@ -780,7 +781,7 @@ def print_explanation(explanation):
     print()
 
 
-def print_explain_json(explanation):
+def print_explain_json(explanation: Any) -> None:
     """Print explanation as JSON."""
     data = {
         "filepath": explanation.filepath,

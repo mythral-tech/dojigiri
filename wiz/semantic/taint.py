@@ -413,7 +413,7 @@ def analyze_taint_pathsensitive(
 
                 # Compute taint_in: union of all predecessor taint_outs
                 if block.is_entry:
-                    taint_in = set()
+                    taint_in: set[str] = set()
                 else:
                     taint_in = set()
                     for pred_id in block.predecessors:

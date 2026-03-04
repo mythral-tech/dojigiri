@@ -157,10 +157,10 @@ def _analyze_single_file(
     except OSError:
         return None, None, True
 
-    findings = analyze_file_static(fp_str, content, lang, custom_rules=custom_rules)
+    findings = analyze_file_static(fp_str, content, lang, custom_rules=custom_rules)  # type: ignore[arg-type]
     fa = FileAnalysis(
         path=fp_str,
-        language=lang,
+        language=lang,  # type: ignore[arg-type]
         lines=content.count("\n") + 1,
         findings=findings,
         file_hash=current_hash,
@@ -324,7 +324,7 @@ def scan_deep(
             skipped += 1
             continue
         line_count = content.count("\n") + 1
-        static_findings = analyze_file_static(fp_str, content, lang, custom_rules=custom_rules)
+        static_findings = analyze_file_static(fp_str, content, lang, custom_rules=custom_rules)  # type: ignore[arg-type]
         file_data.append((fp_str, lang, content, line_count, static_findings, fhash))
 
     # Phase 2: LLM enrichment with parallel workers

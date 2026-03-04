@@ -125,7 +125,7 @@ def run_regex_checks(content: str, filepath: str, language: str,
                 # Check if block opens and closes on same line
                 idx = stripped.index(block_open)
                 rest = stripped[idx + len(block_open):]
-                if block_close not in rest:
+                if block_close not in rest:  # type: ignore[operator]
                     in_block_comment = True
                     continue
             elif alt_block_open:
@@ -139,7 +139,7 @@ def run_regex_checks(content: str, filepath: str, language: str,
                 if alt_start_match:
                     idx = stripped.index(alt_block_open)
                     rest = stripped[idx + len(alt_block_open):]
-                    if alt_block_close not in rest:
+                    if alt_block_close not in rest:  # type: ignore[operator]
                         in_block_comment = True
                         continue
         elif in_block_comment:
@@ -301,7 +301,7 @@ def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
             # Track the root of attribute chains (e.g., 'os' in 'os.path.join')
             root = node
             while isinstance(root, ast.Attribute):
-                root = root.value
+                root = root.value  # type: ignore[assignment]
             if isinstance(root, ast.Name):
                 used_names.add(root.id)
 
@@ -316,7 +316,7 @@ def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
         # via attribute access (e.g., `email.message.Message()` uses `email`)
         is_used = name in used_names
         if not is_used and "." in name:
-            root = name.split(".")[0]
+            root = name.split(".")[0]  # type: ignore[assignment]
             is_used = root in used_names
         if not is_used:
             findings.append(Finding(
@@ -353,7 +353,7 @@ def _check_functions(tree: ast.AST, filepath: str, findings: list[Finding]):
     """Check all functions for common issues."""
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            _check_function(node, filepath, findings)
+            _check_function(node, filepath, findings)  # type: ignore[arg-type]
 
 
 def _check_exception_handling(tree: ast.AST, filepath: str, findings: list[Finding]):

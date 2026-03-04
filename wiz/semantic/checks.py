@@ -5,6 +5,8 @@ Install with: pip install wiz[ast]
 """
 
 import re
+from collections.abc import Iterator
+from typing import Any, Optional
 
 from ..config import Finding, Severity, Category, Source
 from .lang_config import get_config, LanguageConfig
@@ -20,7 +22,7 @@ def _get_node_text(node, source_bytes: bytes) -> str:
     return source_bytes[node.start_byte:node.end_byte].decode("utf-8", errors="replace")
 
 
-def _walk_tree(node):
+def _walk_tree(node: Any) -> Iterator[Any]:
     """Yield all nodes in the tree via depth-first traversal."""
     yield node
     for child in node.children:
@@ -303,7 +305,7 @@ def check_empty_catch(tree, source_bytes: bytes, config: LanguageConfig,
     return findings
 
 
-def _get_catch_body(node, config: LanguageConfig):
+def _get_catch_body(node: Any, config: LanguageConfig) -> Any:
     """Get the body node of a catch/except clause."""
     if config.catch_body_field:
         return node.child_by_field_name(config.catch_body_field)
@@ -576,7 +578,7 @@ def run_tree_sitter_checks(content: str, filepath: str,
         return []
 
     try:
-        parser = get_parser(config.ts_language_name)
+        parser = get_parser(config.ts_language_name)  # type: ignore[arg-type]
     except Exception:
         return []  # Language not available in installed pack
 

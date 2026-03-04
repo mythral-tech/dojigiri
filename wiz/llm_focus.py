@@ -192,7 +192,7 @@ def build_micro_queries(
         List of MicroQuery sorted by priority.
     """
     lines = content.splitlines()
-    queries = []
+    queries: list[MicroQuery] = []
 
     # Group findings by line proximity (within 5 lines = same query)
     groups: list[list[Finding]] = []

@@ -5,7 +5,7 @@ import re
 import shutil
 import sys
 import tempfile
-from typing import Callable, Optional
+from typing import Optional, Protocol
 
 from .config import (
     Finding, Fix, FixReport, FixSource, FixStatus, Severity,
@@ -41,6 +41,12 @@ def _pattern_outside_strings(line: str, pattern: re.Pattern) -> bool:
     """Check if pattern matches in code portions of a line (outside string literals)."""
     code_only = _STRING_LITERAL_RE.sub(lambda m: ' ' * len(m.group()), line)
     return bool(pattern.search(code_only))
+
+
+class FixerFn(Protocol):
+    """Deterministic fix generator: receives a single line + context, returns a fix or None."""
+
+    def __call__(self, line: str, finding: Finding, content: str) -> Optional[Fix]: ...
 
 
 # ─── Deterministic fixers ────────────────────────────────────────────
@@ -386,7 +392,7 @@ def _fix_exception_swallowed(line: str, finding: Finding, content: str) -> Optio
 
     # Replace pass with pass + TODO
     pass_line = lines[pass_idx]
-    pass_indent = re.match(r'^(\s*)', pass_line).group(1)
+    pass_indent = re.match(r'^(\s*)', pass_line).group(1)  # type: ignore[union-attr]
     new_pass = f"{pass_indent}pass  # TODO: handle this exception\n"
     return Fix(
         file=finding.file, line=pass_idx + 1, rule=finding.rule,
@@ -396,7 +402,7 @@ def _fix_exception_swallowed(line: str, finding: Finding, content: str) -> Optio
     )
 
 
-DETERMINISTIC_FIXERS: dict[str, Callable] = {
+DETERMINISTIC_FIXERS: dict[str, FixerFn] = {
     "unused-import": _fix_unused_import,
     "bare-except": _fix_bare_except,
     "loose-equality": _fix_loose_equality,
@@ -488,8 +494,8 @@ def apply_fixes(
         with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
     except OSError as e:
-        for f in fixes:
-            f.status = FixStatus.FAILED
+        for f in fixes:  # type: ignore[assignment]
+            f.status = FixStatus.FAILED  # type: ignore[attr-defined]
         print(f"  [fix] Cannot read {filepath}: {e}", file=sys.stderr)
         return fixes
 
@@ -632,9 +638,9 @@ def verify_fixes(filepath: str, language: str,
     new = post_buckets - pre_buckets
 
     new_findings = []
-    for f in post_findings:
-        if (f.line // 5, f.rule) in new:
-            new_findings.append(f.to_dict())
+    for f in post_findings:  # type: ignore[assignment]
+        if (f.line // 5, f.rule) in new:  # type: ignore[attr-defined]
+            new_findings.append(f.to_dict())  # type: ignore[attr-defined]
 
     return {
         "resolved": len(resolved),

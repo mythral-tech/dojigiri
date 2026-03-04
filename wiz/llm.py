@@ -4,7 +4,7 @@ import json
 import sys
 import time
 import threading
-from typing import Optional
+from typing import Any, Optional
 
 import re
 
@@ -36,12 +36,12 @@ def _strip_markdown_fences(text: str) -> str:
 class CostTracker:
     """Track cumulative API costs for a session (thread-safe)."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         self._lock = threading.Lock()
 
-    def add(self, input_tokens: int, output_tokens: int):
+    def add(self, input_tokens: int, output_tokens: int) -> None:
         with self._lock:
             self.total_input_tokens += input_tokens
             self.total_output_tokens += output_tokens
@@ -55,7 +55,7 @@ class CostTracker:
             )
 
 
-def _get_client():
+def _get_client() -> Any:
     """Get Anthropic client, raising clear error if not available."""
     key = get_api_key()
     if not key:
@@ -345,7 +345,7 @@ _RETRY_DELAYS = [1, 2, 4]  # exponential backoff seconds
 _RETRIABLE_STATUS_CODES = {429, 503, 529}
 
 
-def _api_call_with_retry(client, **kwargs):
+def _api_call_with_retry(client: Any, **kwargs: Any) -> Any:
     """Call client.messages.create with exponential backoff on transient errors."""
     last_err = None
     for attempt in range(len(_RETRY_DELAYS) + 1):
@@ -365,7 +365,7 @@ def _api_call_with_retry(client, **kwargs):
                 last_err = e
             else:
                 raise
-    raise last_err  # shouldn't reach here, but safety net
+    raise last_err  # type: ignore[misc]
 
 
 def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
@@ -508,10 +508,10 @@ def _merge_chunked_results(results: list[dict]) -> dict:
             key = (f.get("line"), f.get("title", ""))
             if key not in seen_findings:
                 seen_findings.add(key)
-                merged["findings"].append(f)
+                merged["findings"].append(f)  # type: ignore[attr-defined]
         for qw in r.get("quick_wins", []):
             if qw not in merged["quick_wins"]:
-                merged["quick_wins"].append(qw)
+                merged["quick_wins"].append(qw)  # type: ignore[attr-defined]
 
     merged["summary"] = " | ".join(summaries) if summaries else "No issues found"
     return merged

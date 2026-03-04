@@ -10,7 +10,8 @@ Returns None when tree-sitter is not installed (graceful degradation).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
+from collections.abc import Iterator
+from typing import Any, Optional
 
 from .lang_config import get_config, LanguageConfig
 
@@ -145,17 +146,17 @@ class _Extractor:
         self._scope_stack.append(sid)
         return sid
 
-    def _pop_scope(self):
+    def _pop_scope(self) -> None:
         if self._scope_stack:
             self._scope_stack.pop()
 
-    def extract(self, root_node):
+    def extract(self, root_node: Any) -> None:
         # Module scope
         self._push_scope("module", root_node, name=self.filepath)
         self._walk(root_node)
         self._pop_scope()
 
-    def _walk(self, node):
+    def _walk(self, node: Any) -> None:
         ntype = node.type
 
         # ── Function definitions ──────────────────────────────────
@@ -200,7 +201,7 @@ class _Extractor:
         for child in node.children:
             self._walk(child)
 
-    def _handle_function(self, node):
+    def _handle_function(self, node: Any) -> None:
         name_node = node.child_by_field_name("name")
         name = _get_text(name_node, self.src) if name_node else "<anonymous>"
 
@@ -247,7 +248,7 @@ class _Extractor:
 
         self._pop_scope()
 
-    def _handle_class(self, node):
+    def _handle_class(self, node: Any) -> None:
         name_node = node.child_by_field_name("name")
         name = _get_text(name_node, self.src) if name_node else "<anonymous>"
 
@@ -294,7 +295,7 @@ class _Extractor:
         self._pop_scope()
         self._current_class = prev_class
 
-    def _handle_assignment(self, node):
+    def _handle_assignment(self, node: Any) -> None:
         is_augmented = "augmented" in node.type or "compound" in node.type
         lang = self.language
 
@@ -311,7 +312,7 @@ class _Extractor:
         elif lang == "csharp":
             self._handle_csharp_assignment(node, is_augmented)
 
-    def _handle_for_loop_var(self, node):
+    def _handle_for_loop_var(self, node: Any) -> None:
         """Extract for-loop target variable as an assignment.
 
         Python: for item in items → 'left' field is the loop variable
@@ -346,7 +347,7 @@ class _Extractor:
                         is_parameter=False, is_augmented=False,
                     ))
 
-    def _handle_python_assignment(self, node, is_augmented: bool):
+    def _handle_python_assignment(self, node: Any, is_augmented: bool) -> None:
         if is_augmented:
             left = node.child_by_field_name("left")
             if left and left.type == "identifier":
@@ -411,7 +412,7 @@ class _Extractor:
                             is_parameter=False, is_augmented=False,
                         ))
 
-    def _handle_js_assignment(self, node, is_augmented: bool):
+    def _handle_js_assignment(self, node: Any, is_augmented: bool) -> None:
         if node.type == "variable_declarator":
             name_node = node.child_by_field_name("name")
             value_node = node.child_by_field_name("value")
@@ -437,7 +438,7 @@ class _Extractor:
                     is_parameter=False, is_augmented=is_augmented,
                 ))
 
-    def _handle_go_assignment(self, node, is_augmented: bool):
+    def _handle_go_assignment(self, node: Any, is_augmented: bool) -> None:
         if node.type == "short_var_declaration":
             left = node.child_by_field_name("left")
             right = node.child_by_field_name("right")
@@ -465,7 +466,7 @@ class _Extractor:
                             is_parameter=False, is_augmented=is_augmented,
                         ))
 
-    def _handle_rust_assignment(self, node, is_augmented: bool):
+    def _handle_rust_assignment(self, node: Any, is_augmented: bool) -> None:
         if node.type == "let_declaration":
             pat = node.child_by_field_name("pattern")
             value = node.child_by_field_name("value")
@@ -487,7 +488,7 @@ class _Extractor:
                     is_parameter=False, is_augmented=is_augmented,
                 ))
 
-    def _handle_java_assignment(self, node, is_augmented: bool):
+    def _handle_java_assignment(self, node: Any, is_augmented: bool) -> None:
         if node.type == "local_variable_declaration":
             for child in node.children:
                 if child.type == "variable_declarator":
@@ -511,7 +512,7 @@ class _Extractor:
                     is_parameter=False, is_augmented=is_augmented,
                 ))
 
-    def _handle_csharp_assignment(self, node, is_augmented: bool):
+    def _handle_csharp_assignment(self, node: Any, is_augmented: bool) -> None:
         # Similar to Java
         if node.type == "variable_declarator":
             name_node = node.child_by_field_name("name") or (
@@ -534,7 +535,7 @@ class _Extractor:
                     is_parameter=False, is_augmented=is_augmented,
                 ))
 
-    def _handle_call(self, node):
+    def _handle_call(self, node: Any) -> None:
         func_node = node.child_by_field_name("function")
         if func_node is None:
             # Java method_invocation uses "name" and "object" fields
@@ -583,7 +584,7 @@ class _Extractor:
             receiver=receiver,
         ))
 
-    def _handle_identifier(self, node):
+    def _handle_identifier(self, node: Any) -> None:
         parent = node.parent
         if parent is None:
             return
@@ -665,14 +666,14 @@ class _Extractor:
 
     def _extract_params(self, func_node) -> list[str]:
         """Extract parameter names from a function node."""
-        params = []
+        params: list[str] = []
         for child in func_node.children:
             if child.type in ("parameters", "formal_parameters", "parameter_list"):
                 self._collect_param_names(child, params)
                 break
         return params
 
-    def _collect_param_names(self, param_list, params: list[str]):
+    def _collect_param_names(self, param_list: Any, params: list[str]) -> None:
         """Recursively collect parameter names."""
         for child in param_list.children:
             if child.type == "identifier":
@@ -714,7 +715,7 @@ class _Extractor:
                         return True
         return False
 
-    def _walk_all(self, node):
+    def _walk_all(self, node: Any) -> Iterator[Any]:
         """Simple tree walker."""
         yield node
         for child in node.children:
@@ -739,7 +740,7 @@ def extract_semantics(content: str, filepath: str, language: str) -> Optional[Fi
         return None
 
     try:
-        parser = get_parser(config.ts_language_name)
+        parser = get_parser(config.ts_language_name)  # type: ignore[arg-type]
     except Exception:
         return None
 

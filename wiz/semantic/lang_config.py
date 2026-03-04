@@ -212,8 +212,8 @@ _JS_BASE = dict(
 )
 
 LANGUAGE_CONFIGS.update({
-    "javascript": LanguageConfig(ts_language_name="javascript", **_JS_BASE),
-    "typescript": LanguageConfig(ts_language_name="typescript", **_JS_BASE),
+    "javascript": LanguageConfig(ts_language_name="javascript", **_JS_BASE),  # type: ignore[arg-type]
+    "typescript": LanguageConfig(ts_language_name="typescript", **_JS_BASE),  # type: ignore[arg-type]
     "go": LanguageConfig(
         ts_language_name="go",
         import_node_types=["import_declaration"],

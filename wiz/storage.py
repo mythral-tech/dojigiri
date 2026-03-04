@@ -12,7 +12,7 @@ from .config import ScanReport, STORAGE_DIR, REPORTS_DIR, CACHE_FILE
 from . import __version__
 
 
-def ensure_dirs():
+def ensure_dirs() -> None:
     """Create storage directories if they don't exist."""
     STORAGE_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -45,14 +45,14 @@ def load_cache() -> dict:
     return {"__version__": __version__}
 
 
-def save_cache(cache: dict):
+def save_cache(cache: dict) -> None:
     """Save file hash cache to disk."""
     ensure_dirs()
     cache["__version__"] = __version__
     CACHE_FILE.write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
 
-def save_report(report: ScanReport):
+def save_report(report: ScanReport) -> Path:
     """Save scan report as JSON."""
     ensure_dirs()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -73,7 +73,7 @@ def save_report(report: ScanReport):
     return filepath
 
 
-def _prune_reports(max_keep: int = 50):
+def _prune_reports(max_keep: int = 50) -> None:
     """Remove old reports, keeping only the most recent max_keep."""
     reports = sorted(REPORTS_DIR.glob("scan_*.json"), reverse=True)
     for old in reports[max_keep:]:

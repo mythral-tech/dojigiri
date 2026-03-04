@@ -133,7 +133,7 @@ class DepGraph:
             score = node.fan_in * 2 + node.fan_out
             ranked.append((path, score))
         ranked.sort(key=lambda x: (-x[1], x[0]))
-        return ranked
+        return ranked  # type: ignore[return-value]
 
     def to_dict(self) -> dict:
         return {
@@ -218,7 +218,7 @@ def _resolve_python_imports(filepath: str, content: str, project_root: str) -> s
     root_path = Path(project_root)
     file_path = Path(filepath)
     file_dir = file_path.parent
-    resolved = set()
+    resolved: set[str] = set()
 
     for node in ast_mod.walk(tree):
         if isinstance(node, ast_mod.Import):
@@ -256,7 +256,7 @@ def _resolve_python_imports(filepath: str, content: str, project_root: str) -> s
 
 
 def _try_resolve_dotted(parts: list[str], root: Path, result: set[str],
-                         base: Optional[Path] = None):
+                         base: Optional[Path] = None) -> None:
     """Try to resolve a dotted import path to a file on disk."""
     if base is None:
         base = root
@@ -412,10 +412,10 @@ def _detect_cycles(graph: DepGraph) -> list[tuple[str, ...]]:
     """
     WHITE, GRAY, BLACK = 0, 1, 2
     color = {path: WHITE for path in graph.nodes}
-    parent = {}
+    parent: dict[str, str] = {}
     cycles = []
 
-    def dfs(u: str):
+    def dfs(u: str) -> None:
         color[u] = GRAY
         for v in sorted(graph.nodes[u].imports):
             if v not in color:

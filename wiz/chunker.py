@@ -65,7 +65,7 @@ def _chunk_by_boundaries(
     segment_ends = boundaries + [total_lines]
     segments = list(zip(segment_starts, segment_ends))
 
-    chunks = []
+    chunks: list[Chunk] = []
     current_start = 0
     current_end = 0
 
@@ -158,7 +158,7 @@ def _chunk_lines(
 ) -> list[Chunk]:
     """Line-based chunking with overlap."""
     total_lines = len(lines)
-    chunks = []
+    chunks: list[Chunk] = []
     start = 0
     step = chunk_size - overlap
 

@@ -101,7 +101,7 @@ class _CfgBuilder:
         self.blocks[blk.id] = blk
         return blk
 
-    def _link(self, from_id: int, to_id: int):
+    def _link(self, from_id: int, to_id: int) -> None:
         """Add a directed edge from_id → to_id."""
         if to_id not in self.blocks[from_id].successors:
             self.blocks[from_id].successors.append(to_id)
@@ -479,7 +479,7 @@ def build_cfg(
             fdef_to_func_scope[scope.name] = scope.scope_id
 
     # Walk the AST to find function nodes
-    def find_functions(node):
+    def find_functions(node) -> None:
         if node.type in func_types:
             func_line = node.start_point[0] + 1
             fdef = fdef_by_line.get(func_line)
@@ -511,7 +511,7 @@ def get_reverse_postorder(cfg: FunctionCFG) -> list[int]:
     visited = set()
     postorder = []
 
-    def dfs(block_id: int):
+    def dfs(block_id: int) -> None:
         if block_id in visited:
             return
         visited.add(block_id)

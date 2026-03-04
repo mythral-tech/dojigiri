@@ -17,3 +17,20 @@ from .config import (
     CrossFileFinding,
     ProjectAnalysis,
 )
+
+__all__ = [
+    "__version__",
+    "Finding",
+    "FileAnalysis",
+    "ScanReport",
+    "Severity",
+    "Category",
+    "Source",
+    "Confidence",
+    "FixStatus",
+    "FixSource",
+    "Fix",
+    "FixReport",
+    "CrossFileFinding",
+    "ProjectAnalysis",
+]

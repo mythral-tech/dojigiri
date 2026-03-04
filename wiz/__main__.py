@@ -40,7 +40,7 @@ def _confirm_llm_usage(args) -> bool:
     return response in ("y", "yes")
 
 
-def cmd_scan(args):
+def cmd_scan(args: argparse.Namespace) -> int:
     """Run a code scan (quick or deep)."""
     root = Path(args.path).resolve()
     if not root.exists():
@@ -123,11 +123,11 @@ def cmd_scan(args):
     if not ignore_rules and "ignore_rules" in project_config:
         ignore_rules = set(project_config["ignore_rules"])
     
-    min_severity = SEVERITY_MAP.get(getattr(args, "min_severity", None))
+    min_severity = SEVERITY_MAP.get(getattr(args, "min_severity", None))  # type: ignore[arg-type]
     if not min_severity and "min_severity" in project_config:
         min_severity = SEVERITY_MAP.get(project_config["min_severity"])
-    
-    min_confidence = CONFIDENCE_MAP.get(getattr(args, "min_confidence", None))
+
+    min_confidence = CONFIDENCE_MAP.get(getattr(args, "min_confidence", None))  # type: ignore[arg-type]
     if not min_confidence and "min_confidence" in project_config:
         min_confidence = CONFIDENCE_MAP.get(project_config["min_confidence"])
     report_obj = filter_report(
@@ -308,7 +308,7 @@ def _collect_context_files(context_arg: str, filepath: str, lang: str,
     return result if result else None
 
 
-def cmd_debug(args):
+def cmd_debug(args: argparse.Namespace) -> int:
     """Debug a specific file (always uses LLM)."""
     filepath = Path(args.file).resolve()
     if not filepath.is_file():
@@ -369,7 +369,7 @@ def cmd_debug(args):
     return 0
 
 
-def cmd_optimize(args):
+def cmd_optimize(args: argparse.Namespace) -> int:
     """Optimize a specific file (always uses LLM)."""
     filepath = Path(args.file).resolve()
     if not filepath.is_file():
@@ -427,7 +427,7 @@ def cmd_optimize(args):
     return 0
 
 
-def cmd_fix(args):
+def cmd_fix(args: argparse.Namespace) -> int:
     """Fix detected issues in code (deterministic + optional LLM)."""
     root = Path(args.path).resolve()
     if not root.exists():
@@ -540,7 +540,7 @@ def cmd_fix(args):
             aggregate_verification["resolved"] += report.verification.get("resolved", 0)
             aggregate_verification["remaining"] += report.verification.get("remaining", 0)
             aggregate_verification["new_issues"] += report.verification.get("new_issues", 0)
-            aggregate_verification["new_findings"].extend(report.verification.get("new_findings", []))
+            aggregate_verification["new_findings"].extend(report.verification.get("new_findings", []))  # type: ignore[attr-defined]
 
     # Build aggregate report
     aggregate = FixReport(
@@ -563,7 +563,7 @@ def cmd_fix(args):
     return 0
 
 
-def cmd_analyze(args):
+def cmd_analyze(args: argparse.Namespace) -> int:
     """Analyze a project for cross-file issues."""
     root = Path(args.path).resolve()
     if not root.is_dir():
@@ -609,7 +609,7 @@ def cmd_analyze(args):
     return 0
 
 
-def cmd_report(args):
+def cmd_report(args: argparse.Namespace) -> int:
     """Show latest scan report."""
     data = load_latest_report()
     if not data:
@@ -647,7 +647,7 @@ def cmd_report(args):
     return 0
 
 
-def cmd_cost(args):
+def cmd_cost(args: argparse.Namespace) -> int:
     """Estimate deep scan cost."""
     root = Path(args.path).resolve()
     if not root.exists():
@@ -665,7 +665,7 @@ def cmd_cost(args):
     return 0
 
 
-def cmd_hook(args):
+def cmd_hook(args: argparse.Namespace) -> int:
     """Install or uninstall wiz pre-commit hook."""
     from .hooks import install_hook, uninstall_hook
 
@@ -690,7 +690,7 @@ def cmd_hook(args):
         return 1
 
 
-def cmd_explain(args):
+def cmd_explain(args: argparse.Namespace) -> int:
     """Explain a code file in beginner-friendly language."""
     filepath = Path(args.file).resolve()
     if not filepath.is_file():
@@ -752,7 +752,7 @@ def cmd_explain(args):
             if not api_key:
                 print("\n  --deep requires ANTHROPIC_API_KEY. Showing offline analysis only.", file=sys.stderr)
             else:
-                from .llm import explain_file_llm, CostTracker
+                from .llm import explain_file_llm, CostTracker  # type: ignore[attr-defined]
                 tracker = CostTracker()
                 llm_result, tracker = explain_file_llm(
                     content, str(filepath), lang,
@@ -776,7 +776,7 @@ def cmd_explain(args):
     return 0
 
 
-def cmd_setup(args):
+def cmd_setup(args: argparse.Namespace) -> int:
     """Check environment setup."""
     api_key_set = get_api_key() is not None
 
@@ -791,7 +791,7 @@ def cmd_setup(args):
     return 0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         prog="wiz",
         description="Code debugging & optimization agent",

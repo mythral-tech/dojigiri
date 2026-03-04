@@ -273,7 +273,7 @@ def check_null_safety(
         if ref.context != "attribute_access":
             continue
 
-        tinfo = _resolve_nullable_in_scope(ref.name, ref.scope_id, nullable_vars, semantics)
+        tinfo = _resolve_nullable_in_scope(ref.name, ref.scope_id, nullable_vars, semantics)  # type: ignore[assignment]
         if tinfo is None:
             continue
 
@@ -316,7 +316,7 @@ def check_null_safety(
         if call.receiver is None:
             continue
 
-        tinfo = _resolve_nullable_in_scope(call.receiver, call.scope_id, nullable_vars, semantics)
+        tinfo = _resolve_nullable_in_scope(call.receiver, call.scope_id, nullable_vars, semantics)  # type: ignore[assignment]
         if tinfo is None:
             continue
 

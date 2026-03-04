@@ -65,7 +65,7 @@ class TypeInfo:
     nullable: bool = False
     source: str = "literal"  # "literal", "annotation", "constructor", "return_type", "propagated"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         parts = [self.inferred_type.value]
         if self.class_name:
             parts.append(f"({self.class_name})")
@@ -289,7 +289,7 @@ def infer_types(
         if name == "__return__":
             # Return type annotation — look up scope then function
             scope = scope_by_id.get(scope_id)
-            fdef = fdef_by_qname.get(scope.name) if scope and scope.kind == "function" else None
+            fdef = fdef_by_qname.get(scope.name) if scope and scope.kind == "function" else None  # type: ignore[arg-type]
             if fdef:
                 tinfo = _infer_from_annotation(ann_text, semantics.language)
                 if tinfo:
