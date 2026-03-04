@@ -155,7 +155,7 @@ def check_long_method(
 def _structural_hash(fdef: FunctionDef, semantics: FileSemantics) -> tuple | None:
     """Compute a structural signature for a function.
 
-    Signature: (param_count, assignment_count, call_names_sorted, branch_count, return_count)
+    Signature: (param_count, assignment_count, call_names_sorted, line_span)
     Only computed for functions with >10 statements (enough to be meaningful).
     """
     # Count statements (rough: assignments + calls in this function's scope)
@@ -252,8 +252,7 @@ class SemanticSignature:
     param_count: int
     call_sequence: tuple[str, ...]  # sorted call names
     assignment_count: int
-    return_count: int
-    branch_pattern: str  # e.g. "if-for-if" — sequence of branch types
+    scope_pattern: str  # e.g. "blo-blo-blo" — sequence of block scope types
     data_flow_hash: int  # hash of assignment patterns
 
     def similarity(self, other: SemanticSignature) -> float:
@@ -290,11 +289,11 @@ class SemanticSignature:
         else:
             score += w
 
-        # Branch pattern edit distance (weight: 0.25)
+        # Scope pattern edit distance (weight: 0.25)
         w = 0.25
         weight_total += w
-        bp1 = self.branch_pattern
-        bp2 = other.branch_pattern
+        bp1 = self.scope_pattern
+        bp2 = other.scope_pattern
         if bp1 == bp2:
             score += w
         elif bp1 and bp2:
@@ -357,21 +356,14 @@ def build_semantic_signature(
     # Call sequence (sorted, normalized)
     call_names = sorted(c.name for c in calls_in_func)
 
-    # Count returns (from references to return-like patterns)
-    return_count = sum(
-        1 for r in semantics.references
-        if fdef.line <= r.line <= fdef.end_line and r.context == "call"
-        and r.name in ("return",)
-    )
-
-    # Build branch pattern from scopes
-    branch_types = []
+    # Build scope pattern from block scopes
+    scope_types = []
     for scope in semantics.scopes:
         if (scope.start_line >= fdef.line and scope.end_line <= fdef.end_line
                 and scope.kind in ("block",)):
-            branch_types.append(scope.kind[:3])  # abbreviated
+            scope_types.append(scope.kind[:3])  # abbreviated
 
-    branch_pattern = "-".join(branch_types) if branch_types else ""
+    scope_pattern = "-".join(scope_types) if scope_types else ""
 
     # Data flow hash: hash of (assignment_value_types, call_names)
     flow_parts = [a.value_node_type for a in assignments_in_func] + call_names
@@ -381,8 +373,7 @@ def build_semantic_signature(
         param_count=len(fdef.params),
         call_sequence=tuple(call_names),
         assignment_count=len(assignments_in_func),
-        return_count=return_count,
-        branch_pattern=branch_pattern,
+        scope_pattern=scope_pattern,
         data_flow_hash=data_flow_hash,
     )
 

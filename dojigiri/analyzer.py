@@ -242,7 +242,7 @@ def scan_quick(
     for fa in analyses:
         if fa.semantics is not None:
             semantics_by_file[fa.path] = fa.semantics
-    if len(semantics_by_file) > 1:
+    if len(semantics_by_file) >= 1:
         from .semantic.smells import find_semantic_clone_pairs
         clone_pairs = find_semantic_clone_pairs(semantics_by_file)
         for p in clone_pairs:

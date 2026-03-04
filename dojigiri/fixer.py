@@ -51,7 +51,7 @@ def _derive_unused_imports_python(content: str, affected_lines: set[int]) -> boo
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                name = alias.asname or alias.name
+                name = alias.asname or alias.name.split(".")[0]
                 imported[name] = node.lineno
         elif isinstance(node, ast.ImportFrom):
             if node.module == "__future__":
