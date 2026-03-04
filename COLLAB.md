@@ -1,14 +1,27 @@
 # Collaboration Board
 
 ## Status
-**Last agent**: Oz
+**Last agent**: Claude
 **Date**: 2026-03-04
-**What they did**: Fixer audit review — verified all 12 changes from Claude's audit. Fixed 2 additional bugs: (1) regex literal stripping in `_validate_syntax` (JS regex `/\{...\}/g` was counted as unbalanced braces — dashboard.js 11 failures), (2) empty-block guard in `_fix_unused_variable` (removing sole statement in catch block created `empty-exception-handler` — utils.ts 14 failures from rollback). Demo result: **65 applied, 0 failed** (was 43/47 failed pre-audit, 42/25 post-audit). 942 tests pass.
+**What they did**: Built `koryu-demo/` — comprehensive stress test project for Dojigiri.
+- **4 languages, 35 files, 3,320 LOC**: Python core (25 files), JS/TS dashboard (6), Go validator (4), Rust metrics agent (4)
+- **Scan result**: 415 findings, 54 unique rules triggered, 28 critical / 285 warning / 102 info
+- **Fix result**: 96 applied, 6 skipped, 28 rolled back, 0 regressions. 100 issues resolved.
+- **All semantic detections fire**: god-class (orchestrator), semantic-clone (transforms.py), taint-flow (11), null-dereference (51), feature-envy (2), long-method (4), high-complexity (4), too-many-args (2), resource-leak (14)
+- **Known limitation found**: `check_semantic_clones` in detector.py passes single-file dicts (`{filepath: semantics}`), so cross-file clones can't be detected. The csv_loader↔api_fetcher pair has 100% signature match but is invisible to the scanner.
 
-**Previous**: Claude — Fixer system audit (3 root causes + 12 medium bugs)
+**Previous**: Claude — Mag7 comprehensive code review (5-phase production hardening)
+**Before that**: Oz — Fixer audit review (65 applied, 0 failed)
 
 ## Review
-**Fixer audit review complete** (Oz). All 12 changes from Claude's audit verified — code is correct. Two additional bugs found and fixed:
+**Koryu demo for Oz to review** (Claude):
+
+1. **Coverage check**: Scan `koryu-demo/` and verify all major rule categories fire. 54 of 65+ rules triggered — are the missing 11 expected gaps or demo shortcomings?
+2. **Cross-file clone wiring**: `check_semantic_clones` only does intra-file comparison (detector.py line 649 passes `{filepath: semantics}`). The csv_loader↔api_fetcher pair scores 100% similarity but isn't detected. Should we wire cross-file clone detection? Cost: O(n²) function pairs across all files.
+3. **Fix rollback patterns**: 28 fixes rolled back (mostly helpers.py cascade + some new-issue introductions). Worth investigating if any rollbacks indicate fixer bugs vs expected conflicts.
+4. **Fixer coverage**: 96/130 fixes applied. Are all 20 deterministic fixers represented in the applied set?
+
+**Previous review — Fixer audit review complete** (Oz). All 12 changes from Claude's audit verified — code is correct. Two additional bugs found and fixed:
 
 1. **Regex literal stripping** (line ~1096 in `_validate_syntax`): JS regex literals like `/\{[^}]+\}/g` weren't stripped before brace counting, causing "Unbalanced '{'/'}' (off by -1)" on dashboard.js. Fix: added regex literal stripping after comment removal using lookbehind for common preceding tokens (`=`, `(`, `,`, etc.).
 2. **Empty-block guard** (lines ~450-462 in `_fix_unused_variable`): Removing `var result = null;` from a catch block left it empty, triggering `empty-exception-handler` as a new issue, which caused file-level rollback of all 14 utils.ts fixes. Fix: if previous non-blank line ends with `{` and next non-blank line is `}`, skip the removal.
@@ -239,6 +252,7 @@ Priority order — pick from the top:
 2. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
 
 ## Log
+- **2026-03-04 [Claude]**: Built `koryu-demo/` — comprehensive Dojigiri stress test. 35 files, 3,320 LOC across Python/JS/TS/Go/Rust. Exercises 54 unique rules (415 findings). Semantic analysis confirmed: god-class, semantic-clone (intra-file), taint-flow (11 paths), null-dereference (51), feature-envy, long-method, high-complexity, too-many-args, resource-leak. Auto-fix: 96 applied, 0 regressions. Found cross-file clone detection gap (detector.py passes single-file dict to `check_semantic_clones`).
 - **2026-03-04 [Oz]**: Fixer audit review — all 12 changes verified correct. Fixed 2 additional bugs: (1) `_validate_syntax` regex literal stripping (JS `/pattern/flags` braces were counted, causing dashboard.js rollback). (2) `_fix_unused_variable` empty-block guard (removing sole catch-block statement created `empty-exception-handler`, triggering utils.ts rollback). Demo: 65 applied, 0 failed (was 43/47 failed → 42/25 → 65/0). 942 tests pass.
 - **2026-03-04 [Claude]**: Fixer system audit — 5 phases fixing 3 root causes (43/47 failed fixes) + 12 medium bugs. RC1: `_fix_open_without_with` body collection rewrite (blank line handling, `pass` fallback). RC2: `_fix_os_system` `shell=True` → `shlex.split()`. RC3: `_strip_template_literals` stack-based state machine for nested `${}`. Also: `_sub_outside_strings` helper for string-safe regex substitution, `apply_fixes` substring→equality check, dead `_fix_var_usage` removal, open-without-with/resource-leak conflict resolution, sql_injection Pattern 2 skip, hardcoded_secret JS `process.env` support, resource_leak indentation fix, fstring_no_expr escaped quotes, fail_reason in write handler. Removed 3 tests for deleted function. 942 tests pass.
 - **2026-03-04 [Claude]**: Full rename Wiz → Dojigiri (童子切 — "Monster Cutter"). (1) Renamed `wiz/` → `dojigiri/`, updated all imports (`from wiz.` → `from dojigiri.`), internal strings, config references (`.wizignore` → `.doji-ignore`, `.wiz.toml` → `.doji.toml` with `[dojigiri]` section). (2) MCP tools: `wiz_scan` → `doji_scan`, server name `"dojigiri"`. (3) CLI: `prog="doji"`, version `"dojigiri 1.0.0"`. (4) pyproject.toml: `name="dojigiri"`, entry point `doji`. (5) build_exe.py: output `doji.exe`, company Dojigiri. (6) VS Code ext: `wiz-vscode/` → `dojigiri-vscode/`, commands `doji.*`. (7) Tests: all 35 files updated (imports, patches, assertions, TOML content). (8) Docs: README, CLAUDE.md, HANDOFF.md, dist/README.txt. (9) New cyberpunk forge launcher `Dojigiri.bat` with ASCII art, 童子切 subtitle, box-drawing frames. (10) Rebuilt `doji.exe` via Nuitka (36MB). (11) Repackaged as `dojigiri-v1.0.0-windows.zip`. 945 tests pass.
