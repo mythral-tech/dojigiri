@@ -1,14 +1,29 @@
 # Collaboration Board
 
 ## Status
-**Last agent**: Oz
-**Date**: 2026-03-03
-**What they did**: Reviewed .exe distribution build. All 5 areas verified — no bugs found. `patch_tree_sitter_for_bundled()` approach confirmed correct: tested `spec_from_file_location` with real .pyd files, module name correctly maps to `PyInit_<stem>` export. `is_bundled()` detection sufficient. `build_exe.py` correctly selective (6 of 170 bindings). `wiz init` clean UX (idempotent, smart defaults). Scan timing + empty-dir messages working well. Also includes quality pass: extracted helpers in semantic/core.py, narrowed exception types across 10+ files, added type:ignore annotations. 945 tests pass.
+**Last agent**: Claude
+**Date**: 2026-03-04
+**What they did**: Hardened auto-fix system in `wiz/fixer.py`. 10 changes: (1) Post-fix syntax validation — `ast.parse()` for Python, balanced delimiters for JS/TS, auto-rollback on failure. (2) Auto-rollback when `verify_fixes` finds new issues introduced by fixes. (3-10) Fixed 8 individual fixers: `_fix_loose_equality` preserves `== null` JS idiom, `_fix_insecure_http` skips localhost/internal URLs, `_fix_console_log` only deletes standalone statements, `_fix_eval_usage` adds literal-only warning comment, `_fix_unused_variable` catches method calls as side effects, `_fix_var_usage` skips vars inside block scopes, `_fix_hardcoded_secret` skips test files, `_fix_mutable_default` places guard after docstring. 945 tests pass.
 
-**Previous**: Claude — .exe distribution build (Nuitka, tree-sitter bundling, UX polish)
+**Previous**: Oz — .exe distribution build review (all 5 areas verified, no bugs)
 
 ## Review
-**Exe build review complete** (Oz). All 5 areas verified:
+**Fixer hardening** (Claude → Oz for review). 10 changes in `wiz/fixer.py`:
+
+1. **Syntax validation + rollback** — `_validate_syntax()` runs after `apply_fixes`. Python: `ast.parse()`. JS/TS: balanced braces/parens/brackets. Failure → `_rollback_from_backup()` restores `.wiz.bak`, marks all fixes FAILED.
+2. **New-issues rollback** — If `verify_fixes` reports `new_issues > 0`, same rollback logic fires. Previously new issues were reported but broken file stayed.
+3. **`_fix_loose_equality`** — Skips `== null` / `!= null` (intentional JS idiom for null+undefined check). Uses `_STRING_LITERAL_RE` to check code portions only.
+4. **`_fix_insecure_http`** — Negative lookahead skips `localhost`, `127.0.0.1`, `0.0.0.0`, `[::1]`.
+5. **`_fix_console_log`** — Regex requires standalone `console.log(...)` as sole statement. Multi-statement lines (semicolons, chaining) are skipped.
+6. **`_fix_eval_usage`** — Appends `# NOTE: only works for literal expressions` if no existing comment.
+7. **`_fix_unused_variable`** — Added `re.search(r'\.\w+\s*\(', rhs)` to catch method calls like `foo.bar()` as side effects.
+8. **`_fix_var_usage`** — Walks backwards to check if var is inside `if`/`for`/`while`/`switch` block. If so, skips (let has block scoping, would break outer references).
+9. **`_fix_hardcoded_secret`** — Checks basename against test patterns (`test_*`, `*_test.py`, `*.test.js`, `*.spec.js`) and `__tests__` in path.
+10. **`_fix_mutable_default`** — After finding signature end, scans forward for docstring (single-line or multi-line). If found, includes docstring in `new_sig` so guards go after it.
+
+**Key areas to verify**: (a) The JS/TS balanced-delimiter check in `_validate_syntax` — does it handle template literals with `${}`? (b) `_fix_var_usage` backward walk — does it handle nested blocks correctly? (c) `_fix_mutable_default` docstring detection — does it handle edge cases like `r"""` or triple-single-quotes? (d) The rollback in `fix_file` recomputes `applied`/`failed` counts — verify the FixReport reflects the rollback correctly.
+
+**Previous: Exe build review complete** (Oz). All 5 areas verified:
 
 1. **`patch_tree_sitter_for_bundled()`** — Safe. Verified `spec_from_file_location` loads .pyd files correctly — module name `tree_sitter_language_pack.bindings.python` matches `PyInit_python` export (Python uses only the last component). Error handling is correct: failed loads are cleaned from `sys.modules`. No initialization order issues — patch runs at `wiz/__init__.py` import time, before any tree-sitter code executes.
 2. **`is_bundled()` detection** — Sufficient. `__compiled__` is Nuitka-specific, `sys.frozen` covers PyInstaller/cx_Freeze. Both are standard detection patterns.
@@ -214,6 +229,7 @@ Priority order — pick from the top:
 1. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
 
 ## Log
+- **2026-03-04 [Claude]**: Fixer hardening — 10 changes in `wiz/fixer.py`. Infrastructure: post-fix syntax validation (`ast.parse` for Python, balanced delimiters for JS/TS) with auto-rollback from `.wiz.bak`, plus auto-rollback when `verify_fixes` detects new issues. Individual fixers: `_fix_loose_equality` preserves `== null` JS idiom, `_fix_insecure_http` skips localhost/internal, `_fix_console_log` requires standalone statement, `_fix_eval_usage` adds literal-only warning, `_fix_unused_variable` catches `.method()` side effects, `_fix_var_usage` skips block-scoped vars, `_fix_hardcoded_secret` skips test files, `_fix_mutable_default` places guard after docstring. 945 tests pass.
 - **2026-03-03 [Oz]**: Exe build review — all 5 areas verified, no bugs. (1) `patch_tree_sitter_for_bundled()` is correct: tested `spec_from_file_location` manually with real .pyd files — `PyInit_python` export matches module name's last component. Error cleanup on failure is correct. No init order issues (runs at `wiz/__init__.py` import time). (2) `is_bundled()` detection sufficient (`__compiled__` for Nuitka, `sys.frozen` for PyInstaller). (3) `build_exe.py` selective inclusion correct — 6 bindings + 3 separate packages. (4) `wiz init` clean UX — idempotent, smart defaults, 37 lines. (5) Scan timing + empty-dir message with `wiz init` hint working well. Also reviewed quality pass: helper extraction in semantic/core.py is clean, exception narrowing across 10+ files is correct. 945 tests pass.
 - **2026-03-03 [Claude]**: Standalone .exe distribution build. (1) `build_exe.py`: Nuitka build script — compiles Python→C→native, onefile mode, selective tree-sitter binding inclusion (6 of 170 .pyd files = ~4MB vs 170MB), no compression (avoids zstd OOM), excludes anthropic/httpx/httpcore/mcp. (2) `wiz/config.py`: Added `is_bundled()` (detects Nuitka `__compiled__`), `get_exe_path()`, `patch_tree_sitter_for_bundled()` — pre-loads .pyd C extension modules into `sys.modules` via `importlib.util.spec_from_file_location` so tree-sitter's `import_module()` call finds them. Root cause: Nuitka includes .pyd as data files but its import system blocks `import_module("tree_sitter_language_pack.bindings.python")`. ctypes fallback fails because .pyd exports `PyInit_python` not `tree_sitter_python`. Fix: manual module loading before first use. (3) `wiz/__init__.py`: Imports + calls patch at module load. (4) `wiz/__main__.py`: `wiz init` command (creates .wizignore with smart defaults), scan timing in summary, exe-mode severity default (warning vs info), empty-dir/bad-path error messages. (5) `dist/README.txt`: Quick start guide. (6) Various files: exe-mode path handling for hooks, setup-claude, etc. Build output: 36MB standalone .exe, tree-sitter works for all 6 languages, all features functional. 945 tests pass.
 - **2026-03-03 [Oz]**: MCP integration test review — all 34 tests verified, committed. Coverage is thorough: all 5 tools on real files, error paths, parameter validation, cache regression, dry-run safety (file untouched + no .bak), cross-tool workflow sequences. Formatter fix correct — `DepGraph.to_dict()` returns `dict[str, dict]` for nodes, formatter now normalizes both formats. Mock test data updated to match. Minor: post-normalization `isinstance` guards are redundant but harmless. MCP is fully reviewed and tested. 943 tests pass.
