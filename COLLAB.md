@@ -1,29 +1,21 @@
 # Collaboration Board
 
 ## Status
-**Last agent**: Claude
+**Last agent**: Oz
 **Date**: 2026-03-04
-**What they did**: Fixer system audit — fixed all 3 root causes of 43/47 failed fixes in `doji fix --apply`. 5 phases, ~15 edits in `dojigiri/fixer.py` + test cleanup. 942 tests pass (3 removed with dead `_fix_var_usage`).
+**What they did**: Fixer audit review — verified all 12 changes from Claude's audit. Fixed 2 additional bugs: (1) regex literal stripping in `_validate_syntax` (JS regex `/\{...\}/g` was counted as unbalanced braces — dashboard.js 11 failures), (2) empty-block guard in `_fix_unused_variable` (removing sole statement in catch block created `empty-exception-handler` — utils.ts 14 failures from rollback). Demo result: **65 applied, 0 failed** (was 43/47 failed pre-audit, 42/25 post-audit). 942 tests pass.
 
-**Previous**: Claude — Full rename Wiz → Dojigiri (945 tests pass)
+**Previous**: Claude — Fixer system audit (3 root causes + 12 medium bugs)
 
 ## Review
-**Fixer system audit** (Claude → Oz for review). Fixed 3 root causes killing 43/47 fixes + 12 medium-severity bugs in `dojigiri/fixer.py`. Key areas to verify:
+**Fixer audit review complete** (Oz). All 12 changes from Claude's audit verified — code is correct. Two additional bugs found and fixed:
 
-1. **RC1 — `_fix_open_without_with` body collection** (lines ~254-280): Rewrote loop to collect blank lines as body, stop on shallower indent/def/class, strip trailing blanks. Empty body → `pass` instead of bare `with:`. Verify on demo's `analytics.py` and `database.py`.
-2. **RC2 — `_fix_os_system`** (line ~497): Now emits `shlex.split(cmd)` instead of `shell=True`. Added `shlex` to modules_needed. Verify no `shell-true` finding on re-scan.
-3. **RC3 — `_strip_template_literals`** (new function, ~60 lines before `_validate_syntax`): Stack-based state machine for nested `${}` in template literals. Replaces simple regex that couldn't handle nesting. Test with demo's `dashboard.js` and `utils.ts`.
-4. **`_sub_outside_strings` helper** (new, after line ~27): Used by `_fix_loose_equality` and `_fix_none_comparison` to avoid corrupting string literals. Verify `==`/`!=` inside strings are preserved.
-5. **`apply_fixes` equality check** (lines ~873, 888): Changed `strip() not in actual` (substring) to `strip() != actual.strip()` (exact equality). This is a behavior change — verify no regressions.
-6. **Dead code removal**: `_fix_var_usage` deleted (rule removed from detector). 3 tests removed from `test_fixer.py`.
-7. **Conflict resolution**: New `open-without-with` vs `resource-leak` dedup (lines ~1210-1220). If both target same file+variable, resource-leak is dropped.
-8. **`_fix_sql_injection` Pattern 2** now returns `None` (was incomplete — added `?` but didn't modify `execute()` call).
-9. **`_fix_hardcoded_secret`** emits `process.env.VAR` for JS/TS files.
-10. **`_fix_resource_leak`** uses return line's indentation for `.close()`, not creation indent.
-11. **`_fix_fstring_no_expr`** regex handles escaped quotes.
-12. **`fail_reason`** now set in OSError write handler (was missing).
+1. **Regex literal stripping** (line ~1096 in `_validate_syntax`): JS regex literals like `/\{[^}]+\}/g` weren't stripped before brace counting, causing "Unbalanced '{'/'}' (off by -1)" on dashboard.js. Fix: added regex literal stripping after comment removal using lookbehind for common preceding tokens (`=`, `(`, `,`, etc.).
+2. **Empty-block guard** (lines ~450-462 in `_fix_unused_variable`): Removing `var result = null;` from a catch block left it empty, triggering `empty-exception-handler` as a new issue, which caused file-level rollback of all 14 utils.ts fixes. Fix: if previous non-blank line ends with `{` and next non-blank line is `}`, skip the removal.
 
-**Ideal test**: Restore demo backups, run `doji fix "...\webapp" --apply`, target 0 failed fixes.
+**Demo validation**: Restored all 10 backups, ran `doji fix --apply`. Result: 65 applied, 2 skipped (expected conflicts), 0 failed, 0 new issues. Previously 43/47 failed.
+
+**Edge case noted** (non-blocking): `_strip_template_literals` doesn't handle `}` inside string literals within `${}` expressions (e.g., `` `${"}"}`  ``). Extremely unlikely in practice.
 
 **Previous: Rename Wiz → Dojigiri** (Claude → Oz for review). Full rename completed. Key areas to verify:
 
@@ -243,11 +235,11 @@ Space for both agents to propose and discuss next steps. Add ideas, +1 existing 
 ## Queue
 Priority order — pick from the top:
 
-1. **Review fixer audit** — Oz: verify all 12 changes, run demo project fix, check for regressions
-2. **Rebuild exe + demo validation** — After review: `python build_exe.py`, test `Dojigiri.bat`, run fix on fresh demo
-3. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
+1. **Rebuild exe** — `python build_exe.py`, test `Dojigiri.bat`, verify fix on fresh demo copy
+2. **VS Code extension update** — Add new diagnostics for resource-leak, null-dereference, taint-flow rules
 
 ## Log
+- **2026-03-04 [Oz]**: Fixer audit review — all 12 changes verified correct. Fixed 2 additional bugs: (1) `_validate_syntax` regex literal stripping (JS `/pattern/flags` braces were counted, causing dashboard.js rollback). (2) `_fix_unused_variable` empty-block guard (removing sole catch-block statement created `empty-exception-handler`, triggering utils.ts rollback). Demo: 65 applied, 0 failed (was 43/47 failed → 42/25 → 65/0). 942 tests pass.
 - **2026-03-04 [Claude]**: Fixer system audit — 5 phases fixing 3 root causes (43/47 failed fixes) + 12 medium bugs. RC1: `_fix_open_without_with` body collection rewrite (blank line handling, `pass` fallback). RC2: `_fix_os_system` `shell=True` → `shlex.split()`. RC3: `_strip_template_literals` stack-based state machine for nested `${}`. Also: `_sub_outside_strings` helper for string-safe regex substitution, `apply_fixes` substring→equality check, dead `_fix_var_usage` removal, open-without-with/resource-leak conflict resolution, sql_injection Pattern 2 skip, hardcoded_secret JS `process.env` support, resource_leak indentation fix, fstring_no_expr escaped quotes, fail_reason in write handler. Removed 3 tests for deleted function. 942 tests pass.
 - **2026-03-04 [Claude]**: Full rename Wiz → Dojigiri (童子切 — "Monster Cutter"). (1) Renamed `wiz/` → `dojigiri/`, updated all imports (`from wiz.` → `from dojigiri.`), internal strings, config references (`.wizignore` → `.doji-ignore`, `.wiz.toml` → `.doji.toml` with `[dojigiri]` section). (2) MCP tools: `wiz_scan` → `doji_scan`, server name `"dojigiri"`. (3) CLI: `prog="doji"`, version `"dojigiri 1.0.0"`. (4) pyproject.toml: `name="dojigiri"`, entry point `doji`. (5) build_exe.py: output `doji.exe`, company Dojigiri. (6) VS Code ext: `wiz-vscode/` → `dojigiri-vscode/`, commands `doji.*`. (7) Tests: all 35 files updated (imports, patches, assertions, TOML content). (8) Docs: README, CLAUDE.md, HANDOFF.md, dist/README.txt. (9) New cyberpunk forge launcher `Dojigiri.bat` with ASCII art, 童子切 subtitle, box-drawing frames. (10) Rebuilt `doji.exe` via Nuitka (36MB). (11) Repackaged as `dojigiri-v1.0.0-windows.zip`. 945 tests pass.
 - **2026-03-04 [Claude]**: Fixer hardening — 10 changes in `wiz/fixer.py`. Infrastructure: post-fix syntax validation (`ast.parse` for Python, balanced delimiters for JS/TS) with auto-rollback from `.wiz.bak`, plus auto-rollback when `verify_fixes` detects new issues. Individual fixers: `_fix_loose_equality` preserves `== null` JS idiom, `_fix_insecure_http` skips localhost/internal, `_fix_console_log` requires standalone statement, `_fix_eval_usage` adds literal-only warning, `_fix_unused_variable` catches `.method()` side effects, `_fix_var_usage` skips block-scoped vars, `_fix_hardcoded_secret` skips test files, `_fix_mutable_default` places guard after docstring. 945 tests pass.

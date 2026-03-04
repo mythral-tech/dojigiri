@@ -443,6 +443,26 @@ def _fix_unused_variable(line: str, finding: Finding, content: str) -> Optional[
     """Remove an unused variable assignment."""
     stripped = line.strip()
 
+    # Don't remove if it's the only statement in a block (would create empty-exception-handler etc.)
+    lines = content.splitlines()
+    line_idx = finding.line - 1
+    if 0 <= line_idx < len(lines):
+        # Look backward for block opener, forward for block closer
+        prev_code = ""
+        for i in range(line_idx - 1, -1, -1):
+            s = lines[i].strip()
+            if s:
+                prev_code = s
+                break
+        next_code = ""
+        for i in range(line_idx + 1, len(lines)):
+            s = lines[i].strip()
+            if s:
+                next_code = s
+                break
+        if prev_code.endswith('{') and next_code == '}':
+            return None  # sole statement in block — removal would leave empty block
+
     # JS/TS: const x = ...; / let x = ...; / var x = ...;
     js_m = re.match(r'^(const|let|var)\s+(\w+)\s*=\s*(.+?);?\s*$', stripped)
     if js_m:
@@ -1092,6 +1112,8 @@ def _validate_syntax(filepath: str, content: str, language: str) -> Optional[str
         stripped = re.sub(r"'(?:[^'\\]|\\.)*'", '', stripped)          # single-quoted strings
         stripped = re.sub(r'/\*.*?\*/', '', stripped, flags=re.DOTALL)  # block comments
         stripped = re.sub(r'//[^\n]*', '', stripped)                    # line comments
+        # Regex literals: /pattern/flags after common preceding tokens
+        stripped = re.sub(r'(?<=[=(:,;\[!&|?{}\n])\s*/(?:[^/\\\n]|\\.)+/[gimsuy]*', '', stripped)
         counts = {'(': 0, '[': 0, '{': 0}
         closers = {')': '(', ']': '[', '}': '{'}
         for ch in stripped:
