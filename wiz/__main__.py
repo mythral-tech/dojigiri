@@ -791,6 +791,56 @@ def cmd_setup(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_mcp(args: argparse.Namespace) -> int:
+    """Start the MCP server (stdio transport)."""
+    try:
+        from .mcp_server import mcp as mcp_app
+    except ImportError:
+        print("Error: MCP support requires the 'mcp' package.", file=sys.stderr)
+        print("Install with: pip install wiz-scan[mcp]", file=sys.stderr)
+        return 1
+    mcp_app.run()
+    return 0
+
+
+def cmd_setup_claude(args: argparse.Namespace) -> int:
+    """Print MCP config for Claude Code setup."""
+    import json
+
+    config = {
+        "mcpServers": {
+            "wiz": {
+                "command": "python",
+                "args": ["-m", "wiz", "mcp"],
+            }
+        }
+    }
+
+    print("Add to your Claude Code MCP settings:\n")
+    print(json.dumps(config, indent=2))
+    print()
+    print("---")
+    print()
+    print("Optionally add this to your CLAUDE.md:\n")
+    print("""## Wiz Static Analyzer (MCP)
+
+You have access to Wiz via MCP tools. Use them proactively:
+
+- **wiz_scan** — Scan files/dirs for bugs, security issues, code quality.
+  Use after writing code or when reviewing a project.
+- **wiz_scan_file** — Quick single-file scan. Faster for one file.
+- **wiz_fix** — Preview available auto-fixes (dry run). Apply with Edit tool.
+- **wiz_explain** — Understand file structure, patterns, and design.
+- **wiz_analyze_project** — Cross-file analysis: dependencies, dead code, cycles.
+
+When to use Wiz vs your own analysis:
+- Wiz catches systematic issues (taint flow, null deref, scope bugs) that are
+  easy to miss in manual review. Use it as a second pair of eyes.
+- For security-sensitive code, always run wiz_scan.
+- After fixing issues, re-scan to verify they're resolved.""")
+    return 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="wiz",
@@ -913,6 +963,15 @@ def main() -> None:
     # setup
     p_setup = subparsers.add_parser("setup", help="Check environment setup")
     p_setup.set_defaults(func=cmd_setup)
+
+    # mcp
+    p_mcp = subparsers.add_parser("mcp", help="Start the MCP server (for Claude Code integration)")
+    p_mcp.set_defaults(func=cmd_mcp)
+
+    # setup-claude
+    p_setup_claude = subparsers.add_parser("setup-claude",
+                                            help="Print MCP config for Claude Code")
+    p_setup_claude.set_defaults(func=cmd_setup_claude)
 
     args = parser.parse_args()
     if not args.command:

@@ -35,7 +35,8 @@ dependencies = [
 
 [project.optional-dependencies]
 llm = ["anthropic>=0.40.0"]
-all = ["anthropic>=0.40.0"]
+mcp = ["mcp>=1.0.0"]
+all = ["anthropic>=0.40.0", "mcp>=1.0.0"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
