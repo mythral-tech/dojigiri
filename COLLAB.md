@@ -2,21 +2,30 @@
 
 ## Status
 **Last agent**: Claude
-**Date**: 2026-03-04
-**What they did**: Added inline suppression (`doji:ignore`) and `doji rules` command. Two rounds of self-review applied. 1034 tests pass (30 new). Pushed `635636a`.
+**Date**: 2026-03-05
+**What they did**: v1.1.0 defense/enterprise feature pack. LLM backend abstraction (Anthropic/OpenAI/Ollama), CWE/NIST compliance mappings, HTML/PDF reports with classification markings, compliance profiles, offline mode. 1035 tests pass. Pushed `9442213`.
 
-**Previous**: Oz — Koryu-demo review, fixed multi-line unused-variable removal
-**Before that**: Claude — Built koryu-demo + Mag7 comprehensive code review
+**Previous**: Claude — Added inline suppression (`doji:ignore`) and `doji rules` command.
+**Before that**: Oz — Koryu-demo review, fixed multi-line unused-variable removal
 
 ## Review
-**Inline suppression + rules command — needs fresh-eyes review** (Claude). Commit `635636a`. Changed files:
-- `dojigiri/detector.py` — `_parse_line_suppression()`, `_is_line_suppressed()`, lazy per-line caching in `run_regex_checks`, post-filter in `analyze_file_static`
-- `dojigiri/languages.py` — `list_all_rules()` with dedup and severity-ordered sort
-- `dojigiri/__main__.py` — `cmd_rules()` subcommand with `--lang` and `--output json`
-- `tests/test_detector.py` — 20 new inline suppression tests
-- `tests/test_rules_command.py` — 12 new tests (new file)
+**v1.1.0 defense/enterprise feature pack — needs full review** (Claude). Commit `9442213`.
 
-Key design decisions to scrutinize: (a) rightmost-comment-marker heuristic for `#`/`//` detection, (b) three-way return type from `_parse_line_suppression` (`None | True | set[str]`), (c) `_DOJI_IGNORE_RE` regex permissiveness, (d) suppression inside security rules (should `# doji:ignore(hardcoded-secret)` be allowed?).
+New files:
+- `dojigiri/compliance.py` — CWE/NIST mappings for all ~40 rules
+- `dojigiri/llm_backend.py` — Backend protocol + AnthropicBackend, OpenAICompatibleBackend (urllib, no deps), OllamaBackend, factory with auto-detection
+- `dojigiri/report_html.py` — Self-contained HTML reports, optional PDF via weasyprint
+
+Modified files:
+- `dojigiri/config.py` — CLASSIFICATION_LEVELS, PROFILES, get_llm_config(), CWE/NIST in Finding.to_dict()
+- `dojigiri/llm.py` — Replaced _get_client() with _get_backend(), all 7 API functions refactored to LLMBackend.chat(), CostTracker reads cost from backend
+- `dojigiri/report.py` — CWE in SARIF tags, CWE in text output, classification stamps
+- `dojigiri/languages.py` — CWE/NIST in list_all_rules()
+- `dojigiri/__main__.py` — New CLI flags (--offline, --backend, --model, --base-url, --classification, --profile, --output html/pdf, --output-file, --project-name), profile application, backend setup
+- `pyproject.toml` — v1.1.0, pdf optional dep
+- `tests/test_llm.py` + `tests/test_debug_optimize.py` — Mock pattern updated from _get_client to _get_backend with LLMResponse
+
+Key review points: (a) OpenAICompatibleBackend uses urllib.request with 300s timeout — is that reasonable? (b) CWE mappings accuracy — are all 40+ mappings correct? (c) classification is cosmetic only — stamps reports but doesn't restrict functionality, (d) profiles are defaults not overrides — CLI args always win, (e) test mock refactor — check no assertions were lost in the pattern conversion, (f) HTML template XSS safety — uses html.escape() everywhere but worth verifying.
 
 **Previous: Koryu demo review complete** (Oz). All 4 items addressed:
 
