@@ -1,0 +1,287 @@
+{
+  "schema_version": "2.0",
+  "audit_id": "2026-03-05-taka",
+  "timestamp": "2026-03-05T12:00:00-05:00",
+  "auditor": "taka",
+  "threat_model": "solo-dev-workstation",
+  "checks": [
+    {
+      "id": "W01",
+      "area": "system",
+      "name": "RemoteMouse listening on 0.0.0.0 (ports 1978-1980)",
+      "status": "fail",
+      "severity": "critical",
+      "detail": "RemoteMouse (PID 7656) is listening on 0.0.0.0:1978, 0.0.0.0:1979, and 0.0.0.0:1980 — bound to all interfaces including LAN. RemoteMouse has a long history of CVEs (CVE-2021-27569 through CVE-2021-27573) including unauthenticated remote code execution, keystroke injection, and cleartext password transmission. These vulnerabilities allow anyone on the same network to take full control of the machine.",
+      "attack_scenario": "Anyone on the same WiFi network (coffee shop, shared apartment, etc.) can send crafted packets to port 1978 to inject keystrokes, move the mouse, or execute arbitrary commands — no authentication required in vulnerable versions. Combined with the cleartext protocol, credentials typed on this machine could be intercepted.",
+      "remediation": "1. Uninstall RemoteMouse unless actively needed. 2. If needed, update to the latest version AND configure Windows Firewall to block ports 1978-1980 from non-localhost sources. 3. Never use it on public/shared networks.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W02",
+      "area": "workspace",
+      "name": "Secret scan — demo/test projects only",
+      "status": "info",
+      "severity": "info",
+      "detail": "Hardcoded secrets found in: test_project/, koryu-demo/, nexus-demo/, dojigiri-stress/, wiz-v1.0.0-windows/demo/. These are all intentional demo/test projects designed for Dojigiri to scan. No real credentials detected in production code (Genesis/, tradingview-mcp/, mean_reversion_backtest/). The AKIAIOSFODNN7EXAMPLE values are AWS's official example keys. The sk-ant-api03-FAKE_KEY values are clearly labeled as fake.",
+      "attack_scenario": "Low risk. If someone cloned the workspace and mistook demo keys for real ones, they'd find them non-functional. However, the pattern of having many files with credential-shaped strings could desensitize someone to actual secret exposure.",
+      "remediation": "No action needed — these are test fixtures. Consider adding a README to test_project/ noting they contain intentional fake secrets.",
+      "effort": "short-term"
+    },
+    {
+      "id": "W03",
+      "area": "workspace",
+      "name": "No .env files found",
+      "status": "pass",
+      "severity": "info",
+      "detail": "No .env, .env.local, or similar files found anywhere in ClaudeProjects/. Secrets are not stored in dotenv files.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W04",
+      "area": "workspace",
+      "name": "No private keys found",
+      "status": "pass",
+      "severity": "info",
+      "detail": "The only .pem files are CA certificate bundles inside pip's certifi package (expected). No private key files (.key, .p12, .secret) found. Private key headers (BEGIN PRIVATE KEY) found only in demo projects designed for Dojigiri testing.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W05",
+      "area": "workspace",
+      "name": "PowerShell history clean",
+      "status": "pass",
+      "severity": "info",
+      "detail": "Searched the last 200 lines of PowerShell history for secret patterns. No credentials found.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W06",
+      "area": "workspace",
+      "name": "User environment variables clean",
+      "status": "pass",
+      "severity": "info",
+      "detail": "User environment variables contain only standard entries (Path, TEMP, TMP, OneDrive, OPENSSL_ia32cap). No API keys or secrets stored in environment variables.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed. Note: ANTHROPIC_API_KEY is not set — Dojigiri's LLM mode won't work until it is. When you do set it, use the User environment variable scope, not System.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W07",
+      "area": "workspace",
+      "name": ".claude directory permissions",
+      "status": "pass",
+      "severity": "info",
+      "detail": "C:\\Users\\Stephane\\.claude is accessible by: SYSTEM (F), Administrators (F), Stephane (F). This is the default Windows user-profile inheritance — appropriate for a single-user machine.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W08",
+      "area": "workspace",
+      "name": "Claude conversation logs contain echoed secret patterns",
+      "status": "warn",
+      "severity": "medium",
+      "detail": "Claude's .jsonl conversation logs and file-history cache contain echoes of the demo project secrets (from previous scans and edits). This is expected behavior — Claude logs tool outputs including file contents it reads. Over 425 files in .claude/ match secret patterns, though all appear to be reflections of the demo projects, not real credentials.",
+      "attack_scenario": "If .claude/ directory were exfiltrated (malware, backup leak), an attacker would find searchable plaintext of every file Claude has ever read, including any secrets. Currently these are all demo/test secrets, but if a real secret were ever pasted into a Claude session, it would persist in these logs.",
+      "remediation": "1. Never paste real API keys or passwords directly into Claude conversations. 2. Periodically clear old conversation logs: delete .jsonl files in .claude/projects/ older than 30 days. 3. Consider excluding .claude/ from any cloud backup/sync.",
+      "effort": "ongoing"
+    },
+    {
+      "id": "W09",
+      "area": "project",
+      "name": "Git remote URLs clean (no embedded credentials)",
+      "status": "pass",
+      "severity": "info",
+      "detail": "Genesis remote: https://github.com/Inklling/Genesis (no token in URL). tradingview-mcp: no remote configured.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W10",
+      "area": "project",
+      "name": "Genesis .gitignore coverage",
+      "status": "pass",
+      "severity": "info",
+      "detail": "Genesis .gitignore covers: .env, .venv/, .doji.toml, .dojigiri/, *.bak, dist/. All critical patterns are present.",
+      "attack_scenario": "N/A",
+      "remediation": "Consider adding explicit entries for *.pem, *.key, *.p12, credentials* as defense-in-depth.",
+      "effort": "short-term"
+    },
+    {
+      "id": "W11",
+      "area": "project",
+      "name": "tradingview-mcp .gitignore minimal",
+      "status": "warn",
+      "severity": "low",
+      "detail": "tradingview-mcp .gitignore only covers .venv/, __pycache__/, *.pyc, .env. Missing: *.pem, *.key, *.secret, .doji.toml, credentials*.",
+      "attack_scenario": "If a credential file were accidentally placed in this directory, it could be committed without warning.",
+      "remediation": "Add safety patterns to .gitignore: *.pem, *.key, *.p12, *.secret, credentials*, .doji.toml",
+      "effort": "immediate"
+    },
+    {
+      "id": "W12",
+      "area": "project",
+      "name": "MCP permissions match documentation",
+      "status": "pass",
+      "severity": "info",
+      "detail": "settings.local.json permissions exactly match PERMISSIONS.md documentation. No undocumented permissions found. The broadest grant is Bash(powershell:*) which is acknowledged and justified in the audit notes.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W13",
+      "area": "system",
+      "name": "Network exposure — non-localhost listeners",
+      "status": "warn",
+      "severity": "medium",
+      "detail": "Services listening on 0.0.0.0 (all interfaces): ports 135 (RPC), 445 (SMB), 1978-1980 (RemoteMouse), 2869/5357 (SSDP/WS-Discovery), 5040 (WinNAT), 7680 (Delivery Optimization). Most are standard Windows services. RemoteMouse is the outlier (see W01). Spotify (57621, 60605) also listens on 0.0.0.0 for local device discovery.",
+      "attack_scenario": "SMB (445) and RemoteMouse (1978-1980) are the primary LAN attack surfaces. SMB is mitigated by Windows Firewall defaults. RemoteMouse is not.",
+      "remediation": "Address RemoteMouse per W01. The remaining services are standard Windows — ensure Windows Firewall is set to 'Public' profile when on shared networks.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W14",
+      "area": "system",
+      "name": "Windows Defender active and current",
+      "status": "pass",
+      "severity": "info",
+      "detail": "AntivirusEnabled: True, RealTimeProtectionEnabled: True, Signatures last updated: 2026-03-04 (yesterday). All good.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W15",
+      "area": "system",
+      "name": "Windows updates 21 days behind",
+      "status": "warn",
+      "severity": "medium",
+      "detail": "Most recent hotfix: KB5077181 installed 2026-02-12. That's 21 days ago. Before that: KB5077869 on 2026-02-11. No updates since mid-February. The gap from November to February (KB5066128 -> KB5077869) suggests updates may not be applied promptly.",
+      "attack_scenario": "Unpatched vulnerabilities in Windows or its components could be exploited. 21 days is not extreme but worth checking if a March update is available.",
+      "remediation": "Run Windows Update manually: Settings > Windows Update > Check for updates. Enable automatic updates if not already enabled.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W16",
+      "area": "project",
+      "name": "Dependencies unpinned (tradingview-mcp)",
+      "status": "warn",
+      "severity": "low",
+      "detail": "tradingview-mcp/requirements.txt has no version pins: mcp, tradingview-ta, pandas are all unpinned. tvdatafeed is installed from GitHub main branch (no commit hash or tag). This means pip install could pull different versions at any time.",
+      "attack_scenario": "Supply chain attack: a compromised update to any of these packages would be pulled automatically. The GitHub-sourced tvdatafeed is particularly risky — a force push to main could inject malicious code.",
+      "remediation": "Pin all versions: run `pip freeze > requirements.txt` in the venv, or at minimum pin major versions (e.g., mcp>=1.0,<2.0). For tvdatafeed, pin to a specific commit hash.",
+      "effort": "short-term"
+    },
+    {
+      "id": "W17",
+      "area": "project",
+      "name": "Dependencies use minimum pins (Genesis)",
+      "status": "info",
+      "severity": "low",
+      "detail": "Genesis pyproject.toml uses >= pins (tree-sitter>=0.24, anthropic>=0.40.0, etc.). This is standard for a library/tool meant to be installed by others. Acceptable for this use case.",
+      "attack_scenario": "Lower risk than tradingview-mcp since Genesis is a published tool with its own release process.",
+      "remediation": "Consider adding upper bounds for critical dependencies in a lockfile for development.",
+      "effort": "short-term"
+    },
+    {
+      "id": "W18",
+      "area": "project",
+      "name": "pip-audit not installed",
+      "status": "warn",
+      "severity": "low",
+      "detail": "pip-audit is not installed, so known vulnerability scanning was not possible. Cannot verify if current dependencies have known CVEs.",
+      "remediation": "Install pip-audit: pip install pip-audit. Run periodically: pip-audit --require-hashes -r requirements.txt",
+      "effort": "short-term"
+    },
+    {
+      "id": "W19",
+      "area": "project",
+      "name": "Genesis source code — no dangerous patterns in production code",
+      "status": "pass",
+      "severity": "info",
+      "detail": "Searched Genesis/dojigiri/ for subprocess shell=True, eval(), exec(), os.system(), pickle.loads(), yaml.load(). All matches are in the fixer/detector/languages modules — these are pattern definitions that Dojigiri uses to DETECT these issues in other code. No actual dangerous usage in Dojigiri's own logic.",
+      "attack_scenario": "N/A",
+      "remediation": "None needed.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W20",
+      "area": "project",
+      "name": "Genesis dist/ has no checksums",
+      "status": "warn",
+      "severity": "medium",
+      "detail": "Genesis/dist/ contains doji.exe and wiz.exe (Nuitka-compiled binaries) but no .sha256 checksum files. The dojigiri-v1.0.0-windows.zip distribution was sent to a friend without a way to verify integrity.",
+      "attack_scenario": "If the binary were tampered with in transit or at rest (man-in-the-middle, compromised download, disk swap), there would be no way to detect modification.",
+      "remediation": "Generate checksums: sha256sum dist/doji.exe > dist/doji.exe.sha256. Include the checksum when distributing binaries. Document expected hashes in release notes.",
+      "effort": "immediate"
+    },
+    {
+      "id": "W21",
+      "area": "project",
+      "name": "mean_reversion_backtest has no git repo",
+      "status": "info",
+      "severity": "low",
+      "detail": "The trading agent project has no .git directory. No version control, no gitignore protection, no history.",
+      "attack_scenario": "No git means no .gitignore protection — if this project were ever shared or backed up carelessly, there's no safety net against including sensitive files.",
+      "remediation": "Initialize git: cd mean_reversion_backtest && git init && create .gitignore with standard exclusions.",
+      "effort": "short-term"
+    },
+    {
+      "id": "W22",
+      "area": "workspace",
+      "name": "Claude file-history caches secret-containing files",
+      "status": "warn",
+      "severity": "medium",
+      "detail": "Claude's .claude/file-history/ directory stores versioned snapshots of every file edited during sessions. This includes files from demo projects that contain hardcoded secrets (e.g., file-history/*/b4309f38790b385f@v2 contains AKIAIOSFODNN7EXAMPLE). These persist indefinitely.",
+      "attack_scenario": "Same as W08 — exfiltration of .claude/ would expose all historical file contents. Additionally, these file-history entries survive even if the original files are deleted.",
+      "remediation": "Periodically prune .claude/file-history/ for old sessions. Be aware that editing files with secrets causes them to be cached here.",
+      "effort": "ongoing"
+    }
+  ],
+  "attack_chains": [
+    {
+      "id": "AC01",
+      "name": "LAN -> RemoteMouse RCE -> Full workstation compromise",
+      "steps": [
+        "Attacker joins same network (WiFi, corporate LAN)",
+        "Scans for RemoteMouse on port 1978 (0.0.0.0 binding makes it visible)",
+        "Exploits known CVEs for unauthenticated keystroke injection or RCE",
+        "Has full control of Solomon's workstation — can access all projects, credentials, trading agent"
+      ],
+      "severity": "critical",
+      "mitigating_factors": "Requires LAN access. If on a home network with strong WiFi password, attack surface is limited to trusted devices."
+    },
+    {
+      "id": "AC02",
+      "name": "Supply chain -> tvdatafeed compromise -> trading agent manipulation",
+      "steps": [
+        "Attacker compromises rongardF's GitHub account or repo",
+        "Pushes malicious code to tvdatafeed main branch",
+        "Next pip install in tradingview-mcp pulls compromised version",
+        "Malicious code executes in the MCP server context, which has access to Solomon's trading data and strategies"
+      ],
+      "severity": "medium",
+      "mitigating_factors": "Requires compromising an upstream maintainer. tvdatafeed is a read-only data library — limited blast radius unless the attacker adds data exfiltration."
+    }
+  ],
+  "summary": {
+    "total_checks": 22,
+    "pass": 11,
+    "info": 3,
+    "warn": 7,
+    "fail": 1,
+    "skip": 0,
+    "highest_severity": "critical",
+    "top_recommendation": "Uninstall or firewall RemoteMouse immediately — it is listening on all interfaces with a history of unauthenticated RCE vulnerabilities (CVE-2021-27569 through CVE-2021-27573). This is the single highest-risk finding.",
+    "verdict": "Workstation security posture is GOOD for a solo dev environment, with one critical exception: RemoteMouse. Code practices are clean — no real secrets in production code, no dangerous patterns in Dojigiri, git remotes are credential-free. The demo projects with fake secrets are properly isolated. Windows Defender is active. The main gaps are: RemoteMouse (critical), unpinned dependencies (medium), no binary checksums (medium), and Claude log accumulation (medium)."
+  }
+}

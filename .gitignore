@@ -29,6 +29,9 @@ nul
 # Dojigiri storage (local scan results)
 .dojigiri/
 
+# Project config (may contain API keys)
+.doji.toml
+
 # Benchmark results and cloned repos
 benchmarks/results/
 benchmarks/.repos/

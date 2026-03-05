@@ -171,8 +171,26 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
     # Load project config from .doji.toml (if exists)
     scan_root = root if root.is_dir() else root.parent
-    project_config = load_project_config(scan_root)
-    custom_rules = compile_custom_rules(project_config)
+    if getattr(args, "no_config", False):
+        project_config = {}
+        custom_rules = []
+    else:
+        project_config = load_project_config(scan_root)
+        custom_rules = compile_custom_rules(project_config)
+        # Warn if config suppresses security-relevant rules
+        _SECURITY_RULES = {
+            "eval-usage", "exec-usage", "hardcoded-secret", "sql-injection",
+            "os-system", "shell-true", "pickle-unsafe", "yaml-unsafe",
+            "command-injection", "path-traversal", "insecure-crypto",
+            "insecure-deserialization", "insecure-http", "xss",
+        }
+        suppressed = _SECURITY_RULES & set(project_config.get("ignore_rules", []))
+        if suppressed:
+            print(f"Warning: .doji.toml is suppressing {len(suppressed)} security rule(s): "
+                  f"{', '.join(sorted(suppressed))}",
+                  file=sys.stderr)
+            print("  Use --no-config to override when scanning untrusted code.",
+                  file=sys.stderr)
 
     use_cache = not args.no_cache
     output_format = getattr(args, "output", "text")
@@ -1111,6 +1129,7 @@ def main() -> None:
                          help="Only scan lines changed vs git ref (default: main/master)")
     p_scan.add_argument("--lang", help="Filter by language (e.g., python, javascript)")
     p_scan.add_argument("--no-cache", action="store_true", help="Skip file hash cache (rescan all files)")
+    p_scan.add_argument("--no-config", action="store_true", help="Ignore .doji.toml project config (use when scanning untrusted code)")
     p_scan.add_argument("--ignore", help="Comma-separated rule names to suppress (e.g., todo-marker,long-line)")
     p_scan.add_argument("--min-severity", choices=["critical", "warning", "info"],
                          help="Minimum severity to display (filters lower)")
