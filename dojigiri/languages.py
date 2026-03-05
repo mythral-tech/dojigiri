@@ -409,6 +409,8 @@ def list_all_rules() -> list[dict]:
     """
     seen: dict[str, dict] = {}  # rule_name -> dict
 
+    from .compliance import get_cwe, get_nist
+
     def _add_rules(rules: list[Rule], languages: list[str]):
         for _pattern, severity, category, name, message, suggestion in rules:
             if name in seen:
@@ -418,7 +420,7 @@ def list_all_rules() -> list[dict]:
                         if lang not in existing_langs:
                             existing_langs.append(lang)
             else:
-                seen[name] = {
+                entry = {
                     "name": name,
                     "severity": severity.value,
                     "category": category.value,
@@ -426,6 +428,13 @@ def list_all_rules() -> list[dict]:
                     "message": message,
                     "suggestion": suggestion,
                 }
+                cwe = get_cwe(name)
+                if cwe:
+                    entry["cwe"] = cwe
+                nist = get_nist(name)
+                if nist:
+                    entry["nist"] = nist
+                seen[name] = entry
 
     # Universal and security rules apply to all languages
     _add_rules(UNIVERSAL_RULES, ["all"])

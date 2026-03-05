@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dojigiri"
-version = "1.0.0"
+version = "1.1.0"
 description = "Static analysis + LLM-powered code audit tool with tree-sitter semantic analysis"
 readme = "README.md"
 license = {text = "MIT"}
@@ -36,6 +36,7 @@ dependencies = [
 [project.optional-dependencies]
 llm = ["anthropic>=0.40.0"]
 mcp = ["mcp>=1.0.0"]
+pdf = ["weasyprint>=60.0"]
 all = ["anthropic>=0.40.0", "mcp>=1.0.0"]
 dev = [
     "pytest>=7.0",

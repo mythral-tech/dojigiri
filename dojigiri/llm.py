@@ -35,7 +35,17 @@ from .config import (
     LANGUAGE_DEBUG_HINTS, LANGUAGE_OPTIMIZE_HINTS,
     CHUNK_SIZE, get_api_key,
 )
+from .llm_backend import LLMBackend, get_backend
 from .chunker import Chunk, chunk_file
+
+# Module-level backend config — set by CLI before any LLM calls
+_backend_config: dict = {}
+
+
+def set_backend_config(config: dict) -> None:
+    """Set the backend config for this module (called from CLI)."""
+    global _backend_config
+    _backend_config = config
 
 
 class LLMError(Exception):
@@ -55,10 +65,12 @@ def _strip_markdown_fences(text: str) -> str:
 class CostTracker:
     """Track cumulative API costs for a session (thread-safe)."""
 
-    def __init__(self) -> None:
+    def __init__(self, backend: Optional[LLMBackend] = None) -> None:
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         self._lock = threading.Lock()
+        self._input_cost = backend.cost_per_million_input if backend else LLM_INPUT_COST_PER_M
+        self._output_cost = backend.cost_per_million_output if backend else LLM_OUTPUT_COST_PER_M
 
     def add(self, input_tokens: int, output_tokens: int) -> None:
         with self._lock:
@@ -77,27 +89,17 @@ class CostTracker:
     def total_cost(self) -> float:
         with self._lock:
             return (
-                (self.total_input_tokens / 1_000_000) * LLM_INPUT_COST_PER_M
-                + (self.total_output_tokens / 1_000_000) * LLM_OUTPUT_COST_PER_M
+                (self.total_input_tokens / 1_000_000) * self._input_cost
+                + (self.total_output_tokens / 1_000_000) * self._output_cost
             )
 
 
-def _get_client() -> Any:
-    """Get Anthropic client, raising clear error if not available."""
-    key = get_api_key()
-    if not key:
-        raise LLMError(
-            "ANTHROPIC_API_KEY not set. "
-            "Set the environment variable before running deep scans."
-        )
+def _get_backend() -> LLMBackend:
+    """Get LLM backend based on module config."""
     try:
-        import anthropic
-    except ImportError:
-        raise LLMError(
-            "anthropic package not installed. "
-            "Install with: pip install anthropic"
-        )
-    return anthropic.Anthropic(api_key=key)
+        return get_backend(_backend_config)
+    except RuntimeError as e:
+        raise LLMError(str(e)) from e
 
 
 # ─── Prompts ──────────────────────────────────────────────────────────
@@ -373,14 +375,22 @@ _RETRY_DELAYS = [1, 2, 4]  # exponential backoff seconds
 _RETRIABLE_STATUS_CODES = {408, 429, 500, 502, 503, 529}
 
 
-def _api_call_with_retry(client: Any, **kwargs: Any) -> Any:
-    """Call client.messages.create with exponential backoff on transient errors."""
+def _api_call_with_retry(
+    backend: LLMBackend, system: str, messages: list[dict[str, str]],
+    max_tokens: int = 4096, temperature: float = 0.0,
+) -> "LLMResponse":
+    """Call backend.chat with exponential backoff on transient errors."""
+    from .llm_backend import LLMResponse
     last_err = None
     for attempt in range(len(_RETRY_DELAYS) + 1):
         try:
-            return client.messages.create(**kwargs)
-        except Exception as e:  # Anthropic SDK raises various types; inspect status to decide retry
-            # Check if this is a retriable HTTP error
+            return backend.chat(
+                system=system,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
+        except Exception as e:
             status = getattr(e, "status_code", None)
             is_timeout = "timeout" in str(e).lower() or "timed out" in str(e).lower()
             is_retriable = status in _RETRIABLE_STATUS_CODES or is_timeout
@@ -393,7 +403,7 @@ def _api_call_with_retry(client: Any, **kwargs: Any) -> Any:
                 last_err = e
             else:
                 raise
-    assert last_err is not None  # guaranteed by loop structure
+    assert last_err is not None
     raise last_err
 
 
@@ -405,23 +415,22 @@ def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
                      f"{est_tokens:,}", f"{MAX_CHUNK_TOKENS:,}",
                      chunk.filepath, chunk.start_line, chunk.end_line)
 
-    client = _get_client()
+    backend = _get_backend()
 
     user_msg = f"{chunk.header}\n\n```{chunk.language}\n{chunk.content}\n```"
 
     response = _api_call_with_retry(
-        client,
-        model=LLM_MODEL,
-        max_tokens=LLM_MAX_TOKENS,
-        temperature=LLM_TEMPERATURE,
+        backend,
         system=SCAN_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_msg}],
+        max_tokens=LLM_MAX_TOKENS,
+        temperature=LLM_TEMPERATURE,
     )
 
-    cost_tracker.add(response.usage.input_tokens, response.usage.output_tokens)
+    cost_tracker.add(response.input_tokens, response.output_tokens)
 
     # Parse JSON response
-    text = _strip_markdown_fences(response.content[0].text.strip())
+    text = _strip_markdown_fences(response.text.strip())
 
     try:
         raw_findings = json.loads(text)
@@ -497,7 +506,7 @@ def _build_optimize_system_prompt(language: str) -> str:
 
 
 def _debug_single_chunk(
-    client, chunk_content: str, filepath: str, language: str,
+    backend: LLMBackend, chunk_content: str, filepath: str, language: str,
     system_prompt: str, extra_context: str,
     cost_tracker: CostTracker,
     chunk_header: str = "",
@@ -514,16 +523,15 @@ def _debug_single_chunk(
         user_msg += f"\n\n{extra_context}"
 
     response = _api_call_with_retry(
-        client,
-        model=LLM_MODEL,
-        max_tokens=LLM_DEBUG_MAX_TOKENS,
-        temperature=LLM_TEMPERATURE,
+        backend,
         system=system_prompt,
         messages=[{"role": "user", "content": user_msg}],
+        max_tokens=LLM_DEBUG_MAX_TOKENS,
+        temperature=LLM_TEMPERATURE,
     )
 
-    cost_tracker.add(response.usage.input_tokens, response.usage.output_tokens)
-    raw_text = response.content[0].text
+    cost_tracker.add(response.input_tokens, response.output_tokens)
+    raw_text = response.text
     parsed = _parse_debug_response(raw_text)
     return parsed, raw_text
 
@@ -563,14 +571,14 @@ def _analyze_file_chunked(
     cost_tracker: CostTracker,
 ) -> tuple[dict, CostTracker]:
     """Shared chunking logic for debug_file and optimize_file."""
-    client = _get_client()
+    backend = _get_backend()
 
     if content.count("\n") > CHUNK_SIZE:
         chunks = chunk_file(content, filepath, language)
         results = []
         for chunk in chunks:
             parsed, raw = _debug_single_chunk(
-                client, chunk.content, filepath, language,
+                backend, chunk.content, filepath, language,
                 system_prompt, extra_context, cost_tracker,
                 chunk_header=f"Lines {chunk.start_line}-{chunk.end_line} "
                              f"(chunk {chunk.chunk_index + 1}/{chunk.total_chunks})",
@@ -585,7 +593,7 @@ def _analyze_file_chunked(
 
     # Single-chunk path
     parsed, raw = _debug_single_chunk(
-        client, content, filepath, language,
+        backend, content, filepath, language,
         system_prompt, extra_context, cost_tracker,
     )
     if parsed:
@@ -802,7 +810,7 @@ def analyze_file_with_context(
     if cost_tracker is None:
         cost_tracker = CostTracker()
 
-    client = _get_client()
+    backend = _get_backend()
 
     # Build user message
     parts = [f"Primary file: {filepath} ({language})\n\n```{language}\n{content}\n```"]
@@ -823,16 +831,15 @@ def analyze_file_with_context(
     user_msg = "\n".join(parts)
 
     response = _api_call_with_retry(
-        client,
-        model=LLM_MODEL,
-        max_tokens=LLM_ANALYZE_MAX_TOKENS,
-        temperature=LLM_TEMPERATURE,
+        backend,
         system=ANALYZE_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_msg}],
+        max_tokens=LLM_ANALYZE_MAX_TOKENS,
+        temperature=LLM_TEMPERATURE,
     )
 
-    cost_tracker.add(response.usage.input_tokens, response.usage.output_tokens)
-    raw_text = response.content[0].text
+    cost_tracker.add(response.input_tokens, response.output_tokens)
+    raw_text = response.text
     parsed = _parse_debug_response(raw_text)
 
     if parsed is None:
@@ -854,7 +861,7 @@ def synthesize_project(
     if cost_tracker is None:
         cost_tracker = CostTracker()
 
-    client = _get_client()
+    backend = _get_backend()
 
     # Build user message
     parts = [f"--- Dependency Graph ---\n{graph_summary}"]
@@ -879,16 +886,15 @@ def synthesize_project(
     user_msg = "\n".join(parts)
 
     response = _api_call_with_retry(
-        client,
-        model=LLM_MODEL,
-        max_tokens=LLM_SYNTHESIS_MAX_TOKENS,
-        temperature=LLM_TEMPERATURE,
+        backend,
         system=SYNTHESIS_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_msg}],
+        max_tokens=LLM_SYNTHESIS_MAX_TOKENS,
+        temperature=LLM_TEMPERATURE,
     )
 
-    cost_tracker.add(response.usage.input_tokens, response.usage.output_tokens)
-    raw_text = response.content[0].text
+    cost_tracker.add(response.input_tokens, response.output_tokens)
+    raw_text = response.text
     parsed = _parse_debug_response(raw_text)
 
     if parsed is None:
@@ -946,7 +952,7 @@ def fix_file(
     if not findings:
         return [], cost_tracker
 
-    client = _get_client()
+    backend = _get_backend()
 
     # Build user message
     findings_text = "\n".join(
@@ -962,17 +968,16 @@ def fix_file(
     )
 
     response = _api_call_with_retry(
-        client,
-        model=LLM_MODEL,
-        max_tokens=LLM_FIX_MAX_TOKENS,
-        temperature=LLM_TEMPERATURE,
+        backend,
         system=FIX_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_msg}],
+        max_tokens=LLM_FIX_MAX_TOKENS,
+        temperature=LLM_TEMPERATURE,
     )
 
-    cost_tracker.add(response.usage.input_tokens, response.usage.output_tokens)
+    cost_tracker.add(response.input_tokens, response.output_tokens)
 
-    text = _strip_markdown_fences(response.content[0].text.strip())
+    text = _strip_markdown_fences(response.text.strip())
 
     try:
         raw_fixes = json.loads(text)

@@ -12,6 +12,28 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+# ─── Classification & Compliance ─────────────────────────────────────
+
+CLASSIFICATION_LEVELS = ("UNCLASSIFIED", "CUI", "CONFIDENTIAL", "SECRET", "TOP SECRET")
+
+PROFILES: dict[str, dict] = {
+    "owasp": {
+        "min_severity": "warning",
+        "ignore_rules": ["todo-marker", "long-line", "fstring-no-expr", "console-log", "fmt-print"],
+        "description": "OWASP Top 10 focus — security findings only",
+    },
+    "dod": {
+        "min_severity": "info",
+        "classification": "CUI",
+        "description": "DoD/defense compliance — all findings, CWE/NIST metadata, CUI markings",
+    },
+    "ci": {
+        "min_severity": "warning",
+        "ignore_rules": ["todo-marker", "long-line", "fstring-no-expr"],
+        "description": "CI/CD pipeline — warnings and above, no noise",
+    },
+}
+
 
 def is_bundled() -> bool:
     """Return True if running as a Nuitka-compiled standalone binary."""
@@ -158,6 +180,7 @@ class Finding:
     confidence: Optional[Confidence] = None  # LLM findings only
 
     def to_dict(self) -> dict:
+        from .compliance import get_cwe, get_nist
         snippet = "[REDACTED]" if self.rule in REDACT_SNIPPET_RULES else self.snippet
         d = {
             "file": self.file,
@@ -172,6 +195,12 @@ class Finding:
         }
         if self.confidence is not None:
             d["confidence"] = self.confidence.value
+        cwe = get_cwe(self.rule)
+        if cwe:
+            d["cwe"] = cwe
+        nist = get_nist(self.rule)
+        if nist:
+            d["nist"] = nist
         return d
 
 
@@ -497,6 +526,24 @@ LANGUAGE_OPTIMIZE_HINTS = {
 
 def get_api_key() -> Optional[str]:
     return os.environ.get("ANTHROPIC_API_KEY")
+
+
+def get_llm_config(project_config: Optional[dict] = None) -> dict:
+    """Build LLM backend config from env vars and .doji.toml [dojigiri.llm] section.
+
+    Priority: env vars > .doji.toml > defaults.
+    Returns dict with keys: backend, model, base_url, api_key.
+    """
+    toml_llm = {}
+    if project_config:
+        toml_llm = project_config.get("llm", {})
+
+    return {
+        "backend": os.environ.get("DOJI_LLM_BACKEND") or toml_llm.get("backend"),
+        "model": os.environ.get("DOJI_LLM_MODEL") or toml_llm.get("model"),
+        "base_url": os.environ.get("DOJI_LLM_BASE_URL") or toml_llm.get("base_url"),
+        "api_key": toml_llm.get("api_key"),  # not from env — per-backend env vars handle that
+    }
 
 
 def load_ignore_patterns(root: Path) -> list[str]:

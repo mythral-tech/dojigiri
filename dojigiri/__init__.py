@@ -1,6 +1,6 @@
 """dojigiri — Static analysis + LLM-powered code audit tool."""
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 from .config import (
     Finding,

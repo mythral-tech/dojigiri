@@ -1,4 +1,4 @@
-"""Tests for llm module — mocked Anthropic client, JSON recovery, cost tracking."""
+"""Tests for llm module — mocked LLM backend, JSON recovery, cost tracking."""
 
 import json
 import pytest
@@ -11,6 +11,7 @@ from dojigiri.llm import (
     LLMError,
     _api_call_with_retry,
 )
+from dojigiri.llm_backend import LLMResponse
 from dojigiri.chunker import Chunk
 from dojigiri.config import Severity, Category, Source, Confidence
 
@@ -33,14 +34,20 @@ def sample_chunk():
 
 @pytest.fixture
 def mock_response():
-    """Create a mock Anthropic API response."""
+    """Create a mock LLMResponse."""
     def _make(text, input_tokens=100, output_tokens=50):
-        resp = MagicMock()
-        resp.content = [MagicMock(text=text)]
-        resp.usage.input_tokens = input_tokens
-        resp.usage.output_tokens = output_tokens
-        return resp
+        return LLMResponse(text=text, input_tokens=input_tokens, output_tokens=output_tokens)
     return _make
+
+
+def _make_mock_backend(response):
+    """Create a mock backend that returns the given LLMResponse."""
+    backend = MagicMock()
+    backend.chat.return_value = response
+    backend.is_local = False
+    backend.cost_per_million_input = 3.0
+    backend.cost_per_million_output = 15.0
+    return backend
 
 
 # ─── CostTracker ──────────────────────────────────────────────────────
@@ -123,8 +130,8 @@ def test_recover_no_complete_objects():
 
 # ─── analyze_chunk with mocked API ────────────────────────────────────
 
-@patch("dojigiri.llm._get_client")
-def test_analyze_chunk_valid_json(mock_get_client, sample_chunk, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_analyze_chunk_valid_json(mock_get_backend, sample_chunk, mock_response):
     """Test analyze_chunk with valid JSON response."""
     findings_json = json.dumps([
         {
@@ -137,9 +144,7 @@ def test_analyze_chunk_valid_json(mock_get_client, sample_chunk, mock_response):
             "confidence": "high",
         }
     ])
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(findings_json)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(findings_json))
 
     ct = CostTracker()
     findings = analyze_chunk(sample_chunk, ct)
@@ -153,12 +158,10 @@ def test_analyze_chunk_valid_json(mock_get_client, sample_chunk, mock_response):
     assert ct.total_output_tokens == 50
 
 
-@patch("dojigiri.llm._get_client")
-def test_analyze_chunk_empty_array(mock_get_client, sample_chunk, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_analyze_chunk_empty_array(mock_get_backend, sample_chunk, mock_response):
     """Test analyze_chunk with empty findings."""
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response("[]")
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response("[]"))
 
     ct = CostTracker()
     findings = analyze_chunk(sample_chunk, ct)
@@ -166,12 +169,10 @@ def test_analyze_chunk_empty_array(mock_get_client, sample_chunk, mock_response)
     assert len(findings) == 0
 
 
-@patch("dojigiri.llm._get_client")
-def test_analyze_chunk_malformed_json(mock_get_client, sample_chunk, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_analyze_chunk_malformed_json(mock_get_backend, sample_chunk, mock_response):
     """Test analyze_chunk with completely malformed response."""
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response("not json at all")
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response("not json at all"))
 
     ct = CostTracker()
     findings = analyze_chunk(sample_chunk, ct)
@@ -179,14 +180,12 @@ def test_analyze_chunk_malformed_json(mock_get_client, sample_chunk, mock_respon
     assert len(findings) == 0  # Should gracefully return empty
 
 
-@patch("dojigiri.llm._get_client")
-def test_analyze_chunk_truncated_json(mock_get_client, sample_chunk, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_analyze_chunk_truncated_json(mock_get_backend, sample_chunk, mock_response):
     """Test analyze_chunk with truncated JSON (recovery should work)."""
     # Two objects, second is truncated
     text = '[{"line": 1, "severity": "warning", "category": "bug", "rule": "r1", "message": "m1", "suggestion": "s1", "confidence": "high"}, {"line": 2, "sev'
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(text)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(text))
 
     ct = CostTracker()
     findings = analyze_chunk(sample_chunk, ct)
@@ -196,13 +195,11 @@ def test_analyze_chunk_truncated_json(mock_get_client, sample_chunk, mock_respon
     assert findings[0].rule == "r1"
 
 
-@patch("dojigiri.llm._get_client")
-def test_analyze_chunk_markdown_fences(mock_get_client, sample_chunk, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_analyze_chunk_markdown_fences(mock_get_backend, sample_chunk, mock_response):
     """Test analyze_chunk strips markdown code fences."""
     text = '```json\n[{"line": 1, "severity": "info", "category": "style", "rule": "r1", "message": "m1", "confidence": "low"}]\n```'
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(text)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(text))
 
     ct = CostTracker()
     findings = analyze_chunk(sample_chunk, ct)
@@ -211,8 +208,8 @@ def test_analyze_chunk_markdown_fences(mock_get_client, sample_chunk, mock_respo
     assert findings[0].confidence == Confidence.LOW
 
 
-@patch("dojigiri.llm._get_client")
-def test_analyze_chunk_confidence_default(mock_get_client, sample_chunk, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_analyze_chunk_confidence_default(mock_get_backend, sample_chunk, mock_response):
     """Test that missing confidence field defaults to MEDIUM."""
     text = json.dumps([{
         "line": 1,
@@ -222,9 +219,7 @@ def test_analyze_chunk_confidence_default(mock_get_client, sample_chunk, mock_re
         "message": "m1",
         # no confidence field
     }])
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(text)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(text))
 
     ct = CostTracker()
     findings = analyze_chunk(sample_chunk, ct)
@@ -233,8 +228,8 @@ def test_analyze_chunk_confidence_default(mock_get_client, sample_chunk, mock_re
     assert findings[0].confidence == Confidence.MEDIUM
 
 
-@patch("dojigiri.llm._get_client")
-def test_analyze_chunk_line_offset(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_analyze_chunk_line_offset(mock_get_backend, mock_response):
     """Test that line numbers are adjusted for chunk offset."""
     chunk = Chunk(
         content="code here",
@@ -252,9 +247,7 @@ def test_analyze_chunk_line_offset(mock_get_client, mock_response):
         "rule": "r1",
         "message": "m1",
     }])
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(text)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(text))
 
     ct = CostTracker()
     findings = analyze_chunk(chunk, ct)
@@ -268,21 +261,17 @@ def test_analyze_chunk_line_offset(mock_get_client, mock_response):
 @patch("dojigiri.llm.time.sleep")
 def test_api_call_retry_on_429(mock_sleep):
     """Test that 429 errors trigger retry with backoff."""
-    mock_client = MagicMock()
+    mock_backend = MagicMock()
 
     # First call: 429 error; second call: success
     error_429 = Exception("Rate limited")
     error_429.status_code = 429
-    success = MagicMock()
-    success.content = [MagicMock(text="[]")]
-    success.usage.input_tokens = 10
-    success.usage.output_tokens = 5
+    success = LLMResponse(text="[]", input_tokens=10, output_tokens=5)
 
-    mock_client.messages.create.side_effect = [error_429, success]
+    mock_backend.chat.side_effect = [error_429, success]
 
-    result = _api_call_with_retry(mock_client, model="test", max_tokens=100,
-                                   temperature=0, system="test",
-                                   messages=[])
+    result = _api_call_with_retry(mock_backend, system="test", messages=[],
+                                   max_tokens=100, temperature=0)
     assert result == success
     mock_sleep.assert_called_once_with(1)  # First retry = 1s
 
@@ -290,15 +279,15 @@ def test_api_call_retry_on_429(mock_sleep):
 @patch("dojigiri.llm.time.sleep")
 def test_api_call_retry_exhausted(mock_sleep):
     """Test that non-retriable errors raise immediately."""
-    mock_client = MagicMock()
+    mock_backend = MagicMock()
 
     error_401 = Exception("Unauthorized")
     error_401.status_code = 401
-    mock_client.messages.create.side_effect = error_401
+    mock_backend.chat.side_effect = error_401
 
     with pytest.raises(Exception, match="Unauthorized"):
-        _api_call_with_retry(mock_client, model="test", max_tokens=100,
-                              temperature=0, system="test", messages=[])
+        _api_call_with_retry(mock_backend, system="test", messages=[],
+                              max_tokens=100, temperature=0)
 
     # No retries for 401
     mock_sleep.assert_not_called()

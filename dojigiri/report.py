@@ -57,11 +57,15 @@ def _c(color: str, text: str) -> str:
 
 def print_finding(f: Finding, show_file: bool = True) -> None:
     """Print a single finding."""
+    from .compliance import get_cwe
     color, label = SEVERITY_STYLE[f.severity]
     src = SOURCE_LABEL.get(f.source, f.source.value)
 
+    cwe = get_cwe(f.rule)
+    cwe_tag = f"  {_c('dim', cwe)}" if cwe else ""
+
     location = f"{f.file}:{f.line}" if show_file else f"line {f.line}"
-    print(f"  {_c(color, label)}  {_c('dim', f'[{src}]')}  {_c('dim', f'[{f.rule}]')}  {location}")
+    print(f"  {_c(color, label)}  {_c('dim', f'[{src}]')}  {_c('dim', f'[{f.rule}]')}{cwe_tag}  {location}")
     print(f"           {f.message}")
     if f.snippet:
         print(f"           {_c('gray', f.snippet)}")
@@ -89,8 +93,11 @@ def print_file_analysis(fa: FileAnalysis) -> None:
         print_finding(f, show_file=False)
 
 
-def print_scan_summary(report: ScanReport, duration: float | None = None) -> None:
+def print_scan_summary(report: ScanReport, duration: float | None = None,
+                       classification: str | None = None) -> None:
     """Print the scan summary."""
+    if classification:
+        print(f"\n{_c('bold', f'// {classification} //')}")
     print()
     print(_c("bold", "═" * 70))
     timing = f" in {duration:.1f}s" if duration is not None else ""
@@ -128,10 +135,13 @@ def print_scan_summary(report: ScanReport, duration: float | None = None) -> Non
 
     if report.llm_cost_usd > 0:
         print(f"\n  LLM cost:  ${report.llm_cost_usd:.4f}")
+    if classification:
+        print(f"\n{_c('bold', f'// {classification} //')}")
     print()
 
 
-def print_report(report: ScanReport, verbose: bool = False, duration: float | None = None) -> None:
+def print_report(report: ScanReport, verbose: bool = False, duration: float | None = None,
+                 classification: str | None = None) -> None:
     """Print full report — file analyses + summary."""
     # Show files with findings (or all files in verbose mode)
     for fa in report.file_analyses:
@@ -145,7 +155,7 @@ def print_report(report: ScanReport, verbose: bool = False, duration: float | No
         for cf in report.cross_file_findings:
             print_cross_file_finding(cf.to_dict())
 
-    print_scan_summary(report, duration=duration)
+    print_scan_summary(report, duration=duration, classification=classification)
 
 
 CONFIDENCE_BADGE = {
@@ -545,12 +555,14 @@ def to_sarif(report: ScanReport) -> dict:
         Severity.INFO: "note",
     }
     
+    from .compliance import get_cwe, get_nist
+
     # Collect unique rules from all findings
     rules_map = {}
     for fa in report.file_analyses:
         for f in fa.findings:
             if f.rule not in rules_map:
-                rules_map[f.rule] = {
+                rule_entry = {
                     "id": f.rule,
                     "name": f.message.split(" ")[0],  # First word as short name
                     "shortDescription": {
@@ -567,6 +579,15 @@ def to_sarif(report: ScanReport) -> dict:
                         "source": f.source.value,
                     }
                 }
+                # Add CWE tag for GitHub Code Scanning
+                cwe = get_cwe(f.rule)
+                if cwe:
+                    cwe_num = cwe.replace("CWE-", "")
+                    rule_entry["properties"]["tags"] = [f"external/cwe/cwe-{cwe_num}"]
+                nist = get_nist(f.rule)
+                if nist:
+                    rule_entry["properties"]["nist"] = nist
+                rules_map[f.rule] = rule_entry
     
     # Convert findings to SARIF results
     results = []

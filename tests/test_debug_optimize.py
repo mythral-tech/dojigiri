@@ -15,6 +15,7 @@ from dojigiri.llm import (
     optimize_file,
     CostTracker,
 )
+from dojigiri.llm_backend import LLMResponse
 from dojigiri.config import Finding, Severity, Category, Source, Confidence
 
 
@@ -22,14 +23,20 @@ from dojigiri.config import Finding, Severity, Category, Source, Confidence
 
 @pytest.fixture
 def mock_response():
-    """Create a mock Anthropic API response."""
+    """Create a mock LLMResponse."""
     def _make(text, input_tokens=100, output_tokens=50):
-        resp = MagicMock()
-        resp.content = [MagicMock(text=text)]
-        resp.usage.input_tokens = input_tokens
-        resp.usage.output_tokens = output_tokens
-        return resp
+        return LLMResponse(text=text, input_tokens=input_tokens, output_tokens=output_tokens)
     return _make
+
+
+def _make_mock_backend(response):
+    """Create a mock backend that returns the given LLMResponse."""
+    backend = MagicMock()
+    backend.chat.return_value = response
+    backend.is_local = False
+    backend.cost_per_million_input = 3.0
+    backend.cost_per_million_output = 15.0
+    return backend
 
 
 @pytest.fixture
@@ -215,8 +222,8 @@ def test_merge_deduplicates_findings():
 
 # ─── debug_file Mocked ─────────────────────────────────────────────────
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_basic(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_basic(mock_get_backend, mock_response):
     """Test basic debug_file returns structured result."""
     llm_output = json.dumps({
         "summary": "Found a bug",
@@ -228,9 +235,7 @@ def test_debug_file_basic(mock_get_client, mock_response):
         ],
         "quick_wins": ["Fix the loop bound"],
     })
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, tracker = debug_file("def foo(): pass", "test.py", "python")
     assert "findings" in result
@@ -240,107 +245,95 @@ def test_debug_file_basic(mock_get_client, mock_response):
     assert tracker.total_input_tokens == 100
 
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_with_error(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_with_error(mock_get_backend, mock_response):
     """Test debug_file includes error message in prompt."""
     llm_output = json.dumps({"summary": "TypeError", "findings": [], "quick_wins": []})
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, _ = debug_file("x = 1", "test.py", "python",
                            error_msg="TypeError: unsupported operand")
     assert result["summary"] == "TypeError"
 
     # Verify error was included in the user message
-    call_kwargs = mock_client.messages.create.call_args
-    user_msg = call_kwargs.kwargs["messages"][0]["content"]
+    call_kwargs = mock_get_backend.return_value.chat.call_args
+    user_msg = call_kwargs.kwargs.get("messages", call_kwargs[0][1] if len(call_kwargs[0]) > 1 else [])[0]["content"]
     assert "TypeError" in user_msg
 
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_with_traceback(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_with_traceback(mock_get_backend, mock_response):
     """Test debug_file parses Python traceback and highlights lines."""
     traceback = '''Traceback (most recent call last):
   File "test.py", line 10, in main
     result = bad_call()
 ValueError: nope'''
     llm_output = json.dumps({"summary": "ValueError", "findings": [], "quick_wins": []})
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, _ = debug_file("x = 1", "test.py", "python", error_msg=traceback)
 
-    call_kwargs = mock_client.messages.create.call_args
-    user_msg = call_kwargs.kwargs["messages"][0]["content"]
+    call_kwargs = mock_get_backend.return_value.chat.call_args
+    user_msg = call_kwargs.kwargs.get("messages", call_kwargs[0][1] if len(call_kwargs[0]) > 1 else [])[0]["content"]
     assert "Pay special attention to lines" in user_msg
     assert "10" in user_msg
 
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_with_static_findings(mock_get_client, mock_response, sample_findings):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_with_static_findings(mock_get_backend, mock_response, sample_findings):
     """Test debug_file includes static findings in prompt."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, _ = debug_file("x = 1", "test.py", "python",
                            static_findings=sample_findings)
 
-    call_kwargs = mock_client.messages.create.call_args
-    user_msg = call_kwargs.kwargs["messages"][0]["content"]
+    call_kwargs = mock_get_backend.return_value.chat.call_args
+    user_msg = call_kwargs.kwargs.get("messages", call_kwargs[0][1] if len(call_kwargs[0]) > 1 else [])[0]["content"]
     assert "Static analysis already found" in user_msg
 
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_raw_markdown_fallback(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_raw_markdown_fallback(mock_get_backend, mock_response):
     """Test debug_file falls back to raw_markdown when JSON parsing fails."""
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(
+    mock_get_backend.return_value = _make_mock_backend(mock_response(
         "## Root Cause\nThe bug is on line 5.\n## Fix\nChange x to y."
-    )
-    mock_get_client.return_value = mock_client
+    ))
 
     result, _ = debug_file("x = 1", "test.py", "python")
     assert "raw_markdown" in result
     assert "Root Cause" in result["raw_markdown"]
 
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_uses_8192_tokens(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_uses_8192_tokens(mock_get_backend, mock_response):
     """Test debug_file uses LLM_DEBUG_MAX_TOKENS (8192)."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     debug_file("x = 1", "test.py", "python")
 
-    call_kwargs = mock_client.messages.create.call_args
-    assert call_kwargs.kwargs["max_tokens"] == 8192
+    call_kwargs = mock_get_backend.return_value.chat.call_args
+    assert call_kwargs.kwargs.get("max_tokens", 0) == 8192
 
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_includes_language_hints(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_includes_language_hints(mock_get_backend, mock_response):
     """Test debug_file injects language-specific hints into system prompt."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     debug_file("x = 1", "test.py", "python")
 
-    call_kwargs = mock_client.messages.create.call_args
-    system_prompt = call_kwargs.kwargs["system"]
+    call_kwargs = mock_get_backend.return_value.chat.call_args
+    system_prompt = call_kwargs.kwargs.get("system", call_kwargs[0][0] if call_kwargs[0] else "")
     assert "mutable default" in system_prompt.lower() or "late-binding" in system_prompt.lower()
 
 
 # ─── optimize_file Mocked ──────────────────────────────────────────────
 
-@patch("dojigiri.llm._get_client")
-def test_optimize_file_basic(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_optimize_file_basic(mock_get_backend, mock_response):
     """Test basic optimize_file returns structured result."""
     llm_output = json.dumps({
         "summary": "Room for improvement",
@@ -352,9 +345,7 @@ def test_optimize_file_basic(mock_get_client, mock_response):
         ],
         "quick_wins": ["Use list comprehension"],
     })
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, tracker = optimize_file("for x in y: pass", "test.py", "python")
     assert "findings" in result
@@ -362,19 +353,17 @@ def test_optimize_file_basic(mock_get_client, mock_response):
     assert result["findings"][0]["title"] == "Slow loop"
 
 
-@patch("dojigiri.llm._get_client")
-def test_optimize_file_with_static_findings(mock_get_client, mock_response, sample_perf_findings):
+@patch("dojigiri.llm._get_backend")
+def test_optimize_file_with_static_findings(mock_get_backend, mock_response, sample_perf_findings):
     """Test optimize_file only passes perf-relevant static findings."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, _ = optimize_file("x = 1", "test.py", "python",
                               static_findings=sample_perf_findings)
 
-    call_kwargs = mock_client.messages.create.call_args
-    user_msg = call_kwargs.kwargs["messages"][0]["content"]
+    call_kwargs = mock_get_backend.return_value.chat.call_args
+    user_msg = call_kwargs.kwargs.get("messages", call_kwargs[0][1] if len(call_kwargs[0]) > 1 else [])[0]["content"]
     # Should include perf/style findings but NOT security ones
     if "Static analysis already found" in user_msg:
         assert "complexity" in user_msg.lower() or "long" in user_msg.lower()
@@ -382,28 +371,24 @@ def test_optimize_file_with_static_findings(mock_get_client, mock_response, samp
         # (it might still appear if it matched the rule filter, but the key is the filter ran)
 
 
-@patch("dojigiri.llm._get_client")
-def test_optimize_file_uses_8192_tokens(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_optimize_file_uses_8192_tokens(mock_get_backend, mock_response):
     """Test optimize_file uses LLM_OPTIMIZE_MAX_TOKENS (8192)."""
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     optimize_file("x = 1", "test.py", "python")
 
-    call_kwargs = mock_client.messages.create.call_args
-    assert call_kwargs.kwargs["max_tokens"] == 8192
+    call_kwargs = mock_get_backend.return_value.chat.call_args
+    assert call_kwargs.kwargs.get("max_tokens", 0) == 8192
 
 
-@patch("dojigiri.llm._get_client")
-def test_optimize_file_raw_markdown_fallback(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_optimize_file_raw_markdown_fallback(mock_get_backend, mock_response):
     """Test optimize_file falls back to raw_markdown when JSON fails."""
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(
+    mock_get_backend.return_value = _make_mock_backend(mock_response(
         "## Performance Assessment\nNeeds work.\n## Findings\nSlow loop at line 5."
-    )
-    mock_get_client.return_value = mock_client
+    ))
 
     result, _ = optimize_file("for x in y: pass", "test.py", "python")
     assert "raw_markdown" in result
@@ -411,36 +396,32 @@ def test_optimize_file_raw_markdown_fallback(mock_get_client, mock_response):
 
 # ─── Chunking Integration ──────────────────────────────────────────────
 
-@patch("dojigiri.llm._get_client")
-def test_debug_file_chunks_large_file(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_debug_file_chunks_large_file(mock_get_backend, mock_response):
     """Test debug_file chunks large files (>400 lines) into multiple API calls."""
     # Create a 500-line file
     code = "\n".join([f"x_{i} = {i}" for i in range(500)])
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
 
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, _ = debug_file(code, "big.py", "python")
     assert "findings" in result
     # Should have made multiple API calls (500 lines / 400 chunk_size = 2 chunks)
-    assert mock_client.messages.create.call_count >= 2
+    assert mock_get_backend.return_value.chat.call_count >= 2
 
 
-@patch("dojigiri.llm._get_client")
-def test_optimize_file_chunks_large_file(mock_get_client, mock_response):
+@patch("dojigiri.llm._get_backend")
+def test_optimize_file_chunks_large_file(mock_get_backend, mock_response):
     """Test optimize_file chunks large files into multiple API calls."""
     code = "\n".join([f"y_{i} = {i}" for i in range(500)])
     llm_output = json.dumps({"summary": "OK", "findings": [], "quick_wins": []})
 
-    mock_client = MagicMock()
-    mock_client.messages.create.return_value = mock_response(llm_output)
-    mock_get_client.return_value = mock_client
+    mock_get_backend.return_value = _make_mock_backend(mock_response(llm_output))
 
     result, _ = optimize_file(code, "big.py", "python")
     assert "findings" in result
-    assert mock_client.messages.create.call_count >= 2
+    assert mock_get_backend.return_value.chat.call_count >= 2
 
 
 # ─── CLI Integration ──────────────────────────────────────────────────
