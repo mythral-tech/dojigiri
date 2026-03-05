@@ -163,8 +163,10 @@ class OpenAICompatibleBackend:
             ) from e
 
         # Parse response
-        choice = body["choices"][0]
-        text = choice["message"]["content"]
+        choices = body.get("choices", [])
+        if not choices:
+            raise RuntimeError("LLM returned empty choices")
+        text = choices[0]["message"]["content"]
         usage = body.get("usage", {})
 
         return LLMResponse(
