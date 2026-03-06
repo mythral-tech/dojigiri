@@ -6,8 +6,8 @@
 <p align="center">
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10+"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License"></a>
-  <a href="#"><img src="https://img.shields.io/badge/tests-1035%20passed-brightgreen.svg" alt="Tests"></a>
-  <a href="#"><img src="https://img.shields.io/badge/rules-40%2B-orange.svg" alt="Rules"></a>
+  <a href="#"><img src="https://img.shields.io/badge/tests-1122%20passed-brightgreen.svg" alt="Tests"></a>
+  <a href="#"><img src="https://img.shields.io/badge/rules-50%2B-orange.svg" alt="Rules"></a>
   <a href="#"><img src="https://img.shields.io/badge/languages-17-blueviolet.svg" alt="Languages"></a>
 </p>
 
@@ -217,43 +217,53 @@ doji hook uninstall   # Removes it
 
 ## Architecture
 
+See **[ARCHITECTURE.md](ARCHITECTURE.md)** for the full system map — call flow
+diagrams, module tables, data flow through the semantic engine, and a
+"start here" guide for navigating the codebase.
+
 ```
 dojigiri/
-├── __main__.py          CLI entry point
+├── __main__.py          CLI entry point (6 subcommands)
 ├── analyzer.py          Scan orchestration, file collection, caching
-├── detector.py          Static analysis engine (regex + AST + tree-sitter)
-├── languages.py         40+ pattern rules across 17 languages
+├── detector.py          Static analysis engine (regex + AST + semantic)
+├── languages.py         50+ pattern rules across 17 languages
 ├── fixer.py             Deterministic fixers + LLM fix orchestration
-├── depgraph.py          Dependency graph (import resolution, cycles, metrics)
-├── project.py           Cross-file analysis orchestration
-├── ts_semantic.py       Tree-sitter: function/class/variable extraction
-├── ts_cfg.py            Control flow graph construction
-├── ts_taint.py          Taint analysis (path-sensitive, sanitizer-aware)
-├── ts_types.py          Type inference + contract checking
-├── ts_nullsafety.py     Null dereference + narrowing
-├── ts_resource.py       Resource leak detection
-├── ts_scope.py          Unused vars, shadowing, undefined references
-├── ts_smells.py         Dead code, complexity, semantic clones
-├── ts_checks.py         AST pattern checks
-├── ts_callgraph.py      Call graph construction
-├── ts_explain.py        Beginner-friendly code explanation
-├── ts_lang_config.py    Language configs for 7 tree-sitter grammars
-├── llm.py               Claude API: scan, debug, optimize, analyze, explain
-├── llm_focus.py         Micro-queries for targeted LLM analysis
+├── llm.py               Claude API wrapper with cost tracking
+├── llm_backend.py       Backend abstraction (Anthropic/OpenAI/Ollama)
+├── llm_focus.py         Targeted LLM prompts from static findings
 ├── chunker.py           File splitting for LLM context windows
 ├── config.py            Data structures, enums, constants
+├── compliance.py        CWE and NIST SP 800-53 mappings
 ├── storage.py           JSON reports, file hash cache
-├── report.py            Output formatting (ANSI, JSON, SARIF)
-└── hooks.py             Pre-commit hook management
+├── report.py            Console output (ANSI, JSON, SARIF)
+├── report_html.py       Self-contained HTML reports
+├── mcp_server.py        FastMCP server for AI agent integration
+├── hooks.py             Pre-commit hook management
+├── semantic/            Tree-sitter semantic analysis engine
+│   ├── core.py          Single-pass AST extraction
+│   ├── cfg.py           Control flow graph construction
+│   ├── taint.py         Path-sensitive taint analysis
+│   ├── types.py         Type inference + contracts
+│   ├── nullsafety.py    Null dereference detection
+│   ├── resource.py      Resource leak detection
+│   ├── scope.py         Unused vars, shadowing, uninitialized
+│   ├── smells.py        God class, feature envy, semantic clones
+│   ├── checks.py        Cross-language AST checks
+│   ├── explain.py       Tutorial-mode file explanation
+│   └── lang_config.py   Language configs for 7 grammars
+└── graph/               Cross-file analysis
+    ├── depgraph.py      Dependency graph + call graph engine
+    ├── callgraph.py     Dead functions, arg mismatches
+    └── project.py       Cross-file analysis orchestrator
 ```
 
-**28 modules · 12,500+ lines · 1,035 tests**
+**35 modules · ~17,000 lines · 1,122 tests**
 
 ## Development
 
 ```bash
-git clone https://github.com/Inklling/Genesis
-cd Genesis
+git clone https://github.com/Inklling/dojigiri
+cd dojigiri
 pip install -e ".[dev]"
 pytest tests/ -q         # 1035 tests, ~40s
 ```
