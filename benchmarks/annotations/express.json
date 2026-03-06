@@ -1,0 +1,9 @@
+{
+  "notes": "Express.js benchmark annotations. Baseline from SUMMARY.md (2026-03-03).",
+  "true_positives": [],
+  "false_positives": [],
+  "expected_counts": {
+    "total": 140,
+    "notes": "Expected counts from Round 2 FP reduction (SUMMARY.md)"
+  }
+}

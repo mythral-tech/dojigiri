@@ -35,3 +35,4 @@ nul
 # Benchmark results and cloned repos
 benchmarks/results/
 benchmarks/.repos/
+.hypothesis/

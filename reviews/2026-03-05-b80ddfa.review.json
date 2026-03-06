@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "review_id": "2026-03-05-b80ddfa",
+  "timestamp": "2026-03-05T17:15:00-05:00",
+  "reviewer": "claude-review",
+  "status": "open",
+  "scope": {
+    "base_ref": "792b46a",
+    "head_ref": "b80ddfa",
+    "commits_reviewed": ["eafcffa", "815511d", "b80ddfa"],
+    "commit_messages": [
+      "eafcffa: [Claude] Add 87 tests for v1.1.0 modules + bump build version",
+      "815511d: [Claude] Update COLLAB.md — tests complete, build verified",
+      "b80ddfa: [Claude] Security hardening: --no-config flag, rule suppression warning"
+    ],
+    "files_changed": 8,
+    "lines_added": 1091,
+    "lines_removed": 5
+  },
+  "doji_scan": {
+    "total_findings": 0,
+    "critical": 0,
+    "warnings": 0,
+    "info": 0,
+    "findings": []
+  },
+  "findings": [
+    {
+      "id": "R001",
+      "severity": "serious",
+      "category": "correctness",
+      "file": "dojigiri/__main__.py",
+      "line": 181,
+      "title": "Phantom rule names in _SECURITY_RULES — 3 rules don't exist",
+      "detail": "_SECURITY_RULES contains 'command-injection', 'insecure-deserialization', and 'xss', but none of these rule names exist in languages.py, compliance.py, detector.py, or anywhere else in the codebase. They are phantom rules. If a malicious .doji.toml suppressed 'os-system' (real) and 'command-injection' (phantom), the warning would say '2 security rule(s)' when only 1 real rule is suppressed. The set gives a false sense of coverage — it looks like command injection, XSS, and insecure deserialization are recognized categories when they have no corresponding detection rules.",
+      "evidence": "\"command-injection\", \"path-traversal\", \"insecure-crypto\",\n\"insecure-deserialization\", \"insecure-http\", \"xss\",\n\nGrep for these 3 names in dojigiri/ returns matches ONLY in __main__.py:184-185.",
+      "suggestion": "Remove the 3 phantom names. Derive the set from CWE_MAP keys to stay in sync automatically. Or add a test that asserts every entry in _SECURITY_RULES corresponds to an actual rule.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R002",
+      "severity": "concern",
+      "category": "correctness",
+      "file": "dojigiri/llm_backend.py",
+      "line": 88,
+      "title": "AnthropicBackend.chat blindly indexes response.content[0] without guard",
+      "detail": "OpenAI backend got an empty-choices guard in commit 792b46a (immediately before this review range), but AnthropicBackend.chat still does `response.content[0].text` without checking if content is empty. The Anthropic API can return an empty content array in edge cases (max_tokens=0, safety filter). This would crash with IndexError instead of a clear error.",
+      "evidence": "return LLMResponse(\n    text=response.content[0].text,  # IndexError if content is empty\n    input_tokens=response.usage.input_tokens,\n    output_tokens=response.usage.output_tokens,\n)",
+      "suggestion": "Add: `if not response.content: raise RuntimeError('Anthropic returned empty response')` — mirrors the guard already in OpenAICompatibleBackend.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R003",
+      "severity": "concern",
+      "category": "testing",
+      "file": "tests/test_llm_backend.py",
+      "line": 66,
+      "title": "test_chat_wraps_anthropic_sdk is mock theater — proves mock returns what was set up",
+      "detail": "The test sets up a mock to return 'response text' with 100/50 tokens, calls chat(), then asserts it got 'response text' with 100/50 tokens. If chat() were `return LLMResponse(text='response text', input_tokens=100, output_tokens=50)`, the test still passes. It doesn't verify the SDK was called with the correct model, temperature, max_tokens, or system prompt. Compare with test_chat_builds_correct_payload (line 108) for the OpenAI backend, which does verify all arguments — the Anthropic test should match that rigor.",
+      "evidence": "mock_client.messages.create.assert_called_once()  # checks call count, not arguments",
+      "suggestion": "Use assert_called_once_with() to verify model, max_tokens, temperature, system, and messages are forwarded correctly.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R004",
+      "severity": "concern",
+      "category": "testing",
+      "file": "dojigiri/__main__.py",
+      "line": 174,
+      "title": "No test coverage for --no-config flag or security rule suppression warning",
+      "detail": "The --no-config flag and security suppression warning are the entire substantive change in commit b80ddfa, but there are zero tests for either. No test verifies --no-config skips config loading. No test verifies the warning fires when security rules are suppressed. No test verifies it stays silent for non-security rules. This is the one security-hardening feature in the commit range — it should be tested.",
+      "evidence": "Grep for 'no.config' or 'no_config' in tests/ returns no matches.",
+      "suggestion": "Add tests: (1) --no-config results in empty project_config and custom_rules, (2) suppressing 'eval-usage' in config triggers stderr warning containing 'security rule', (3) suppressing 'todo-marker' does NOT trigger the warning.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R005",
+      "severity": "concern",
+      "category": "testing",
+      "file": "tests/test_llm_backend.py",
+      "line": 170,
+      "title": "Empty-choices guard tests use unrealistic empty messages list",
+      "detail": "test_chat_empty_choices_raises and test_chat_missing_choices_raises both pass messages=[] to chat(). This means the request payload itself is malformed — no real caller would send zero messages. The test validates the guard from commit 792b46a but with inputs that would never occur in practice. A real scenario is: user sends a valid prompt, but the API returns empty choices due to content filtering or rate limiting.",
+      "evidence": "b.chat(system=\"sys\", messages=[])  # testing empty response with empty request",
+      "suggestion": "Use messages=[{\"role\": \"user\", \"content\": \"test\"}] to simulate a realistic request that receives an unexpected empty-choices response.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R006",
+      "severity": "concern",
+      "category": "security",
+      "file": "reviews/2026-03-05-taka-audit.json",
+      "line": null,
+      "title": "Taka audit committed to public repo contains workstation fingerprint",
+      "detail": "The audit JSON contains specific PIDs, port bindings, installed software (RemoteMouse, Spotify), Windows patch history with dates (KB5077181, 2026-02-12), and network service inventory. The repo remote is https://github.com/Inklling/Genesis (per the audit). If pushed, this is information disclosure — an attacker learns exact software inventory, patch level (21 days behind), and network exposure of the development machine.",
+      "evidence": "\"RemoteMouse (PID 7656) is listening on 0.0.0.0:1978\"\n\"Most recent hotfix: KB5077181 installed 2026-02-12\"",
+      "suggestion": "Either add reviews/*-taka-*.json to .gitignore, redact system-specific details, or keep audit results in a private location outside the repo.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R007",
+      "severity": "nit",
+      "category": "maintainability",
+      "file": "dojigiri/__main__.py",
+      "line": 181,
+      "title": "_SECURITY_RULES rebuilt on every scan invocation",
+      "detail": "The set literal is reconstructed every time cmd_scan() is called. It's a constant — should be module-level. Defining it inside the function also makes it invisible to tests and imports.",
+      "evidence": "_SECURITY_RULES = { ... }  # inside cmd_scan()",
+      "suggestion": "Move to module level as a frozenset. Makes it importable for testing and avoids per-call overhead.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R008",
+      "severity": "nit",
+      "category": "testing",
+      "file": "tests/test_llm_backend.py",
+      "line": 48,
+      "title": "Nested patch.dict pattern is confusing — outer patch is a no-op",
+      "detail": "test_no_api_key_raises wraps patch.dict(clear=True) around a second patch.dict(clear=True) that manually filters ANTHROPIC_API_KEY. The outer one is immediately overridden. Same pattern in test_default_host (line 248) and test_default_model (line 275).",
+      "evidence": "with patch.dict(os.environ, {}, clear=True):\n    env = {k: v for k, v in os.environ.items() if k != \"ANTHROPIC_API_KEY\"}\n    with patch.dict(os.environ, env, clear=True):",
+      "suggestion": "Single `patch.dict(os.environ, {}, clear=True)` achieves the same result. The inner reconstruction is redundant because clear=True already removes everything.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R009",
+      "severity": "nit",
+      "category": "maintainability",
+      "file": "tests/test_report_html.py",
+      "line": 222,
+      "title": "Hardcoded version string will break on next version bump",
+      "detail": "test_version_footer asserts 'Dojigiri v1.1.0' — this must be manually updated with every release.",
+      "evidence": "assert \"Dojigiri v1.1.0\" in result",
+      "suggestion": "Import __version__ from dojigiri and assert f'Dojigiri v{__version__}' instead.",
+      "disposition": null,
+      "disposition_reason": null
+    },
+    {
+      "id": "R010",
+      "severity": "question",
+      "category": "design",
+      "file": "tests/test_compliance.py",
+      "line": 99,
+      "title": "Is 100% CWE coverage for all rules an intentional policy?",
+      "detail": "test_all_language_rules_have_cwe asserts every rule from list_all_rules() has a CWE mapping. Adding any new language rule without a CWE mapping will fail this test. Some rules (style, formatting) have tenuous CWE connections. Is this deliberate policy or will it become friction?",
+      "evidence": "unmapped = [r[\"name\"] for r in rules if r[\"name\"] not in CWE_MAP]\nassert unmapped == []",
+      "suggestion": "If intentional (compliance requirement), document the policy in a comment. If pragmatic, consider an explicit opt-out set for rules where CWE mapping is not meaningful.",
+      "disposition": null,
+      "disposition_reason": null
+    }
+  ],
+  "verdict": {
+    "result": "PASS_WITH_CONCERNS",
+    "blocking_count": 0,
+    "serious_count": 1,
+    "concern_count": 5,
+    "nit_count": 3,
+    "question_count": 1,
+    "summary": "3 phantom rules in security allowlist, missing empty-content guard on Anthropic backend, no tests for the core security hardening change, and Taka audit leaks workstation fingerprint to public repo."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "notes": "Flask benchmark annotations. Baseline from SUMMARY.md (2026-03-03). TPs/FPs verified during Mag7 review.",
+  "true_positives": [
+    {"file": "src/flask/config.py", "line": 0, "rule": "exec-usage", "note": "Intentional exec() for config loading — TP but acceptable risk"},
+    {"file": "src/flask/config.py", "line": 0, "rule": "eval-usage", "note": "Intentional eval() for config loading — TP but acceptable risk"}
+  ],
+  "false_positives": [],
+  "expected_counts": {
+    "total": 287,
+    "bare-except": 1,
+    "unused-import": 0,
+    "unused-variable": 0,
+    "notes": "Expected counts from Round 2 FP reduction (SUMMARY.md)"
+  }
+}
