@@ -253,7 +253,6 @@ def test_baseline_absolute_vs_relative_paths(sample_scan_report):
     fa = FileAnalysis("/project/src/test.py", "python", 100, current_findings)
     sample_scan_report.root = "/project"
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 1
 
     # Baseline uses relative path (from same root)
     baseline_dict = {
@@ -288,7 +287,6 @@ def test_baseline_both_absolute_paths(sample_scan_report):
     fa = FileAnalysis("/project/test.py", "python", 100, current_findings)
     sample_scan_report.root = "/project"
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 1
 
     baseline_dict = {
         "root": "/project",

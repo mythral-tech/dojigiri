@@ -200,20 +200,11 @@ def scan_quick(
     for fa in analyses:
         fa.semantics = None
 
-    total_findings = sum(len(fa.findings) for fa in analyses) + len(cross_file_findings)
-    critical = sum(fa.critical_count for fa in analyses)
-    warnings = sum(fa.warning_count for fa in analyses)
-    info = sum(fa.info_count for fa in analyses) + len(cross_file_findings)
-
     report_obj = ScanReport(
         root=str(root),
         mode="quick",
         files_scanned=len(analyses),
         files_skipped=skipped,
-        total_findings=total_findings,
-        critical=critical,
-        warnings=warnings,
-        info=info,
         file_analyses=analyses,
         cross_file_findings=cross_file_findings,
     )
@@ -371,24 +362,15 @@ def scan_deep(
                 except Exception as e:  # future.result() — any worker error must be caught
                     logger.warning("Worker error: %s", e)
 
-    total_findings = sum(len(fa.findings) for fa in analyses)
-    critical = sum(fa.critical_count for fa in analyses)
-    warnings = sum(fa.warning_count for fa in analyses)
-    info = sum(fa.info_count for fa in analyses)
-
     # Save cache with updated analyses
     if use_cache:
         save_cache(cache)
-    
+
     report_obj = ScanReport(
         root=str(root),
         mode="deep",
         files_scanned=len(analyses),
         files_skipped=skipped,
-        total_findings=total_findings,
-        critical=critical,
-        warnings=warnings,
-        info=info,
         file_analyses=analyses,
         llm_cost_usd=cost_tracker.total_cost,
     )
@@ -461,11 +443,6 @@ def filter_report(
     for fa in report.file_analyses:
         fa.findings = [f for f in fa.findings if _keep(f)]
 
-    # Recompute counts
-    report.total_findings = sum(len(fa.findings) for fa in report.file_analyses)
-    report.critical = sum(fa.critical_count for fa in report.file_analyses)
-    report.warnings = sum(fa.warning_count for fa in report.file_analyses)
-    report.info = sum(fa.info_count for fa in report.file_analyses)
     return report
 
 
@@ -520,12 +497,7 @@ def diff_reports(
             f for f in fa.findings
             if (norm_path, f.line // 5, f.rule) not in baseline_signatures
         ]
-    
-    # Recompute counts
-    report.total_findings = sum(len(fa.findings) for fa in report.file_analyses)
-    report.critical = sum(fa.critical_count for fa in report.file_analyses)
-    report.warnings = sum(fa.warning_count for fa in report.file_analyses)
-    report.info = sum(fa.info_count for fa in report.file_analyses)
+
     return report
 
 
@@ -720,7 +692,6 @@ def scan_diff(
     if not changed_files:
         return ScanReport(
             root=str(root), mode="diff", files_scanned=0, files_skipped=0,
-            total_findings=0, critical=0, warnings=0, info=0,  # doji:ignore(possibly-uninitialized)
             timestamp=datetime.now().isoformat(timespec="seconds"),
         ), ref
 
@@ -770,16 +741,10 @@ def scan_diff(
                 lines=lines_count, findings=findings,
             ))
 
-    total = sum(len(fa.findings) for fa in file_analyses)
-    crit = sum(fa.critical_count for fa in file_analyses)
-    warn = sum(fa.warning_count for fa in file_analyses)
-    info = sum(fa.info_count for fa in file_analyses)
-
     report = ScanReport(
         root=str(root), mode="diff",
         files_scanned=len(changed_files) - skipped,
         files_skipped=skipped,
-        total_findings=total, critical=crit, warnings=warn, info=info,
         file_analyses=file_analyses,
         timestamp=datetime.now().isoformat(timespec="seconds"),
     )

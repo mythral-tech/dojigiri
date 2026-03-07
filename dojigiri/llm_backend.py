@@ -59,6 +59,10 @@ _ANTHROPIC_PRICING: dict[str, tuple[float, float]] = {
     "claude-sonnet-4": (3.0, 15.0),
     "claude-haiku-4": (0.80, 4.0),
 }
+
+# Task tiers for model selection
+TIER_SCAN = "scan"   # basic scan chunks — high volume, structured output
+TIER_DEEP = "deep"   # debug/optimize/cross-file/synthesis/fix — needs reasoning
 # Cache pricing multipliers relative to base input price
 _CACHE_READ_DISCOUNT = 0.1    # cache reads cost 10% of base
 _CACHE_CREATE_PREMIUM = 1.25  # cache creation costs 125% of base
@@ -89,6 +93,12 @@ class AnthropicBackend:
             )
         self._client = anthropic.Anthropic(api_key=self._api_key)
         return self._client
+
+    def with_model(self, model: str) -> "AnthropicBackend":
+        """Return a new backend instance using a different model but same API key/client."""
+        clone = AnthropicBackend(api_key=self._api_key, model=model)
+        clone._client = self._client  # reuse the authenticated client
+        return clone
 
     def chat(
         self,
@@ -322,3 +332,35 @@ def get_backend(config: Optional[dict] = None) -> LLMBackend:
             f"Unknown LLM backend '{backend_type}'. "
             "Use: anthropic, ollama, or openai"
         )
+
+
+def get_tiered_backend(config: Optional[dict] = None, tier: str = TIER_DEEP) -> LLMBackend:
+    """Get a backend appropriate for the given task tier.
+
+    For Anthropic backends with tier_mode='auto':
+    - TIER_SCAN: uses Haiku (fast, cheap — good for structured scan output)
+    - TIER_DEEP: uses Sonnet (reasoning — debug/optimize/cross-file/fix)
+
+    For non-Anthropic backends or tier_mode='off', returns the default backend.
+    """
+    import os as _os
+    from .config import LLM_TIER_MODE, LLM_SCAN_MODEL, LLM_DEEP_MODEL
+
+    tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
+
+    # If tiering is off, or user explicitly set a model, use default
+    config = config or {}
+    user_model = config.get("model") or _os.environ.get("DOJI_LLM_MODEL")
+    if tier_mode == "off" or user_model:
+        return get_backend(config)
+
+    backend = get_backend(config)
+
+    # Only tier Anthropic backends — local/OpenAI models don't have tiering
+    if not isinstance(backend, AnthropicBackend):
+        return backend
+
+    if tier == TIER_SCAN:
+        return backend.with_model(LLM_SCAN_MODEL)
+    else:
+        return backend.with_model(LLM_DEEP_MODEL)

@@ -54,7 +54,7 @@ from .config import (
     LANGUAGE_DEBUG_HINTS, LANGUAGE_OPTIMIZE_HINTS,
     CHUNK_SIZE,
 )
-from .llm_backend import LLMBackend, get_backend
+from .llm_backend import LLMBackend, get_backend, get_tiered_backend, TIER_SCAN, TIER_DEEP
 from .chunker import Chunk, chunk_file
 
 # Module-level backend config — set by CLI before any LLM calls
@@ -87,30 +87,50 @@ class CostLimitExceeded(LLMError):
 
 
 class CostTracker:
-    """Track cumulative API costs for a session (thread-safe)."""
+    """Track cumulative API costs for a session (thread-safe).
+
+    Supports mixed-model pricing: each add() call computes cost using the
+    backend that made the call, so tiered model selection (Haiku for scan,
+    Sonnet for deep) is tracked accurately.
+    """
 
     def __init__(self, backend: Optional[LLMBackend] = None, max_cost: Optional[float] = None) -> None:
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         self._total_cache_read = 0
         self._total_cache_create = 0
+        self._accumulated_cost = 0.0  # exact dollar cost from per-call pricing
         self.max_cost = max_cost
         self._lock = threading.Lock()
-        self._input_cost = backend.cost_per_million_input if backend else LLM_INPUT_COST_PER_M
-        self._output_cost = backend.cost_per_million_output if backend else LLM_OUTPUT_COST_PER_M
+        # Fallback pricing when no backend passed to add()
+        self._default_input_cost = backend.cost_per_million_input if backend else LLM_INPUT_COST_PER_M
+        self._default_output_cost = backend.cost_per_million_output if backend else LLM_OUTPUT_COST_PER_M
 
     def add(self, input_tokens: int, output_tokens: int,
-            cache_read_tokens: int = 0, cache_create_tokens: int = 0) -> None:
+            cache_read_tokens: int = 0, cache_create_tokens: int = 0,
+            backend: Optional[LLMBackend] = None) -> None:
+        from .llm_backend import _CACHE_READ_DISCOUNT, _CACHE_CREATE_PREMIUM
+        input_rate = backend.cost_per_million_input if backend else self._default_input_cost
+        output_rate = backend.cost_per_million_output if backend else self._default_output_cost
+
+        uncached = input_tokens - cache_read_tokens - cache_create_tokens
+        call_cost = (
+            (uncached / 1_000_000) * input_rate
+            + (cache_read_tokens / 1_000_000) * input_rate * _CACHE_READ_DISCOUNT
+            + (cache_create_tokens / 1_000_000) * input_rate * _CACHE_CREATE_PREMIUM
+            + (output_tokens / 1_000_000) * output_rate
+        )
+
         with self._lock:
             self.total_input_tokens += input_tokens
             self.total_output_tokens += output_tokens
             self._total_cache_read += cache_read_tokens
             self._total_cache_create += cache_create_tokens
+            self._accumulated_cost += call_cost
             # Check cost limit inside lock to avoid TOCTOU race
-            current_cost = self._compute_cost()
-            if self.max_cost is not None and current_cost > self.max_cost:
+            if self.max_cost is not None and self._accumulated_cost > self.max_cost:
                 raise CostLimitExceeded(
-                    f"Cost limit exceeded: ${current_cost:.4f} > ${self.max_cost:.2f}"
+                    f"Cost limit exceeded: ${self._accumulated_cost:.4f} > ${self.max_cost:.2f}"
                 )
         # Record in session metrics (best-effort)
         try:
@@ -121,28 +141,20 @@ class CostTracker:
         except Exception as e:
             logger.debug("Failed to record LLM call metrics: %s", e)
 
-    def _compute_cost(self) -> float:
-        """Compute cost — caller must hold _lock."""
-        from .llm_backend import _CACHE_READ_DISCOUNT, _CACHE_CREATE_PREMIUM
-        uncached = self.total_input_tokens - self._total_cache_read - self._total_cache_create
-        input_cost = (
-            (uncached / 1_000_000) * self._input_cost
-            + (self._total_cache_read / 1_000_000) * self._input_cost * _CACHE_READ_DISCOUNT
-            + (self._total_cache_create / 1_000_000) * self._input_cost * _CACHE_CREATE_PREMIUM
-        )
-        output_cost = (self.total_output_tokens / 1_000_000) * self._output_cost
-        return input_cost + output_cost
-
     @property
     def total_cost(self) -> float:
         with self._lock:
-            return self._compute_cost()
+            return self._accumulated_cost
 
 
-def _get_backend() -> LLMBackend:
-    """Get LLM backend based on module config."""
+def _get_backend(tier: str = TIER_DEEP) -> LLMBackend:
+    """Get LLM backend based on module config and task tier.
+
+    tier=TIER_SCAN uses Haiku for cost-efficient scan chunks.
+    tier=TIER_DEEP uses Sonnet for reasoning-heavy tasks (default).
+    """
     try:
-        return get_backend(_backend_config)
+        return get_tiered_backend(_backend_config, tier=tier)
     except RuntimeError as e:
         raise LLMError(str(e)) from e
 
@@ -460,7 +472,7 @@ def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
                      f"{est_tokens:,}", f"{MAX_CHUNK_TOKENS:,}",
                      chunk.filepath, chunk.start_line, chunk.end_line)
 
-    backend = _get_backend()
+    backend = _get_backend(tier=TIER_SCAN)
 
     user_msg = (
         f"{chunk.header}\n\n"
@@ -479,7 +491,8 @@ def analyze_chunk(chunk: Chunk, cost_tracker: CostTracker) -> list[Finding]:
 
     cost_tracker.add(response.input_tokens, response.output_tokens,
                      getattr(response, 'cache_read_tokens', 0),
-                     getattr(response, 'cache_create_tokens', 0))
+                     getattr(response, 'cache_create_tokens', 0),
+                     backend=backend)
 
     # Parse JSON response
     text = _strip_markdown_fences(response.text.strip())
@@ -588,7 +601,8 @@ def _debug_single_chunk(
 
     cost_tracker.add(response.input_tokens, response.output_tokens,
                      getattr(response, 'cache_read_tokens', 0),
-                     getattr(response, 'cache_create_tokens', 0))
+                     getattr(response, 'cache_create_tokens', 0),
+                     backend=backend)
     raw_text = response.text
     parsed = _parse_debug_response(raw_text)
     return parsed, raw_text
@@ -911,7 +925,8 @@ def analyze_file_with_context(
 
     cost_tracker.add(response.input_tokens, response.output_tokens,
                      getattr(response, 'cache_read_tokens', 0),
-                     getattr(response, 'cache_create_tokens', 0))
+                     getattr(response, 'cache_create_tokens', 0),
+                     backend=backend)
     raw_text = response.text
     parsed = _parse_debug_response(raw_text)
 
@@ -968,7 +983,8 @@ def synthesize_project(
 
     cost_tracker.add(response.input_tokens, response.output_tokens,
                      getattr(response, 'cache_read_tokens', 0),
-                     getattr(response, 'cache_create_tokens', 0))
+                     getattr(response, 'cache_create_tokens', 0),
+                     backend=backend)
     raw_text = response.text
     parsed = _parse_debug_response(raw_text)
 
@@ -1010,6 +1026,89 @@ Rules:
 6. For deletions (removing a line), set fixed_code to ""
 
 If no fixes can be generated, return an empty array: []"""
+
+
+# ─── LLM fix safety validation ───────────────────────────────────────
+
+# Dangerous function calls that an LLM fix must never introduce.
+# Uses regex to catch evasion via whitespace, aliasing, getattr, etc.
+# Patterns match the callable name at a word boundary, followed by optional
+# whitespace and an open paren — catches `eval(`, `eval (`, etc.
+_DANGEROUS_CALL_RES = [
+    re.compile(r'\beval\s*\('),
+    re.compile(r'\bexec\s*\('),
+    re.compile(r'\bcompile\s*\('),
+    re.compile(r'\b__import__\s*\('),
+    re.compile(r'\bos\s*\.\s*system\s*\('),           # doji:ignore(os-system)
+    re.compile(r'\bos\s*\.\s*popen\s*\('),
+    re.compile(r'\bsubprocess\s*\.\s*call\s*\('),
+    re.compile(r'\bsubprocess\s*\.\s*run\s*\('),
+    re.compile(r'\bsubprocess\s*\.\s*Popen\s*\('),
+    re.compile(r'\bsubprocess\s*\.\s*check_output\s*\('),
+    re.compile(r'\bsubprocess\s*\.\s*check_call\s*\('),
+]
+
+# Indirect execution / reflection patterns — getattr, globals, builtins
+_INDIRECT_EXEC_RES = [
+    re.compile(r'\bgetattr\s*\(.+["\'](?:system|popen|exec|eval|compile)["\']'),
+    re.compile(r'\bglobals\s*\(\s*\)\s*\['),
+    re.compile(r'\bbuiltins\b.*\b(?:eval|exec|compile|__import__)\b'),
+    re.compile(r'\b__builtins__\b.*\b(?:eval|exec|compile|__import__)\b'),
+]
+
+# Network exfiltration — an LLM fix should never introduce outbound calls
+_NETWORK_EXFIL_RES = [
+    re.compile(r'\burllib\s*\.\s*request\s*\.\s*urlopen\s*\('),
+    re.compile(r'\brequests\s*\.\s*(?:get|post|put|patch|delete|head)\s*\('),
+    re.compile(r'\bhttpx\s*\.\s*(?:get|post|put|patch|delete|head)\s*\('),
+    re.compile(r'\bsocket\s*\.\s*(?:connect|create_connection)\s*\('),
+    re.compile(r'\burlopen\s*\('),
+]
+
+# Import of dangerous modules that weren't in the original
+_DANGEROUS_IMPORT_RE = re.compile(
+    r'(?:^|\n)\s*(?:import|from)\s+(?:os|subprocess|shlex|socket|http|urllib|requests|httpx)\b'
+)
+
+
+def _check_fix_introduces_danger(original: str, fixed: str) -> Optional[str]:
+    """Check if a proposed LLM fix introduces dangerous patterns not in the original.
+
+    Returns a rejection reason string, or None if safe.
+
+    Defense-in-depth against prompt injection: even if the LLM is tricked into
+    generating malicious fixes, this layer catches them before application.
+    """
+    if not fixed:
+        return None  # Deletions are always safe
+
+    # --- Direct dangerous calls ---
+    for pattern in _DANGEROUS_CALL_RES:
+        if pattern.search(fixed) and not pattern.search(original):
+            return f"introduces dangerous call matching /{pattern.pattern}/"
+
+    # --- Indirect execution / reflection ---
+    for pattern in _INDIRECT_EXEC_RES:
+        if pattern.search(fixed) and not pattern.search(original):
+            return f"introduces indirect execution matching /{pattern.pattern}/"
+
+    # --- Network exfiltration ---
+    for pattern in _NETWORK_EXFIL_RES:
+        if pattern.search(fixed) and not pattern.search(original):
+            return f"introduces network call matching /{pattern.pattern}/"
+
+    # --- Suspicious new imports ---
+    if _DANGEROUS_IMPORT_RE.search(fixed) and not _DANGEROUS_IMPORT_RE.search(original):
+        return "introduces import of dangerous module (os/subprocess/socket/http/requests)"
+
+    # --- Ratio check: reject fixes that are vastly larger than original ---
+    # A prompt-injected fix often appends large payloads. A legitimate fix
+    # should be roughly the same size. Allow 3x growth + 200 char baseline.
+    max_len = max(len(original) * 3, 200)
+    if len(fixed) > max_len:
+        return f"fix is suspiciously large ({len(fixed)} chars vs {len(original)} original)"
+
+    return None
 
 
 def fix_file(
@@ -1054,7 +1153,8 @@ def fix_file(
 
     cost_tracker.add(response.input_tokens, response.output_tokens,
                      getattr(response, 'cache_read_tokens', 0),
-                     getattr(response, 'cache_create_tokens', 0))
+                     getattr(response, 'cache_create_tokens', 0),
+                     backend=backend)
 
     text = _strip_markdown_fences(response.text.strip())
 
@@ -1070,8 +1170,6 @@ def fix_file(
         return [], cost_tracker
 
     # Validate each fix dict — reject malformed or suspicious entries
-    _DANGEROUS_PATTERNS = {"os.system(", "subprocess.call(", "subprocess.run(",  # doji:ignore(os-system)
-                           "eval(", "exec(", "__import__(", "compile("}
     validated = []
     for fix in raw_fixes:
         if not isinstance(fix, dict):
@@ -1088,12 +1186,10 @@ def fix_file(
             logger.warning("Fix rejected: original_code not found in file")
             continue
         # Check for dangerous patterns introduced by the fix
-        for pattern in _DANGEROUS_PATTERNS:
-            if pattern in fixed and pattern not in original:
-                logger.warning("Fix rejected: introduces dangerous pattern '%s'", pattern)
-                fixed = None
-                break
-        if fixed is not None:
-            validated.append(fix)
+        rejection = _check_fix_introduces_danger(original, fixed)
+        if rejection:
+            logger.warning("Fix rejected: %s", rejection)
+            continue
+        validated.append(fix)
 
     return validated, cost_tracker

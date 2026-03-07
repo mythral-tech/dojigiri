@@ -147,6 +147,15 @@ LLM_TEMPERATURE = 0.0
 LLM_INPUT_COST_PER_M = 3.0
 LLM_OUTPUT_COST_PER_M = 15.0
 
+# ─── Tiered model selection ──────────────────────────────────────────
+# Tasks are assigned a tier that determines which model to use.
+# "scan" (basic chunk review) uses Haiku for cost efficiency.
+# "deep" (debug, optimize, cross-file, synthesis, fix) uses Sonnet for quality.
+# Set DOJI_LLM_TIER_MODE=off to force single-model (Sonnet) for everything.
+LLM_TIER_MODE = "auto"  # "auto" | "off"
+LLM_SCAN_MODEL = "claude-haiku-4-20250514"   # fast/cheap for scan chunks
+LLM_DEEP_MODEL = "claude-sonnet-4-20250514"  # reasoning-heavy tasks
+
 # Chunking
 CHUNK_SIZE = 400  # lines per chunk
 CHUNK_OVERLAP = 30  # overlap lines between chunks

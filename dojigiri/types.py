@@ -132,17 +132,32 @@ class FileAnalysis:
 @dataclass
 class ScanReport:
     root: str
-    mode: str  # "quick" or "deep"
+    mode: str  # "quick", "deep", or "diff"
     files_scanned: int
     files_skipped: int
-    total_findings: int
-    critical: int
-    warnings: int
-    info: int
     file_analyses: list[FileAnalysis] = field(default_factory=list)
     cross_file_findings: list["CrossFileFinding"] = field(default_factory=list)
     llm_cost_usd: float = 0.0
     timestamp: str = ""
+
+    @property
+    def total_findings(self) -> int:
+        return (sum(len(fa.findings) for fa in self.file_analyses)
+                + len(self.cross_file_findings))
+
+    @property
+    def critical(self) -> int:
+        return sum(fa.critical_count for fa in self.file_analyses)
+
+    @property
+    def warnings(self) -> int:
+        return sum(fa.warning_count for fa in self.file_analyses)
+
+    @property
+    def info(self) -> int:
+        return (sum(fa.info_count for fa in self.file_analyses)
+                + sum(1 for cf in self.cross_file_findings
+                      if cf.severity == Severity.INFO))
 
     def to_dict(self) -> dict:
         d = {

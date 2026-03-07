@@ -167,8 +167,7 @@ def test_filter_report_ignore_rules(sample_scan_report):
     ]
     fa = FileAnalysis("test.py", "python", 100, findings)
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 3
-    
+
     # Filter out rule2
     filtered = filter_report(sample_scan_report, ignore_rules={"rule2"})
     
@@ -207,7 +206,7 @@ def test_filter_report_min_severity(sample_scan_report):
 
 
 def test_filter_report_updates_counts(sample_scan_report):
-    """Test that filtering updates the total counts."""
+    """Test that filtering updates the computed counts."""
     from dojigiri.types import FileAnalysis
     findings = [
         Finding("test.py", 1, Severity.CRITICAL, Category.BUG, Source.STATIC, "r1", "msg1"),
@@ -216,14 +215,14 @@ def test_filter_report_updates_counts(sample_scan_report):
     ]
     fa = FileAnalysis("test.py", "python", 100, findings)
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 3
-    sample_scan_report.critical = 1
-    sample_scan_report.warnings = 1
-    sample_scan_report.info = 1
-    
+
+    # Verify pre-filter counts (computed properties)
+    assert sample_scan_report.total_findings == 3
+    assert sample_scan_report.critical == 1
+
     # Filter to only warnings and above
     filtered = filter_report(sample_scan_report, min_severity=Severity.WARNING)
-    
+
     assert filtered.total_findings == 2
     assert filtered.critical == 1
     assert filtered.warnings == 1
@@ -242,11 +241,7 @@ def test_diff_reports_removes_known_findings(sample_scan_report):
     ]
     fa = FileAnalysis("test.py", "python", 100, current_findings)
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 3
-    sample_scan_report.critical = 1
-    sample_scan_report.warnings = 1
-    sample_scan_report.info = 1
-    
+
     # Baseline has 2 of these findings (line 10 and 50)
     baseline_dict = {
         "files": [
@@ -285,8 +280,7 @@ def test_diff_reports_preserves_new_findings(sample_scan_report):
     fa1 = FileAnalysis("test.py", "python", 100, [current_findings[0]])
     fa2 = FileAnalysis("other.py", "python", 50, [current_findings[1]])
     sample_scan_report.file_analyses = [fa1, fa2]
-    sample_scan_report.total_findings = 2
-    
+
     # Baseline has different findings (different file or rule)
     baseline_dict = {
         "files": [
@@ -323,8 +317,7 @@ def test_diff_reports_uses_bucket_matching(sample_scan_report):
     ]
     fa = FileAnalysis("test.py", "python", 100, current_findings)
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 1
-    
+
     # Baseline has same rule at line 14 (both in bucket 2: 12//5=2, 14//5=2)
     baseline_dict = {
         "files": [
@@ -357,8 +350,7 @@ def test_diff_reports_empty_baseline(sample_scan_report):
     ]
     fa = FileAnalysis("test.py", "python", 100, current_findings)
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 2
-    
+
     # Empty baseline
     baseline_dict = {"files": []}
     
@@ -384,11 +376,7 @@ def test_diff_reports_updates_counts(sample_scan_report):
     ]
     fa = FileAnalysis("test.py", "python", 100, current_findings)
     sample_scan_report.file_analyses = [fa]
-    sample_scan_report.total_findings = 3
-    sample_scan_report.critical = 1
-    sample_scan_report.warnings = 1
-    sample_scan_report.info = 1
-    
+
     # Baseline has the critical and info findings
     baseline_dict = {
         "files": [

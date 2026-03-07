@@ -942,7 +942,7 @@ class TestRegressions:
 
     def test_eval_import_no_imports_file(self):
         """REGRESSION: eval fix should handle files with no imports."""
-        from dojigiri.fixer import _fix_eval_usage
+        from dojigiri.fixer.deterministic import _fix_eval_usage
         content = 'def process(data):\n    return eval(data)\n'
         finding = _make_finding("eval-usage", line=2, file="script.py")
         result = _fix_eval_usage(

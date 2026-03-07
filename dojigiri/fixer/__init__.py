@@ -61,34 +61,16 @@ __all__ = [
     "apply_fixes",
     "fix_file",
     "verify_fixes",
-    # Deterministic fixers
+    # Deterministic fixers (public registry + type)
     "DETERMINISTIC_FIXERS",
     "FixerFn",
-    "_fix_bare_except",
-    "_fix_console_log",
-    "_fix_eval_usage",
-    "_fix_exception_swallowed",
-    "_fix_fstring_no_expr",
-    "_fix_hardcoded_secret",
-    "_fix_insecure_http",
-    "_fix_loose_equality",
-    "_fix_mutable_default",
-    "_fix_none_comparison",
-    "_fix_open_without_with",
-    "_fix_os_system",
-    "_fix_resource_leak",
-    "_fix_sql_injection",
-    "_fix_type_comparison",
-    "_fix_unreachable_code",
-    "_fix_unused_import",
-    "_fix_unused_variable",
-    "_fix_weak_hash",
-    "_fix_yaml_unsafe",
     # Cascade
     "derive_expected_cascades",
     # LLM
     "generate_llm_fixes",
-    # Helpers
-    "_in_multiline_string",
-    "_pattern_outside_strings",
 ]
+# Note: Individual fixer functions (_fix_*) and helpers (_in_multiline_string,
+# _pattern_outside_strings) are still importable via explicit import but are NOT
+# part of __all__. Import them from their specific modules:
+#   from dojigiri.fixer.deterministic import _fix_eval_usage
+#   from dojigiri.fixer.helpers import _in_multiline_string

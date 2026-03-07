@@ -19,10 +19,6 @@ def empty_report():
         mode="quick",
         files_scanned=5,
         files_skipped=0,
-        total_findings=0,
-        critical=0,
-        warnings=0,
-        info=0,
         file_analyses=[],
         timestamp="2026-03-05T12:00:00",
     )
@@ -64,10 +60,6 @@ def report_with_findings():
         mode="deep",
         files_scanned=10,
         files_skipped=2,
-        total_findings=2,
-        critical=1,
-        warnings=1,
-        info=0,
         file_analyses=[fa],
         llm_cost_usd=0.0042,
         timestamp="2026-03-05T12:00:00",
@@ -168,7 +160,6 @@ class TestRenderHtml:
         )
         report = ScanReport(
             root="/p", mode="quick", files_scanned=1, files_skipped=0,
-            total_findings=1, critical=0, warnings=0, info=1,
             file_analyses=[fa], timestamp="2026-01-01T00:00:00",
         )
         result = render_html(report)
@@ -193,7 +184,6 @@ class TestRenderHtml:
         )
         report = ScanReport(
             root="/p", mode="quick", files_scanned=1, files_skipped=0,
-            total_findings=1, critical=0, warnings=0, info=1,
             file_analyses=[fa], timestamp="2026-01-01T00:00:00",
         )
         result = render_html(report)
@@ -249,7 +239,6 @@ class TestRenderHtml:
         )
         report = ScanReport(
             root="/p", mode="quick", files_scanned=2, files_skipped=0,
-            total_findings=2, critical=1, warnings=0, info=1,
             file_analyses=[fa1, fa2], timestamp="2026-01-01T00:00:00",
         )
         result = render_html(report)

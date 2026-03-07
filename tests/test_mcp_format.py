@@ -89,7 +89,7 @@ class TestFormatScanReport:
     def test_empty_report(self):
         report = ScanReport(
             root="/project", mode="quick", files_scanned=10,
-            files_skipped=0, total_findings=0, critical=0, warnings=0, info=0,
+            files_skipped=0,
         )
         result = format_scan_report(report)
         assert "No issues found" in result
@@ -99,7 +99,7 @@ class TestFormatScanReport:
     def test_findings_sorted_by_severity(self, critical_finding, warning_finding, info_finding):
         report = ScanReport(
             root="/project", mode="quick", files_scanned=5,
-            files_skipped=0, total_findings=3, critical=1, warnings=1, info=1,
+            files_skipped=0,
             file_analyses=[
                 FileAnalysis(
                     path="src/auth.py", language="python", lines=100,
@@ -121,7 +121,7 @@ class TestFormatScanReport:
     def test_suggestion_shown(self, critical_finding):
         report = ScanReport(
             root="/project", mode="quick", files_scanned=1,
-            files_skipped=0, total_findings=1, critical=1, warnings=0, info=0,
+            files_skipped=0,
             file_analyses=[
                 FileAnalysis(path="src/auth.py", language="python", lines=100,
                              findings=[critical_finding]),
@@ -142,7 +142,7 @@ class TestFormatScanReport:
         ]
         report = ScanReport(
             root="/project", mode="quick", files_scanned=1,
-            files_skipped=0, total_findings=100, critical=0, warnings=100, info=0,
+            files_skipped=0,
             file_analyses=[
                 FileAnalysis(path="big.py", language="python", lines=200,
                              findings=findings),
@@ -154,7 +154,7 @@ class TestFormatScanReport:
     def test_diff_mode_label(self):
         report = ScanReport(
             root="/project", mode="diff", files_scanned=3,
-            files_skipped=0, total_findings=0, critical=0, warnings=0, info=0,
+            files_skipped=0,
         )
         result = format_scan_report(report)
         assert "diff mode" in result

@@ -54,10 +54,6 @@ def _make_report(findings_data=None):
     return ScanReport(
         root="/project", mode="quick",
         files_scanned=1, files_skipped=0,
-        total_findings=len(findings),
-        critical=sum(1 for f in findings if f.severity == Severity.CRITICAL),
-        warnings=sum(1 for f in findings if f.severity == Severity.WARNING),
-        info=sum(1 for f in findings if f.severity == Severity.INFO),
         file_analyses=[fa],
     )
 
@@ -184,7 +180,6 @@ class TestToSarif:
         report = ScanReport(
             root="/project", mode="quick",
             files_scanned=0, files_skipped=0,
-            total_findings=0, critical=0, warnings=0, info=0,
         )
         sarif = to_sarif(report)
         assert sarif["runs"][0]["results"] == []

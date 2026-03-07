@@ -171,31 +171,27 @@ def test_file_analysis_empty_findings():
 
 
 def test_scan_report_creation():
-    """Test ScanReport dataclass instantiation."""
+    """Test ScanReport dataclass instantiation and computed properties."""
     fa = FileAnalysis("test.py", "python", 100, [])
-    
+
     report = ScanReport(
         root="/project",
         mode="quick",
         files_scanned=10,
         files_skipped=5,
-        total_findings=25,
-        critical=5,
-        warnings=15,
-        info=5,
         file_analyses=[fa],
         llm_cost_usd=0.25,
         timestamp="2024-01-01T00:00:00",
     )
-    
+
     assert report.root == "/project"
     assert report.mode == "quick"
     assert report.files_scanned == 10
     assert report.files_skipped == 5
-    assert report.total_findings == 25
-    assert report.critical == 5
-    assert report.warnings == 15
-    assert report.info == 5
+    assert report.total_findings == 0  # computed from file_analyses
+    assert report.critical == 0
+    assert report.warnings == 0
+    assert report.info == 0
     assert len(report.file_analyses) == 1
     assert report.llm_cost_usd == 0.25
     assert report.timestamp == "2024-01-01T00:00:00"
@@ -211,25 +207,21 @@ def test_scan_report_to_dict():
         mode="deep",
         files_scanned=5,
         files_skipped=2,
-        total_findings=10,
-        critical=3,
-        warnings=5,
-        info=2,
         file_analyses=[fa],
         llm_cost_usd=1.50,
         timestamp="2024-01-01T12:00:00",
     )
-    
+
     result = report.to_dict()
-    
+
     assert result["root"] == "/project"
     assert result["mode"] == "deep"
     assert result["files_scanned"] == 5
     assert result["files_skipped"] == 2
-    assert result["total_findings"] == 10
-    assert result["critical"] == 3
-    assert result["warnings"] == 5
-    assert result["info"] == 2
+    assert result["total_findings"] == 1  # computed: 1 finding in fa
+    assert result["critical"] == 1        # the one finding is CRITICAL
+    assert result["warnings"] == 0
+    assert result["info"] == 0
     assert result["llm_cost_usd"] == 1.50
     assert result["timestamp"] == "2024-01-01T12:00:00"
     assert len(result["files"]) == 1
@@ -377,13 +369,13 @@ def test_scan_report_default_values():
         mode="quick",
         files_scanned=1,
         files_skipped=0,
-        total_findings=0,
-        critical=0,
-        warnings=0,
-        info=0,
     )
-    
+
     assert report.file_analyses == []
+    assert report.total_findings == 0
+    assert report.critical == 0
+    assert report.warnings == 0
+    assert report.info == 0
     assert report.llm_cost_usd == 0.0
     assert report.timestamp == ""
 
