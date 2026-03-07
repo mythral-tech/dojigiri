@@ -10,9 +10,7 @@ Data in -> Data out: file content + applied fixes + semantics -> set of rule nam
 """
 
 import ast
-from typing import Optional
-
-from ..config import Fix, FixStatus
+from ..types import Fix, FixStatus
 
 
 def _get_fix_affected_lines(applied_fixes: list[Fix]) -> tuple[set[int], set[int]]:

@@ -14,7 +14,7 @@ from dojigiri.graph.project import (
     _format_graph_summary,
 )
 from dojigiri.graph.depgraph import build_dependency_graph, compute_metrics, DepGraph, FileNode
-from dojigiri.config import ProjectAnalysis, CrossFileFinding, Severity, Category
+from dojigiri.types import ProjectAnalysis, CrossFileFinding, Severity, Category
 
 
 # ─── No-LLM mode ────────────────────────────────────────────────────

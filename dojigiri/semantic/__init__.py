@@ -1,7 +1,7 @@
 """dojigiri.semantic — Tree-sitter based semantic analysis subsystem."""
 
-from .lang_config import LanguageConfig, LANGUAGE_CONFIGS, get_config
-from .core import (
+from .lang_config import LanguageConfig, LANGUAGE_CONFIGS, get_config  # doji:ignore(unused-import)
+from .core import (  # doji:ignore(unused-import)
     Assignment,
     NameReference,
     FunctionDef,
@@ -11,7 +11,7 @@ from .core import (
     FileSemantics,
     extract_semantics,
 )
-from .checks import (
+from .checks import (  # doji:ignore(unused-import)
     check_unused_imports,
     check_unreachable_code,
     check_empty_catch,
@@ -22,8 +22,8 @@ from .checks import (
     ALL_CHECKS,
     run_tree_sitter_checks,
 )
-from .cfg import CfgStatement, BasicBlock, FunctionCFG, build_cfg, get_reverse_postorder
-from .types import (
+from .cfg import CfgStatement, BasicBlock, FunctionCFG, build_cfg, get_reverse_postorder  # doji:ignore(unused-import)
+from .types import (  # doji:ignore(unused-import)
     InferredType,
     TypeInfo,
     FileTypeMap,
@@ -31,9 +31,9 @@ from .types import (
     infer_types,
     infer_contracts,
 )
-from .taint import TaintSource, TaintSink, TaintPath, analyze_taint, analyze_taint_pathsensitive
-from .scope import check_unused_variables, check_variable_shadowing, check_uninitialized_variables
-from .smells import (
+from .taint import TaintSource, TaintSink, TaintPath, analyze_taint, analyze_taint_pathsensitive  # doji:ignore(unused-import)
+from .scope import check_unused_variables, check_variable_shadowing, check_uninitialized_variables  # doji:ignore(unused-import)
+from .smells import (  # doji:ignore(unused-import)
     SemanticSignature,
     check_god_class,
     check_feature_envy,
@@ -42,9 +42,9 @@ from .smells import (
     build_semantic_signature,
     check_semantic_clones,
 )
-from .nullsafety import check_null_safety
-from .resource import ResourceState, check_resource_leaks
-from .explain import ExplainSection, FileExplanation, explain_file
+from .nullsafety import check_null_safety  # doji:ignore(unused-import)
+from .resource import ResourceState, check_resource_leaks  # doji:ignore(unused-import)
+from .explain import ExplainSection, FileExplanation, explain_file  # doji:ignore(unused-import)
 
 __all__ = [
     # lang_config

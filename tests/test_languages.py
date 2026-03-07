@@ -11,7 +11,7 @@ from dojigiri.languages import (
     RUST_RULES,
     SECURITY_RULES,
 )
-from dojigiri.config import Severity, Category
+from dojigiri.types import Severity, Category
 
 
 def test_get_rules_for_language_python():

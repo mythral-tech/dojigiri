@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from dojigiri.report_html import render_html, render_pdf
-from dojigiri.config import (
+from dojigiri.types import (
     ScanReport, FileAnalysis, Finding,
     Severity, Category, Source, Confidence,
 )

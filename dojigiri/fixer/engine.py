@@ -18,8 +18,8 @@ import sys
 import tempfile
 from typing import Optional
 
-from ..config import (
-    Finding, Fix, FixContext, FixReport, FixSource, FixStatus,
+from ..types import (
+    Finding, Fix, FixContext, FixReport, FixStatus,
 )
 
 from .cascade import derive_expected_cascades
@@ -147,8 +147,8 @@ def apply_fixes(
             except (OSError, ValueError):  # cleanup-and-reraise for temp file
                 try:
                     os.unlink(tmp_path)
-                except OSError:
-                    pass
+                except OSError as e:
+                    logger.debug("Failed to clean up temp file: %s", e)
                 raise
         except OSError as e:
             logger.warning("Error writing %s: %s", filepath, e)
@@ -204,7 +204,7 @@ def verify_fixes(filepath: str, language: str,
     from collections import Counter
     pre_counts = Counter(f.rule for f in pre_findings)
     post_counts = Counter(f.rule for f in post_findings)
-    # Rules that fixers intentionally introduce (e.g., TODO markers) should
+    # Rules that fixers intentionally introduce (e.g., TODO markers) should  # doji:ignore(todo-marker)
     # not trigger rollback. Track info-only new rules separately.
     info_only_rules = {f.rule for f in post_findings if getattr(f.severity, 'value', f.severity) == "info"} - set(pre_counts)
 
@@ -410,7 +410,7 @@ def fix_file(
     if not findings:
         return FixReport(
             root=filepath, files_fixed=0, total_fixes=0,
-            applied=0, skipped=0, failed=0,
+            applied=0, skipped=0, failed=0,  # doji:ignore(possibly-uninitialized)
         )
 
     lines = content.splitlines(keepends=True)
@@ -531,8 +531,8 @@ def fix_file(
                 _rollback_from_backup(filepath, all_fixes, reason=f"rolled back -- {syntax_err}")
                 applied = 0
                 failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
-        except OSError:
-            pass
+        except OSError as e:
+            logger.debug("Failed to validate/rollback fix: %s", e)
 
     llm_cost = 0.0
     if cost_tracker:
@@ -564,8 +564,8 @@ def fix_file(
         session = get_session()
         if session:
             session.record_fix_duration(_fix_total_ms)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Failed to record fix duration metrics: %s", e)
 
     return FixReport(
         root=filepath,

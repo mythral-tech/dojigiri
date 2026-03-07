@@ -11,10 +11,10 @@ Data in -> Data out: list[Finding] -> focused prompt string
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
-from .config import Finding
+from .types import Finding
 
 
 @dataclass

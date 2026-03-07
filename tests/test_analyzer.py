@@ -17,7 +17,7 @@ from dojigiri.analyzer import (
     _find_git_root,
     _HUNK_RE,
 )
-from dojigiri.config import Severity, Finding, Category, Source
+from dojigiri.types import Severity, Finding, Category, Source
 
 
 def test_detect_language():
@@ -159,7 +159,7 @@ def test_collect_files_with_wizignore(temp_dir):
 def test_filter_report_ignore_rules(sample_scan_report):
     """Test filtering report by ignored rules."""
     # Add some findings with different rules
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     findings = [
         Finding("test.py", 1, Severity.CRITICAL, Category.BUG, Source.STATIC, "rule1", "msg1"),
         Finding("test.py", 2, Severity.WARNING, Category.BUG, Source.STATIC, "rule2", "msg2"),
@@ -184,7 +184,7 @@ def test_filter_report_ignore_rules(sample_scan_report):
 
 def test_filter_report_min_severity(sample_scan_report):
     """Test filtering report by minimum severity."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     findings = [
         Finding("test.py", 1, Severity.CRITICAL, Category.BUG, Source.STATIC, "r1", "msg1"),
         Finding("test.py", 2, Severity.WARNING, Category.BUG, Source.STATIC, "r2", "msg2"),
@@ -208,7 +208,7 @@ def test_filter_report_min_severity(sample_scan_report):
 
 def test_filter_report_updates_counts(sample_scan_report):
     """Test that filtering updates the total counts."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     findings = [
         Finding("test.py", 1, Severity.CRITICAL, Category.BUG, Source.STATIC, "r1", "msg1"),
         Finding("test.py", 2, Severity.WARNING, Category.BUG, Source.STATIC, "r2", "msg2"),
@@ -232,7 +232,7 @@ def test_filter_report_updates_counts(sample_scan_report):
 
 def test_diff_reports_removes_known_findings(sample_scan_report):
     """Test that diff_reports filters out findings in baseline."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     
     # Current report has 3 findings
     current_findings = [
@@ -275,7 +275,7 @@ def test_diff_reports_removes_known_findings(sample_scan_report):
 
 def test_diff_reports_preserves_new_findings(sample_scan_report):
     """Test that diff_reports preserves findings not in baseline."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     
     # Current report has findings
     current_findings = [
@@ -315,7 +315,7 @@ def test_diff_reports_preserves_new_findings(sample_scan_report):
 
 def test_diff_reports_uses_bucket_matching(sample_scan_report):
     """Test that diff_reports uses 5-line bucket matching."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     
     # Current finding at line 12
     current_findings = [
@@ -349,7 +349,7 @@ def test_diff_reports_uses_bucket_matching(sample_scan_report):
 
 def test_diff_reports_empty_baseline(sample_scan_report):
     """Test diff_reports with empty baseline (all findings are new)."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     
     current_findings = [
         Finding("test.py", 10, Severity.WARNING, Category.BUG, Source.STATIC, "rule1", "msg1"),
@@ -375,7 +375,7 @@ def test_diff_reports_empty_baseline(sample_scan_report):
 
 def test_diff_reports_updates_counts(sample_scan_report):
     """Test that diff_reports updates totals correctly."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     
     current_findings = [
         Finding("test.py", 10, Severity.CRITICAL, Category.BUG, Source.STATIC, "r1", "msg1"),

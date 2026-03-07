@@ -12,16 +12,19 @@ Data in -> Data out: CLI args -> console output + saved reports
 """
 
 import argparse
+import logging
 import sys
 import time
 from pathlib import Path
-from typing import Optional
-
 from . import __version__
+
+logger = logging.getLogger(__name__)
+from .types import Severity, Confidence
+from .bundling import is_bundled, get_exe_path
 from .config import (
-    get_api_key, get_llm_config, Severity, Confidence, LANGUAGE_EXTENSIONS,
+    get_api_key, get_llm_config, LANGUAGE_EXTENSIONS,
     CLASSIFICATION_LEVELS, PROFILES,
-    load_project_config, compile_custom_rules, is_bundled, get_exe_path,
+    load_project_config, compile_custom_rules,
 )
 from .analyzer import scan_quick, scan_deep, scan_diff, cost_estimate, filter_report, diff_reports
 from .discovery import detect_language
@@ -47,10 +50,17 @@ def _confirm_llm_usage(args) -> bool:
               file=sys.stderr)
         return False
 
-    # Local backends don't need confirmation
+    # Local backends don't need confirmation — check by locality, not by name.
+    # An OpenAI-compatible backend pointed at a remote URL must still confirm.
     backend_type = getattr(args, "backend", None) or ""
+    base_url = getattr(args, "base_url", None) or ""
     if backend_type.lower() == "ollama":
         return True
+    if backend_type.lower() in ("openai", "openai-compatible") and base_url:
+        from urllib.parse import urlparse
+        parsed = urlparse(base_url)
+        if parsed.hostname in ("localhost", "127.0.0.1", "::1"):
+            return True
 
     if getattr(args, "accept_remote", False):
         return True
@@ -107,45 +117,7 @@ def _setup_llm_backend(args: argparse.Namespace, project_config: dict | None = N
     set_backend_config(llm_config)
 
 
-_DEFAULT_DOJI_IGNORE = """\
-# Build artifacts
-build/
-dist/
-bin/
-obj/
-out/
-target/
-
-# Dependencies
-node_modules/
-vendor/
-.venv/
-venv/
-Packages/
-
-# Caches and generated
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-*.pyc
-
-# Version control
-.git/
-
-# IDE
-.idea/
-.vs/
-.vscode/
-
-# Binary/asset files (not code)
-*.exe
-*.dll
-*.so
-*.o
-*.a
-*.lib
-*.pdb
-"""
+from .config import DEFAULT_DOJI_IGNORE as _DEFAULT_DOJI_IGNORE
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -165,7 +137,7 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 def cmd_scan(args: argparse.Namespace) -> int:
     """Run a code scan (quick or deep)."""
-    from .metrics import start_session, end_session, save_session, format_summary
+    from .metrics import start_session, end_session, save_session
     session = start_session()
 
     _apply_profile(args)
@@ -236,9 +208,11 @@ def cmd_scan(args: argparse.Namespace) -> int:
             workers = getattr(args, "workers", None)
             if workers is None:
                 workers = project_config.get("workers", 4)
+            max_cost = getattr(args, "max_cost", None)
             try:
                 report_obj = scan_deep(root, language_filter=lang, use_cache=use_cache,
-                                       max_workers=workers, custom_rules=custom_rules)
+                                       max_workers=workers, custom_rules=custom_rules,
+                                       max_cost=max_cost)
             except Exception as e:  # CLI boundary: catch-all for user-facing error
                 print(f"Error: {e}", file=sys.stderr)
                 return 1
@@ -332,291 +306,116 @@ def cmd_scan(args: argparse.Namespace) -> int:
     if session:
         try:
             save_session(session)
-        except OSError:
-            pass
+        except OSError as e:
+            logger.debug("Failed to save metrics session: %s", e)
 
     if report_obj.critical > 0:
         return 2  # exit code 2 = critical issues found
     return 0
 
 
-def _auto_discover_python_imports(filepath: str, content: str) -> dict[str, str]:
-    """Discover local Python imports and read their contents (legacy fallback).
+# Context discovery extracted to context.py — reusable by MCP and programmatic API
+from .context import collect_context_files as _collect_context_files
 
-    Parses AST for import/from-import statements, resolves to local files
-    in the same directory or relative paths. Returns {filepath: content} dict.
-    Caps at 50KB total to avoid blowing token budget.
+
+def _run_llm_subcommand(
+    args: argparse.Namespace,
+    llm_func_name: str,
+    status_msg: str,
+    print_text,
+    print_json,
+    **extra_llm_kwargs,
+) -> int:
+    """Shared pipeline for LLM subcommands (debug, optimize).
+
+    Handles file validation, LLM setup, static analysis, context collection,
+    LLM invocation with error handling, and output formatting.
+
+    Args:
+        args: Parsed CLI arguments (must have .file; may have .output, .context).
+        llm_func_name: Name of the function to import from .llm (e.g. "debug_file").
+        status_msg: Status line printed before the LLM call (receives filepath via .format).
+        print_text: Callable(filepath, static_findings[, llm_result]) for text output.
+        print_json: Callable(filepath, static_findings[, llm_result, tracker]) for JSON output.
+        **extra_llm_kwargs: Additional keyword arguments forwarded to the LLM function.
     """
-    import ast as ast_mod
+    filepath = Path(args.file).resolve()
+    if not filepath.is_file():
+        print(f"Error: '{args.file}' is not a file", file=sys.stderr)
+        return 1
+
+    lang = detect_language(filepath)
+    if not lang:
+        print(f"Error: unsupported file type '{filepath.suffix}'", file=sys.stderr)
+        return 1
+
+    _setup_llm_backend(args)
+    if not _confirm_llm_usage(args):
+        return 1
 
     try:
-        tree = ast_mod.parse(content)
-    except SyntaxError:
-        return {}
+        content = filepath.read_text(encoding="utf-8", errors="replace")
+    except OSError as e:
+        print(f"Error reading file: {e}", file=sys.stderr)
+        return 1
 
-    base_dir = Path(filepath).parent
-    candidates = set()
+    output_format = getattr(args, "output", "text")
+    static_findings = analyze_file_static(str(filepath), content, lang)
 
-    for node in ast_mod.walk(tree):
-        if isinstance(node, ast_mod.Import):
-            for alias in node.names:
-                parts = alias.name.split(".")
-                candidates.add(parts[0])
-        elif isinstance(node, ast_mod.ImportFrom):
-            if node.module and node.level == 0:
-                parts = node.module.split(".")
-                candidates.add(parts[0])
-            elif node.level > 0 and node.module:
-                candidates.add(node.module.split(".")[0])
+    context_files = None
+    context_arg = getattr(args, "context", None)
+    if context_arg:
+        context_files = _collect_context_files(context_arg, str(filepath), lang, content)
 
-    result = {}
-    total_size = 0
-    max_size = 50_000
+    if output_format != "json":
+        print(status_msg.format(filepath))
 
-    for mod_name in sorted(candidates):
-        mod_path = base_dir / f"{mod_name}.py"
-        if mod_path.is_file():
-            try:
-                mod_content = mod_path.read_text(encoding="utf-8", errors="replace")
-                if total_size + len(mod_content) > max_size:
-                    break
-                result[str(mod_path)] = mod_content
-                total_size += len(mod_content)
-            except OSError:
-                continue
-
-    return result
-
-
-def _auto_discover_imports_v2(filepath: str, content: str, lang: str) -> dict[str, str]:
-    """Enhanced context discovery using depgraph — transitive deps, ranked by importance.
-
-    Falls back to legacy _auto_discover_python_imports if depgraph fails.
-    Works for Python, JS, and TS (not just Python).
-    """
     try:
-        from .graph.depgraph import build_dependency_graph
-        from .discovery import collect_files
-
-        fp = Path(filepath).resolve()
-        project_root = fp.parent
-
-        # Try to find the actual project root (look for common markers)
-        for parent in [fp.parent] + list(fp.parents):
-            if any((parent / marker).exists() for marker in
-                   [".git", "pyproject.toml", "setup.py", "package.json", ".doji.toml"]):
-                project_root = parent
-                break
-
-        # Collect sibling files in the project
-        files, _ = collect_files(project_root, language_filter=lang)
-        if not files:
-            raise ValueError("No files found")
-
-        graph = build_dependency_graph([str(f) for f in files], str(project_root))
-
-        # Find our file in the graph
-        try:
-            rel = str(fp.relative_to(project_root)).replace("\\", "/")
-        except ValueError:
-            raise ValueError("File not in project root")
-
-        if rel not in graph.nodes:
-            raise ValueError(f"File {rel} not in graph")
-
-        # Get transitive deps (depth 2) + direct dependents
-        deps = graph.get_dependencies(rel, depth=2)
-        dependents = graph.get_dependents(rel, depth=1)
-        all_related = deps | dependents
-
-        if not all_related:
-            return {}
-
-        # Rank by fan_in (most important first)
-        ranked = []
-        for r in all_related:
-            if r in graph.nodes:
-                ranked.append((r, graph.nodes[r].fan_in))
-        ranked.sort(key=lambda x: (-x[1], x[0]))
-
-        result = {}
-        total_size = 0
-        max_size = 50_000
-
-        for r, _fi in ranked:
-            abs_path = project_root / r
-            if abs_path.is_file():
-                try:
-                    ctx_content = abs_path.read_text(encoding="utf-8", errors="replace")
-                    if total_size + len(ctx_content) > max_size:
-                        break
-                    result[str(abs_path)] = ctx_content
-                    total_size += len(ctx_content)
-                except OSError:
-                    continue
-
-        return result
-
-    except (OSError, ValueError, ImportError):
-        # Fall back to legacy method for Python
-        if lang == "python":
-            return _auto_discover_python_imports(filepath, content)
-        return {}
-
-
-def _collect_context_files(context_arg: str, filepath: str, lang: str,
-                           content: str) -> Optional[dict[str, str]]:
-    """Collect context files based on --context argument.
-
-    "auto" → auto-discover imports using depgraph (v2) with legacy fallback
-    comma-separated paths → read each file
-    """
-    if context_arg == "auto":
-        return _auto_discover_imports_v2(filepath, content, lang)
-
-    result = {}
-    total_size = 0
-    max_size = 50_000
-
-    for path_str in context_arg.split(","):
-        path_str = path_str.strip()
-        if not path_str:
-            continue
-        ctx_path = Path(path_str).resolve()
-        if ctx_path.is_file():
-            try:
-                ctx_content = ctx_path.read_text(encoding="utf-8", errors="replace")
-                if total_size + len(ctx_content) > max_size:
-                    print(f"  Skipping {path_str} (context size cap reached)", file=sys.stderr)
-                    break
-                result[str(ctx_path)] = ctx_content
-                total_size += len(ctx_content)
-            except OSError as e:
-                print(f"  Warning: couldn't read context file {path_str}: {e}", file=sys.stderr)
+        from . import llm as _llm
+        llm_func = getattr(_llm, llm_func_name)
+        llm_result, tracker = llm_func(
+            content, str(filepath), lang,
+            static_findings=static_findings,
+            context_files=context_files,
+            **extra_llm_kwargs,
+        )
+        if output_format == "json":
+            print_json(str(filepath), static_findings, llm_result, tracker)
         else:
-            print(f"  Warning: context file not found: {path_str}", file=sys.stderr)
+            print_text(str(filepath), static_findings, llm_result)
+            print(f"  Cost: ${tracker.total_cost:.4f}")
+    except Exception as e:  # LLM can fail many ways (network, API, parse); graceful fallback
+        if output_format != "json":
+            print(f"LLM error: {e}", file=sys.stderr)
+        if output_format == "json":
+            print_json(str(filepath), static_findings, None)
+        else:
+            print_text(str(filepath), static_findings)
 
-    return result if result else None
+    return 0
 
 
 def cmd_debug(args: argparse.Namespace) -> int:
     """Debug a specific file (always uses LLM)."""
-    filepath = Path(args.file).resolve()
-    if not filepath.is_file():
-        print(f"Error: '{args.file}' is not a file", file=sys.stderr)
-        return 1
-
-    lang = detect_language(filepath)
-    if not lang:
-        print(f"Error: unsupported file type '{filepath.suffix}'", file=sys.stderr)
-        return 1
-
-    _setup_llm_backend(args)
-    if not _confirm_llm_usage(args):
-        return 1
-
-    try:
-        content = filepath.read_text(encoding="utf-8", errors="replace")
-    except OSError as e:
-        print(f"Error reading file: {e}", file=sys.stderr)
-        return 1
-
-    output_format = getattr(args, "output", "text")
-
-    # Static analysis first
-    static_findings = analyze_file_static(str(filepath), content, lang)
-
-    # Collect context files if requested
-    context_files = None
-    context_arg = getattr(args, "context", None)
-    if context_arg:
-        context_files = _collect_context_files(context_arg, str(filepath), lang, content)
-
-    # LLM analysis
-    if output_format != "json":
-        print(f"Analyzing {filepath} with Claude ...\n")
-
-    try:
-        from .llm import debug_file
-        llm_result, tracker = debug_file(
-            content, str(filepath), lang,
-            error_msg=args.error,
-            static_findings=static_findings,
-            context_files=context_files,
-        )
-        if output_format == "json":
-            rpt.print_debug_json(str(filepath), static_findings, llm_result, tracker)
-        else:
-            rpt.print_debug_result(str(filepath), static_findings, llm_result)
-            print(f"  Cost: ${tracker.total_cost:.4f}")
-    except Exception as e:  # LLM can fail many ways (network, API, parse); graceful fallback
-        if output_format != "json":
-            print(f"LLM error: {e}", file=sys.stderr)
-        if output_format == "json":
-            rpt.print_debug_json(str(filepath), static_findings, None)
-        else:
-            rpt.print_debug_result(str(filepath), static_findings)
-
-    return 0
+    return _run_llm_subcommand(
+        args,
+        llm_func_name="debug_file",
+        status_msg="Analyzing {} with Claude ...\n",
+        print_text=rpt.print_debug_result,
+        print_json=rpt.print_debug_json,
+        error_msg=args.error,
+    )
 
 
 def cmd_optimize(args: argparse.Namespace) -> int:
     """Optimize a specific file (always uses LLM)."""
-    filepath = Path(args.file).resolve()
-    if not filepath.is_file():
-        print(f"Error: '{args.file}' is not a file", file=sys.stderr)
-        return 1
-
-    lang = detect_language(filepath)
-    if not lang:
-        print(f"Error: unsupported file type '{filepath.suffix}'", file=sys.stderr)
-        return 1
-
-    _setup_llm_backend(args)
-    if not _confirm_llm_usage(args):
-        return 1
-
-    try:
-        content = filepath.read_text(encoding="utf-8", errors="replace")
-    except OSError as e:
-        print(f"Error reading file: {e}", file=sys.stderr)
-        return 1
-
-    output_format = getattr(args, "output", "text")
-
-    # Static analysis
-    static_findings = analyze_file_static(str(filepath), content, lang)
-
-    # Collect context files if requested
-    context_files = None
-    context_arg = getattr(args, "context", None)
-    if context_arg:
-        context_files = _collect_context_files(context_arg, str(filepath), lang, content)
-
-    if output_format != "json":
-        print(f"Analyzing {filepath} for optimization with Claude ...\n")
-
-    try:
-        from .llm import optimize_file
-        llm_result, tracker = optimize_file(
-            content, str(filepath), lang,
-            static_findings=static_findings,
-            context_files=context_files,
-        )
-        if output_format == "json":
-            rpt.print_optimize_json(str(filepath), static_findings, llm_result, tracker)
-        else:
-            rpt.print_optimize_result(str(filepath), static_findings, llm_result)
-            print(f"  Cost: ${tracker.total_cost:.4f}")
-    except Exception as e:  # LLM can fail many ways (network, API, parse); graceful fallback
-        if output_format != "json":
-            print(f"LLM error: {e}", file=sys.stderr)
-        if output_format == "json":
-            rpt.print_optimize_json(str(filepath), static_findings, None)
-        else:
-            rpt.print_optimize_result(str(filepath), static_findings)
-
-    return 0
+    return _run_llm_subcommand(
+        args,
+        llm_func_name="optimize_file",
+        status_msg="Analyzing {} for optimization with Claude ...\n",
+        print_text=rpt.print_optimize_result,
+        print_json=rpt.print_optimize_json,
+    )
 
 
 def cmd_fix(args: argparse.Namespace) -> int:
@@ -636,6 +435,25 @@ def cmd_fix(args: argparse.Namespace) -> int:
 
     dry_run = not getattr(args, "apply", False)
     use_llm = getattr(args, "llm", False)
+    accept_llm_fixes = getattr(args, "accept_llm_fixes", False)
+
+    # Block LLM fix application in non-interactive mode without explicit opt-in
+    if use_llm and not dry_run and not accept_llm_fixes:
+        if not sys.stdin.isatty():
+            print(
+                "Error: LLM-generated fixes require --accept-llm-fixes in non-interactive mode.\n"
+                "  LLM fixes are AI-generated and may introduce subtle logic changes.\n"
+                "  Add --accept-llm-fixes to acknowledge this risk.",
+                file=sys.stderr,
+            )
+            return 1
+        print(
+            "Warning: LLM-generated fixes will be applied alongside deterministic fixes.\n"
+            "  LLM fixes are AI-generated and may introduce subtle logic changes.\n"
+            "  Review the .doji.bak backup after applying.\n"
+            "  To suppress this warning, use --accept-llm-fixes.\n",
+            file=sys.stderr,
+        )
 
     create_backup = not getattr(args, "no_backup", False)
     verify = not getattr(args, "no_verify", False)
@@ -656,7 +474,7 @@ def cmd_fix(args: argparse.Namespace) -> int:
             return 1
 
     from .fixer import fix_file as fixer_fix_file
-    from .config import FixReport
+    from .types import FixReport
 
     # Collect files to fix
     if root.is_file():
@@ -683,8 +501,8 @@ def cmd_fix(args: argparse.Namespace) -> int:
     elif output_format != "json":
         print(f"Scanning {len(files_to_fix)} file(s) for fixes (dry run) ...")
 
-    # Severity filter helper
-    severity_order = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
+    # Severity filter
+    from .types import SEVERITY_ORDER as severity_order
 
     cost_tracker = None
     if use_llm:
@@ -765,8 +583,8 @@ def cmd_fix(args: argparse.Namespace) -> int:
     if session:
         try:
             save_session(session)
-        except OSError:
-            pass
+        except OSError as e:
+            logger.debug("Failed to save metrics session: %s", e)
 
     return 0
 
@@ -992,10 +810,10 @@ def cmd_setup(args: argparse.Namespace) -> int:
 
     anthropic_installed = False
     try:
-        import anthropic  # noqa: F401
+        import anthropic  # noqa: F401  # doji:ignore(unused-import)
         anthropic_installed = True
-    except ImportError:
-        pass
+    except ImportError as e:
+        logger.debug("Failed to import anthropic: %s", e)
 
     rpt.print_setup_status(api_key_set, anthropic_installed)
     return 0
@@ -1058,6 +876,63 @@ When to use Dojigiri vs your own analysis:
   easy to miss in manual review. Use it as a second pair of eyes.
 - For security-sensitive code, always run doji_scan.
 - After fixing issues, re-scan to verify they're resolved.""")
+    return 0
+
+
+def cmd_clean(args: argparse.Namespace) -> int:
+    """Remove .doji.bak and .doji.tmp files."""
+    root = Path(args.path).resolve()
+    if not root.is_dir():
+        print(f"Error: '{args.path}' is not a directory", file=sys.stderr)
+        return 1
+
+    dry_run = getattr(args, "dry_run", False)
+    patterns = ["**/*.doji.bak", "**/*.doji.tmp"]
+    found = []
+    for pattern in patterns:
+        found.extend(root.glob(pattern))
+
+    if not found:
+        print("No .doji.bak or .doji.tmp files found.")
+        return 0
+
+    total_size = sum(f.stat().st_size for f in found if f.exists())
+    size_mb = total_size / (1024 * 1024)
+
+    if dry_run:
+        print(f"Would remove {len(found)} file(s) ({size_mb:.2f} MB):")
+        for f in sorted(found):
+            print(f"  {f}")
+    else:
+        removed = 0
+        for f in found:
+            try:
+                f.unlink()
+                removed += 1
+            except OSError as e:
+                print(f"  Warning: could not remove {f}: {e}", file=sys.stderr)
+        print(f"Removed {removed} file(s) ({size_mb:.2f} MB).")
+
+    return 0
+
+
+def cmd_privacy(args: argparse.Namespace) -> int:
+    """Show privacy and data handling information."""
+    privacy_path = Path(__file__).parent.parent / "PRIVACY.md"
+    if privacy_path.exists():
+        print(privacy_path.read_text(encoding="utf-8"))
+    else:
+        print("Dojigiri Privacy Information")
+        print("=" * 40)
+        print()
+        print("Static scan (doji scan .):  No data leaves your machine.")
+        print("Deep scan (--deep):         Source code is sent to the configured LLM API.")
+        print("                            Default: Anthropic (Claude) at api.anthropic.com")
+        print("                            See Anthropic's privacy policy for data handling.")
+        print("Local backends (ollama):    No data leaves your machine.")
+        print()
+        print("API keys should be set via environment variables, not .doji.toml.")
+        print("Scan reports are stored locally in ~/.dojigiri/reports/.")
     return 0
 
 
@@ -1165,6 +1040,8 @@ def main() -> None:
     p_scan.add_argument("--baseline", help="Compare against baseline (use 'latest' or report path)")
     p_scan.add_argument("--workers", type=int, default=None, metavar="N",
                          help="Number of parallel workers for quick scan (default: 4 or from .doji.toml, use 1 for sequential)")
+    p_scan.add_argument("--max-cost", type=float, default=None, metavar="USD",
+                         help="Maximum LLM cost in USD before pausing (deep scan only)")
     p_scan.add_argument("--accept-remote", action="store_true",
                          help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_scan.set_defaults(func=cmd_scan)
@@ -1207,6 +1084,8 @@ def main() -> None:
                         help="Actually apply fixes (default is dry-run)")
     p_fix.add_argument("--llm", action="store_true",
                         help="Include LLM-generated fixes (costs money)")
+    p_fix.add_argument("--accept-llm-fixes", action="store_true",
+                        help="Apply LLM-generated fixes without extra confirmation (use with --apply --llm)")
     p_fix.add_argument("--no-backup", action="store_true",
                         help="Skip creating .doji.bak backup files (backups accumulate and are not auto-cleaned)")
     p_fix.add_argument("--no-verify", action="store_true",
@@ -1298,6 +1177,16 @@ def main() -> None:
     p_setup_claude = subparsers.add_parser("setup-claude",
                                             help="Print MCP config for Claude Code")
     p_setup_claude.set_defaults(func=cmd_setup_claude)
+
+    # clean
+    p_clean = subparsers.add_parser("clean", help="Remove .doji.bak backup files and .doji.tmp temp files")
+    p_clean.add_argument("path", nargs="?", default=".", help="Directory to clean (default: current directory)")
+    p_clean.add_argument("--dry-run", action="store_true", help="Show what would be removed without deleting")
+    p_clean.set_defaults(func=cmd_clean)
+
+    # privacy
+    p_privacy = subparsers.add_parser("privacy", help="Show data handling and privacy information")
+    p_privacy.set_defaults(func=cmd_privacy)
 
     args = parser.parse_args()
     if not args.command:

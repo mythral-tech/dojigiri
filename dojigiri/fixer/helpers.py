@@ -9,8 +9,11 @@ Data in -> Data out: source text + AST nodes -> transformed text / boolean check
 """
 
 import ast
+import logging
 import re
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 # ─── String-context helpers ───────────────────────────────────────────
@@ -39,8 +42,8 @@ def _in_multiline_string(content: str, line_num: int) -> bool:
                         return True
                     # Same start and end line is a single-line string, skip
         return False
-    except SyntaxError:
-        pass
+    except SyntaxError as e:
+        logger.debug("Failed to parse AST for multiline string check: %s", e)
 
     # Fallback: simple delimiter counting
     lines = content.splitlines()
@@ -229,5 +232,5 @@ def _record_fix_metric(rule: str, succeeded: bool, duration_ms: float) -> None:
         session = get_session()
         if session:
             session.record_fix(rule, succeeded, duration_ms)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Failed to record fix metrics: %s", e)

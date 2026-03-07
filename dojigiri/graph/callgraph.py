@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..config import Finding, CrossFileFinding, Severity, Category, Source
+from ..types import Finding, Severity, Category, Source
 from .depgraph import CallGraph, DepGraph
 
 

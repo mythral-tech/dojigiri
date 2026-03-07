@@ -8,7 +8,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from dojigiri.config import (
+from dojigiri.types import (
     Finding, Fix, FixReport, FixSource, FixStatus,
     Severity, Category, Source,
 )
@@ -977,7 +977,7 @@ class TestRegressions:
         from dojigiri.fixer import verify_fixes
         fp = temp_dir / "test.py"
         fp.write_text('import os\nx = 1\n', encoding="utf-8")
-        from dojigiri.config import Finding, Severity, Category, Source
+        from dojigiri.types import Finding, Severity, Category, Source
         pre_findings = [Finding(
             file=str(fp), line=1, severity=Severity.WARNING,
             category=Category.DEAD_CODE, source=Source.AST,

@@ -14,8 +14,8 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 
-from ..config import Finding, Severity, Category, Source
-from .core import FileSemantics, FunctionDef, ClassDef
+from ..types import Finding, Severity, Category, Source
+from .core import FileSemantics, FunctionDef
 
 
 # ─── Check: God Class ────────────────────────────────────────────────
@@ -114,7 +114,7 @@ def check_feature_envy(
                 ),
                 suggestion=(
                     f"Consider moving '{fdef.name}' to the class it references most, "
-                    f"or extract the external access into a helper"
+                    "or extract the external access into a helper"
                 ),
             ))
 

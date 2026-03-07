@@ -11,7 +11,7 @@ Data in → Data out: FileSemantics → list[Finding] (unused vars, shadowing, u
 
 from __future__ import annotations
 
-from ..config import Finding, Severity, Category, Source
+from ..types import Finding, Severity, Category, Source
 from .core import FileSemantics, ScopeInfo
 
 

@@ -16,7 +16,7 @@ from dojigiri.llm import (
     CostTracker,
 )
 from dojigiri.llm_backend import LLMResponse
-from dojigiri.config import Finding, Severity, Category, Source, Confidence
+from dojigiri.types import Finding, Severity, Category, Source, Confidence
 
 
 # ─── Fixtures ──────────────────────────────────────────────────────────

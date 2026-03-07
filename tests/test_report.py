@@ -6,7 +6,7 @@ import pytest
 from io import StringIO
 from unittest.mock import patch
 
-from dojigiri.config import (
+from dojigiri.types import (
     Finding, FileAnalysis, ScanReport, FixReport, Fix,
     Severity, Category, Source, Confidence, FixSource, FixStatus,
 )

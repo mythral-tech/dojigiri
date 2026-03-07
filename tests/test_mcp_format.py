@@ -1,7 +1,7 @@
 """Tests for MCP output formatting — no MCP dependency needed."""
 
 import pytest
-from dojigiri.config import (
+from dojigiri.types import (
     Finding, FileAnalysis, ScanReport, FixReport, Fix,
     ProjectAnalysis, CrossFileFinding,
     Severity, Category, Source, FixSource, FixStatus,

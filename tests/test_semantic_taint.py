@@ -9,7 +9,7 @@ import pytest
 from dojigiri.semantic.core import extract_semantics
 from dojigiri.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath
 from dojigiri.semantic.lang_config import get_config, LanguageConfig
-from dojigiri.config import Severity, Category, Source
+from dojigiri.types import Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser

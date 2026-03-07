@@ -10,13 +10,18 @@ Data in → Data out: ScanReport / file paths in → JSON files + SHA-256 cache 
 
 import hashlib
 import json
+import logging
 import os
+import subprocess
 import sys
+
+logger = logging.getLogger(__name__)
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from .config import ScanReport, STORAGE_DIR, REPORTS_DIR, CACHE_FILE
+from .types import ScanReport
+from .config import STORAGE_DIR, REPORTS_DIR, CACHE_FILE
 from . import __version__
 
 
@@ -24,10 +29,23 @@ def ensure_dirs() -> None:
     """Create storage directories if they don't exist."""
     STORAGE_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    # Restrict permissions on Unix (owner-only access)
+    # Restrict permissions (owner-only access to scan reports)
     if sys.platform != "win32":
         os.chmod(STORAGE_DIR, 0o700)
         os.chmod(REPORTS_DIR, 0o700)
+    else:
+        # Windows: restrict via icacls (best-effort)
+        try:
+            username = os.environ.get("USERNAME", "")
+            if username:
+                for d in (STORAGE_DIR, REPORTS_DIR):
+                    subprocess.run(
+                        ["icacls", str(d), "/inheritance:r",
+                         "/grant:r", f"{username}:(OI)(CI)F"],
+                        capture_output=True, timeout=5,
+                    )
+        except (OSError, subprocess.TimeoutExpired) as e:
+            logger.debug("Failed to set directory permissions: %s", e)
 
 
 def file_hash(filepath: str) -> str:
@@ -87,8 +105,8 @@ def _prune_reports(max_keep: int = 50) -> None:
     for old in reports[max_keep:]:
         try:
             old.unlink()
-        except OSError:
-            pass  # Non-critical: file may be in use or already deleted
+        except OSError as e:
+            logger.debug("Failed to delete old report: %s", e)
 
 
 def load_latest_report() -> Optional[dict]:

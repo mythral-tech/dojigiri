@@ -16,11 +16,10 @@ Data in → Data out: FileSemantics + FileTypeMap → list[Finding]
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
 
-from ..config import Finding, Severity, Category, Source
+from ..types import Finding, Severity, Category, Source
 from .lang_config import LanguageConfig
-from .core import FileSemantics, FunctionDef
+from .core import FileSemantics
 from .types import FileTypeMap, TypeInfo, InferredType
 
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from dojigiri.config import Finding, Severity, Category, Source
+from dojigiri.types import Finding, Severity, Category, Source
 from dojigiri.llm_focus import build_micro_queries, MicroQuery
 
 

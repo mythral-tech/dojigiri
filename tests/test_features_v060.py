@@ -13,11 +13,11 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from dojigiri.config import (
+from dojigiri.types import (
     Finding, FileAnalysis, Fix, FixReport, FixSource, FixStatus,
     Severity, Category, Source, Confidence,
-    compile_custom_rules, load_project_config,
 )
+from dojigiri.config import compile_custom_rules, load_project_config
 from dojigiri.detector import run_regex_checks, analyze_file_static
 from dojigiri.llm import CostTracker
 

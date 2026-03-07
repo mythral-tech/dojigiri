@@ -9,7 +9,7 @@ from dojigiri.detector import (
     _is_line_suppressed,
     _parse_line_suppression,
 )
-from dojigiri.config import Severity, Category, Source
+from dojigiri.types import Severity, Category, Source
 
 
 def test_run_regex_checks_python(sample_python_code):

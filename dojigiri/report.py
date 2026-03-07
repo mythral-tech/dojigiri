@@ -9,14 +9,17 @@ Data in -> Data out: ScanReport -> stdout (ANSI-colored text)
 """
 
 import json
+import logging
 import sys
 import textwrap
 from collections import Counter
-from typing import Any, Optional
-from .config import (
+from typing import Any
+from .types import (
     Finding, FileAnalysis, ScanReport, Severity, Source, Category,
     ProjectAnalysis, FixReport, FixSource, FixStatus,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _ensure_utf8() -> None:
@@ -24,8 +27,8 @@ def _ensure_utf8() -> None:
     if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
         try:
             sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        except (OSError, ValueError):
-            pass  # If reconfigure fails, continue with default encoding
+        except (OSError, ValueError) as e:
+            logger.debug("Failed to reconfigure stdout for UTF-8: %s", e)
 
 
 _ensure_utf8()
@@ -117,8 +120,8 @@ def print_scan_summary(report: ScanReport, duration: float | None = None,
     if report.files_scanned == 0:
         print()
         print(f"  {_c('yellow', 'No supported files found.')}")
-        print(f"  Dojigiri scans: Python, JavaScript, TypeScript, C#, Java, Go, Rust, C/C++, and more.")
-        print(f"  Use 'doji init' to create a .doji-ignore, or check your --lang filter.")
+        print("  Dojigiri scans: Python, JavaScript, TypeScript, C#, Java, Go, Rust, C/C++, and more.")
+        print("  Use 'doji init' to create a .doji-ignore, or check your --lang filter.")
     print()
     print(f"  {_c('red', f'Critical:  {report.critical}')}")
     print(f"  {_c('yellow', f'Warnings:  {report.warnings}')}")
@@ -143,6 +146,9 @@ def print_scan_summary(report: ScanReport, duration: float | None = None,
 
     if report.llm_cost_usd > 0:
         print(f"\n  LLM cost:  ${report.llm_cost_usd:.4f}")
+        print(f"\n  {_c('dim', 'Note: Findings marked [llm] are AI-generated and may contain')}")
+        print(f"  {_c('dim', 'false positives or miss real issues. Not a substitute for')}")
+        print(f"  {_c('dim', 'professional security review. See: doji privacy')}")
     if classification:
         print(f"\n{_c('bold', f'// {classification} //')}")
     print()
@@ -663,7 +669,7 @@ def to_sarif(report: ScanReport) -> dict:
                     "driver": {
                         "name": "Dojigiri",
                         "informationUri": "https://github.com/Inklling/Genesis",
-                        "semanticVersion": "1.0.0",
+                        "semanticVersion": "1.1.0",
                         "rules": list(rules_map.values())
                     }
                 },

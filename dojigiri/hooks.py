@@ -12,7 +12,7 @@ import stat
 import sys
 from pathlib import Path
 
-from .config import is_bundled, get_exe_path
+from .bundling import is_bundled, get_exe_path
 
 
 HOOK_MARKER = "# doji-managed-hook"

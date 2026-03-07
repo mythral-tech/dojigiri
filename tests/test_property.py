@@ -14,7 +14,7 @@ try:
 except ImportError:
     HAS_HYPOTHESIS = False
 
-from dojigiri.config import Finding, Fix, FixSource, FixStatus, Severity, Category, Source
+from dojigiri.types import Finding, Fix, FixSource, FixStatus, Severity, Category, Source
 from dojigiri.fixer import (
     _fix_bare_except,
     _fix_none_comparison,

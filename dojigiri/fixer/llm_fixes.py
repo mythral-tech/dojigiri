@@ -9,9 +9,7 @@ Data in -> Data out: filepath + content + findings -> list[Fix] with source=LLM
 """
 
 import logging
-from typing import Optional
-
-from ..config import Finding, Fix, FixSource
+from ..types import Finding, Fix, FixSource
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +26,7 @@ def generate_llm_fixes(
         return []
 
     try:
-        from ..llm import fix_file as llm_fix_file, CostTracker, LLMError
+        from ..llm import fix_file as llm_fix_file, CostTracker
 
         if cost_tracker is None:
             cost_tracker = CostTracker()

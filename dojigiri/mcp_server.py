@@ -12,12 +12,15 @@ Data in -> Data out: tool requests (file paths, options) -> formatted text
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 from typing import Sequence
 
 from mcp.server.fastmcp import FastMCP
 
-from .config import Severity
+from .types import Severity
 
 mcp = FastMCP(
     "dojigiri",
@@ -41,25 +44,50 @@ _SEVERITY_RANK = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
 
 _allowed_roots: list[Path] = [Path.cwd().resolve()]
 
-# Load extra allowed roots from .doji.toml at import time
+# Load extra allowed roots from .doji.toml at import time.
+# SECURITY: Only allow roots that are subdirectories of cwd to prevent
+# a malicious .doji.toml in a scanned project from granting access to
+# arbitrary directories (e.g. mcp_allowed_roots = ["/"]).
 try:
     from .config import load_project_config as _load_cfg
     _mcp_cfg = _load_cfg(Path.cwd())
     _extra = _mcp_cfg.get("mcp_allowed_roots", [])
+    _cwd_resolved = Path.cwd().resolve()
     if isinstance(_extra, list):
         for _r in _extra:
-            _allowed_roots.append(Path(_r).resolve())
-except Exception:
-    pass  # Config loading is best-effort
+            _resolved = Path(_r).resolve()
+            if _resolved.is_relative_to(_cwd_resolved):
+                _allowed_roots.append(_resolved)
+            else:
+                import logging as _logging
+                _logging.getLogger(__name__).warning(
+                    "Ignoring mcp_allowed_roots entry '%s' — must be under cwd (%s)",
+                    _r, _cwd_resolved,
+                )
+except Exception as _e:
+    import logging as _logging
+    _logging.getLogger(__name__).debug("MCP config loading failed: %s", _e)
 
 
-def configure_allowed_roots(extra_roots: Sequence[str | Path] | None = None) -> None:
-    """Reset allowed roots to cwd + any extras (e.g. from config)."""
+def _configure_allowed_roots(extra_roots: Sequence[str | Path] | None = None) -> None:
+    """Reset allowed roots to cwd + validated extras.
+
+    Only accepts roots that are subdirectories of cwd (same security
+    boundary as the import-time loader).
+    """
     _allowed_roots.clear()
-    _allowed_roots.append(Path.cwd().resolve())
+    cwd = Path.cwd().resolve()
+    _allowed_roots.append(cwd)
     if extra_roots:
         for r in extra_roots:
-            _allowed_roots.append(Path(r).resolve())
+            resolved = Path(r).resolve()
+            if resolved.is_relative_to(cwd):
+                _allowed_roots.append(resolved)
+            else:
+                import logging as _log
+                _log.getLogger(__name__).warning(
+                    "Ignoring allowed root '%s' — must be under cwd (%s)", r, cwd,
+                )
 
 
 def _validate_path(path: Path) -> Path:
@@ -238,7 +266,8 @@ def doji_fix(
     """
     from .detector import analyze_file_static
     from .fixer import fix_file as fixer_fix_file
-    from .config import FixReport, load_project_config, compile_custom_rules
+    from .types import FixReport
+    from .config import load_project_config, compile_custom_rules
     from .mcp_format import format_fix_report
 
     sev = _parse_severity(min_severity)
@@ -346,8 +375,8 @@ def doji_explain(path: str) -> str:
             config = get_config(lang)
             if config:
                 type_map = infer_types(semantics, content.encode("utf-8"), config)
-    except ImportError:
-        pass  # tree-sitter not installed
+    except ImportError as e:
+        logger.debug("Failed to import tree-sitter components: %s", e)
 
     explanation = explain_file(
         content, filepath, lang,

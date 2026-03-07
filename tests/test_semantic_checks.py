@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import patch
 
-from dojigiri.config import Severity, Category, Source
+from dojigiri.types import Severity, Category, Source
 from dojigiri.semantic.lang_config import get_config, LANGUAGE_CONFIGS
 from dojigiri.semantic.checks import (
     run_tree_sitter_checks,

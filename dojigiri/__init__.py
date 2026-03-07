@@ -2,7 +2,7 @@
 
 __version__ = "1.1.0"
 
-from .config import (
+from .types import (  # doji:ignore(unused-import)
     Finding,
     FileAnalysis,
     ScanReport,
@@ -16,8 +16,8 @@ from .config import (
     FixReport,
     CrossFileFinding,
     ProjectAnalysis,
-    patch_tree_sitter_for_bundled,
 )
+from .bundling import patch_tree_sitter_for_bundled
 
 # Patch tree-sitter loading for Nuitka bundled mode (no-op if not bundled)
 patch_tree_sitter_for_bundled()

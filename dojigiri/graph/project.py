@@ -13,13 +13,12 @@ Data in -> Data out: directory path -> ProjectAnalysis
 import ast as ast_mod
 import logging
 import re
-import sys
 from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-from ..config import (
+from ..types import (
     FileAnalysis, CrossFileFinding, ProjectAnalysis,
     Severity, Category, Confidence,
 )

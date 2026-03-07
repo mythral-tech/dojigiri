@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from .lang_config import LanguageConfig, get_config
+from .lang_config import LanguageConfig
 from .core import FileSemantics, FunctionDef
 
 
@@ -27,6 +27,10 @@ class CfgStatement:
     text: str
     assignment_idx: Optional[int] = None  # index into FileSemantics.assignments
     call_idx: Optional[int] = None  # index into FileSemantics.function_calls
+    # Additional indices when multiple assignments/calls share the same line
+    # (e.g., `a = 1; b = 2` or `foo(); bar()`)
+    extra_assignment_idxs: list[int] = field(default_factory=list)
+    extra_call_idxs: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -84,15 +88,16 @@ class _CfgBuilder:
         self._throw_types = set(config.throw_node_types)
         self._func_types = set(config.function_node_types)
 
-        # Build assignment/call index lookups by line
-        self._asgn_by_line: dict[int, int] = {}
+        # Build assignment/call index lookups by line (lists to handle
+        # multiple statements on the same line, e.g. `a = 1; b = 2`)
+        self._asgn_by_line: dict[int, list[int]] = {}
         for i, a in enumerate(semantics.assignments):
             if fdef.line <= a.line <= fdef.end_line:
-                self._asgn_by_line.setdefault(a.line, i)
-        self._call_by_line: dict[int, int] = {}
+                self._asgn_by_line.setdefault(a.line, []).append(i)
+        self._call_by_line: dict[int, list[int]] = {}
         for i, c in enumerate(semantics.function_calls):
             if fdef.line <= c.line <= fdef.end_line:
-                self._call_by_line.setdefault(c.line, i)
+                self._call_by_line.setdefault(c.line, []).append(i)
 
         # Loop context stack for break/continue: (header_block, exit_block)
         self._loop_stack: list[tuple[int, int]] = []
@@ -131,12 +136,16 @@ class _CfgBuilder:
             elif line_num in self._call_by_line:
                 kind = "call"
 
+        asgn_idxs = self._asgn_by_line.get(line_num, [])
+        call_idxs = self._call_by_line.get(line_num, [])
         stmt = CfgStatement(
             line=line_num,
             kind=kind,
             text=text,
-            assignment_idx=self._asgn_by_line.get(line_num),
-            call_idx=self._call_by_line.get(line_num),
+            assignment_idx=asgn_idxs[0] if asgn_idxs else None,
+            call_idx=call_idxs[0] if call_idxs else None,
+            extra_assignment_idxs=asgn_idxs[1:],
+            extra_call_idxs=call_idxs[1:],
         )
         block.statements.append(stmt)
         self.line_to_block[line_num] = block.id

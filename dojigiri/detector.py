@@ -16,7 +16,7 @@ import re
 
 logger = logging.getLogger(__name__)
 
-from .config import Finding, Severity, Category, Source
+from .types import Finding, Severity, Category, Source
 from .languages import get_rules_for_language
 
 # Security-related categories where string lines should still be scanned
@@ -251,7 +251,7 @@ def run_regex_checks(content: str, filepath: str, language: str,
         line_suppression_parsed = False
 
         def _line_is_suppressed(rule: str) -> bool:
-            nonlocal line_suppression, line_suppression_parsed
+            nonlocal line_suppression, line_suppression_parsed  # doji:ignore(possibly-uninitialized)
             if not line_suppression_parsed:
                 line_suppression = _parse_line_suppression(line, language)
                 line_suppression_parsed = True
@@ -484,13 +484,17 @@ def _check_exception_handling(tree: ast.AST, filepath: str, findings: list[Findi
                 ))
 
 
+# Builtins that should not be shadowed by variables or parameters
+_SHADOW_BUILTINS = {
+    "list", "dict", "type", "str", "int", "float", "set", "tuple",
+    "len", "range", "open", "input", "print", "sum", "min", "max",
+    "id", "sorted", "next", "map", "filter", "zip", "hash", "iter",
+    "bool", "bytes", "complex", "frozenset", "object", "super",
+}
+
+
 def _check_shadowed_builtins(tree: ast.AST, filepath: str, findings: list[Finding]):
     """Check for variables that shadow Python builtins."""
-    _SHADOW_BUILTINS = {
-        "list", "dict", "type", "str", "int", "float", "set", "tuple",
-        "len", "range", "open", "input", "print", "sum", "min", "max",
-        "id", "sorted", "next",
-    }
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
@@ -580,12 +584,6 @@ def _check_mutable_defaults(tree: ast.AST, filepath: str, findings: list[Finding
 
 def _check_shadowed_builtin_params(tree: ast.AST, filepath: str, findings: list[Finding]):
     """Check for function parameters that shadow Python builtins."""
-    _SHADOW_BUILTINS = {
-        "list", "dict", "type", "str", "int", "float", "set", "tuple",
-        "len", "range", "open", "input", "print", "sum", "min", "max",
-        "id", "sorted", "next", "map", "filter", "zip", "hash", "iter",
-        "bool", "bytes", "complex", "frozenset", "object", "super",
-    }
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
@@ -788,8 +786,8 @@ def analyze_file_static(filepath: str, content: str, language: str,
             unique.append(f)
 
     # Sort by severity (critical first), then line number
-    severity_order = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
-    unique.sort(key=lambda f: (severity_order[f.severity], f.line))
+    from .types import SEVERITY_ORDER
+    unique.sort(key=lambda f: (SEVERITY_ORDER[f.severity], f.line))
 
     # Record metrics
     _scan_ms = (_time.perf_counter() - _scan_start) * 1000
@@ -800,8 +798,8 @@ def analyze_file_static(filepath: str, content: str, language: str,
             session.record_file(_scan_ms)
             for f in unique:
                 session.record_finding(f.rule, f.severity.value)
-    except Exception:
-        pass  # metrics are best-effort
+    except Exception as e:
+        logger.debug("Failed to record metrics: %s", e)
 
     if return_semantics:
         return unique, semantics, _file_type_map

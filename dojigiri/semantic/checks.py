@@ -10,9 +10,9 @@ Data in → Data out: (source content, filepath, language) → list[Finding]
 
 import re
 from collections.abc import Iterator
-from typing import Any, Optional
+from typing import Any
 
-from ..config import Finding, Severity, Category, Source
+from ..types import Finding, Severity, Category, Source
 from .lang_config import get_config, LanguageConfig
 
 
@@ -577,7 +577,7 @@ def run_tree_sitter_checks(content: str, filepath: str,
         return []
 
     try:
-        from tree_sitter_language_pack import get_language, get_parser
+        from tree_sitter_language_pack import get_parser
     except ImportError:
         return []
 

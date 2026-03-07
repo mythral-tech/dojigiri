@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 
 from dojigiri.analyzer import scan_quick
-from dojigiri.config import Severity, Category, Source, Finding
+from dojigiri.types import Severity, Category, Source, Finding
 
 
 @pytest.fixture
@@ -242,7 +242,7 @@ def test_scan_fix_rescan_cycle(temp_dir):
 
 def test_baseline_absolute_vs_relative_paths(sample_scan_report):
     """REGRESSION: diff_reports matches findings regardless of abs/rel path format."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     from dojigiri.analyzer import diff_reports
 
     # Current report uses absolute path
@@ -278,7 +278,7 @@ def test_baseline_absolute_vs_relative_paths(sample_scan_report):
 
 def test_baseline_both_absolute_paths(sample_scan_report):
     """diff_reports works when both sides use absolute paths from the same root."""
-    from dojigiri.config import FileAnalysis
+    from dojigiri.types import FileAnalysis
     from dojigiri.analyzer import diff_reports
 
     current_findings = [
@@ -312,7 +312,7 @@ def test_baseline_both_absolute_paths(sample_scan_report):
 def test_cache_with_corrupted_enum():
     """REGRESSION: Cached findings with invalid confidence don't crash the scan."""
     from dojigiri.analyzer import _safe_enum
-    from dojigiri.config import Confidence
+    from dojigiri.types import Confidence
 
     # Valid enum value
     assert _safe_enum(Confidence, "high") == Confidence.HIGH

@@ -4,7 +4,7 @@ import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
-from dojigiri.config import Finding, FileAnalysis, ScanReport, Severity, Category, Source
+from dojigiri.types import Finding, FileAnalysis, ScanReport, Severity, Category, Source
 
 
 @pytest.fixture(autouse=True)

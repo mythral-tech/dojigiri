@@ -13,7 +13,7 @@ from dojigiri.llm import (
 )
 from dojigiri.llm_backend import LLMResponse
 from dojigiri.chunker import Chunk
-from dojigiri.config import Severity, Category, Source, Confidence
+from dojigiri.types import Severity, Category, Source, Confidence
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────────

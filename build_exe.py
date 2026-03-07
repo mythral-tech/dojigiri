@@ -90,7 +90,7 @@ cmd += [
     # Product metadata (Windows)
     "--company-name=Dojigiri",
     "--product-name=Dojigiri Static Analyzer",
-    "--product-version=1.1.0",
+    f"--product-version={__import__('dojigiri').__version__}",
     "--file-description=Static analysis and code quality tool",
 
     # Windows console app

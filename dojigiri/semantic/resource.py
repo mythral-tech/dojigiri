@@ -13,12 +13,12 @@ Data in → Data out: FileSemantics + CFG → list[Finding] (unclosed files/conn
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from ..config import Finding, Severity, Category, Source
+from ..types import Finding, Severity, Category, Source
 from .lang_config import LanguageConfig
 from .core import FileSemantics, FunctionDef
-from .cfg import FunctionCFG, get_reverse_postorder
+from .cfg import FunctionCFG
 
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -231,7 +231,7 @@ def check_resource_leaks(
                 ),
                 suggestion=(
                     f"Close '{rstate.variable}' explicitly or use a context manager "
-                    f"(e.g., 'with' statement)"
+                    "(e.g., 'with' statement)"
                 ),
             ))
 

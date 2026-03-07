@@ -14,13 +14,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .config import (
+    from .types import (
         ScanReport, Finding, FixReport,
         ProjectAnalysis, CrossFileFinding,
     )
     from .semantic.explain import FileExplanation, ExplainSection
 
-from .config import Severity
+from .types import Severity
 
 _MAX_FINDINGS = 50
 _MAX_CROSS_FILE = 20
@@ -36,7 +36,8 @@ _SEVERITY_DISPLAY = [Severity.CRITICAL, Severity.WARNING, Severity.INFO]
 
 def _finding_line(f: Finding) -> str:
     """Format a single finding as one concise line."""
-    line = f"  {f.file}:{f.line} [{f.rule}] {f.message}"
+    src = f.source.value if hasattr(f, 'source') else "static"
+    line = f"  {f.file}:{f.line} [{src}] [{f.rule}] {f.message}"
     if f.suggestion:
         line += f"\n    -> {f.suggestion}"
     return line

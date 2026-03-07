@@ -1,22 +1,20 @@
-"""Data structures, enums, paths, and LLM configuration.
+"""Constants, paths, and configuration loading.
 
-Defines the core types used everywhere: Finding, FileAnalysis, ScanReport,
-Severity, Category, Source, Fix, and constants like CHUNK_SIZE / CHUNK_OVERLAP.
+Constants (extensions, skip dirs, LLM settings), project config from .doji.toml,
+custom rule compilation. Types and bundling moved to types.py and bundling.py.
 
 Called by: virtually every other module in the package.
-Calls into: nothing — this is a leaf module with no dojigiri imports.
-Data in → Data out: no I/O; provides shared types and configuration values.
+Calls into: types.py (enums for custom rule compilation)
+Data in → Data out: .doji.toml files → config dicts; regex strings → compiled rules.
 """
 
 import logging
-import sys
-from dataclasses import dataclass, field
-from enum import Enum
-from pathlib import Path
-from typing import Optional, TypeAlias
 import os
 import re
-from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+from .types import Severity, Category
 
 logger = logging.getLogger(__name__)
 
@@ -43,79 +41,7 @@ PROFILES: dict[str, dict] = {
 }
 
 
-def is_bundled() -> bool:
-    """Return True if running as a Nuitka-compiled standalone binary."""
-    return "__compiled__" in globals() or getattr(sys, "frozen", False)
-
-
-def get_exe_path() -> Path:
-    """Return the path to the running executable (for bundled mode)."""
-    return Path(sys.executable).resolve()
-
-
-def patch_tree_sitter_for_bundled() -> None:
-    """Pre-load tree-sitter .pyd bindings into sys.modules for Nuitka onefile mode.
-
-    In bundled mode, the .pyd data files are extracted to a temp directory.
-    Nuitka's import system doesn't know about them (they're data files, not
-    compiled modules), so import_module() fails. We use spec_from_file_location
-    to manually load each .pyd and register it in sys.modules before any
-    tree-sitter code runs.
-    """
-    if not is_bundled():
-        return
-
-    import importlib
-    import importlib.util
-
-    try:
-        tslp = importlib.import_module("tree_sitter_language_pack")
-    except ImportError:
-        return
-
-    tslp_file = getattr(tslp, "__file__", None)
-    if not tslp_file:
-        return
-
-    bindings_dir = Path(tslp_file).parent / "bindings"
-    if not bindings_dir.is_dir():
-        return
-
-    # Pre-load each .pyd binding into sys.modules so import_module() finds them
-    for pyd_path in bindings_dir.glob("*.pyd"):
-        lang_name = pyd_path.stem  # e.g. "python", "javascript"
-        mod_name = f"tree_sitter_language_pack.bindings.{lang_name}"
-        if mod_name in sys.modules:
-            continue
-        spec = importlib.util.spec_from_file_location(mod_name, str(pyd_path))
-        if spec and spec.loader:
-            try:
-                mod = importlib.util.module_from_spec(spec)
-                sys.modules[mod_name] = mod
-                spec.loader.exec_module(mod)
-            except Exception:
-                sys.modules.pop(mod_name, None)
-
-
-class Severity(Enum):
-    CRITICAL = "critical"
-    WARNING = "warning"
-    INFO = "info"
-
-
-class Source(Enum):
-    STATIC = "static"
-    AST = "ast"
-    LLM = "llm"
-
-
-class Category(Enum):
-    BUG = "bug"
-    SECURITY = "security"
-    PERFORMANCE = "performance"
-    STYLE = "style"
-    DEAD_CODE = "dead_code"
-
+# ─── File discovery ──────────────────────────────────────────────────
 
 LANGUAGE_EXTENSIONS = {
     ".py": "python",
@@ -165,292 +91,56 @@ SENSITIVE_FILE_PATTERNS = [
 
 MAX_FILE_SIZE = 1_000_000  # 1MB — skip binary/huge files
 
-REDACT_SNIPPET_RULES = {"hardcoded-secret", "aws-credentials"}
+DEFAULT_DOJI_IGNORE = """\
+# Build artifacts
+build/
+dist/
+bin/
+obj/
+out/
+target/
+
+# Dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+Packages/
+
+# Caches and generated
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+*.pyc
+
+# Version control
+.git/
+
+# IDE
+.idea/
+.vs/
+.vscode/
+
+# Binary/asset files (not code)
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.lib
+*.pdb
+"""
 
 
-class Confidence(Enum):
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
+# ─── LLM config ─────────────────────────────────────────────────────
 
-
-@dataclass
-class Finding:
-    file: str
-    line: int
-    severity: Severity
-    category: Category
-    source: Source
-    rule: str
-    message: str
-    suggestion: Optional[str] = None
-    snippet: Optional[str] = None
-    confidence: Optional[Confidence] = None  # LLM findings only
-
-    def to_dict(self) -> dict:
-        from .compliance import get_cwe, get_nist
-        snippet = "[REDACTED]" if self.rule in REDACT_SNIPPET_RULES else self.snippet
-        d = {
-            "file": self.file,
-            "line": self.line,
-            "severity": self.severity.value,
-            "category": self.category.value,
-            "source": self.source.value,
-            "rule": self.rule,
-            "message": self.message,
-            "suggestion": self.suggestion,
-            "snippet": snippet,
-        }
-        if self.confidence is not None:
-            d["confidence"] = self.confidence.value
-        cwe = get_cwe(self.rule)
-        if cwe:
-            d["cwe"] = cwe
-        nist = get_nist(self.rule)
-        if nist:
-            d["nist"] = nist
-        return d
-
-
-@dataclass
-class FileAnalysis:
-    path: str
-    language: str
-    lines: int
-    findings: list[Finding] = field(default_factory=list)
-    file_hash: Optional[str] = None
-    semantics: Optional[object] = None  # semantic.core.FileSemantics (not serialized)
-
-    @property
-    def critical_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == Severity.CRITICAL)
-
-    @property
-    def warning_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == Severity.WARNING)
-
-    @property
-    def info_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == Severity.INFO)
-
-
-@dataclass
-class ScanReport:
-    root: str
-    mode: str  # "quick" or "deep"
-    files_scanned: int
-    files_skipped: int
-    total_findings: int
-    critical: int
-    warnings: int
-    info: int
-    file_analyses: list[FileAnalysis] = field(default_factory=list)
-    cross_file_findings: list["CrossFileFinding"] = field(default_factory=list)
-    llm_cost_usd: float = 0.0
-    timestamp: str = ""
-
-    def to_dict(self) -> dict:
-        d = {
-            "root": self.root,
-            "mode": self.mode,
-            "files_scanned": self.files_scanned,
-            "files_skipped": self.files_skipped,
-            "total_findings": self.total_findings,
-            "critical": self.critical,
-            "warnings": self.warnings,
-            "info": self.info,
-            "llm_cost_usd": self.llm_cost_usd,
-            "timestamp": self.timestamp,
-            "files": [
-                {
-                    "path": fa.path,
-                    "language": fa.language,
-                    "lines": fa.lines,
-                    "findings": [f.to_dict() for f in fa.findings],
-                }
-                for fa in self.file_analyses
-            ],
-        }
-        if self.cross_file_findings:
-            d["cross_file_findings"] = [cf.to_dict() for cf in self.cross_file_findings]
-        return d
-
-
-@dataclass
-class CrossFileFinding:
-    """A finding that spans two files — only visible with cross-file context."""
-    source_file: str
-    target_file: str
-    line: int
-    target_line: Optional[int] = None
-    severity: Severity = Severity.WARNING
-    category: Category = Category.BUG
-    rule: str = ""
-    message: str = ""
-    suggestion: Optional[str] = None
-    confidence: Optional[Confidence] = None
-
-    def to_dict(self) -> dict:
-        d = {
-            "source_file": self.source_file,
-            "target_file": self.target_file,
-            "line": self.line,
-            "severity": self.severity.value,
-            "category": self.category.value,
-            "rule": self.rule,
-            "message": self.message,
-        }
-        if self.target_line is not None:
-            d["target_line"] = self.target_line
-        if self.suggestion:
-            d["suggestion"] = self.suggestion
-        if self.confidence is not None:
-            d["confidence"] = self.confidence.value
-        return d
-
-
-@dataclass
-class ProjectAnalysis:
-    """Complete project-level analysis result."""
-    root: str
-    files_analyzed: int
-    graph_metrics: dict
-    dependency_graph: dict
-    per_file_findings: list[FileAnalysis] = field(default_factory=list)
-    cross_file_findings: list[CrossFileFinding] = field(default_factory=list)
-    synthesis: Optional[dict] = None
-    llm_cost_usd: float = 0.0
-    timestamp: str = ""
-
-    def __post_init__(self):
-        if not self.timestamp:
-            self.timestamp = datetime.now().isoformat(timespec="seconds")
-
-    def to_dict(self) -> dict:
-        return {
-            "root": self.root,
-            "files_analyzed": self.files_analyzed,
-            "graph_metrics": self.graph_metrics,
-            "dependency_graph": self.dependency_graph,
-            "per_file_findings": [
-                {
-                    "path": fa.path,
-                    "language": fa.language,
-                    "lines": fa.lines,
-                    "findings": [f.to_dict() for f in fa.findings],
-                }
-                for fa in self.per_file_findings
-            ],
-            "cross_file_findings": [cf.to_dict() for cf in self.cross_file_findings],
-            "synthesis": self.synthesis,
-            "llm_cost_usd": self.llm_cost_usd,
-            "timestamp": self.timestamp,
-        }
-
-
-@dataclass
-class FixContext:
-    """Context passed to all fixers — provides semantic data when available."""
-    content: str
-    finding: "Finding"
-    semantics: Optional[object] = None  # semantic.core.FileSemantics
-    type_map: Optional[object] = None   # semantic.types.FileTypeMap
-    language: str = "python"
-
-
-# Fix config
-LLM_FIX_MAX_TOKENS = 8192
-
-
-class FixStatus(Enum):
-    PENDING = "pending"
-    APPLIED = "applied"
-    FAILED = "failed"
-    SKIPPED = "skipped"
-
-
-class FixSource(Enum):
-    DETERMINISTIC = "deterministic"  # rule-based, guaranteed correct
-    LLM = "llm"                     # AI-generated, needs review
-
-
-@dataclass
-class Fix:
-    file: str
-    line: int
-    rule: str
-    original_code: str       # exact line(s) to replace
-    fixed_code: str          # replacement
-    explanation: str          # what changed and why
-    source: FixSource
-    end_line: Optional[int] = None  # last line of range (inclusive), None = single line
-    status: FixStatus = FixStatus.PENDING
-    fail_reason: Optional[str] = None  # why the fix failed (for user diagnostics)
-
-    def to_dict(self) -> dict:
-        d = {
-            "file": self.file,
-            "line": self.line,
-            "rule": self.rule,
-            "original_code": self.original_code,
-            "fixed_code": self.fixed_code,
-            "explanation": self.explanation,
-            "source": self.source.value,
-            "status": self.status.value,
-        }
-        if self.end_line is not None:
-            d["end_line"] = self.end_line
-        if self.fail_reason is not None:
-            d["fail_reason"] = self.fail_reason
-        return d
-
-
-@dataclass
-class FixReport:
-    root: str
-    files_fixed: int
-    total_fixes: int
-    applied: int
-    skipped: int
-    failed: int
-    fixes: list[Fix] = field(default_factory=list)
-    llm_cost_usd: float = 0.0
-    timestamp: str = ""
-    verification: Optional[dict] = None
-
-    def __post_init__(self):
-        if not self.timestamp:
-            self.timestamp = datetime.now().isoformat(timespec="seconds")
-
-    def to_dict(self) -> dict:
-        d = {
-            "root": self.root,
-            "files_fixed": self.files_fixed,
-            "total_fixes": self.total_fixes,
-            "applied": self.applied,
-            "skipped": self.skipped,
-            "failed": self.failed,
-            "fixes": [f.to_dict() for f in self.fixes],
-            "llm_cost_usd": self.llm_cost_usd,
-            "timestamp": self.timestamp,
-        }
-        if self.verification is not None:
-            d["verification"] = self.verification
-        return d
-
-
-# ─── Type aliases ────────────────────────────────────────────────────
-Findings: TypeAlias = list[Finding]
-SourceBytes: TypeAlias = bytes
-
-
-# LLM config
 LLM_MODEL = "claude-sonnet-4-20250514"
 LLM_MAX_TOKENS = 4096  # scan
 LLM_DEBUG_MAX_TOKENS = 8192  # debug needs room for code examples
 LLM_OPTIMIZE_MAX_TOKENS = 8192  # optimize needs room for before/after
 LLM_ANALYZE_MAX_TOKENS = 8192  # cross-file analysis
 LLM_SYNTHESIS_MAX_TOKENS = 8192  # project synthesis
+LLM_FIX_MAX_TOKENS = 8192
 LLM_TEMPERATURE = 0.0
 
 # Cost per million tokens (Sonnet 4)
@@ -532,6 +222,8 @@ LANGUAGE_OPTIMIZE_HINTS = {
 }
 
 
+# ─── Configuration loading ───────────────────────────────────────────
+
 def get_api_key() -> Optional[str]:
     return os.environ.get("ANTHROPIC_API_KEY")
 
@@ -546,11 +238,26 @@ def get_llm_config(project_config: Optional[dict] = None) -> dict:
     if project_config:
         toml_llm = project_config.get("llm", {})
 
+    # Security: api_key and base_url are NOT read from .doji.toml.
+    # A malicious repo could plant a .doji.toml that redirects API calls
+    # to an attacker-controlled endpoint, exfiltrating the user's API key
+    # and source code. Only env vars and CLI flags are trusted for these.
+    if toml_llm.get("api_key"):
+        logger.warning(
+            "Ignoring api_key in .doji.toml — API keys must be set via environment "
+            "variables (ANTHROPIC_API_KEY, OPENAI_API_KEY) for security."
+        )
+    if toml_llm.get("base_url"):
+        logger.warning(
+            "Ignoring base_url in .doji.toml — LLM endpoint must be set via "
+            "DOJI_LLM_BASE_URL env var or --base-url flag for security."
+        )
+
     return {
         "backend": os.environ.get("DOJI_LLM_BACKEND") or toml_llm.get("backend"),
         "model": os.environ.get("DOJI_LLM_MODEL") or toml_llm.get("model"),
-        "base_url": os.environ.get("DOJI_LLM_BASE_URL") or toml_llm.get("base_url"),
-        "api_key": toml_llm.get("api_key"),  # not from env — per-backend env vars handle that
+        "base_url": os.environ.get("DOJI_LLM_BASE_URL"),
+        "api_key": None,  # env-only — never from config files
     }
 
 
@@ -600,8 +307,18 @@ def load_project_config(root: Path) -> dict:
         return {}
 
 
-# Custom rule type: (compiled_pattern, Severity, Category, name, message, suggestion, languages)
-CustomRule = tuple
+# Custom rule type
+from typing import NamedTuple
+
+
+class CustomRule(NamedTuple):
+    pattern: re.Pattern
+    severity: Severity
+    category: Category
+    name: str
+    message: str
+    suggestion: Optional[str]
+    languages: Optional[list[str]]
 
 
 def _is_safe_regex(pattern_str: str) -> bool:
@@ -615,24 +332,31 @@ def _is_safe_regex(pattern_str: str) -> bool:
     # Reject patterns that are excessively long
     if len(pattern_str) > 500:
         return False
-    # Reject nested quantifiers: a group containing a quantifier, with a
-    # quantifier on the group itself — e.g. (a+)+, (x*){2,}
-    if re.search(r'\([^)]*[+*?{][^)]*\)[+*?{]', pattern_str):
+    # Reject nested quantifiers: a group (including non-capturing (?:), lookahead
+    # (?=), etc.) containing a quantifier, with a quantifier on the group itself.
+    # e.g. (a+)+, (?:a+)+, (?=a+)+, (x*){2,}
+    if re.search(r'(?:\((?:\?[:!=<])?[^)]*[+*?{][^)]*\)[+*?{])', pattern_str):
         return False
     # Reject alternation with single-char overlapping branches inside quantified groups
     # e.g. (a|a)+, but NOT (error|warning)+ which is safe
-    if re.search(r'\(([a-zA-Z])\|(\1)\)[+*{]', pattern_str):
+    if re.search(r'\((?:\?:)?([a-zA-Z])\|(\1)\)[+*{]', pattern_str):
         return False
-    # Test-run: compile and match against adversarial strings
+    # Test-run: compile and match against adversarial strings with a timeout thread
     try:
         compiled = re.compile(pattern_str)
-        # Test against multiple adversarial inputs
-        for test_str in ["a" * 10000, "b" * 10000, "ab" * 5000, "\x00" * 10000]:
-            compiled.search(test_str)
+        import concurrent.futures
+        def _test_regex():
+            for test_str in ["a" * 10000, "b" * 10000, "ab" * 5000, "\x00" * 10000]:
+                compiled.search(test_str)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(_test_regex)
+            future.result(timeout=2.0)  # 2-second hard timeout
     except re.error:
         # Invalid regex — let the caller's re.compile() handle the error message
         return True
     except (RecursionError, MemoryError):
+        return False
+    except (concurrent.futures.TimeoutError, TimeoutError):
         return False
     return True
 

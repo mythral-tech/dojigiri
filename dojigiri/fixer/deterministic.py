@@ -10,11 +10,14 @@ Data in -> Data out: source line + Finding + file content -> Fix object or None
 """
 
 import ast
+import logging
 import os
 import re
 from typing import Optional, Protocol, Union
 
-from ..config import Finding, Fix, FixContext, FixSource
+from ..types import Finding, Fix, FixContext, FixSource
+
+logger = logging.getLogger(__name__)
 
 from .helpers import (
     _extract_name_from_message,
@@ -78,8 +81,8 @@ def _fix_unused_import(line: str, finding: Finding, content: str,
                     for child in ast.iter_child_nodes(parent):
                         if child is node and isinstance(parent, ast.Try):
                             return None
-            except SyntaxError:
-                pass
+            except SyntaxError as e:
+                logger.debug("Failed to parse AST for import check: %s", e)
 
             if isinstance(node, ast.ImportFrom) and len(node.names) > 1:
                 # Multi-name import: remove only the unused name, keep the rest
@@ -204,7 +207,7 @@ def _fix_loose_equality(line: str, finding: Finding, content: str,
 
 def _fix_none_comparison(line: str, finding: Finding, content: str,
                          ctx: Optional[FixContext] = None) -> Optional[Fix]:
-    """Replace `== None` with `is None`, `!= None` with `is not None`. AST-first."""
+    """Replace ``x == None`` / ``x != None`` with identity checks. AST-first."""  # doji:ignore(none-comparison)
     # AST approach: structurally rebuild the comparison
     if finding.file.endswith('.py'):
         def _is_none_eq(node):
@@ -341,7 +344,7 @@ def _fix_insecure_http(line: str, finding: Finding, content: str,
         return None
     # Skip localhost and internal URLs -- these legitimately use HTTP
     new_line = re.sub(
-        r'http://(?!localhost\b|127\.0\.0\.1\b|0\.0\.0\.0\b|\[::1\])',
+        r'http://(?!localhost\b|127\.0\.0\.1\b|0\.0\.0\.0\b|\[::1\])',  # doji:ignore(insecure-http)
         'https://', line,
     )
     if new_line != line:
@@ -471,7 +474,7 @@ def _fix_open_without_with(line: str, finding: Finding, content: str,
 
     if not body_lines:
         # No body found -- emit with ... as f:\n    pass
-        new_code = f"{indent}with open({open_args}) as {var_name}:\n{indent}    pass\n"
+        new_code = f"{indent}with open({open_args}) as {var_name}:\n{indent}    pass\n"  # doji:ignore(resource-leak)
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
             original_code=line, fixed_code=new_code,
@@ -480,7 +483,8 @@ def _fix_open_without_with(line: str, finding: Finding, content: str,
         )
 
     # Build the with block with re-indented body (preserve relative indentation)
-    new_code = f"{indent}with open({open_args}) as {var_name}:\n"
+    open_stmt = f"open({open_args})"  # doji:ignore(resource-leak)
+    code_lines = [f"{indent}with {open_stmt} as {var_name}:\n"]
     for bl in body_lines:
         if bl.strip():
             # Preserve indentation relative to the original indent level
@@ -488,9 +492,10 @@ def _fix_open_without_with(line: str, finding: Finding, content: str,
                 relative = bl[len(indent):]
             else:
                 relative = bl.lstrip()
-            new_code += indent + "    " + relative
+            code_lines.append(indent + "    " + relative)
         else:
-            new_code += bl
+            code_lines.append(bl)
+    new_code = "".join(code_lines)
 
     # Set end_line so apply_fixes blanks out the original body lines
     last_body_line = finding.line + len(body_lines)
@@ -826,8 +831,8 @@ def _fix_unused_variable(line: str, finding: Finding, content: str,
 
 def _fix_os_system(line: str, finding: Finding, content: str,
                    ctx: Optional[FixContext] = None) -> Optional[Fix]:
-    """Replace os.system() with subprocess.run()."""
-    m = re.search(r'os\.system\((.+)\)', line)
+    """Replace os.system() with subprocess.run()."""  # doji:ignore(os-system)
+    m = re.search(r'os\.system\((.+)\)', line)  # doji:ignore(os-system)
     if not m:
         return None
     cmd_arg = m.group(1).strip()
@@ -836,7 +841,7 @@ def _fix_os_system(line: str, finding: Finding, content: str,
     return Fix(
         file=finding.file, line=finding.line, rule=finding.rule,
         original_code=line, fixed_code=new_line,
-        explanation="Replaced os.system() with subprocess.run() (safer, returns exit info)",
+        explanation="Replaced os.system() with subprocess.run() (safer, returns exit info)",  # doji:ignore(os-system)
         source=FixSource.DETERMINISTIC,
     )
 
@@ -857,9 +862,9 @@ def _fix_eval_usage(line: str, finding: Finding, content: str,
                     found_eval = True
                     break
             if not found_eval:
-                return None  # AST says no eval() here -- false positive
-        except SyntaxError:
-            pass  # fall through to regex
+                return None  # AST says no eval here -- false positive  # doji:ignore(eval-usage)
+        except SyntaxError as e:
+            logger.debug("Failed to parse AST for eval check: %s", e)
 
     m = re.search(r'\beval\s*\((.+)\)', line)
     if not m:
@@ -981,7 +986,7 @@ def _fix_sql_injection(line: str, finding: Finding, content: str,
         call_obj = m.group(2)
         sql_body = m.group(4)
         param_var = m.group(5)
-        new_line = f'{indent}{call_obj}.execute("{sql_body} ?", ({param_var},))\n'
+        new_line = f'{indent}{call_obj}.execute("{sql_body} ?", ({param_var},))\n'  # doji:ignore(sql-injection)
         return Fix(
             file=finding.file, line=finding.line, rule=finding.rule,
             original_code=line, fixed_code=new_line,
@@ -1102,11 +1107,11 @@ def _fix_exception_swallowed(line: str, finding: Finding, content: str,
     if pass_idx is None:
         return None
 
-    # Replace pass with pass + TODO
+    # Replace pass with pass + TODO  # doji:ignore(todo-marker)
     pass_line = lines[pass_idx]
     m = re.match(r'^(\s*)', pass_line)
     pass_indent = m.group(1) if m else ""
-    new_pass = f"{pass_indent}pass  # TODO: handle this exception\n"
+    new_pass = f"{pass_indent}pass  # TODO: handle this exception\n"  # doji:ignore(todo-marker)
     return Fix(
         file=finding.file, line=pass_idx + 1, rule=finding.rule,
         original_code=pass_line, fixed_code=new_pass,

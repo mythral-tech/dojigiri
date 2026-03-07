@@ -16,11 +16,11 @@ Data in → Data out: FileSemantics + CFG → list[Finding] (injection vulnerabi
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from ..config import Finding, Severity, Category, Source
-from .lang_config import LanguageConfig, get_config
-from .core import FileSemantics, Assignment, FunctionCall
+from ..types import Finding, Severity, Category, Source
+from .lang_config import LanguageConfig
+from .core import FileSemantics
 
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -99,7 +99,14 @@ def _propagate_taint(
     # Propagation with sanitization: if RHS contains a tainted variable, LHS
     # becomes tainted — UNLESS the RHS passes through a sanitizer, in which
     # case taint is removed (flow-sensitive reassignment).
+    # Sort by line to ensure source-order propagation (assignments may not
+    # be in source order in the semantics list).
     # Iterate until fixed-point.
+    scoped_assignments = sorted(
+        [a for a in semantics.assignments
+         if a.scope_id in func_scope_ids and not a.is_parameter],
+        key=lambda a: a.line,
+    )
     changed = True
     max_iters = 10  # prevent infinite loops
     iteration = 0
@@ -108,12 +115,7 @@ def _propagate_taint(
         changed = False
         iteration += 1
 
-        for asgn in semantics.assignments:
-            if asgn.scope_id not in func_scope_ids:
-                continue
-            if asgn.is_parameter:
-                continue
-
+        for asgn in scoped_assignments:
             rhs = asgn.value_text
 
             # Check if RHS passes through a sanitizer
@@ -212,48 +214,79 @@ def _is_sanitized(
     return False
 
 
+def _process_assignment_taint(
+    asgn, config: LanguageConfig, current_taint: set[str],
+    source_vars: set[str] | None = None, source_lines: dict[str, int] | None = None,
+) -> None:
+    """Process a single assignment for taint propagation/sanitization."""
+    rhs = asgn.value_text
+
+    for pattern, kind in config.taint_source_patterns:
+        if _matches_pattern(rhs, pattern):
+            current_taint.add(asgn.name)
+            if source_vars is not None and asgn.name not in source_vars:
+                source_vars.add(asgn.name)
+                if source_lines is not None:
+                    source_lines[asgn.name] = asgn.line
+            break
+    else:
+        for tvar in list(current_taint):
+            if re.search(r'\b' + re.escape(tvar) + r'\b', rhs):
+                current_taint.add(asgn.name)
+                break
+
+    for sanitizer in config.taint_sanitizer_patterns:
+        if sanitizer in rhs:
+            current_taint.discard(asgn.name)
+            break
+
+
+def _process_call_taint(
+    call, config: LanguageConfig, current_taint: set[str],
+    line_idx: int, lines: list[str],
+) -> None:
+    """Process a single call for sanitizer detection."""
+    call_text = call.name
+    if call.receiver:
+        call_text = f"{call.receiver}.{call.name}"
+    for sanitizer in config.taint_sanitizer_patterns:
+        if sanitizer in call_text:
+            if 0 <= line_idx < len(lines):
+                line_text = lines[line_idx]
+                for tvar in list(current_taint):
+                    if re.search(r'\b' + re.escape(tvar) + r'\b', line_text):
+                        current_taint.discard(tvar)
+
+
 def _update_stmt_taint(
     stmt, semantics: FileSemantics, config: LanguageConfig,
     current_taint: set[str], lines: list[str],
     source_vars: set[str] | None = None, source_lines: dict[str, int] | None = None,
 ) -> None:
-    """Update current_taint in-place for a single CFG statement."""
+    """Update current_taint in-place for a single CFG statement.
+
+    Handles multiple assignments/calls on the same line via extra_*_idxs.
+    """
+    # Process all assignments on this line (primary + extras)
+    asgn_idxs = []
     if stmt.assignment_idx is not None:
-        asgn = semantics.assignments[stmt.assignment_idx]
-        rhs = asgn.value_text
+        asgn_idxs.append(stmt.assignment_idx)
+    asgn_idxs.extend(getattr(stmt, 'extra_assignment_idxs', []))
 
-        for pattern, kind in config.taint_source_patterns:
-            if _matches_pattern(rhs, pattern):
-                current_taint.add(asgn.name)
-                if source_vars is not None and asgn.name not in source_vars:
-                    source_vars.add(asgn.name)
-                    if source_lines is not None:
-                        source_lines[asgn.name] = asgn.line
-                break
-        else:
-            for tvar in list(current_taint):
-                if re.search(r'\b' + re.escape(tvar) + r'\b', rhs):
-                    current_taint.add(asgn.name)
-                    break
+    for aidx in asgn_idxs:
+        asgn = semantics.assignments[aidx]
+        _process_assignment_taint(asgn, config, current_taint, source_vars, source_lines)
 
-        for sanitizer in config.taint_sanitizer_patterns:
-            if sanitizer in rhs:
-                current_taint.discard(asgn.name)
-                break
-
+    # Process all calls on this line (primary + extras)
+    call_idxs = []
     if stmt.call_idx is not None:
-        call = semantics.function_calls[stmt.call_idx]
-        call_text = call.name
-        if call.receiver:
-            call_text = f"{call.receiver}.{call.name}"
-        line_idx = stmt.line - 1
-        for sanitizer in config.taint_sanitizer_patterns:
-            if sanitizer in call_text:
-                if 0 <= line_idx < len(lines):
-                    line_text = lines[line_idx]
-                    for tvar in list(current_taint):
-                        if re.search(r'\b' + re.escape(tvar) + r'\b', line_text):
-                            current_taint.discard(tvar)
+        call_idxs.append(stmt.call_idx)
+    call_idxs.extend(getattr(stmt, 'extra_call_idxs', []))
+
+    line_idx = stmt.line - 1
+    for cidx in call_idxs:
+        call = semantics.function_calls[cidx]
+        _process_call_taint(call, config, current_taint, line_idx, lines)
 
 
 def _build_scope_children(semantics: FileSemantics) -> dict[int, set[int]]:
@@ -363,11 +396,11 @@ def analyze_taint(
                 message=(
                     f"Tainted data from '{source.variable}' ({source.kind}, line {source.line}) "
                     f"reaches sink '{sink.function_name}' ({sink.kind}){chain_desc} — "
-                    f"verify sanitization"
+                    "verify sanitization"
                 ),
                 suggestion=(
                     f"Sanitize '{sink.variable}' before passing to '{sink.function_name}', "
-                    f"or use parameterized queries/safe APIs"
+                    "or use parameterized queries/safe APIs"
                 ),
             ))
 
@@ -394,7 +427,7 @@ def analyze_taint_pathsensitive(
 
     Falls back to flow-insensitive analyze_taint() for functions without CFGs.
     """
-    from .cfg import get_reverse_postorder, FunctionCFG
+    from .cfg import get_reverse_postorder
 
     if not config.taint_source_patterns or not config.taint_sink_patterns:
         return []
@@ -479,9 +512,14 @@ def analyze_taint_pathsensitive(
                 # Update taint through this statement
                 _update_stmt_taint(stmt, semantics, config, current_taint, lines)
 
-                # Check for sinks
+                # Check for sinks (all calls on this line)
+                sink_call_idxs = []
                 if stmt.call_idx is not None:
-                    call = semantics.function_calls[stmt.call_idx]
+                    sink_call_idxs.append(stmt.call_idx)
+                sink_call_idxs.extend(getattr(stmt, 'extra_call_idxs', []))
+
+                for _cidx in sink_call_idxs:
+                    call = semantics.function_calls[_cidx]
                     call_text = call.name
                     if call.receiver:
                         call_text = f"{call.receiver}.{call.name}"
@@ -520,12 +558,12 @@ def analyze_taint_pathsensitive(
                                                     f"Tainted data from '{src_var}' "
                                                     f"({src_kind}, line {src_line}) "
                                                     f"reaches sink '{call_text}' ({sink_kind}) "
-                                                    f"— path-sensitive analysis"
+                                                    "— path-sensitive analysis"
                                                 ),
                                                 suggestion=(
                                                     f"Sanitize '{tvar}' before passing to "
                                                     f"'{call_text}', or use parameterized "
-                                                    f"queries/safe APIs"
+                                                    "queries/safe APIs"
                                                 ),
                                             ))
                                         break

@@ -11,7 +11,6 @@ Data in -> Data out: scan events (timing, counts) -> SessionMetrics dataclass
 import json
 import logging
 import threading
-import time
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
@@ -106,7 +105,7 @@ _current_session: Optional[SessionMetrics] = None
 
 def start_session() -> SessionMetrics:
     """Start a new metrics session."""
-    global _current_session
+    global _current_session  # doji:ignore(global-keyword)
     with _session_lock:
         _current_session = SessionMetrics(started_at=datetime.now().isoformat(timespec="seconds"))
         return _current_session
@@ -120,7 +119,7 @@ def get_session() -> Optional[SessionMetrics]:
 
 def end_session() -> Optional[SessionMetrics]:
     """End the current session and return its metrics."""
-    global _current_session
+    global _current_session  # doji:ignore(global-keyword)
     with _session_lock:
         session = _current_session
         _current_session = None
@@ -152,8 +151,8 @@ def load_history(days: int = 30) -> list[dict]:
                     age = (datetime.now() - session_dt).days
                     if age > days:
                         continue
-                except ValueError:
-                    pass
+                except ValueError as e:
+                    logger.debug("Failed to parse session timestamp: %s", e)
             sessions.append(data)
         except (json.JSONDecodeError, OSError):
             continue

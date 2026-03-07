@@ -3,9 +3,11 @@
 import pytest
 import os
 from pathlib import Path
-from dojigiri.config import (
+from dojigiri.types import (
     Finding, FileAnalysis, ScanReport,
     Severity, Category, Source,
+)
+from dojigiri.config import (
     get_api_key, load_ignore_patterns,
     LANGUAGE_EXTENSIONS,
     _is_safe_regex, compile_custom_rules,

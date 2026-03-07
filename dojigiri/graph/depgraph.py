@@ -10,9 +10,12 @@ Data in -> Data out: source directory -> DepGraph, CallGraph, GraphMetrics
 """
 
 import ast as ast_mod
+import logging
 import re
 from collections import deque
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
 from pathlib import Path
 from typing import Optional
 
@@ -255,8 +258,8 @@ def _resolve_python_imports(filepath: str, content: str, project_root: str) -> s
         try:
             rel = str(Path(p).relative_to(root_path)).replace("\\", "/")
             normalized.add(rel)
-        except ValueError:
-            pass
+        except ValueError as e:
+            logger.debug("Failed to compute relative path: %s", e)
     return normalized
 
 
@@ -326,8 +329,8 @@ def _resolve_js_ts_imports(filepath: str, content: str, project_root: str) -> se
                 try:
                     rel = str(c.relative_to(root_path)).replace("\\", "/")
                     resolved.add(rel)
-                except ValueError:
-                    pass
+                except ValueError as e:
+                    logger.debug("Failed to compute relative path: %s", e)
                 break
 
     return resolved

@@ -16,10 +16,10 @@ Data in -> Data out: (re-export hub, no data transformation)
 """
 
 # ─── Engine (orchestration, application, verification) ────────────────
-from .engine import apply_fixes, fix_file, verify_fixes
+from .engine import apply_fixes, fix_file, verify_fixes  # doji:ignore(unused-import)
 
 # ─── Deterministic fixers (the catalog) ───────────────────────────────
-from .deterministic import (
+from .deterministic import (  # doji:ignore(unused-import)
     DETERMINISTIC_FIXERS,
     FixerFn,
     _fix_bare_except,
@@ -45,10 +45,10 @@ from .deterministic import (
 )
 
 # ─── Cascade derivation ──────────────────────────────────────────────
-from .cascade import derive_expected_cascades
+from .cascade import derive_expected_cascades  # doji:ignore(unused-import)
 
 # ─── LLM fixes ───────────────────────────────────────────────────────
-from .llm_fixes import generate_llm_fixes
+from .llm_fixes import generate_llm_fixes  # doji:ignore(unused-import)
 
 # ─── Helpers (re-exported for tests that import them directly) ────────
 from .helpers import (

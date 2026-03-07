@@ -16,8 +16,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
-from .lang_config import LanguageConfig, get_config
-from .core import FileSemantics, Assignment, FunctionDef, ScopeInfo
+from .lang_config import LanguageConfig
+from .core import FileSemantics
 
 
 # ─── Type model ──────────────────────────────────────────────────────
@@ -159,23 +159,31 @@ def _infer_nullable_from_call(value_text: str, config: LanguageConfig) -> Option
     """Rule 5: Infer nullable from known nullable-return patterns.
 
     Special case: .get(key, default) with a non-None default is NOT nullable.
+    Patterns must match as complete method names — `.get` matches `.get(`
+    but not `.getLogger(` or `.getattr(`.
     """
     for pattern in config.nullable_return_patterns:
-        if pattern in value_text:
-            # Check for .get() with a non-None default value
-            if pattern.endswith(".get") or pattern == ".get":
-                # Match .get(key, default) — if there's a second arg, check if it's None
-                m = re.search(r'\.get\s*\([^,]+,\s*(.+?)\s*\)', value_text)
-                if m:
-                    default_val = m.group(1).strip()
-                    if default_val not in ("None", "null", "nil"):
-                        # Has a non-None default — not nullable
-                        return None
-            return TypeInfo(
-                inferred_type=InferredType.OPTIONAL,
-                nullable=True,
-                source="return_type",
-            )
+        idx = value_text.find(pattern)
+        if idx == -1:
+            continue
+        # Ensure pattern matches a complete method name: next char must be '(' or whitespace
+        after = idx + len(pattern)
+        if after < len(value_text) and value_text[after] not in ("(", " ", "\t"):
+            continue
+        # Check for .get() with a non-None default value
+        if pattern.endswith(".get") or pattern == ".get":
+            # Match .get(key, default) — if there's a second arg, check if it's None
+            m = re.search(r'\.get\s*\([^,]+,\s*(.+?)\s*\)', value_text)
+            if m:
+                default_val = m.group(1).strip()
+                if default_val not in ("None", "null", "nil"):
+                    # Has a non-None default — not nullable
+                    return None
+        return TypeInfo(
+            inferred_type=InferredType.OPTIONAL,
+            nullable=True,
+            source="return_type",
+        )
     return None
 
 

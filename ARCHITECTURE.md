@@ -197,7 +197,7 @@ All defined in `config.py`:
 
 ## File Count & Size
 
-- **35 Python modules** across 3 packages (`dojigiri/`, `semantic/`, `graph/`)
-- **~17,000 lines** total
+- **42 Python modules** across 4 packages (`dojigiri/`, `semantic/`, `graph/`, `fixer/`)
+- **~15,000 lines** production code + **~17,000 lines** tests (39 test files)
 - Largest files: `__main__.py` (~1300 lines, CLI), `languages.py` (regex rules), `detector.py` (analysis engine)
 - Compiled to standalone `.exe` via Nuitka (Python → C → native binary)

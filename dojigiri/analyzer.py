@@ -22,13 +22,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
 
-from .config import (
+from .types import (
     Finding, FileAnalysis, ScanReport, CrossFileFinding, Severity, Confidence, Category, Source,
+    SEVERITY_ORDER,
 )
-from .discovery import detect_language, should_skip_dir, should_skip_file, collect_files  # noqa: F401 — re-exported
+from .discovery import detect_language, collect_files
 from .detector import analyze_file_static
 from .chunker import chunk_file, estimate_tokens
-from .llm import analyze_chunk, CostTracker, LLMError
+from .llm import analyze_chunk, CostTracker, LLMError, CostLimitExceeded
 from .storage import file_hash, load_cache, save_cache, save_report
 
 
@@ -227,6 +228,7 @@ def scan_deep(
     use_cache: bool = True,
     max_workers: int = 4,
     custom_rules=None,
+    max_cost: Optional[float] = None,
 ) -> ScanReport:
     """Deep scan — static + Claude API analysis.
 
@@ -240,9 +242,10 @@ def scan_deep(
         use_cache: Whether to use file hash cache (skips LLM for unchanged files)
         max_workers: Number of parallel workers for LLM calls (default: 4)
         custom_rules: Compiled custom rules from compile_custom_rules()
+        max_cost: Maximum LLM cost in USD (None = no limit)
     """
     files, skipped = collect_files(root, language_filter)
-    cost_tracker = CostTracker()
+    cost_tracker = CostTracker(max_cost=max_cost)
     cache = load_cache() if use_cache else {}
 
     # Phase 1: Static analysis and cache check
@@ -324,6 +327,10 @@ def scan_deep(
             if len(chunks) > 1:
                 with print_lock:
                     print()
+        except CostLimitExceeded:
+            with print_lock:
+                print(f"\n  Cost limit reached (${cost_tracker.total_cost:.4f}). "
+                      "Remaining files will use static analysis only.", flush=True)
         except LLMError as e:
             with print_lock:
                 logger.warning("LLM error for %s: %s", fp_str, e)
@@ -423,8 +430,7 @@ def _merge_findings(static: list[Finding], llm: list[Finding]) -> list[Finding]:
             unique.append(f)
 
     # Sort by severity then line
-    severity_order = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
-    unique.sort(key=lambda f: (severity_order[f.severity], f.line))
+    unique.sort(key=lambda f: (SEVERITY_ORDER[f.severity], f.line))
     return unique
 
 
@@ -438,15 +444,14 @@ def filter_report(
     if not ignore_rules and not min_severity and not min_confidence:
         return report
 
-    severity_order = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
     confidence_order = {Confidence.HIGH: 0, Confidence.MEDIUM: 1, Confidence.LOW: 2}
-    min_level = severity_order.get(min_severity, 2) if min_severity else 2
+    min_level = SEVERITY_ORDER.get(min_severity, 2) if min_severity else 2
     min_conf = confidence_order.get(min_confidence, 2) if min_confidence else 2
 
     def _keep(f: Finding) -> bool:
         if ignore_rules and f.rule in ignore_rules:
             return False
-        if severity_order[f.severity] > min_level:
+        if SEVERITY_ORDER[f.severity] > min_level:
             return False
         # Confidence filter only applies to LLM findings (static/AST have no confidence)
         if f.confidence is not None and confidence_order[f.confidence] > min_conf:
@@ -474,8 +479,8 @@ def _normalize_path(path_str: str, root: Optional[str] = None) -> str:
     if root and os.path.isabs(p):
         try:
             p = os.path.relpath(p, os.path.normpath(root))
-        except ValueError:
-            pass  # Different drive on Windows
+        except ValueError as e:
+            logger.debug("Failed to compute relative path: %s", e)
     return p
 
 
@@ -589,8 +594,8 @@ def _find_git_root(path: Path) -> Optional[Path]:
         )
         if result.returncode == 0:
             return Path(result.stdout.strip())
-    except (OSError, FileNotFoundError):
-        pass
+    except (OSError, FileNotFoundError) as e:
+        logger.debug("Failed to find git root: %s", e)
     return None
 
 
@@ -598,6 +603,10 @@ def _resolve_base_ref(git_root: Path, base: Optional[str] = None) -> Optional[st
     """Resolve the base ref to diff against. Tries base arg, then main, then master."""
     candidates = [base] if base else ["main", "master"]
     for ref in candidates:
+        # Validate ref format to prevent flag injection into git commands
+        if ref and (ref.startswith("-") or not re.match(r'^[a-zA-Z0-9._/~^@{}\-]+$', ref)):
+            logger.warning("Invalid git ref rejected: %s", ref)
+            return None
         result = _git_run(
             ["git", "rev-parse", "--verify", ref],
             cwd=str(git_root),
@@ -711,7 +720,7 @@ def scan_diff(
     if not changed_files:
         return ScanReport(
             root=str(root), mode="diff", files_scanned=0, files_skipped=0,
-            total_findings=0, critical=0, warnings=0, info=0,
+            total_findings=0, critical=0, warnings=0, info=0,  # doji:ignore(possibly-uninitialized)
             timestamp=datetime.now().isoformat(timespec="seconds"),
         ), ref
 

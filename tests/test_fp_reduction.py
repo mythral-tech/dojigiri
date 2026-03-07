@@ -6,7 +6,7 @@ in the real-world benchmarks (Flask, FastAPI, Express) is now suppressed.
 
 import pytest
 from dojigiri.detector import run_regex_checks, run_python_ast_checks, analyze_file_static
-from dojigiri.config import Finding, Severity, Category, Source
+from dojigiri.types import Finding, Severity, Category, Source
 from dojigiri.languages import get_rules_for_language
 
 

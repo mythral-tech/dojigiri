@@ -2,7 +2,7 @@
 
 import pytest
 
-from dojigiri.config import Finding, Severity, Category, Source
+from dojigiri.types import Finding, Severity, Category, Source
 
 try:
     from tree_sitter_language_pack import get_parser

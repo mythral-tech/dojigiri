@@ -2,7 +2,7 @@
 
 import pytest
 
-from dojigiri.config import Severity, Category, Source
+from dojigiri.types import Severity, Category, Source
 from dojigiri.semantic.core import extract_semantics
 from dojigiri.semantic.cfg import build_cfg
 from dojigiri.semantic.resource import check_resource_leaks

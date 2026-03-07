@@ -14,9 +14,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from ..config import Finding, Severity, Category
-from .core import FileSemantics, FunctionDef, ClassDef, Assignment
-from .types import FileTypeMap, InferredType
+from ..types import Finding
+from .core import FileSemantics, FunctionDef, ClassDef
+from .types import FileTypeMap
 
 
 # ─── Data structures ─────────────────────────────────────────────────

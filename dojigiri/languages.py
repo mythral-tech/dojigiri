@@ -9,7 +9,7 @@ Data in → Data out: language string in → list[Rule] out.
 """
 
 import re
-from .config import Severity, Category
+from .types import Severity, Category
 
 # Each rule: (pattern, severity, category, rule_name, message, suggestion)
 # pattern can be a compiled regex or a string (compiled at load time)
@@ -145,7 +145,7 @@ PYTHON_RULES: list[Rule] = _compile([
     ),
     # os.system / subprocess with shell=True
     (
-        r"\bos\.system\s*\(",
+        r"\bos\.system\s*\(",  # doji:ignore(os-system)
         Severity.WARNING, Category.SECURITY,
         "os-system",
         "os.system() is vulnerable to shell injection",
@@ -175,9 +175,11 @@ PYTHON_RULES: list[Rule] = _compile([
         "Use explicit if/raise for production checks",
     ),
     # f-string without expression — must match f"..." with NO { inside at all
-    # Uses negative lookahead to avoid matching strings that contain braces
+    # Uses negative lookahead to avoid matching strings that contain braces.
+    # Skips triple-quoted f-strings (expressions may be on later lines) and
+    # handles escaped quotes (\" inside f"...") correctly.
     (
-        r"""(?<!\w)f(['"])(?:(?!\{)(?!\1).)*\1""",
+        r"""(?<!\w)f(['"])(?!\1\1)(?:(?:\\.|(?!\{)(?!\1)[^\\]))*\1""",
         Severity.INFO, Category.STYLE,
         "fstring-no-expr",
         "f-string without any expressions — unnecessary f prefix",
@@ -185,7 +187,7 @@ PYTHON_RULES: list[Rule] = _compile([
     ),
     # Unsafe pickle deserialization
     (
-        r"\bpickle\.loads?\s*\(",
+        r"\bpickle\.loads?\s*\(",  # doji:ignore(pickle-unsafe)
         Severity.CRITICAL, Category.SECURITY,
         "pickle-unsafe",
         "pickle.load()/loads() can execute arbitrary code during deserialization",
@@ -389,7 +391,7 @@ SECURITY_RULES: list[Rule] = _compile([
     ),
     # Insecure crypto: ECB mode
     (
-        r"""(?i)(?:MODE_ECB|mode\s*=\s*['"]?ECB|\.ECB\b)""",
+        r"""(?i)(?:MODE_ECB|mode\s*=\s*['"]?ECB|\.ECB\b)""",  # doji:ignore(insecure-ecb-mode)
         Severity.WARNING, Category.SECURITY,
         "insecure-ecb-mode",
         "ECB mode does not hide data patterns — insecure for most uses",
@@ -413,7 +415,7 @@ SECURITY_RULES: list[Rule] = _compile([
     ),
     # XXE — XML parsing without disabling external entities
     (
-        r"""(?:xml\.etree\.ElementTree\.parse\s*\(|xml\.dom\.minidom\.parse\s*\(|xml\.sax\.parse\s*\(|lxml\.etree\.parse\s*\(|DocumentBuilderFactory|XMLReader|SAXParser|DOMParser\s*\(\))""",
+        r"""(?:xml\.etree\.ElementTree\.parse\s*\(|xml\.dom\.minidom\.parse\s*\(|xml\.sax\.parse\s*\(|lxml\.etree\.parse\s*\(|DocumentBuilderFactory|XMLReader|SAXParser|DOMParser\s*\(\))""",  # doji:ignore(xxe-risk)
         Severity.WARNING, Category.SECURITY,
         "xxe-risk",
         "XML parsing — ensure external entities are disabled to prevent XXE attacks",
