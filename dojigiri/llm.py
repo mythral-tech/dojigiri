@@ -54,7 +54,7 @@ from .config import (
     LANGUAGE_DEBUG_HINTS, LANGUAGE_OPTIMIZE_HINTS,
     CHUNK_SIZE,
 )
-from .llm_backend import LLMBackend, get_backend, get_tiered_backend, TIER_SCAN, TIER_DEEP
+from .llm_backend import LLMBackend, get_tiered_backend, TIER_SCAN, TIER_DEEP
 from .chunker import Chunk, chunk_file
 
 # Module-level backend config — set by CLI before any LLM calls
