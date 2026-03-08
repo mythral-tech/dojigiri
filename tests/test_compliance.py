@@ -109,7 +109,7 @@ class TestCoverage:
         rule_names = {r["name"] for r in list_all_rules()}
         # Also include semantic/graph rules not in languages.py
         semantic_rules = {
-            "syntax-error", "unused-import", "exception-swallowed",
+            "syntax-error", "unused-import", "exception-swallowed", "exception-swallowed-continue",
             "shadowed-builtin", "shadowed-builtin-param", "type-comparison",
             "global-keyword", "unreachable-code", "high-complexity",
             "too-many-args", "empty-exception-handler", "unused-variable",

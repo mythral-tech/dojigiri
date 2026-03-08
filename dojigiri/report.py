@@ -600,109 +600,11 @@ def print_sarif(report: ScanReport) -> None:
 def to_sarif(report: ScanReport) -> dict:
     """Convert ScanReport to SARIF 2.1.0 format.
 
-    SARIF (Static Analysis Results Interchange Format) is the standard format
-    for GitHub Code Scanning and other result management systems.
+    Delegates to sarif.py for the actual conversion.
     """
-    # Map our severity to SARIF levels
-    severity_to_level = {
-        Severity.CRITICAL: "error",
-        Severity.WARNING: "warning",
-        Severity.INFO: "note",
-    }
+    from .sarif import to_sarif as _to_sarif
 
-    from .compliance import get_cwe, get_nist
-
-    # Collect unique rules from all findings
-    rules_map = {}
-    for fa in report.file_analyses:
-        for f in fa.findings:
-            if f.rule not in rules_map:
-                rule_entry = {
-                    "id": f.rule,
-                    "name": f.message.split(" ")[0],  # First word as short name
-                    "shortDescription": {"text": f.message},
-                    "fullDescription": {"text": f.message},
-                    "defaultConfiguration": {"level": severity_to_level[f.severity]},
-                    "properties": {
-                        "category": f.category.value,
-                        "source": f.source.value,
-                    },
-                }
-                # Add CWE tag for GitHub Code Scanning
-                cwe = get_cwe(f.rule)
-                if cwe:
-                    cwe_num = cwe.replace("CWE-", "")
-                    rule_entry["properties"]["tags"] = [f"external/cwe/cwe-{cwe_num}"]
-                nist = get_nist(f.rule)
-                if nist:
-                    rule_entry["properties"]["nist"] = nist
-                rules_map[f.rule] = rule_entry
-
-    # Convert findings to SARIF results
-    results = []
-    for fa in report.file_analyses:
-        for f in fa.findings:
-            # Create partial fingerprint for deduplication across runs
-            # Use file + rule + line as fingerprint
-            fingerprint = f"{f.file}:{f.rule}:{f.line}"
-
-            result = {
-                "ruleId": f.rule,
-                "level": severity_to_level[f.severity],
-                "message": {"text": f.message},
-                "locations": [
-                    {
-                        "physicalLocation": {
-                            "artifactLocation": {"uri": f.file, "uriBaseId": "%SRCROOT%"},
-                            "region": {"startLine": f.line, "startColumn": 1},
-                        }
-                    }
-                ],
-                "partialFingerprints": {"primaryLocationLineHash": fingerprint},
-            }
-
-            # Add snippet if available (redact secrets)
-            snippet = f.to_dict()["snippet"]
-            if snippet:
-                result["locations"][0]["physicalLocation"]["region"]["snippet"] = {  # type: ignore[index]  # SARIF result dict is dynamically built
-                    "text": snippet
-                }
-
-            # Add suggestion as fix if available
-            if f.suggestion:
-                result["fixes"] = [{"description": {"text": f.suggestion}}]
-
-            # Add confidence property if available (LLM findings)
-            if f.confidence:
-                result.setdefault("properties", {})["confidence"] = f.confidence.value  # type: ignore[index]  # SARIF result dict is dynamically built
-
-            results.append(result)
-
-    # Build SARIF document
-    sarif = {
-        "version": "2.1.0",
-        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "Dojigiri",
-                        "informationUri": "https://github.com/Inklling/Genesis",
-                        "semanticVersion": "1.1.0",
-                        "rules": list(rules_map.values()),
-                    }
-                },
-                "results": results,
-                "properties": {
-                    "mode": report.mode,
-                    "filesScanned": report.files_scanned,
-                    "filesSkipped": report.files_skipped,
-                },
-            }
-        ],
-    }
-
-    return sarif
+    return _to_sarif(report)
 
 
 # ─── Fix report rendering ────────────────────────────────────────────
