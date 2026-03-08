@@ -527,6 +527,11 @@ MAX_CHUNK_TOKENS = 100_000  # warn threshold
 # Above this threshold, the full chunk is more cost-effective than N queries.
 MICRO_QUERY_THRESHOLD = 8
 
+# Haiku quality gate: if static analysis found >= this many findings in a chunk
+# but Haiku returned 0 LLM findings, escalate to Sonnet for a second opinion.
+# Also triggers on any critical static finding with 0 Haiku results.
+HAIKU_ESCALATION_THRESHOLD = 3
+
 # System prompt for micro-query verification — shorter than full scan prompt
 _MICRO_QUERY_SYSTEM_PROMPT = """\
 You are a senior code reviewer verifying static analysis findings.
@@ -635,7 +640,27 @@ def _analyze_via_micro_queries(
 
     cost_tracker.add_response(response, backend=backend)
 
-    raw_findings = _parse_scan_response(response.text)
+    return _raw_to_findings(response.text, filepath)
+
+
+def _raw_to_findings(
+    response_text: str,
+    filepath: str,
+    chunk_index: int = 0,
+    chunk_start_line: int = 1,
+) -> list[Finding]:
+    """Parse raw LLM response text into Finding objects.
+
+    Shared by micro-query and full-chunk paths. Handles JSON recovery,
+    line offset adjustment for multi-chunk files, and field validation.
+
+    Args:
+        response_text: Raw LLM response text (should be JSON array).
+        filepath: Source file path for the findings.
+        chunk_index: 0-based chunk index (0 = first/only chunk).
+        chunk_start_line: Start line of this chunk in the file (for offset adjustment).
+    """
+    raw_findings = _parse_scan_response(response_text)
     if raw_findings is None:
         return []
 
@@ -648,6 +673,8 @@ def _analyze_via_micro_queries(
             line = rf.get("line", 1)
             if not isinstance(line, int) or line < 1:
                 line = 1
+            if chunk_index > 0:
+                line = line + chunk_start_line - 1
 
             conf_str = rf.get("confidence", "medium")
             try:
@@ -678,6 +705,42 @@ def _analyze_via_micro_queries(
     return findings
 
 
+def _should_escalate_to_sonnet(
+    haiku_findings: list[Finding],
+    chunk_static: list[Finding],
+    backend: LLMBackend,
+) -> bool:
+    """Check if Haiku's scan results warrant escalation to Sonnet.
+
+    Escalates when Haiku returned 0 findings but static analysis found
+    significant issues — suggesting Haiku missed something. This catches
+    Haiku quality gaps on complex code without adding cost on clean chunks.
+
+    Only applies when tiering is active (Haiku is the scan backend).
+    """
+    from .llm_backend import AnthropicBackend
+
+    # No escalation needed if Haiku found something
+    if haiku_findings:
+        return False
+
+    # No escalation if there aren't enough static findings to be suspicious
+    if not chunk_static:
+        return False
+
+    # Only escalate from Haiku — if user forced Sonnet everywhere, skip
+    if not isinstance(backend, AnthropicBackend) or "haiku" not in backend._model:
+        return False
+
+    # Escalate if any critical static finding got 0 Haiku results
+    has_critical = any(f.severity == Severity.CRITICAL for f in chunk_static)
+    if has_critical:
+        return True
+
+    # Escalate if static found enough issues to be suspicious about 0 LLM findings
+    return len(chunk_static) >= HAIKU_ESCALATION_THRESHOLD
+
+
 def analyze_chunk(
     chunk: Chunk, cost_tracker: CostTracker,
     static_findings: Optional[list[Finding]] = None,
@@ -688,6 +751,11 @@ def analyze_chunk(
     - When static findings exist (1-8): sends micro-queries (targeted snippets)
       instead of the full chunk -- 5-10x fewer input tokens.
     - When many static findings (>8) or none: sends the full chunk.
+
+    Includes a Haiku quality gate: if Haiku returns 0 findings on a chunk
+    with significant static findings (3+ or any critical), the chunk is
+    re-sent to Sonnet as a sanity check. This mitigates Haiku false-negative
+    risk at minimal cost (only triggers on suspicious 0-result chunks).
 
     When static_findings are provided, the LLM is told what static analysis
     already found so it can skip those issues and focus on what only an LLM
@@ -716,10 +784,25 @@ def analyze_chunk(
             chunk_static, chunk.content, max_queries=5,
         )
         if micro_queries:
-            return _analyze_via_micro_queries(
+            findings = _analyze_via_micro_queries(
                 micro_queries, chunk.filepath, chunk.language,
                 backend, cost_tracker,
             )
+            # Haiku quality gate — escalate to Sonnet if suspicious 0 results
+            if _should_escalate_to_sonnet(findings, chunk_static, backend):
+                logger.info(
+                    "Haiku returned 0 findings on chunk with %d static findings "
+                    "(%s) — escalating to Sonnet: %s lines %d-%d",
+                    len(chunk_static),
+                    "has critical" if any(f.severity == Severity.CRITICAL for f in chunk_static) else "threshold",
+                    chunk.filepath, chunk.start_line, chunk.end_line,
+                )
+                sonnet = _get_backend(tier=TIER_DEEP)
+                findings = _analyze_via_micro_queries(
+                    micro_queries, chunk.filepath, chunk.language,
+                    sonnet, cost_tracker,
+                )
+            return findings
 
     # Full chunk path: no static findings (fishing for LLM-only insights)
     # or too many findings (full context is cheaper than N queries)
@@ -743,53 +826,37 @@ def analyze_chunk(
 
     cost_tracker.add_response(response, backend=backend)
 
-    # Parse JSON response — unified resilient parsing
-    raw_findings = _parse_scan_response(response.text)
-    if raw_findings is None:
-        return []
+    findings_list = _raw_to_findings(
+        response.text, chunk.filepath,
+        chunk_index=chunk.chunk_index,
+        chunk_start_line=chunk.start_line,
+    )
 
-    findings = []
-    for rf in raw_findings:
-        try:
-            if not isinstance(rf, dict):
-                continue
+    # Haiku quality gate — escalate full-chunk path too
+    if _should_escalate_to_sonnet(findings_list, chunk_static, backend):
+        logger.info(
+            "Haiku returned 0 findings on chunk with %d static findings "
+            "(%s) — escalating to Sonnet: %s lines %d-%d",
+            len(chunk_static),
+            "has critical" if any(f.severity == Severity.CRITICAL for f in chunk_static) else "threshold",
+            chunk.filepath, chunk.start_line, chunk.end_line,
+        )
+        sonnet = _get_backend(tier=TIER_DEEP)
+        response = _api_call_with_retry(
+            sonnet,
+            system=_build_scan_system_prompt(chunk.language),
+            messages=[{"role": "user", "content": user_msg}],
+            max_tokens=LLM_MAX_TOKENS,
+            temperature=LLM_TEMPERATURE,
+        )
+        cost_tracker.add_response(response, backend=sonnet)
+        findings_list = _raw_to_findings(
+            response.text, chunk.filepath,
+            chunk_index=chunk.chunk_index,
+            chunk_start_line=chunk.start_line,
+        )
 
-            # Adjust line numbers for chunk offset
-            line = rf.get("line", 1)
-            if not isinstance(line, int) or line < 1:
-                line = 1
-            if chunk.chunk_index > 0:
-                line = line + chunk.start_line - 1
-
-            # Parse confidence (default to medium if not provided)
-            conf_str = rf.get("confidence", "medium")
-            try:
-                confidence = Confidence(conf_str)
-            except ValueError:
-                confidence = Confidence.MEDIUM
-
-            # Validate and truncate string fields
-            message = str(rf.get("message", "Issue found by Claude"))[:500]
-            suggestion = rf.get("suggestion")
-            if suggestion is not None:
-                suggestion = str(suggestion)[:500]
-            rule = str(rf.get("rule", "llm-finding"))[:100]
-
-            findings.append(Finding(
-                file=chunk.filepath,
-                line=line,
-                severity=Severity(rf.get("severity", "info")),
-                category=Category(rf.get("category", "bug")),
-                source=Source.LLM,
-                rule=rule,
-                message=message,
-                suggestion=suggestion,
-                confidence=confidence,
-            ))
-        except (ValueError, KeyError):
-            continue
-
-    return findings
+    return findings_list
 
 
 def _build_debug_system_prompt(language: str) -> str:

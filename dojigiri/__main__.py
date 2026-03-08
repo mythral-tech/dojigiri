@@ -726,8 +726,10 @@ def cmd_explain(args: argparse.Namespace) -> int:
     output_format = getattr(args, "output", "text")
     deep = getattr(args, "deep", False)
 
-    if deep and not _confirm_llm_usage(args):
-        return 1
+    if deep:
+        _setup_llm_backend(args)
+        if not _confirm_llm_usage(args):
+            return 1
 
     # Static analysis (includes semantics + type inference — no need to redo)
     result = analyze_file_static(str(filepath), content, lang)
@@ -757,7 +759,7 @@ def cmd_explain(args: argparse.Namespace) -> int:
                 tracker = CostTracker()
                 llm_result, tracker = explain_file_llm(
                     content, str(filepath), lang,
-                    static_findings=static_findings,
+                    static_findings=result.findings,
                     cost_tracker=tracker,
                 )
                 if llm_result and output_format != "json":
@@ -1128,6 +1130,10 @@ def main() -> None:
                            help="Use LLM for richer explanations (costs money)")
     p_explain.add_argument("--output", choices=["text", "json"], default="text",
                            help="Output format (default: text)")
+    p_explain.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None,
+                           help="LLM backend")
+    p_explain.add_argument("--model", default=None, help="LLM model name")
+    p_explain.add_argument("--base-url", default=None, help="LLM API base URL")
     p_explain.add_argument("--accept-remote", action="store_true",
                            help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_explain.set_defaults(func=cmd_explain)

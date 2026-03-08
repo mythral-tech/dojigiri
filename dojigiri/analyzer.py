@@ -522,9 +522,22 @@ def cost_estimate(
     # Estimate output as 25% of input
     est_output = est_tokens // 4
 
+    # Use tiered pricing when active (Haiku for scan chunks is the bulk of cost)
+    import os as _os
+    from .config import LLM_TIER_MODE, LLM_INPUT_COST_PER_M, LLM_OUTPUT_COST_PER_M
+    tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
+    user_model = _os.environ.get("DOJI_LLM_MODEL")
+    if tier_mode == "auto" and not user_model:
+        # Scan chunks use Haiku pricing (0.80 / 4.0 per M)
+        input_cost_per_m = 0.80
+        output_cost_per_m = 4.0
+    else:
+        input_cost_per_m = LLM_INPUT_COST_PER_M
+        output_cost_per_m = LLM_OUTPUT_COST_PER_M
+
     est_cost = (
-        (est_tokens / 1_000_000) * 3.0  # input
-        + (est_output / 1_000_000) * 15.0  # output
+        (est_tokens / 1_000_000) * input_cost_per_m
+        + (est_output / 1_000_000) * output_cost_per_m
     )
 
     return total_lines, len(files), est_tokens, est_cost
