@@ -773,10 +773,27 @@ def scan_diff(
     file_analyses = []
     skipped = 0
 
+    # Load .doji-ignore patterns for diff scan (matches discovery.py behavior)
+    from .config import load_ignore_patterns
+    import fnmatch as _fnmatch
+
+    ignore_root = git_root
+    ignore_patterns = load_ignore_patterns(ignore_root)
+
     for filepath in changed_files:
         if not filepath.is_file():
             skipped += 1
             continue
+
+        # Respect .doji-ignore in diff mode
+        if ignore_patterns:
+            try:
+                rel = str(filepath.relative_to(git_root))
+            except ValueError:
+                rel = filepath.name
+            if any(_fnmatch.fnmatch(rel, pat) or _fnmatch.fnmatch(filepath.name, pat) for pat in ignore_patterns):
+                skipped += 1
+                continue
 
         lang = detect_language(filepath)
         if not lang:

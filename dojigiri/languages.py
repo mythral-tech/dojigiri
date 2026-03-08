@@ -33,11 +33,20 @@ UNIVERSAL_RULES: list[Rule] = _compile(
     [
         # Secrets & credentials — exclude common placeholder values
         (
-            r"""(?i)(?:api[_-]?key|secret[_-]?key|password|passwd|token|auth[_-]?token)\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|your[_-]?|xxx|TODO|CHANGE|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-]{8,}['"]""",
+            r"""(?i)(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]""",
             Severity.CRITICAL,
             Category.SECURITY,
             "hardcoded-secret",
             "Possible hardcoded secret or API key",
+            "Use environment variables or a secrets manager",
+        ),
+        # Secrets in dict literals: "password": "value" or 'api_key': 'value'
+        (
+            r"""(?i)['"](?:api[_-]?key|secret[_-]?key|password|passwd|token|auth[_-]?token|database[_-]?password|db[_-]?password|aws[_-]?secret[_-]?\w*|client[_-]?secret|private[_-]?key|encryption[_-]?key|signing[_-]?key|\w+[_-]secret[_-]?\w*key|\w+[_-]secret)['"]\s*:\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*.]{8,}['"]""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "hardcoded-secret",
+            "Possible hardcoded secret in dict/config literal",
             "Use environment variables or a secrets manager",
         ),
         (
@@ -77,7 +86,7 @@ UNIVERSAL_RULES: list[Rule] = _compile(
         ),
         # SQL injection patterns (f-strings, %, +, .format)
         (
-            r"""(?i)(?:execute|cursor\.execute|query)\s*\(\s*(?:f['"]|['"].*?%s|['"].*?\+\s*\w+|['"].*?\{)""",
+            r"""(?i)(?:execute(?:many)?|cursor\.execute(?:many)?|query|\.execute)\s*\(\s*(?:f['"]|['"].*?%s|['"].*?\+\s*\w+|['"].*?\{)""",
             Severity.CRITICAL,
             Category.SECURITY,
             "sql-injection",
@@ -86,7 +95,7 @@ UNIVERSAL_RULES: list[Rule] = _compile(
         ),
         # SQL injection via .format() on query strings
         (
-            r"""(?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b[^'"]*['"]\.format\s*\(""",
+            r"""(?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b.*?['"]\.format\s*\(""",
             Severity.CRITICAL,
             Category.SECURITY,
             "sql-injection",
@@ -101,6 +110,33 @@ UNIVERSAL_RULES: list[Rule] = _compile(
             "sql-injection",
             "Possible SQL injection — f-string inside text()",
             "Use text() with :param bindparams instead",
+        ),
+        # SQL injection via + concatenation on SQL keywords
+        (
+            r"""(?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b.*?['"]\s*\+""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "sql-injection",
+            "Possible SQL injection — string concatenation on SQL query",
+            "Use parameterized queries instead of string concatenation",
+        ),
+        # SQL injection via % formatting on SQL keywords
+        (
+            r"""(?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*%s[^'"]*['"]\s*%""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "sql-injection",
+            "Possible SQL injection — % formatting on SQL query",
+            "Use parameterized queries instead of % formatting",
+        ),
+        # Django ORM .raw() with f-string or format — SQL injection
+        (
+            r"""\.raw\s*\(\s*(?:f['"]|['"].*?\.format\s*\(|['"].*?%s)""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "sql-injection",
+            "Django .raw() with string interpolation — SQL injection",
+            "Use .raw() with parameterized query: Model.objects.raw('SELECT ... WHERE id = %s', [user_id])",
         ),
     ]
 )
@@ -180,6 +216,15 @@ PYTHON_RULES: list[Rule] = _compile(
             "subprocess with shell=True is vulnerable to injection",
             "Pass command as a list without shell=True",
         ),
+        # subprocess call audit — flag any subprocess.run/call/Popen for review
+        (
+            r"subprocess\.(?:run|call|check_call|check_output|Popen)\s*\(",
+            Severity.INFO,
+            Category.SECURITY,
+            "subprocess-audit",
+            "subprocess call — verify input is not constructed from untrusted data",
+            "Ensure command arguments are hardcoded or validated, never from raw user input",
+        ),
         # Star imports
         (
             r"^from\s+\S+\s+import\s+\*",
@@ -191,7 +236,7 @@ PYTHON_RULES: list[Rule] = _compile(
         ),
         # assert in production
         (
-            r"^\s*assert\s+",
+            r"(?:^\s*|[;:]\s*)assert\s+",
             Severity.INFO,
             Category.BUG,
             "assert-statement",
@@ -212,12 +257,30 @@ PYTHON_RULES: list[Rule] = _compile(
         ),
         # Unsafe pickle deserialization
         (
-            r"\bpickle\.loads?\s*\(",  # doji:ignore(pickle-unsafe)
+            r"\bpickle\.(?:loads?\s*\(|Unpickler\s*\()",  # doji:ignore(pickle-unsafe)
             Severity.CRITICAL,
             Category.SECURITY,
             "pickle-unsafe",
-            "pickle.load()/loads() can execute arbitrary code during deserialization",
+            "pickle.load()/loads()/Unpickler() can execute arbitrary code during deserialization",
             "Use json, msgpack, or a safe serialization format instead",
+        ),
+        # Pickle alternatives — equally dangerous
+        (
+            r"\b(?:dill|cloudpickle|shelve)\.loads?\s*\(",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "pickle-unsafe",
+            "Pickle-equivalent deserialization — can execute arbitrary code",
+            "Use json, msgpack, or a safe serialization format instead",
+        ),
+        # jsonpickle — JSON wrapper around pickle
+        (
+            r"\bjsonpickle\.(?:decode|loads?)\s*\(",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "pickle-unsafe",
+            "jsonpickle can execute arbitrary code via crafted JSON",
+            "Use json.loads() for safe JSON deserialization",
         ),
         # Unsafe yaml.load — flag any yaml.load( call; detector will suppress if SafeLoader found nearby
         (
@@ -228,9 +291,18 @@ PYTHON_RULES: list[Rule] = _compile(
             "yaml.load() without SafeLoader can execute arbitrary code",
             "Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)",
         ),
-        # Weak hash algorithms
+        # yaml.load_all and yaml.unsafe_load — same risk
         (
-            r"\bhashlib\.(?:md5|sha1)\s*\(",
+            r"\byaml\.(?:load_all|unsafe_load|unsafe_load_all)\s*\(",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "yaml-unsafe",
+            "yaml.load_all()/unsafe_load() can execute arbitrary code",
+            "Use yaml.safe_load_all() instead",
+        ),
+        # Weak hash algorithms (called or passed as reference)
+        (
+            r"""\bhashlib\.(?:md5|sha1)\b|\bhashlib\.new\s*\(\s*['"](?:md5|sha1)['"]""",
             Severity.WARNING,
             Category.SECURITY,
             "weak-hash",
@@ -263,6 +335,330 @@ PYTHON_RULES: list[Rule] = _compile(
             "insecure-tempfile",
             "mktemp/tempnam/tmpnam are vulnerable to race conditions (TOCTOU)",
             "Use tempfile.mkstemp() or tempfile.NamedTemporaryFile() instead",
+        ),
+        # os.exec* family — replaces current process
+        (
+            r"\bos\.exec(?:l|le|lp|lpe|v|ve|vp|vpe)\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "os-exec",
+            "os.exec*() replaces the current process — verify arguments are trusted",
+            "Use subprocess.run() for better control and input validation",
+        ),
+        # os.spawn* family — spawns new process
+        (
+            r"\bos\.spawn(?:l|le|lp|lpe|v|ve|vp|vpe)\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "os-spawn",
+            "os.spawn*() spawns a new process — verify arguments are trusted",
+            "Use subprocess.run() for better control and input validation",
+        ),
+        # os.popen — shell process, injection risk
+        (
+            r"\bos\.popen\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "os-popen",
+            "os.popen() starts a shell process — vulnerable to injection",
+            "Use subprocess.run() with a list of arguments instead",
+        ),
+        # subprocess.getoutput / getstatusoutput — always use shell
+        (
+            r"\bsubprocess\.(?:getoutput|getstatusoutput)\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "subprocess-shell",
+            "subprocess.getoutput()/getstatusoutput() always uses shell — vulnerable to injection",
+            "Use subprocess.run() with a list of arguments instead",
+        ),
+        # os.startfile — opens file with default handler (Windows)
+        (
+            r"\bos\.startfile\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "os-startfile",
+            "os.startfile() opens file with default handler — could launch executables",
+            "Validate file type and path before opening",
+        ),
+        # os.chmod with permissive mask (world-writable/executable)
+        (
+            r"\bos\.chmod\s*\([^)]*,\s*0o?[0-7](?:[1-35-7][0-7]|[0-7][1-35-7])\b",
+            Severity.WARNING,
+            Category.SECURITY,
+            "insecure-file-permissions",
+            "os.chmod() with overly permissive mode — world-writable or world-readable+executable",
+            "Use restrictive permissions (e.g., 0o600 for owner-only read/write)",
+        ),
+        # Jinja2 Environment without autoescape — XSS risk
+        (
+            r"\bEnvironment\s*\(\s*\)|\bEnvironment\s*\([^)]*autoescape\s*=\s*False",
+            Severity.WARNING,
+            Category.SECURITY,
+            "jinja2-autoescape-off",
+            "Jinja2 Environment with autoescape disabled — XSS risk",
+            "Use autoescape=True or select_autoescape() for HTML templates",
+        ),
+        # pyCrypto is unmaintained — use pycryptodome
+        (
+            r"from\s+Crypto(?:\.Cipher)?\s+import\s+",
+            Severity.INFO,
+            Category.SECURITY,
+            "pycrypto-deprecated",
+            "pyCrypto is unmaintained and has known vulnerabilities",
+            "Switch to pycryptodome (same API, maintained fork)",
+        ),
+        # ssl.wrap_socket — deprecated, no cert verification by default
+        (
+            r"\bssl\.wrap_socket\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "ssl-wrap-socket",
+            "ssl.wrap_socket() is deprecated and does not verify certificates by default",
+            "Use ssl.SSLContext.wrap_socket() with proper cert verification",
+        ),
+        # requests with verify=False — disables SSL cert verification
+        (
+            r"(?:requests|httpx)\.(?:get|post|put|delete|patch|head|options|request)\s*\([^)]*verify\s*=\s*False",
+            Severity.WARNING,
+            Category.SECURITY,
+            "requests-no-verify",
+            "requests call with verify=False disables SSL certificate verification",
+            "Remove verify=False to enable certificate verification (default behavior)",
+        ),
+        # Session-level verify=False
+        (
+            r"\.verify\s*=\s*False",
+            Severity.WARNING,
+            Category.SECURITY,
+            "ssl-verify-disabled",
+            "SSL certificate verification disabled — vulnerable to MITM attacks",
+            "Enable certificate verification or use a custom CA bundle",
+        ),
+        # ssl._create_unverified_context() — explicitly skips verification
+        (
+            r"\bssl\._create_unverified_context\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "ssl-verify-disabled",
+            "ssl._create_unverified_context() disables all certificate verification",
+            "Use ssl.create_default_context() for verified connections",
+        ),
+        # ssl.CERT_NONE — disables certificate verification
+        (
+            r"\bssl\.CERT_NONE\b",
+            Severity.WARNING,
+            Category.SECURITY,
+            "ssl-verify-disabled",
+            "ssl.CERT_NONE disables certificate verification — MITM risk",
+            "Use ssl.CERT_REQUIRED for certificate verification",
+        ),
+        # Hardcoded /tmp directory — predictable location, symlink attacks
+        (
+            r"""['"]\/(?:tmp|var\/tmp)\/""",
+            Severity.INFO,
+            Category.SECURITY,
+            "hardcoded-tmp",
+            "Hardcoded /tmp path — predictable location vulnerable to symlink attacks",
+            "Use tempfile.mkdtemp() or tempfile.NamedTemporaryFile() for secure temp files",
+        ),
+        # Password as default function argument
+        (
+            r"""def\s+\w+\s*\([^)]*(?:password|secret|secret_key|api_key|token)\s*(?::\s*\w+\s*)?=\s*['"][^'"]+['"]""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "hardcoded-password-default",
+            "Default secret/password in function signature — visible in source and help()",
+            "Use None as default and require explicit argument or env var",
+        ),
+        # Django DEBUG=True
+        (
+            r"(?:^\s*DEBUG\s*=\s*True\b|\.run\s*\([^)]*debug\s*=\s*True)",
+            Severity.WARNING,
+            Category.SECURITY,
+            "debug-enabled",
+            "DEBUG=True may expose sensitive information in production",
+            "Set DEBUG=False in production and use environment variables",
+        ),
+        # compile() with user input — code compilation
+        (
+            r"\bcompile\s*\([^)]*,\s*['\"]<(?:string|input)>['\"]",
+            Severity.WARNING,
+            Category.SECURITY,
+            "compile-usage",
+            "compile() can compile arbitrary code — verify input is trusted",
+            "Use ast.literal_eval() for safe evaluation of data literals",
+        ),
+        # User-controlled regex — ReDoS risk
+        (
+            r"\bre\.(?:compile|search|match|findall|sub|split)\s*\(\s*(?!r?['\"])\w+",
+            Severity.INFO,
+            Category.SECURITY,
+            "regex-injection",
+            "Regex pattern from variable — potential ReDoS if user-controlled",
+            "Use re.escape() on user input or set a timeout with regex module",
+        ),
+        # http.client.HTTPConnection — unencrypted
+        (
+            r"\bhttp\.client\.HTTPConnection\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "http-connection-cleartext",
+            "HTTPConnection uses unencrypted HTTP",
+            "Use http.client.HTTPSConnection for encrypted connections",
+        ),
+        # Archive extraction without path validation — zip/tar slip
+        (
+            r"\b(?:zipfile\.ZipFile|ZipFile)\s*\([^)]*\).*\.extractall\s*\(|\.extractall\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "archive-slip",
+            "Archive extractall() without path validation — zip/tar slip attack",
+            "Validate member paths before extraction or use extraction filters",
+        ),
+        # tarfile.open + extractall
+        (
+            r"\btarfile\.open\b",
+            Severity.INFO,
+            Category.SECURITY,
+            "tarfile-open",
+            "tarfile.open() — ensure extractall() uses data_filter or validates member paths",
+            "Use tf.extractall(filter='data') (Python 3.12+) or validate each member",
+        ),
+        # Unencrypted protocols — FTP
+        (
+            r"\bftplib\.FTP\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "unencrypted-ftp",
+            "FTP transmits credentials and data in cleartext",
+            "Use ftplib.FTP_TLS or SFTP (paramiko) instead",
+        ),
+        # Unencrypted protocols — Telnet
+        (
+            r"\btelnetlib\.Telnet\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "unencrypted-telnet",
+            "Telnet transmits everything in cleartext — inherently insecure",
+            "Use SSH (paramiko) instead of telnet",
+        ),
+        # Unencrypted protocols — SMTP without TLS
+        (
+            r"\bsmtplib\.SMTP\s*\(",
+            Severity.INFO,
+            Category.SECURITY,
+            "smtp-cleartext",
+            "SMTP connection may transmit credentials in cleartext",
+            "Use smtplib.SMTP_SSL or call starttls() immediately after connecting",
+        ),
+        # webbrowser.open with variable — arbitrary URL scheme
+        (
+            r"\bwebbrowser\.open\s*\(",
+            Severity.INFO,
+            Category.SECURITY,
+            "webbrowser-open",
+            "webbrowser.open() can open arbitrary URL schemes (file://, javascript:)",
+            "Validate the URL scheme against an allowlist before opening",
+        ),
+        # ctypes library loading — arbitrary code execution
+        (
+            r"\bctypes\.(?:cdll|windll|oledll)\.LoadLibrary\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "ctypes-load-library",
+            "Loading shared library via ctypes — arbitrary code execution if path is user-controlled",
+            "Validate library path against allowlist, never accept user input",
+        ),
+        # shutil.rmtree — dangerous with user input
+        (
+            r"\bshutil\.rmtree\s*\(",
+            Severity.INFO,
+            Category.SECURITY,
+            "rmtree-audit",
+            "shutil.rmtree() recursively deletes — verify path is not user-controlled",
+            "Validate path against a safe base directory before deletion",
+        ),
+        # importlib.import_module — dynamic module loading
+        (
+            r"\bimportlib\.import_module\s*\(",
+            Severity.INFO,
+            Category.SECURITY,
+            "dynamic-import",
+            "Dynamic module import — arbitrary code execution if module name is user-controlled",
+            "Validate module name against an allowlist",
+        ),
+        # LD_PRELOAD / PATH / PYTHONPATH manipulation
+        (
+            r"""os\.environ\s*\[\s*['"](?:LD_PRELOAD|LD_LIBRARY_PATH|PATH|PYTHONPATH)['"]\s*\]\s*=""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "env-path-injection",
+            "Modifying LD_PRELOAD/PATH/PYTHONPATH — can enable code injection",
+            "Avoid modifying these environment variables at runtime",
+        ),
+        # sys.path manipulation
+        (
+            r"\bsys\.path\.(?:insert|append)\s*\(",
+            Severity.INFO,
+            Category.SECURITY,
+            "sys-path-modify",
+            "sys.path modification — could enable module hijacking if path is untrusted",
+            "Avoid dynamic sys.path changes with untrusted paths",
+        ),
+        # Django mark_safe — XSS risk if content is user-controlled
+        (
+            r"\bmark_safe\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "django-mark-safe",
+            "mark_safe() bypasses Django's auto-escaping — XSS risk if content is user-controlled",
+            "Use format_html() or escape user content before marking safe",
+        ),
+        # Django QuerySet.extra() — raw SQL injection
+        (
+            r"\.extra\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "django-extra-sql",
+            "QuerySet.extra() uses raw SQL — injection risk if values are user-controlled",
+            "Use Django ORM methods (filter, annotate) instead of extra()",
+        ),
+        # Paramiko AutoAddPolicy — auto-accept unknown host keys
+        (
+            r"\bparamiko\.AutoAddPolicy\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "paramiko-auto-add-policy",
+            "AutoAddPolicy() accepts unknown SSH host keys — vulnerable to MITM attacks",
+            "Use RejectPolicy or manually verify host keys",
+        ),
+        # Paramiko exec_command — command injection if command is user-controlled
+        (
+            r"\.exec_command\s*\(",
+            Severity.INFO,
+            Category.SECURITY,
+            "paramiko-exec-command",
+            "SSH exec_command — verify command is not constructed from user input",
+            "Validate and sanitize command arguments, use allowlist of commands",
+        ),
+        # Weak RSA key size (< 2048 bits)
+        (
+            r"key_size\s*=\s*(?:512|768|1024)\b",
+            Severity.WARNING,
+            Category.SECURITY,
+            "weak-rsa-key",
+            "RSA key size < 2048 bits is considered breakable",
+            "Use key_size=2048 or higher (NIST recommends >= 2048)",
+        ),
+        # TripleDES — deprecated cipher
+        (
+            r"\bTripleDES\b|\b3DES\b|\bDES3\b",
+            Severity.WARNING,
+            Category.SECURITY,
+            "insecure-crypto",
+            "TripleDES/3DES is deprecated — slow and approaching theoretical breaks",
+            "Use AES-256 or ChaCha20 instead",
         ),
     ]
 )
@@ -435,6 +831,15 @@ SECURITY_RULES: list[Rule] = _compile(
             "Possibly logging sensitive data (password, secret, token)",
             "Redact sensitive values before logging",
         ),
+        # logging.config.listen — accepts arbitrary logging config over network
+        (
+            r"""logging\.config\.listen\s*\(""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "logging-config-listen",
+            "logging.config.listen() accepts config over network — can load arbitrary handler classes (RCE)",
+            "Avoid network-based logging config; use file-based or environment-based config instead",
+        ),
         # Insecure crypto: DES
         (
             r"""\bDES\b\.new\(|\bDES\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+DES\b""",
@@ -453,6 +858,33 @@ SECURITY_RULES: list[Rule] = _compile(
             "ECB mode does not hide data patterns — insecure for most uses",
             "Use CBC, GCM, or CTR mode instead",
         ),
+        # Insecure crypto: Blowfish — 64-bit block cipher, birthday attacks feasible
+        (
+            r"""\bBlowfish\b\.new\(|\bBlowfish\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+Blowfish\b""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "insecure-crypto",
+            "Blowfish has 64-bit blocks — vulnerable to birthday attacks at scale",
+            "Use AES-256 or ChaCha20 instead",
+        ),
+        # Insecure crypto: RC4/ARC4 — broken stream cipher
+        (
+            r"""\bARC4\b\.new\(|\bARC4\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+ARC4\b|\bRC4\b""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "insecure-crypto",
+            "RC4/ARC4 is a broken stream cipher with known biases",
+            "Use AES-GCM or ChaCha20-Poly1305 instead",
+        ),
+        # requests without timeout — can hang indefinitely
+        (
+            r"""requests\.(?:get|post|put|delete|patch|head|request)\s*\([^)]*\)\s*(?!.*timeout)""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "requests-no-timeout",
+            "HTTP request without timeout — can hang indefinitely",
+            "Always pass timeout= to requests calls",
+        ),
         # SSRF — URL constructed from user input passed to HTTP clients
         (
             r"""(?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|fetch\s*\(|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()""",
@@ -461,6 +893,15 @@ SECURITY_RULES: list[Rule] = _compile(
             "ssrf-risk",
             "HTTP request — verify URL is not constructed from user input (SSRF risk)",
             "Validate URLs against an allowlist of domains/schemes before making requests",
+        ),
+        # URL open scheme audit — urlopen/urlretrieve accept file:// and custom schemes
+        (
+            r"""(?:urllib\.request\.urlopen\s*\(|urllib\.request\.urlretrieve\s*\(|urlopen\s*\()""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "url-scheme-audit",
+            "urlopen permits file:/ and custom schemes — verify URL scheme is restricted to https",
+            "Validate URL scheme against allowlist (e.g., only https://) before opening",
         ),
         # SSTI — template rendering from string (not file)
         (
@@ -472,8 +913,9 @@ SECURITY_RULES: list[Rule] = _compile(
             "Use pre-compiled templates from files, never from user-controlled strings",
         ),
         # XXE — XML parsing without disabling external entities
+        # Catches both fully-qualified (xml.etree.ElementTree.parse) and aliased (ET.parse) forms
         (
-            r"""(?:xml\.etree\.ElementTree\.parse\s*\(|xml\.dom\.minidom\.parse\s*\(|xml\.sax\.parse\s*\(|lxml\.etree\.parse\s*\(|DocumentBuilderFactory|XMLReader|SAXParser|DOMParser\s*\(\))""",  # doji:ignore(xxe-risk)
+            r"""(?:xml\.etree\.ElementTree\.(?:parse|fromstring|iterparse)\s*\(|xml\.dom\.minidom\.(?:parse|parseString)\s*\(|xml\.sax\.(?:parse|parseString)\s*\(|lxml\.etree\.(?:parse|fromstring|iterparse)\s*\(|DocumentBuilderFactory|XMLReader|SAXParser|DOMParser\s*\(\)|ET\.(?:parse|fromstring|iterparse)\s*\(|etree\.(?:parse|fromstring|iterparse)\s*\(|minidom\.(?:parse|parseString)\s*\(|sax\.(?:parse|parseString)\s*\()""",  # doji:ignore(xxe-risk)
             Severity.WARNING,
             Category.SECURITY,
             "xxe-risk",
@@ -497,6 +939,24 @@ SECURITY_RULES: list[Rule] = _compile(
             "hardcoded-ip",
             "Hardcoded IP address — may break in different environments",
             "Use configuration files or environment variables for IP addresses",
+        ),
+        # Binding to all interfaces
+        (
+            r"""(?:\.bind|\.run|start_server|HTTPServer|TCPServer|UDPServer|SimpleXMLRPCServer|ThreadingTCPServer|ForkingTCPServer|BaseManager|SyncManager)\s*\([^)]*['"]0\.0\.0\.0['"]|=\s*['"]0\.0\.0\.0['"]""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "bind-all-interfaces",
+            "Binding to 0.0.0.0 exposes the service to all network interfaces",
+            "Bind to specific interface (127.0.0.1 for local-only, or configure via env var)",
+        ),
+        # TOCTOU: check-then-use file race conditions
+        (
+            r"\bos\.path\.(?:exists|isfile|isdir)\s*\(\s*\w+\s*\)",
+            Severity.INFO,
+            Category.SECURITY,
+            "toctou-file-check",
+            "File existence check before use — potential TOCTOU race condition",
+            "Use try/except around the file operation instead of checking first",
         ),
     ]
 )

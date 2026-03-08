@@ -899,15 +899,17 @@ def _fix_unused_variable(line: str, finding: Finding, content: str, ctx: FixCont
     )
 
 
-def _fix_os_system(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
+def _fix_os_system(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | list[Fix] | None:
     """Replace os.system() with subprocess.run()."""  # doji:ignore(os-system)
+    if not finding.file.endswith(".py"):
+        return None
     m = re.search(r"os\.system\((.+)\)", line)  # doji:ignore(os-system)
     if not m:
         return None
     cmd_arg = m.group(1).strip()
     indent = re.match(r"^(\s*)", line).group(1)
     new_line = f"{indent}subprocess.run(shlex.split({cmd_arg}))\n"
-    return Fix(
+    os_fix = Fix(
         file=finding.file,
         line=finding.line,
         rule=finding.rule,
@@ -916,6 +918,62 @@ def _fix_os_system(line: str, finding: Finding, content: str, ctx: FixContext | 
         explanation="Replaced os.system() with subprocess.run() (safer, returns exit info)",  # doji:ignore(os-system)
         source=FixSource.DETERMINISTIC,
     )
+
+    # Ensure 'import subprocess' and 'import shlex' exist -- without them, the
+    # fixed code raises NameError at runtime and silently breaks functionality.
+    import_fixes = []
+    content_lines = content.splitlines(keepends=True)
+    last_import_idx = -1
+    for i, cl in enumerate(content_lines):
+        if re.match(r"^(import |from \S+ import )", cl):
+            last_import_idx = i
+
+    for mod in ("subprocess", "shlex"):
+        if not re.search(rf"^\s*import\s+{mod}\b", content, re.MULTILINE) and not re.search(
+            rf"^\s*from\s+{mod}\s+import\b", content, re.MULTILINE
+        ):
+            if last_import_idx >= 0:
+                anchor_line = content_lines[last_import_idx]
+                import_fix = Fix(
+                    file=finding.file,
+                    line=last_import_idx + 1,
+                    rule=finding.rule,
+                    original_code=anchor_line,
+                    fixed_code=anchor_line.rstrip("\n") + f"\nimport {mod}\n",
+                    explanation=f"Added 'import {mod}' required by subprocess.run(shlex.split(...))",
+                    source=FixSource.DETERMINISTIC,
+                )
+            else:
+                insert_idx = 0
+                if content_lines:
+                    first_stripped = content_lines[0].strip()
+                    for tq in ('"""', "'''"):
+                        if first_stripped.startswith(tq):
+                            if first_stripped.count(tq) >= 2:
+                                insert_idx = 1
+                            else:
+                                for j in range(1, len(content_lines)):
+                                    if tq in content_lines[j]:
+                                        insert_idx = j + 1
+                                        break
+                            break
+                target_line = content_lines[insert_idx] if insert_idx < len(content_lines) else "\n"
+                import_fix = Fix(
+                    file=finding.file,
+                    line=insert_idx + 1,
+                    rule=finding.rule,
+                    original_code=target_line,
+                    fixed_code=f"import {mod}\n" + target_line,
+                    explanation=f"Added 'import {mod}' required by subprocess.run(shlex.split(...))",
+                    source=FixSource.DETERMINISTIC,
+                )
+            import_fixes.append(import_fix)
+            # Bump last_import_idx so the next import goes after this one
+            last_import_idx = max(last_import_idx, 0)
+
+    if import_fixes:
+        return import_fixes + [os_fix]
+    return os_fix
 
 
 def _fix_eval_usage(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | list[Fix] | None:

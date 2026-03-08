@@ -11,7 +11,7 @@ from dojigiri.types import Severity, Category, Source, Finding
 def python_security_dir(temp_dir):
     """Create a temp dir with Python files containing security issues."""
     (temp_dir / "secrets.py").write_text(
-        'API_KEY = "sk_live_abc123defgh456789"\n'
+        'API_KEY = "doji_fake_abc123defgh456789"\n'
         'password = "P@ssw0rd_Not_Placeholder"\n'
         'data = eval(user_input)\n'
         'import pickle\n'

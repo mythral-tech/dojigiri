@@ -6,10 +6,18 @@ dist/
 build/
 *.egg
 
-# Environment
+# Environment & Secrets
 .env
+.env.*
+!.env.example
 .venv/
 venv/
+*.pem
+*.key
+*.p12
+*.pfx
+*.secret
+.credentials*
 
 # IDE
 .vscode/

@@ -216,7 +216,15 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules=No
             # For other languages: any /* is a comment
             block_start_match = False
             if language == "python":
-                block_start_match = stripped.startswith(block_open)
+                # Only treat leading triple-quote as docstring open if the
+                # line is purely a docstring line.  A closing triple-quote
+                # at line start (e.g. '""")  # comment') is NOT an opener —
+                # it ends a multiline string from a previous line.
+                if stripped.startswith(block_open):
+                    after_open = stripped[len(block_open):]
+                    # If the very next char is ) , ] or whitespace-then-), it's a close
+                    if not after_open or after_open[0] not in ")],;":
+                        block_start_match = True
             else:
                 block_start_match = block_open in stripped
 
@@ -232,7 +240,10 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules=No
                 # For Python ''' - same logic
                 alt_start_match = False
                 if language == "python":
-                    alt_start_match = stripped.startswith(alt_block_open)
+                    if stripped.startswith(alt_block_open):
+                        after_open = stripped[len(alt_block_open):]
+                        if not after_open or after_open[0] not in ")],;":
+                            alt_start_match = True
                 else:
                     alt_start_match = alt_block_open in stripped
 
@@ -379,6 +390,12 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
     _check_global_usage(tree, filepath, findings)
     _check_mutable_defaults(tree, filepath, findings)
     _check_shadowed_builtin_params(tree, filepath, findings)
+    _check_aliased_dangerous_calls(tree, filepath, findings)
+    _check_multiline_shell_true(tree, filepath, findings)
+    _check_getattr_dangerous(tree, filepath, findings)
+    _check_async_shell(tree, filepath, findings)
+    _check_sql_fstring(tree, filepath, findings)
+    _check_hardcoded_secret_defaults(tree, filepath, findings)
 
     return findings
 
@@ -488,7 +505,7 @@ def _check_functions(tree: ast.AST, filepath: str, findings: list[Finding]):
 
 
 def _check_exception_handling(tree: ast.AST, filepath: str, findings: list[Finding]):
-    """Check for swallowed exceptions (except: pass)."""
+    """Check for swallowed exceptions (except: pass/continue)."""
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler):
             if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
@@ -502,6 +519,19 @@ def _check_exception_handling(tree: ast.AST, filepath: str, findings: list[Findi
                         rule="exception-swallowed",
                         message="Exception caught and silently ignored (except: pass)",
                         suggestion="Log the exception or handle it explicitly",
+                    )
+                )
+            elif len(node.body) == 1 and isinstance(node.body[0], ast.Continue):
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=node.lineno,
+                        severity=Severity.WARNING,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="exception-swallowed-continue",
+                        message="Exception caught and silently continued (except: continue)",
+                        suggestion="Log the exception before continuing, or handle it explicitly",
                     )
                 )
 
@@ -665,6 +695,370 @@ def _check_shadowed_builtin_params(tree: ast.AST, filepath: str, findings: list[
                         suggestion=f"Rename parameter to avoid shadowing builtin '{arg.arg}'",
                     )
                 )
+
+
+# ── Import-alias-aware dangerous call detection ─────────────────────────
+# Maps canonical module.function to (rule, severity, category, message, suggestion).
+# When code does `import pickle as pkl`, we resolve pkl.loads → pickle.loads.
+_DANGEROUS_CALLS: dict[str, tuple[str, Severity, Category, str, str]] = {
+    "os.system": ("os-system", Severity.WARNING, Category.SECURITY,
+                  "os.system() is vulnerable to shell injection",
+                  "Use subprocess.run() with a list of arguments"),
+    "os.popen": ("os-popen", Severity.WARNING, Category.SECURITY,
+                 "os.popen() starts a shell process — vulnerable to injection",
+                 "Use subprocess.run() with a list of arguments instead"),
+    "pickle.loads": ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
+                     "pickle.loads() can execute arbitrary code during deserialization",
+                     "Use json, msgpack, or a safe serialization format instead"),
+    "pickle.load": ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
+                    "pickle.load() can execute arbitrary code during deserialization",
+                    "Use json, msgpack, or a safe serialization format instead"),
+    "yaml.load": ("yaml-unsafe", Severity.CRITICAL, Category.SECURITY,
+                  "yaml.load() without SafeLoader can execute arbitrary code",
+                  "Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)"),
+    "marshal.loads": ("unsafe-deserialization", Severity.CRITICAL, Category.SECURITY,
+                      "marshal.loads() can execute arbitrary code during deserialization",
+                      "Use json or msgpack for untrusted data"),
+    "marshal.load": ("unsafe-deserialization", Severity.CRITICAL, Category.SECURITY,
+                     "marshal.load() can execute arbitrary code during deserialization",
+                     "Use json or msgpack for untrusted data"),
+    "shelve.open": ("unsafe-deserialization", Severity.CRITICAL, Category.SECURITY,
+                    "shelve.open() is pickle-backed — can execute arbitrary code",
+                    "Use json or msgpack for untrusted data"),
+    "hashlib.md5": ("weak-hash", Severity.WARNING, Category.SECURITY,
+                    "MD5 is a cryptographically weak hash algorithm",
+                    "Use hashlib.sha256() or stronger for security-sensitive hashing"),
+    "hashlib.sha1": ("weak-hash", Severity.WARNING, Category.SECURITY,
+                     "SHA1 is a cryptographically weak hash algorithm",
+                     "Use hashlib.sha256() or stronger for security-sensitive hashing"),
+    "random.choice": ("weak-random", Severity.INFO, Category.SECURITY,
+                      "random module is not cryptographically secure",
+                      "Use secrets module for security-sensitive random values"),
+    "random.randint": ("weak-random", Severity.INFO, Category.SECURITY,
+                       "random module is not cryptographically secure",
+                       "Use secrets module for security-sensitive random values"),
+    "random.random": ("weak-random", Severity.INFO, Category.SECURITY,
+                      "random module is not cryptographically secure",
+                      "Use secrets module for security-sensitive random values"),
+    "random.uniform": ("weak-random", Severity.INFO, Category.SECURITY,
+                       "random module is not cryptographically secure",
+                       "Use secrets module for security-sensitive random values"),
+    "random.randrange": ("weak-random", Severity.INFO, Category.SECURITY,
+                         "random module is not cryptographically secure",
+                         "Use secrets module for security-sensitive random values"),
+    "random.shuffle": ("weak-random", Severity.INFO, Category.SECURITY,
+                       "random module is not cryptographically secure",
+                       "Use secrets module for security-sensitive random values"),
+    "random.sample": ("weak-random", Severity.INFO, Category.SECURITY,
+                      "random module is not cryptographically secure",
+                      "Use secrets module for security-sensitive random values"),
+    "tempfile.mktemp": ("insecure-tempfile", Severity.WARNING, Category.SECURITY,
+                        "mktemp is vulnerable to race conditions (TOCTOU)",
+                        "Use tempfile.mkstemp() or tempfile.NamedTemporaryFile()"),
+    # XML parsers — XXE risk through aliases
+    "xml.etree.ElementTree.parse": ("xxe-risk", Severity.WARNING, Category.SECURITY,
+                                     "XML parsing — ensure external entities are disabled (XXE)",
+                                     "Use defusedxml or disable DTDs/external entities"),
+    "xml.etree.ElementTree.fromstring": ("xxe-risk", Severity.WARNING, Category.SECURITY,
+                                          "XML parsing — ensure external entities are disabled (XXE)",
+                                          "Use defusedxml or disable DTDs/external entities"),
+    "xml.etree.ElementTree.iterparse": ("xxe-risk", Severity.WARNING, Category.SECURITY,
+                                         "XML parsing — ensure external entities are disabled (XXE)",
+                                         "Use defusedxml or disable DTDs/external entities"),
+    "xml.dom.minidom.parse": ("xxe-risk", Severity.WARNING, Category.SECURITY,
+                               "XML parsing — ensure external entities are disabled (XXE)",
+                               "Use defusedxml or disable DTDs/external entities"),
+    "xml.dom.minidom.parseString": ("xxe-risk", Severity.WARNING, Category.SECURITY,
+                                     "XML parsing — ensure external entities are disabled (XXE)",
+                                     "Use defusedxml or disable DTDs/external entities"),
+    "xml.sax.parse": ("xxe-risk", Severity.WARNING, Category.SECURITY,
+                       "XML parsing — ensure external entities are disabled (XXE)",
+                       "Use defusedxml or disable DTDs/external entities"),
+    "xml.sax.parseString": ("xxe-risk", Severity.WARNING, Category.SECURITY,
+                             "XML parsing — ensure external entities are disabled (XXE)",
+                             "Use defusedxml or disable DTDs/external entities"),
+}
+
+
+def _check_aliased_dangerous_calls(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Detect dangerous function calls through import aliases.
+
+    Builds a map of alias → canonical module name from import statements,
+    then walks all Call nodes to check if any resolve to a known dangerous call.
+    Only fires for calls using non-canonical names (aliases), since the regex
+    engine already catches canonical names like pickle.loads().
+    """
+    # Build alias → canonical module map
+    alias_map: dict[str, str] = {}  # e.g. {"pkl": "pickle", "sp": "subprocess"}
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.asname and alias.asname != alias.name:
+                    # import pickle as pkl → pkl → pickle
+                    alias_map[alias.asname] = alias.name
+        elif isinstance(node, ast.ImportFrom):
+            if node.module:
+                for alias in node.names:
+                    if alias.asname and alias.asname != alias.name:
+                        # from xml.dom import minidom as mdom → mdom → xml.dom.minidom
+                        alias_map[alias.asname] = f"{node.module}.{alias.name}"
+
+    if not alias_map:
+        return  # No aliases, regex covers everything
+
+    # Walk call nodes looking for aliased dangerous calls
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+
+        func = node.func
+
+        # Case 1: alias.method() — e.g. pkl.loads()
+        if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+            alias = func.value.id
+            attr = func.attr
+            if alias in alias_map:
+                canonical = f"{alias_map[alias]}.{attr}"
+                if canonical in _DANGEROUS_CALLS:
+                    rule, sev, cat, msg, sug = _DANGEROUS_CALLS[canonical]
+                    findings.append(Finding(
+                        file=filepath, line=node.lineno,
+                        severity=sev, category=cat, source=Source.AST,
+                        rule=rule,
+                        message=f"{msg} (via alias '{alias}')",
+                        suggestion=sug,
+                    ))
+
+        # Case 2: bare alias() — e.g. xml_parse() from "from X import parse as xml_parse"
+        elif isinstance(func, ast.Name):
+            name = func.id
+            if name in alias_map:
+                canonical = alias_map[name]
+                if canonical in _DANGEROUS_CALLS:
+                    rule, sev, cat, msg, sug = _DANGEROUS_CALLS[canonical]
+                    findings.append(Finding(
+                        file=filepath, line=node.lineno,
+                        severity=sev, category=cat, source=Source.AST,
+                        rule=rule,
+                        message=f"{msg} (via alias '{name}')",
+                        suggestion=sug,
+                    ))
+
+
+# ── Multiline shell=True detection (AST) ────────────────────────────────
+# subprocess.run/Popen/call/check_output with shell=True on different lines.
+_SUBPROCESS_FUNCS = frozenset({"run", "Popen", "call", "check_call", "check_output"})
+
+
+def _check_multiline_shell_true(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Detect subprocess calls with shell=True across multiple lines.
+
+    The regex engine catches shell=True on the same line as the function call.
+    This AST check catches it when shell=True is a keyword arg on a different line.
+    """
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+
+        # Match subprocess.run(..., shell=True, ...)
+        func = node.func
+        if not (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)):
+            continue
+        if func.value.id != "subprocess" or func.attr not in _SUBPROCESS_FUNCS:
+            continue
+
+        # Check for shell=True keyword
+        for kw in node.keywords:
+            if kw.arg == "shell" and isinstance(kw.value, ast.Constant) and kw.value.value is True:
+                findings.append(Finding(
+                    file=filepath, line=node.lineno,
+                    severity=Severity.WARNING, category=Category.SECURITY,
+                    source=Source.AST, rule="shell-true",
+                    message=f"subprocess.{func.attr}() with shell=True (multiline)",
+                    suggestion="Pass command as a list without shell=True",
+                ))
+                break
+
+
+# ── getattr-based dangerous call detection (AST) ────────────────────────
+# Catches getattr(os, "system"), getattr(pickle, "loads"), etc.
+_GETATTR_DANGEROUS: dict[tuple[str, str], tuple[str, Severity, Category, str, str]] = {
+    ("os", "system"): ("os-system", Severity.WARNING, Category.SECURITY,
+                       "os.system() via getattr — shell injection risk",
+                       "Use subprocess.run() with a list of arguments"),
+    ("os", "popen"): ("os-popen", Severity.WARNING, Category.SECURITY,
+                      "os.popen() via getattr — shell injection risk",
+                      "Use subprocess.run() with a list of arguments"),
+    ("pickle", "loads"): ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
+                          "pickle.loads() via getattr — arbitrary code execution",
+                          "Use json or msgpack instead"),
+    ("pickle", "load"): ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
+                         "pickle.load() via getattr — arbitrary code execution",
+                         "Use json or msgpack instead"),
+    ("subprocess", "Popen"): ("subprocess-audit", Severity.INFO, Category.SECURITY,
+                              "subprocess.Popen via getattr — verify arguments",
+                              "Ensure command is not user-controlled"),
+}
+
+
+def _check_getattr_dangerous(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Detect getattr(module, 'dangerous_func') patterns."""
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (isinstance(func, ast.Name) and func.id == "getattr"):
+            continue
+        if len(node.args) < 2:
+            continue
+
+        # getattr(module_name, "func_name")
+        mod_arg = node.args[0]
+        attr_arg = node.args[1]
+
+        if isinstance(mod_arg, ast.Name) and isinstance(attr_arg, ast.Constant) and isinstance(attr_arg.value, str):
+            key = (mod_arg.id, attr_arg.value)
+            if key in _GETATTR_DANGEROUS:
+                rule, sev, cat, msg, sug = _GETATTR_DANGEROUS[key]
+                findings.append(Finding(
+                    file=filepath, line=node.lineno,
+                    severity=sev, category=cat, source=Source.AST,
+                    rule=rule,
+                    message=msg,
+                    suggestion=sug,
+                ))
+
+
+# ── asyncio.create_subprocess_shell detection (AST) ─────────────────────
+
+def _check_async_shell(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Detect asyncio.create_subprocess_shell — equivalent to shell=True."""
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        # asyncio.create_subprocess_shell(...)
+        if isinstance(func, ast.Attribute) and func.attr == "create_subprocess_shell":
+            if isinstance(func.value, ast.Name) and func.value.id == "asyncio":
+                findings.append(Finding(
+                    file=filepath, line=node.lineno,
+                    severity=Severity.WARNING, category=Category.SECURITY,
+                    source=Source.AST, rule="shell-true",
+                    message="asyncio.create_subprocess_shell() runs command through shell",
+                    suggestion="Use asyncio.create_subprocess_exec() with argument list instead",
+                ))
+        # Also catch: await asyncio.create_subprocess_shell in Await nodes
+        elif isinstance(func, ast.Attribute) and func.attr == "create_subprocess_shell":
+            # Covers any obj.create_subprocess_shell
+            findings.append(Finding(
+                file=filepath, line=node.lineno,
+                severity=Severity.WARNING, category=Category.SECURITY,
+                source=Source.AST, rule="shell-true",
+                message="create_subprocess_shell() runs command through shell",
+                suggestion="Use create_subprocess_exec() with argument list instead",
+            ))
+
+
+# ── SQL injection via f-string in execute/executemany (AST) ──────────────
+# Catches multiline cases where execute(\n  f"SQL...\n) spans lines.
+_SQL_EXECUTE_METHODS = frozenset({"execute", "executemany", "executescript", "raw"})
+_SQL_KEYWORDS_RE = re.compile(r"(?i)\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b")
+
+
+def _check_sql_fstring(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Detect SQL injection via f-strings passed to execute/executemany.
+
+    Catches the multiline pattern:
+        conn.execute(
+            f"INSERT INTO {table} ..."
+        )
+    where the f-string is on a different line than execute(.
+    """
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        # Match *.execute(...) / *.executemany(...)
+        if not (isinstance(func, ast.Attribute) and func.attr in _SQL_EXECUTE_METHODS):
+            continue
+        if not node.args:
+            continue
+
+        first_arg = node.args[0]
+        # Check if first arg is a JoinedStr (f-string)
+        if isinstance(first_arg, ast.JoinedStr):
+            # Check if the f-string contains SQL keywords
+            static_parts = []
+            has_interpolation = False
+            for val in first_arg.values:
+                if isinstance(val, ast.Constant) and isinstance(val.value, str):
+                    static_parts.append(val.value)
+                elif isinstance(val, ast.FormattedValue):
+                    has_interpolation = True
+            if has_interpolation and _SQL_KEYWORDS_RE.search("".join(static_parts)):
+                findings.append(Finding(
+                    file=filepath, line=first_arg.lineno,
+                    severity=Severity.CRITICAL, category=Category.SECURITY,
+                    source=Source.AST, rule="sql-injection",
+                    message="SQL injection — f-string with interpolation in execute()",
+                    suggestion="Use parameterized queries with ? placeholders",
+                ))
+
+
+# ── Hardcoded secret defaults in function params (AST) ────────────────
+# Catches multiline function signatures where regex can't span lines.
+_SECRET_PARAM_NAMES = re.compile(
+    r"(?i)^(?:password|passwd|secret|secret_key|api_key|token|auth_token|jwt_secret|"
+    r"signing_key|encryption_key|private_key|client_secret)$"
+)
+_SECRET_PLACEHOLDER_RE = re.compile(
+    r"(?i)^(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|"
+    r"TODO|INSERT|REPLACE|None|)$"
+)
+
+
+def _check_hardcoded_secret_defaults(tree: ast.AST, filepath: str, findings: list[Finding]):
+    """Detect hardcoded secrets as default values in function parameters and class fields."""
+    for node in ast.walk(tree):
+        # Case 1: Function/method parameters with secret defaults
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            args = node.args
+            defaults = args.defaults
+            num_args = len(args.args)
+            num_defaults = len(defaults)
+            for i, default in enumerate(defaults):
+                if not isinstance(default, ast.Constant) or not isinstance(default.value, str):
+                    continue
+                val = default.value
+                if len(val) < 6 or _SECRET_PLACEHOLDER_RE.match(val):
+                    continue
+                arg_index = num_args - num_defaults + i
+                arg_name = args.args[arg_index].arg
+                if _SECRET_PARAM_NAMES.match(arg_name):
+                    findings.append(Finding(
+                        file=filepath, line=default.lineno,
+                        severity=Severity.WARNING, category=Category.SECURITY,
+                        source=Source.AST, rule="hardcoded-password-default",
+                        message=f"Hardcoded secret default for parameter '{arg_name}' (multiline signature)",
+                        suggestion="Use None as default and require explicit argument or env var",
+                    ))
+
+        # Case 2: Annotated assignments (dataclass fields, class vars): api_key: str = "secret"
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            if node.value and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+                val = node.value.value
+                if len(val) < 6 or _SECRET_PLACEHOLDER_RE.match(val):
+                    continue
+                field_name = node.target.id
+                if _SECRET_PARAM_NAMES.match(field_name):
+                    findings.append(Finding(
+                        file=filepath, line=node.value.lineno,
+                        severity=Severity.WARNING, category=Category.SECURITY,
+                        source=Source.AST, rule="hardcoded-password-default",
+                        message=f"Hardcoded secret in annotated field '{field_name}'",
+                        suggestion="Use environment variables or a secrets manager",
+                    ))
 
 
 def _count_branches(node: ast.AST) -> int:

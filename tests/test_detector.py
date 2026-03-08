@@ -511,7 +511,7 @@ def test_regression_hardcoded_secret_placeholder_excluded():
 
 def test_regression_hardcoded_secret_real_value_detected():
     """Regression: Real-looking secrets SHOULD trigger hardcoded-secret."""
-    code = 'api_key = "sk_live_abc123def456ghi789"\n'
+    code = 'api_key = "doji_fake_abc123def456ghi789"\n'
     findings = run_regex_checks(code, "test.py", "python")
     secret_findings = [f for f in findings if f.rule == "hardcoded-secret"]
     assert len(secret_findings) == 1
