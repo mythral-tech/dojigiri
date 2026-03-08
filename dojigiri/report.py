@@ -150,6 +150,17 @@ def print_scan_summary(report: ScanReport, duration: float | None = None,
 
     if report.llm_cost_usd > 0:
         print(f"\n  LLM cost:  ${report.llm_cost_usd:.4f}")
+        if report.llm_models_used:
+            # Show short model names (strip date suffixes for readability)
+            short_names = []
+            for m in report.llm_models_used:
+                # "claude-haiku-4-20250514" -> "claude-haiku-4"
+                parts = m.rsplit("-", 1)
+                if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) == 8:
+                    short_names.append(parts[0])
+                else:
+                    short_names.append(m)
+            print(f"  Models:    {', '.join(short_names)}")
         print(f"\n  {_c('dim', 'Note: Findings marked [llm] are AI-generated and may contain')}")
         print(f"  {_c('dim', 'false positives or miss real issues. Not a substitute for')}")
         print(f"  {_c('dim', 'professional security review. See: doji privacy')}")

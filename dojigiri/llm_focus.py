@@ -16,6 +16,17 @@ from typing import Optional
 
 from .types import Finding
 
+# Import sanitizer from llm module (lazy to avoid circular import)
+_sanitize_for_prompt = None
+
+
+def _get_sanitizer():
+    global _sanitize_for_prompt
+    if _sanitize_for_prompt is None:
+        from .llm import _sanitize_for_prompt as _sfp
+        _sanitize_for_prompt = _sfp
+    return _sanitize_for_prompt
+
 
 # ─── Micro-queries (v1.0.0) ─────────────────────────────────────────
 
@@ -87,8 +98,9 @@ def build_micro_queries(
         end = min(len(lines), max_line + 5)
         snippet = "\n".join(f"{start + i + 1:4d} | {lines[start + i]}" for i in range(end - start))
 
+        sanitize = _get_sanitizer()
         rules = list(set(f.rule for f in group))
-        messages = "; ".join(set(f.message[:80] for f in group))
+        messages = "; ".join(set(sanitize(f.message, max_length=80) for f in group))
 
         # Build specific question
         question = f"Static analysis flagged: {messages}. "

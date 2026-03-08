@@ -368,6 +368,7 @@ def scan_deep(
         files_skipped=skipped,
         file_analyses=analyses,
         llm_cost_usd=cost_tracker.total_cost,
+        llm_models_used=cost_tracker.models_used,
     )
 
     save_report(report_obj)

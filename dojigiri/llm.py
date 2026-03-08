@@ -104,6 +104,8 @@ class CostTracker:
         self._accumulated_cost = 0.0  # exact dollar cost from per-call pricing
         self.max_cost = max_cost
         self._lock = threading.Lock()
+        # Track which models were used (for transparency reporting)
+        self._models_used: set[str] = set()
         # Fallback pricing when no backend passed to add()
         self._default_input_cost = backend.cost_per_million_input if backend else LLM_INPUT_COST_PER_M
         self._default_output_cost = backend.cost_per_million_output if backend else LLM_OUTPUT_COST_PER_M
@@ -111,9 +113,12 @@ class CostTracker:
     def add(self, input_tokens: int, output_tokens: int,
             cache_read_tokens: int = 0, cache_create_tokens: int = 0,
             backend: Optional[LLMBackend] = None) -> None:
-        from .llm_backend import _CACHE_READ_DISCOUNT, _CACHE_CREATE_PREMIUM
+        from .llm_backend import _CACHE_READ_DISCOUNT, _CACHE_CREATE_PREMIUM, AnthropicBackend
         input_rate = backend.cost_per_million_input if backend else self._default_input_cost
         output_rate = backend.cost_per_million_output if backend else self._default_output_cost
+        # Track model names for transparency
+        if backend and isinstance(backend, AnthropicBackend):
+            self._models_used.add(backend._model)
 
         uncached = input_tokens - cache_read_tokens - cache_create_tokens
         call_cost = (
@@ -158,6 +163,12 @@ class CostTracker:
     def total_cost(self) -> float:
         with self._lock:
             return self._accumulated_cost
+
+    @property
+    def models_used(self) -> list[str]:
+        """Return sorted list of model names used in this session."""
+        with self._lock:
+            return sorted(self._models_used)
 
 
 def _get_backend(tier: str = TIER_DEEP) -> LLMBackend:
@@ -999,16 +1010,34 @@ def optimize_file(
 
 
 def estimate_cost(total_chars: int) -> float:
-    """Estimate cost for analyzing given amount of code."""
+    """Estimate cost for analyzing given amount of code.
+
+    When tiered mode is active, uses Haiku pricing for scan chunks
+    (which is the bulk of the cost). Falls back to Sonnet pricing
+    if tiering is off or the user explicitly set a model.
+    """
+    import os as _os
+    from .config import LLM_TIER_MODE
+
     input_tokens = total_chars // 4  # rough estimate
     # Add system prompt overhead (~500 tokens per call)
     input_tokens += 500
     # Assume output is ~25% of input
     output_tokens = input_tokens // 4
 
+    tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
+    user_model = _os.environ.get("DOJI_LLM_MODEL")
+    if tier_mode == "auto" and not user_model:
+        # Scan chunks use Haiku pricing (0.80 / 4.0 per M)
+        input_cost = 0.80
+        output_cost = 4.0
+    else:
+        input_cost = LLM_INPUT_COST_PER_M
+        output_cost = LLM_OUTPUT_COST_PER_M
+
     return (
-        (input_tokens / 1_000_000) * LLM_INPUT_COST_PER_M
-        + (output_tokens / 1_000_000) * LLM_OUTPUT_COST_PER_M
+        (input_tokens / 1_000_000) * input_cost
+        + (output_tokens / 1_000_000) * output_cost
     )
 
 
@@ -1275,6 +1304,8 @@ _DANGER_CHECKS: list[tuple[str, list[re.Pattern]]] = [
         re.compile(r'\bglobals\s*\(\s*\)\s*\['),
         re.compile(r'\bbuiltins\b.*\b(?:eval|exec|compile|__import__)\b'),
         re.compile(r'\b__builtins__\b.*\b(?:eval|exec|compile|__import__)\b'),
+        re.compile(r'\bimportlib\s*\.\s*import_module\s*\('),
+        re.compile(r'\bpickle\s*\.\s*loads?\s*\('),
     ]),
     ("network call", [
         re.compile(r'\burllib\s*\.\s*request\s*\.\s*urlopen\s*\('),
@@ -1287,7 +1318,7 @@ _DANGER_CHECKS: list[tuple[str, list[re.Pattern]]] = [
 
 # Import of dangerous modules that weren't in the original
 _DANGEROUS_IMPORT_RE = re.compile(
-    r'(?:^|\n)\s*(?:import|from)\s+(?:os|subprocess|shlex|socket|http|urllib|requests|httpx)\b'
+    r'(?:^|\n)\s*(?:import|from)\s+(?:os|subprocess|shlex|socket|http|urllib|requests|httpx|importlib|pickle|ctypes)\b'
 )
 
 

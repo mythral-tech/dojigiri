@@ -138,6 +138,7 @@ class ScanReport:
     file_analyses: list[FileAnalysis] = field(default_factory=list)
     cross_file_findings: list["CrossFileFinding"] = field(default_factory=list)
     llm_cost_usd: float = 0.0
+    llm_models_used: list[str] = field(default_factory=list)
     timestamp: str = ""
 
     @property
@@ -170,6 +171,7 @@ class ScanReport:
             "warnings": self.warnings,
             "info": self.info,
             "llm_cost_usd": self.llm_cost_usd,
+            "llm_models_used": self.llm_models_used,
             "timestamp": self.timestamp,
             "files": [
                 {
