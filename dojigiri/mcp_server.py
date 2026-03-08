@@ -241,7 +241,7 @@ def doji_scan_file(path: str) -> str:
         return str(e)
 
     try:
-        findings = analyze_file_static(filepath, content, lang)
+        findings = analyze_file_static(filepath, content, lang).findings
     except Exception as e:  # MCP tool boundary: return user-friendly error
         return f"Error analyzing file: {e}"
 
@@ -304,7 +304,7 @@ def doji_fix(
             continue
 
         findings = analyze_file_static(str(filepath), content, file_lang,
-                                       custom_rules=custom_rules)
+                                       custom_rules=custom_rules).findings
         findings = _filter_findings_by_severity(findings, sev)
         if not findings:
             continue
@@ -359,30 +359,14 @@ def doji_explain(path: str) -> str:
     except ValueError as e:
         return str(e)
 
-    findings = analyze_file_static(filepath, content, lang)
-
-    # Semantic extraction enhances explanations but isn't required.
-    # Fails gracefully if tree-sitter isn't installed.
-    semantics = None
-    type_map = None
-    try:
-        from .semantic.core import extract_semantics
-        from .semantic.lang_config import get_config
-        from .semantic.types import infer_types
-
-        semantics = extract_semantics(content, filepath, lang)
-        if semantics:
-            config = get_config(lang)
-            if config:
-                type_map = infer_types(semantics, content.encode("utf-8"), config)
-    except ImportError as e:
-        logger.debug("Failed to import tree-sitter components: %s", e)
+    # analyze_file_static already runs semantics + type inference internally
+    result = analyze_file_static(filepath, content, lang)
 
     explanation = explain_file(
         content, filepath, lang,
-        semantics=semantics,
-        findings=findings,
-        type_map=type_map,
+        semantics=result.semantics,
+        findings=result.findings,
+        type_map=result.type_map,
     )
 
     return format_explanation(explanation)
@@ -412,6 +396,9 @@ def doji_analyze_project(
         return str(e)
     if not root.is_dir():
         return f"Error: '{path}' is not a directory"
+
+    # Clamp depth to prevent excessive graph traversal on large projects
+    depth = max(1, min(depth, 10))
 
     try:
         analysis = analyze_project(

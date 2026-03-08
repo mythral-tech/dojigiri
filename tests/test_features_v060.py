@@ -170,7 +170,7 @@ class TestCustomRulesCoexistence:
         })
         # Code with both a builtin issue (eval) and custom marker
         code = "x = eval('1+1')  # MARKER\n"
-        findings = analyze_file_static("test.py", code, "python", custom_rules=custom_rules)
+        findings = analyze_file_static("test.py", code, "python", custom_rules=custom_rules).findings
         rules_found = {f.rule for f in findings}
         assert "custom-marker" in rules_found
         assert "eval-usage" in rules_found
@@ -267,7 +267,7 @@ class TestFixVerification:
         filepath.write_text("import unused_mod\nx = 1\n", encoding="utf-8")
 
         findings = analyze_file_static(str(filepath),
-                                       filepath.read_text(encoding="utf-8"), "python")
+                                       filepath.read_text(encoding="utf-8"), "python").findings
 
         report = fixer_fix_file(
             str(filepath), filepath.read_text(encoding="utf-8"), "python",
@@ -521,7 +521,7 @@ message = "NOCOMMIT marker found"
         findings = analyze_file_static(
             str(py_file), py_file.read_text(encoding="utf-8"), "python",
             custom_rules=custom_rules,
-        )
+        ).findings
         nocommit = [f for f in findings if f.rule == "nocommit-marker"]
         assert len(nocommit) == 1
         assert nocommit[0].severity == Severity.CRITICAL

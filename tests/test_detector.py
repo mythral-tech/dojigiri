@@ -350,8 +350,7 @@ def outer():
 
 def test_analyze_file_static_python(sample_python_code):
     """Test full static analysis on Python code."""
-    findings = analyze_file_static("test.py", sample_python_code, "python")
-    
+    findings = analyze_file_static("test.py", sample_python_code, "python").findings
     # Should have both regex and AST findings
     sources = {f.source for f in findings}
     assert Source.STATIC in sources
@@ -372,8 +371,7 @@ def test_analyze_file_static_python(sample_python_code):
 
 def test_analyze_file_static_javascript(sample_javascript_code):
     """Test full static analysis on JavaScript code."""
-    findings = analyze_file_static("test.js", sample_javascript_code, "javascript")
-
+    findings = analyze_file_static("test.js", sample_javascript_code, "javascript").findings
     # JavaScript has regex + tree-sitter AST checks (including semantic v0.8.0)
     assert all(f.source in (Source.STATIC, Source.AST) for f in findings)
 
@@ -390,8 +388,7 @@ x = eval("1")
 x = eval("2")
 x = eval("3")
 '''
-    findings = analyze_file_static("test.py", code, "python")
-    
+    findings = analyze_file_static("test.py", code, "python").findings
     # All eval calls are on different lines, so all should be reported
     eval_findings = [f for f in findings if f.rule == "eval-usage"]
     assert len(eval_findings) == 3
@@ -400,7 +397,7 @@ x = eval("3")
     code2 = '''
 x = eval("1"); y = eval("2")  # Both on same line
 '''
-    findings2 = analyze_file_static("test.py", code2, "python")
+    findings2 = analyze_file_static("test.py", code2, "python").findings
     eval_findings2 = [f for f in findings2 if f.rule == "eval-usage"]
     # Should only report once per line+rule combo
     assert len(eval_findings2) <= 2
@@ -420,8 +417,7 @@ subprocess.run(cmd, shell=True)
 # Line 10: another critical
 password = "hardcoded_secret_12345"
 '''
-    findings = analyze_file_static("test.py", code, "python")
-    
+    findings = analyze_file_static("test.py", code, "python").findings
     # Critical should come first, then warnings, then info
     assert findings[0].severity == Severity.CRITICAL
     assert findings[-1].severity in (Severity.INFO, Severity.WARNING)
@@ -434,8 +430,7 @@ password = "hardcoded_secret_12345"
 
 def test_analyze_file_static_go(sample_go_code):
     """Test static analysis on Go code."""
-    findings = analyze_file_static("test.go", sample_go_code, "go")
-    
+    findings = analyze_file_static("test.go", sample_go_code, "go").findings
     rules = {f.rule for f in findings}
     assert "unchecked-error" in rules
     assert "fmt-print" in rules
@@ -443,8 +438,7 @@ def test_analyze_file_static_go(sample_go_code):
 
 def test_analyze_file_static_rust(sample_rust_code):
     """Test static analysis on Rust code."""
-    findings = analyze_file_static("test.rs", sample_rust_code, "rust")
-    
+    findings = analyze_file_static("test.rs", sample_rust_code, "rust").findings
     rules = {f.rule for f in findings}
     assert "unwrap" in rules
     assert "expect-panic" in rules
@@ -453,7 +447,7 @@ def test_analyze_file_static_rust(sample_rust_code):
 
 def test_analyze_file_static_empty_file():
     """Test static analysis on empty file."""
-    findings = analyze_file_static("empty.py", "", "python")
+    findings = analyze_file_static("empty.py", "", "python").findings
     assert len(findings) == 0
 
 
@@ -468,8 +462,7 @@ def clean_function(arg: Optional[int] = None) -> bool:
         return False
     return arg > 0
 '''
-    findings = analyze_file_static("clean.py", code, "python")
-
+    findings = analyze_file_static("clean.py", code, "python").findings
     # Might have some minor findings, but should not have critical issues
     critical = [f for f in findings if f.severity == Severity.CRITICAL]
     assert len(critical) == 0
@@ -673,7 +666,7 @@ def test_inline_suppress_no_comment_does_not_suppress():
 def test_inline_suppress_ast_finding():
     """doji:ignore should suppress AST-based findings via analyze_file_static."""
     code = 'import unused_module  # doji:ignore(unused-import)\nimport os\nos.path.exists("f")\n'
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused = [f for f in findings if f.rule == "unused-import"]
     # unused_module is suppressed, os is used — no unused-import findings
     assert len(unused) == 0
@@ -691,7 +684,7 @@ def test_inline_suppress_does_not_affect_other_lines():
 def test_inline_suppress_excluded_from_report_count():
     """Suppressed findings should not appear in analyze_file_static output."""
     code = 'x = eval("1")  # doji:ignore(eval-usage)\ny = eval("2")\n'
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     eval_findings = [f for f in findings if f.rule == "eval-usage"]
     assert len(eval_findings) == 1
     assert eval_findings[0].line == 2
@@ -758,7 +751,7 @@ def test_parse_line_suppression_unknown_language():
 def test_inline_suppress_not_in_block_comment():
     """doji:ignore inside a block comment/docstring should NOT suppress later code."""
     code = '"""\n# doji:ignore(eval-usage)\n"""\nx = eval("code")\n'
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     eval_findings = [f for f in findings if f.rule == "eval-usage"]
     assert len(eval_findings) == 1
     assert eval_findings[0].line == 4

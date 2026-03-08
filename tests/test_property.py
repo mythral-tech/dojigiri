@@ -505,7 +505,7 @@ def test_detect_fix_reduces_findings(rule, strategy_fn, data):
     filepath = "test_prop.py"
 
     # Detect
-    findings_before = analyze_file_static(filepath, source, "python")
+    findings_before = analyze_file_static(filepath, source, "python").findings
     rule_findings = [f for f in findings_before if f.rule == rule]
     rule_count_before = len(rule_findings)
 
@@ -553,7 +553,7 @@ def test_detect_fix_reduces_findings(rule, strategy_fn, data):
             pass
 
     # Re-detect
-    findings_after = analyze_file_static(filepath, fixed_source, "python")
+    findings_after = analyze_file_static(filepath, fixed_source, "python").findings
     rule_count_after = sum(1 for f in findings_after if f.rule == rule)
 
     assert rule_count_after <= rule_count_before, (

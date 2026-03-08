@@ -333,6 +333,16 @@ class FixReport:
         return d
 
 
+# ─── Analysis result ─────────────────────────────────────────────────
+
+@dataclass
+class StaticAnalysisResult:
+    """Return type of analyze_file_static — always carries findings + optional semantics."""
+    findings: list[Finding]
+    semantics: Optional[object] = None   # semantic.core.FileSemantics
+    type_map: Optional[object] = None    # semantic.types.FileTypeMap
+
+
 # ─── Type aliases ────────────────────────────────────────────────────
 Findings: TypeAlias = list[Finding]
 SourceBytes: TypeAlias = bytes

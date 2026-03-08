@@ -319,7 +319,7 @@ def analyze_project(
         print(f"  [{i+1}/{len(topo_order)}] {rel_path} ({lang})", flush=True)
 
         # Static analysis
-        static_findings = analyze_file_static(abs_path, content, lang)
+        static_findings = analyze_file_static(abs_path, content, lang).findings
 
         # Add any cross-file static findings for this file
         for cf in cross_file_static_findings:

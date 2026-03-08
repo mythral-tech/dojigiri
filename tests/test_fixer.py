@@ -341,7 +341,7 @@ class TestFixFile:
 
         from dojigiri.detector import analyze_file_static
         content = fp.read_text(encoding="utf-8")
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
 
         report = fix_file(
             str(fp), content, "python", findings,
@@ -357,7 +357,7 @@ class TestFixFile:
 
         from dojigiri.detector import analyze_file_static
         content = fp.read_text(encoding="utf-8")
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
 
         # Only fix bare-except, not unused-import
         report = fix_file(
@@ -380,7 +380,7 @@ class TestFixFile:
 
         from dojigiri.detector import analyze_file_static
         content = fp.read_text(encoding="utf-8")
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
 
         report = fix_file(str(fp), content, "python", findings, dry_run=True)
         data = report.to_dict()
@@ -758,7 +758,7 @@ class TestNewFixerIntegration:
         fp.write_text('import yaml\ndata = yaml.load(content)\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
         from dojigiri.detector import analyze_file_static
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
         yaml_findings = [f for f in findings if f.rule == "yaml-unsafe"]
         assert len(yaml_findings) >= 1
         report = fix_file(str(fp), content, "python", yaml_findings, dry_run=True)
@@ -773,7 +773,7 @@ class TestNewFixerIntegration:
         fp.write_text('import hashlib\nh = hashlib.md5(data)\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
         from dojigiri.detector import analyze_file_static
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
         hash_findings = [f for f in findings if f.rule == "weak-hash"]
         assert len(hash_findings) >= 1
         report = fix_file(str(fp), content, "python", hash_findings, dry_run=True)
@@ -785,7 +785,7 @@ class TestNewFixerIntegration:
         fp.write_text('def foo():\n    return 1\n    print("dead")\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
         from dojigiri.detector import analyze_file_static
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
         dead_findings = [f for f in findings if f.rule == "unreachable-code"]
         assert len(dead_findings) >= 1
         report = fix_file(str(fp), content, "python", dead_findings, dry_run=True)
@@ -797,7 +797,7 @@ class TestNewFixerIntegration:
         fp.write_text('try:\n    risky()\nexcept Exception:\n    pass\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
         from dojigiri.detector import analyze_file_static
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
         swallowed = [f for f in findings if f.rule == "exception-swallowed"]
         assert len(swallowed) >= 1
         report = fix_file(str(fp), content, "python", swallowed, dry_run=True)
@@ -809,7 +809,7 @@ class TestNewFixerIntegration:
         fp.write_text('def foo(items=[]):\n    items.append(1)\n    return items\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
         from dojigiri.detector import analyze_file_static
-        findings = analyze_file_static(str(fp), content, "python")
+        findings = analyze_file_static(str(fp), content, "python").findings
         mutable = [f for f in findings if f.rule == "mutable-default"]
         assert len(mutable) >= 1
         report = fix_file(str(fp), content, "python", mutable, dry_run=True)

@@ -675,11 +675,13 @@ def _check_function(node: ast.FunctionDef, filepath: str, findings: list[Finding
 
 
 def analyze_file_static(filepath: str, content: str, language: str,
-                        custom_rules=None, return_semantics: bool = False):
+                        custom_rules=None) -> "StaticAnalysisResult":
     """Run all static checks (regex + tree-sitter AST + Python AST fallback + semantic).
 
-    If return_semantics=True, returns (findings, semantics, type_map) tuple instead of just findings.
+    Always returns a StaticAnalysisResult with findings, semantics, and type_map.
+    Callers that only need findings can use result.findings.
     """
+    from .types import StaticAnalysisResult
     import time as _time
     _scan_start = _time.perf_counter()
 
@@ -801,6 +803,4 @@ def analyze_file_static(filepath: str, content: str, language: str,
     except Exception as e:
         logger.debug("Failed to record metrics: %s", e)
 
-    if return_semantics:
-        return unique, semantics, _file_type_map
-    return unique
+    return StaticAnalysisResult(findings=unique, semantics=semantics, type_map=_file_type_map)

@@ -360,7 +360,7 @@ def _run_llm_subcommand(
         return 1
 
     output_format = getattr(args, "output", "text")
-    static_findings = analyze_file_static(str(filepath), content, lang)
+    static_findings = analyze_file_static(str(filepath), content, lang).findings
 
     context_files = None
     context_arg = getattr(args, "context", None)
@@ -524,9 +524,8 @@ def cmd_fix(args: argparse.Namespace) -> int:
             continue
 
         # Get findings via static analysis (with semantics for context-aware fixing)
-        result = analyze_file_static(str(filepath), content, file_lang,
-                                     return_semantics=True)
-        findings, file_semantics, file_type_map = result
+        result = analyze_file_static(str(filepath), content, file_lang)
+        findings, file_semantics, file_type_map = result.findings, result.semantics, result.type_map
 
         # Apply severity filter
         if min_severity:
@@ -742,30 +741,16 @@ def cmd_explain(args: argparse.Namespace) -> int:
     if deep and not _confirm_llm_usage(args):
         return 1
 
-    # Static analysis for findings context
-    static_findings = analyze_file_static(str(filepath), content, lang)
-
-    # Extract semantics
-    from .semantic.core import extract_semantics
-    semantics = extract_semantics(content, str(filepath), lang)
-
-    # Type inference
-    type_map = None
-    if semantics:
-        from .semantic.lang_config import get_config
-        config = get_config(lang)
-        if config:
-            from .semantic.types import infer_types
-            source_bytes = content.encode("utf-8")
-            type_map = infer_types(semantics, source_bytes, config)
+    # Static analysis (includes semantics + type inference — no need to redo)
+    result = analyze_file_static(str(filepath), content, lang)
 
     # Generate explanation
     from .semantic.explain import explain_file
     explanation = explain_file(
         content, str(filepath), lang,
-        semantics=semantics,
-        findings=static_findings,
-        type_map=type_map,
+        semantics=result.semantics,
+        findings=result.findings,
+        type_map=result.type_map,
     )
 
     if output_format == "json":

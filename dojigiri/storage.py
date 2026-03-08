@@ -12,6 +12,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 
@@ -35,14 +36,30 @@ def ensure_dirs() -> None:
         os.chmod(REPORTS_DIR, 0o700)
     else:
         # Windows: restrict via icacls (best-effort)
+        # SECURITY: Validate USERNAME to prevent ACL poisoning.
+        # A malicious USERNAME env var (e.g. "Everyone") would grant
+        # unintended principals full control over scan report directories.
         try:
             username = os.environ.get("USERNAME", "")
-            if username:
-                for d in (STORAGE_DIR, REPORTS_DIR):
-                    subprocess.run(
-                        ["icacls", str(d), "/inheritance:r",
-                         "/grant:r", f"{username}:(OI)(CI)F"],
-                        capture_output=True, timeout=5,
+            if username and re.match(r'^[a-zA-Z0-9._\- ]+$', username) and len(username) <= 104:
+                # Reject well-known group names that would widen access
+                _DANGEROUS_PRINCIPALS = {
+                    "everyone", "users", "authenticated users", "guests",
+                    "domain users", "network", "interactive", "system",
+                    "local service", "network service", "anonymous logon",
+                }
+                if username.lower().strip() not in _DANGEROUS_PRINCIPALS:
+                    for d in (STORAGE_DIR, REPORTS_DIR):
+                        subprocess.run(
+                            ["icacls", str(d), "/inheritance:r",
+                             "/grant:r", f"{username}:(OI)(CI)F"],
+                            capture_output=True, timeout=5,
+                        )
+                else:
+                    logger.warning(
+                        "Refusing to grant ACL to dangerous principal '%s' — "
+                        "scan reports directory left with inherited permissions",
+                        username,
                     )
         except (OSError, subprocess.TimeoutExpired) as e:
             logger.debug("Failed to set directory permissions: %s", e)
@@ -122,21 +139,33 @@ def load_latest_report() -> Optional[dict]:
 
 def load_baseline_report(baseline: str) -> Optional[dict]:
     """Load a baseline report for comparison.
-    
+
     Args:
-        baseline: Either "latest" or a path to a specific report file
-    
+        baseline: Either "latest" or a path to a specific report file.
+                  Path must be under REPORTS_DIR or cwd to prevent
+                  reading arbitrary files.
+
     Returns:
         Baseline report dict or None if not found/invalid
     """
     if baseline == "latest":
         return load_latest_report()
-    
-    # Try to load from specific path
-    baseline_path = Path(baseline)
+
+    # Validate: baseline path must resolve under REPORTS_DIR or cwd.
+    # Without this, --baseline could read any JSON file on disk.
+    baseline_path = Path(baseline).resolve()
+    cwd = Path.cwd().resolve()
+    reports_dir = REPORTS_DIR.resolve()
+    if not (baseline_path.is_relative_to(reports_dir) or baseline_path.is_relative_to(cwd)):
+        logger.warning(
+            "Rejecting baseline path '%s' — must be under reports dir (%s) or cwd (%s)",
+            baseline, reports_dir, cwd,
+        )
+        return None
+
     if not baseline_path.exists():
         return None
-    
+
     try:
         return json.loads(baseline_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):

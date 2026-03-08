@@ -23,7 +23,7 @@ class UserModel:
 def func():
     unused_local = 42
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     # The class attributes (name, age, items) should NOT be flagged
     flagged_names = {f.message for f in unused_var}
@@ -40,7 +40,7 @@ def func():
     unused = 99
     return used
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     flagged_names = [f.message for f in unused_var]
     assert any("unused" in msg for msg in flagged_names)
@@ -300,7 +300,7 @@ def process(data, config):
         result.append(item)
     return result
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     uninit = [f for f in findings if f.rule == "possibly-uninitialized"]
     flagged_names = [f.message for f in uninit]
     assert not any("data" in msg for msg in flagged_names)
@@ -316,7 +316,7 @@ def func():
         print(item)
     total = item
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     uninit = [f for f in findings if f.rule == "possibly-uninitialized"]
     flagged_names = [f.message for f in uninit]
     # 'item' is a loop variable, should not be flagged
@@ -332,7 +332,7 @@ def func():
     session = app.open_session(request)
     return session
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     leaks = [f for f in findings if f.rule == "resource-leak"]
     assert not any("session" in f.message for f in leaks)
 
@@ -345,7 +345,7 @@ def func():
     data = f.read()
     return data
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     leaks = [f for f in findings if f.rule == "resource-leak"]
     # Should flag 'f' as unclosed resource
     assert any("'f'" in f.message for f in leaks)
@@ -394,7 +394,7 @@ def parse():
     msg = email.message.Message()
     return msg
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused_import = [f for f in findings if f.rule == "unused-import"]
     flagged_names = [f.message for f in unused_import]
     assert not any("email.message" in msg for msg in flagged_names)
@@ -408,7 +408,7 @@ import os.path
 
 x = 42
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused_import = [f for f in findings if f.rule == "unused-import"]
     assert any("os.path" in f.message or "'os'" in f.message for f in unused_import)
 
@@ -426,7 +426,7 @@ class Foo:
         if self.data is not None:
             return self.data.strip()
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     null_deref = [f for f in findings if f.rule == "null-dereference"]
     assert not any("data" in f.message for f in null_deref)
 
@@ -443,7 +443,7 @@ class Foo:
             raise RuntimeError("no connection")
         return self.conn.execute("SELECT 1")
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     null_deref = [f for f in findings if f.rule == "null-dereference"]
     assert not any("conn" in f.message for f in null_deref)
 
@@ -463,7 +463,7 @@ def process(data):
 '''
     # This should NOT suppress the null-dereference on x.strip()
     # because the if-block sets x to a value, not raise/return
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     # We just verify the guard doesn't apply — the finding may or may not
     # appear depending on type inference, so just verify no crash
     assert isinstance(findings, list)
@@ -477,7 +477,7 @@ def process(x):
         raise ValueError("x required")
     return x.strip()
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     null_deref = [f for f in findings if f.rule == "null-dereference"]
     assert not any("'x'" in f.message for f in null_deref)
 
@@ -494,7 +494,7 @@ T = TypeVar('T')
 def identity(x: T) -> T:
     return x
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     assert not any("'T'" in f.message for f in unused_var)
 
@@ -506,7 +506,7 @@ from collections import namedtuple
 
 Point = namedtuple('Point', ['x', 'y'])
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     assert not any("'Point'" in f.message for f in unused_var)
 
@@ -518,6 +518,6 @@ def func():
     result = compute()
     return 42
 '''
-    findings = analyze_file_static("test.py", code, "python")
+    findings = analyze_file_static("test.py", code, "python").findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     assert any("result" in f.message for f in unused_var)

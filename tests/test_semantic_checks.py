@@ -452,7 +452,7 @@ class TestIntegration:
             "def f():\n    return 1\n    print('dead')\n\n"
             "result = os.getcwd()\n"
         )
-        findings = analyze_file_static("test.py", code, "python")
+        findings = analyze_file_static("test.py", code, "python").findings
         rules = {f.rule for f in findings}
         assert "unused-import" in rules
         assert "unreachable-code" in rules
@@ -462,6 +462,6 @@ class TestIntegration:
         from dojigiri.detector import analyze_file_static
 
         code = "function f() {\n    return 1;\n    console.log('dead');\n}\n"
-        findings = analyze_file_static("test.js", code, "javascript")
+        findings = analyze_file_static("test.js", code, "javascript").findings
         rules = {f.rule for f in findings}
         assert "unreachable-code" in rules

@@ -194,7 +194,7 @@ def verify_fixes(filepath: str, language: str,
                 "new_findings": [], "error": f"Could not re-read {filepath}"}
 
     post_findings = analyze_file_static(filepath, new_content, language,
-                                        custom_rules=custom_rules)
+                                        custom_rules=custom_rules).findings
 
     if not allowed_cascades:
         allowed_cascades = set()
