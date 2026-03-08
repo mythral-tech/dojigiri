@@ -630,11 +630,17 @@ def _analyze_via_micro_queries(
         len(queries), total_est, filepath,
     )
 
+    # Adaptive output budget: scale max_tokens to query count.
+    # Each finding is ~80-120 tokens of JSON. Budget for 3 findings per query
+    # plus overhead, capped at LLM_MAX_TOKENS. Reduces latency and prevents
+    # the model from hallucinating extra findings to fill a large output buffer.
+    adaptive_max = min(LLM_MAX_TOKENS, max(512, len(queries) * 400))
+
     response = _api_call_with_retry(
         backend,
         system=_MICRO_QUERY_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_msg}],
-        max_tokens=LLM_MAX_TOKENS,
+        max_tokens=adaptive_max,
         temperature=LLM_TEMPERATURE,
     )
 
@@ -816,11 +822,19 @@ def analyze_chunk(
     if chunk_static:
         user_msg += "\n\n" + _format_static_findings_for_llm(chunk_static)
 
+    # Adaptive output budget for full-chunk path:
+    # - Fishing (0 static findings): most chunks are clean, cap at 1024
+    # - Has findings: scale by count, min 1024 to allow confirmation + new finds
+    if not chunk_static:
+        adaptive_scan_max = 1024
+    else:
+        adaptive_scan_max = min(LLM_MAX_TOKENS, max(1024, len(chunk_static) * 350))
+
     response = _api_call_with_retry(
         backend,
         system=_build_scan_system_prompt(chunk.language),
         messages=[{"role": "user", "content": user_msg}],
-        max_tokens=LLM_MAX_TOKENS,
+        max_tokens=adaptive_scan_max,
         temperature=LLM_TEMPERATURE,
     )
 
@@ -842,6 +856,7 @@ def analyze_chunk(
             chunk.filepath, chunk.start_line, chunk.end_line,
         )
         sonnet = _get_backend(tier=TIER_DEEP)
+        # Escalation gets full budget — Sonnet is the quality backstop
         response = _api_call_with_retry(
             sonnet,
             system=_build_scan_system_prompt(chunk.language),
@@ -1076,38 +1091,6 @@ def optimize_file(
     return _analyze_file_chunked(content, filepath, language, system_prompt, extra_context, cost_tracker)
 
 
-def estimate_cost(total_chars: int) -> float:
-    """Estimate cost for analyzing given amount of code.
-
-    When tiered mode is active, uses Haiku pricing for scan chunks
-    (which is the bulk of the cost). Falls back to Sonnet pricing
-    if tiering is off or the user explicitly set a model.
-    """
-    import os as _os
-    from .config import LLM_TIER_MODE
-
-    input_tokens = total_chars // 4  # rough estimate
-    # Add system prompt overhead (~500 tokens per call)
-    input_tokens += 500
-    # Assume output is ~25% of input
-    output_tokens = input_tokens // 4
-
-    tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
-    user_model = _os.environ.get("DOJI_LLM_MODEL")
-    if tier_mode == "auto" and not user_model:
-        # Scan chunks use Haiku pricing (0.80 / 4.0 per M)
-        input_cost = 0.80
-        output_cost = 4.0
-    else:
-        input_cost = LLM_INPUT_COST_PER_M
-        output_cost = LLM_OUTPUT_COST_PER_M
-
-    return (
-        (input_tokens / 1_000_000) * input_cost
-        + (output_tokens / 1_000_000) * output_cost
-    )
-
-
 # ─── Cross-file analysis prompts ─────────────────────────────────────
 
 ANALYZE_SYSTEM_PROMPT = """\
@@ -1223,7 +1206,7 @@ def analyze_file_with_context(
     if context_files:
         parts.append("\n--- Context files ---")
         for ctx_path, ctx_content in context_files.items():
-            parts.append(f"\nFile: {ctx_path}\n<CONTEXT_FILE>\n```\n{ctx_content}\n```\n</CONTEXT_FILE>")
+            parts.append(f"\nFile: {ctx_path}\n<CONTEXT_FILE>\n```\n{_sanitize_code(ctx_content)}\n```\n</CONTEXT_FILE>")
 
     if graph_summary:
         parts.append(f"\n--- Dependency graph ---\n{graph_summary}")
@@ -1366,13 +1349,30 @@ _DANGER_CHECKS: list[tuple[str, list[re.Pattern]]] = [
         re.compile(r'\bsubprocess\s*\.\s*check_output\s*\('),
         re.compile(r'\bsubprocess\s*\.\s*check_call\s*\('),
     ]),
+    ("process replacement", [
+        re.compile(r'\bos\s*\.\s*exec[lv]p?e?\s*\('),
+        re.compile(r'\bos\s*\.\s*spawn[lv]p?e?\s*\('),
+        re.compile(r'\bos\s*\.\s*posix_spawn\s*\('),
+    ]),
+    ("file write/delete", [
+        re.compile(r'\bopen\s*\([^)]*["\'][waxWAX][+bta]*["\']'),
+        re.compile(r'\.write_text\s*\('),
+        re.compile(r'\.write_bytes\s*\('),
+        re.compile(r'\bos\s*\.\s*(?:remove|unlink|rmdir|rename)\s*\('),
+        re.compile(r'\bshutil\s*\.\s*(?:rmtree|move|copy2?)\s*\('),
+        re.compile(r'\bPath\s*\([^)]*\)\s*\.\s*(?:unlink|rmdir|rename)\s*\('),
+        re.compile(r'\.unlink\s*\('),
+    ]),
     ("indirect execution", [
         re.compile(r'\bgetattr\s*\(.+["\'](?:system|popen|exec|eval|compile)["\']'),
         re.compile(r'\bglobals\s*\(\s*\)\s*\['),
+        re.compile(r'\bvars\s*\(\s*\)\s*\['),
         re.compile(r'\bbuiltins\b.*\b(?:eval|exec|compile|__import__)\b'),
         re.compile(r'\b__builtins__\b.*\b(?:eval|exec|compile|__import__)\b'),
         re.compile(r'\bimportlib\s*\.\s*import_module\s*\('),
         re.compile(r'\bpickle\s*\.\s*loads?\s*\('),
+        re.compile(r'\bctypes\s*\.\s*(?:CDLL|cdll|windll|oledll)\b'),
+        re.compile(r'\bcode\s*\.\s*(?:interact|InteractiveConsole)\s*\('),
     ]),
     ("network call", [
         re.compile(r'\burllib\s*\.\s*request\s*\.\s*urlopen\s*\('),
@@ -1385,7 +1385,7 @@ _DANGER_CHECKS: list[tuple[str, list[re.Pattern]]] = [
 
 # Import of dangerous modules that weren't in the original
 _DANGEROUS_IMPORT_RE = re.compile(
-    r'(?:^|\n)\s*(?:import|from)\s+(?:os|subprocess|shlex|socket|http|urllib|requests|httpx|importlib|pickle|ctypes)\b'
+    r'(?:^|\n)\s*(?:import|from)\s+(?:os|subprocess|shlex|socket|http|urllib|requests|httpx|importlib|pickle|ctypes|shutil|code|webbrowser)\b'
 )
 
 

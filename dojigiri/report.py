@@ -351,15 +351,15 @@ def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est
     print(f"  {_c('bold', f'Est. cost:           ${est_cost:.4f}')}")
     # Show actual model used for pricing (tiered mode uses Haiku for scan chunks)
     import os as _os
-    from .config import LLM_TIER_MODE
+    from .config import LLM_TIER_MODE, LLM_SCAN_MODEL, LLM_DEEP_MODEL
     _tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
     _user_model = _os.environ.get("DOJI_LLM_MODEL")
     if _tier_mode == "auto" and not _user_model:
-        print(f"\n  Model: claude-haiku-4 (scan) + claude-sonnet-4 (deep)")
+        print(f"\n  Model: {LLM_SCAN_MODEL} (scan) + {LLM_DEEP_MODEL} (deep)")
     elif _user_model:
         print(f"\n  Model: {_user_model}")
     else:
-        print("\n  Model: claude-sonnet-4")
+        print(f"\n  Model: {LLM_DEEP_MODEL}")
     print("  (Actual cost may vary based on findings density and cache hits)")
     print()
 

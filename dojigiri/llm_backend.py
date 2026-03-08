@@ -334,6 +334,39 @@ def get_backend(config: Optional[dict] = None) -> LLMBackend:
         )
 
 
+def get_tier_pricing(tier: str = TIER_SCAN) -> tuple[float, float]:
+    """Get (input, output) cost per million tokens for the given tier.
+
+    Respects tier_mode and user model overrides — same resolution logic
+    as get_tiered_backend() but returns pricing without constructing a client.
+    Use this for cost estimation to avoid hardcoding model prices.
+    """
+    import os as _os
+    from .config import LLM_TIER_MODE, LLM_SCAN_MODEL, LLM_DEEP_MODEL, LLM_INPUT_COST_PER_M, LLM_OUTPUT_COST_PER_M
+
+    tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
+    user_model = _os.environ.get("DOJI_LLM_MODEL")
+    backend_type = _os.environ.get("DOJI_LLM_BACKEND", "anthropic").lower()
+
+    # Non-Anthropic backends or user-specified model: use config defaults
+    if backend_type != "anthropic" or tier_mode == "off" or user_model:
+        if user_model:
+            # Look up user's explicit model in pricing table
+            for prefix, pricing in _ANTHROPIC_PRICING.items():
+                if prefix in user_model:
+                    return pricing
+        return (LLM_INPUT_COST_PER_M, LLM_OUTPUT_COST_PER_M)
+
+    # Tiered Anthropic: resolve model name for this tier
+    model = LLM_SCAN_MODEL if tier == TIER_SCAN else LLM_DEEP_MODEL
+    for prefix, pricing in _ANTHROPIC_PRICING.items():
+        if prefix in model:
+            return pricing
+
+    # Fallback to Sonnet pricing
+    return (3.0, 15.0)
+
+
 def get_tiered_backend(config: Optional[dict] = None, tier: str = TIER_DEEP) -> LLMBackend:
     """Get a backend appropriate for the given task tier.
 
