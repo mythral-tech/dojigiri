@@ -95,7 +95,7 @@ def _derive_unused_imports_python(
     replacement_text: dict[int, str] = {}
     if applied_fixes:
         for fix in applied_fixes:
-            if fix.status != FixStatus.APPLIED and fix.fixed_code and fix.fixed_code.strip():
+            if fix.status != FixStatus.APPLIED:
                 continue
             start = fix.line
             end = fix.end_line or fix.line

@@ -753,7 +753,7 @@ def cmd_explain(args: argparse.Namespace) -> int:
             if not api_key:
                 print("\n  --deep requires ANTHROPIC_API_KEY. Showing offline analysis only.", file=sys.stderr)
             else:
-                from .llm import explain_file_llm, CostTracker  # type: ignore[attr-defined]  # conditional import; exists at runtime
+                from .llm import explain_file_llm, CostTracker
                 tracker = CostTracker()
                 llm_result, tracker = explain_file_llm(
                     content, str(filepath), lang,
@@ -765,10 +765,35 @@ def cmd_explain(args: argparse.Namespace) -> int:
                     print("  Deep Analysis (LLM-powered)")
                     print(f"{'=' * 70}\n")
                     if isinstance(llm_result, dict):
-                        for key, value in llm_result.items():
-                            if value:
-                                print(f"  {key}:")
-                                print(f"    {value}\n")
+                        # Purpose
+                        if llm_result.get("purpose"):
+                            print(f"  Purpose: {llm_result['purpose']}\n")
+                        # Data flow
+                        if llm_result.get("data_flow"):
+                            print(f"  Data flow: {llm_result['data_flow']}\n")
+                        # Key concepts
+                        concepts = llm_result.get("key_concepts", [])
+                        if concepts:
+                            print("  Key concepts:")
+                            for c in concepts:
+                                lines = f" (lines {c['lines']})" if c.get("lines") else ""
+                                print(f"    - {c.get('concept', '?')}{lines}")
+                                print(f"      {c.get('explanation', '')}")
+                            print()
+                        # Gotchas
+                        gotchas = llm_result.get("gotchas", [])
+                        if gotchas:
+                            print("  Gotchas:")
+                            for g in gotchas:
+                                print(f"    - {g}")
+                            print()
+                        # Findings explained
+                        findings_ex = llm_result.get("findings_explained", [])
+                        if findings_ex:
+                            print("  Findings explained:")
+                            for fe in findings_ex:
+                                print(f"    [{fe.get('rule', '?')}] {fe.get('plain_english', '')}")
+                            print()
                     print(f"  Cost: ${tracker.total_cost:.4f}")
         except Exception as e:  # LLM can fail many ways (network, API, parse); graceful fallback
             if output_format != "json":

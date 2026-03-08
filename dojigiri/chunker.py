@@ -51,6 +51,13 @@ def _find_python_boundaries(content: str) -> list[int]:
     return sorted(boundaries)
 
 
+def _finalize_chunks(chunks: list[Chunk]) -> list[Chunk]:
+    """Set total_chunks on all chunks after the list is fully built."""
+    for c in chunks:
+        c.total_chunks = len(chunks)
+    return chunks
+
+
 def _chunk_by_boundaries(
     lines: list[str],
     boundaries: list[int],
@@ -110,11 +117,7 @@ def _chunk_by_boundaries(
             language=language,
         ))
 
-    # Fix total_chunks
-    for c in chunks:
-        c.total_chunks = len(chunks)
-
-    return chunks
+    return _finalize_chunks(chunks)
 
 
 def chunk_file(
@@ -189,11 +192,7 @@ def _chunk_lines(
             break
         start += step
 
-    # Fix total_chunks
-    for c in chunks:
-        c.total_chunks = len(chunks)
-
-    return chunks
+    return _finalize_chunks(chunks)
 
 
 def estimate_tokens(content: str) -> int:

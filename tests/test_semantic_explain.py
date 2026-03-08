@@ -189,7 +189,7 @@ class TestPatternRecognition:
             "        return Triangle()\n"
         )
         sem = _sem(code)
-        patterns = _detect_patterns(sem, code)
+        patterns = _detect_patterns(sem, code.splitlines())
 
         titles = [p.title for p in patterns]
         assert any("Factory" in t for t in titles)
@@ -206,7 +206,7 @@ class TestPatternRecognition:
             "        return cls._instance\n"
         )
         sem = _sem(code)
-        patterns = _detect_patterns(sem, code)
+        patterns = _detect_patterns(sem, code.splitlines())
 
         titles = [p.title for p in patterns]
         assert any("Singleton" in t for t in titles)
@@ -222,7 +222,7 @@ class TestPatternRecognition:
             "    return wrapper\n"
         )
         sem = _sem(code)
-        patterns = _detect_patterns(sem, code)
+        patterns = _detect_patterns(sem, code.splitlines())
 
         titles = [p.title for p in patterns]
         assert any("Decorator" in t for t in titles)
@@ -246,7 +246,7 @@ class TestPatternRecognition:
             "        return self\n"
         )
         sem = _sem(code)
-        patterns = _detect_patterns(sem, code)
+        patterns = _detect_patterns(sem, code.splitlines())
 
         titles = [p.title for p in patterns]
         assert any("Builder" in t for t in titles)
@@ -265,7 +265,7 @@ class TestPatternRecognition:
             "            listener(event)\n"
         )
         sem = _sem(code)
-        patterns = _detect_patterns(sem, code)
+        patterns = _detect_patterns(sem, code.splitlines())
 
         titles = [p.title for p in patterns]
         assert any("Observer" in t for t in titles)
@@ -288,7 +288,7 @@ class TestPatternRecognition:
             "        return val\n"
         )
         sem = _sem(code)
-        patterns = _detect_patterns(sem, code)
+        patterns = _detect_patterns(sem, code.splitlines())
 
         titles = [p.title for p in patterns]
         assert any("Iterator" in t for t in titles)

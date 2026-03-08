@@ -12,6 +12,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+# Maximum total bytes of context files to collect (avoids blowing token budget)
+_MAX_CONTEXT_BYTES = 50_000
+
 
 def auto_discover_python_imports(filepath: str, content: str) -> dict[str, str]:
     """Discover local Python imports and read their contents (legacy fallback).
@@ -44,14 +47,13 @@ def auto_discover_python_imports(filepath: str, content: str) -> dict[str, str]:
 
     result = {}
     total_size = 0
-    max_size = 50_000
 
     for mod_name in sorted(candidates):
         mod_path = base_dir / f"{mod_name}.py"
         if mod_path.is_file():
             try:
                 mod_content = mod_path.read_text(encoding="utf-8", errors="replace")
-                if total_size + len(mod_content) > max_size:
+                if total_size + len(mod_content) > _MAX_CONTEXT_BYTES:
                     break
                 result[str(mod_path)] = mod_content
                 total_size += len(mod_content)
@@ -114,14 +116,13 @@ def auto_discover_imports(filepath: str, content: str, lang: str) -> dict[str, s
 
         result = {}
         total_size = 0
-        max_size = 50_000
 
         for r, _fi in ranked:
             abs_path = project_root / r
             if abs_path.is_file():
                 try:
                     ctx_content = abs_path.read_text(encoding="utf-8", errors="replace")
-                    if total_size + len(ctx_content) > max_size:
+                    if total_size + len(ctx_content) > _MAX_CONTEXT_BYTES:
                         break
                     result[str(abs_path)] = ctx_content
                     total_size += len(ctx_content)
@@ -149,7 +150,6 @@ def collect_context_files(context_arg: str, filepath: str, lang: str,
 
     result = {}
     total_size = 0
-    max_size = 50_000
 
     for path_str in context_arg.split(","):
         path_str = path_str.strip()
@@ -159,7 +159,7 @@ def collect_context_files(context_arg: str, filepath: str, lang: str,
         if ctx_path.is_file():
             try:
                 ctx_content = ctx_path.read_text(encoding="utf-8", errors="replace")
-                if total_size + len(ctx_content) > max_size:
+                if total_size + len(ctx_content) > _MAX_CONTEXT_BYTES:
                     print(f"  Skipping {path_str} (context size cap reached)", file=sys.stderr)
                     break
                 result[str(ctx_path)] = ctx_content

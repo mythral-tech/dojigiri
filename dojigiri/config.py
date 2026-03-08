@@ -141,6 +141,7 @@ LLM_OPTIMIZE_MAX_TOKENS = 8192  # optimize needs room for before/after
 LLM_ANALYZE_MAX_TOKENS = 8192  # cross-file analysis
 LLM_SYNTHESIS_MAX_TOKENS = 8192  # project synthesis
 LLM_FIX_MAX_TOKENS = 8192
+LLM_EXPLAIN_MAX_TOKENS = 4096  # explain is a summary, not code generation
 LLM_TEMPERATURE = 0.0
 
 # Cost per million tokens (Sonnet 4)

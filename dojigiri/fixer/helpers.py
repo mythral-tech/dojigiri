@@ -137,13 +137,15 @@ def _extract_name_from_message(message: str) -> Optional[str]:
     return None
 
 
+_OP_MAP: dict[type, str] = {
+    ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=",
+    ast.Gt: ">", ast.GtE: ">=", ast.Is: "is", ast.IsNot: "is not",
+    ast.In: "in", ast.NotIn: "not in",
+}
+
+
 def _op_str(op) -> str:
     """Convert an ast comparison operator to its source string."""
-    _OP_MAP = {
-        ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=",
-        ast.Gt: ">", ast.GtE: ">=", ast.Is: "is", ast.IsNot: "is not",
-        ast.In: "in", ast.NotIn: "not in",
-    }
     return _OP_MAP.get(type(op), "==")
 
 

@@ -183,11 +183,10 @@ _PATTERN_DESCRIPTIONS: dict[str, tuple[str, str]] = {
 
 def _detect_patterns(
     semantics: FileSemantics,
-    content: str,
+    lines: list[str],
 ) -> list[ExplainSection]:
     """Detect common design patterns using heuristic analysis."""
     patterns = []
-    lines = content.splitlines()
 
     # Factory: function that returns different types based on condition
     for fdef in semantics.function_defs:
@@ -280,9 +279,8 @@ def _detect_patterns(
 
 # ─── Structure extraction ───────────────────────────────────────────
 
-def _explain_function(fdef: FunctionDef, content: str) -> ExplainSection:
+def _explain_function(fdef: FunctionDef, lines: list[str]) -> ExplainSection:
     """Generate an explanation for a function."""
-    lines = content.splitlines()
     length = fdef.end_line - fdef.line + 1
 
     # Get the signature line
@@ -323,9 +321,8 @@ def _explain_function(fdef: FunctionDef, content: str) -> ExplainSection:
     )
 
 
-def _explain_class(cdef: ClassDef, semantics: FileSemantics, content: str) -> ExplainSection:
+def _explain_class(cdef: ClassDef, semantics: FileSemantics, lines: list[str]) -> ExplainSection:
     """Generate an explanation for a class."""
-    lines = content.splitlines()
     length = cdef.end_line - cdef.line + 1
 
     parts = [
@@ -353,10 +350,10 @@ def _generate_learning_notes(
     semantics: FileSemantics,
     content: str,
     language: str,
+    lines: list[str],
 ) -> list[str]:
     """Generate learning notes based on what the code demonstrates."""
     notes = []
-    lines = content.splitlines()
 
     # Check for common learning opportunities
     if any(fd.name.startswith("__") and fd.name.endswith("__") for fd in semantics.function_defs):
@@ -471,13 +468,13 @@ def explain_file(
 
     # Structure: explain each class and function
     for cdef in semantics.class_defs:
-        explanation.structure.append(_explain_class(cdef, semantics, content))
+        explanation.structure.append(_explain_class(cdef, semantics, lines))
 
     for fdef in semantics.function_defs:
-        explanation.structure.append(_explain_function(fdef, content))
+        explanation.structure.append(_explain_function(fdef, lines))
 
     # Pattern recognition
-    explanation.patterns = _detect_patterns(semantics, content)
+    explanation.patterns = _detect_patterns(semantics, lines)
 
     # Explain findings in beginner-friendly language
     if findings:
@@ -496,6 +493,6 @@ def explain_file(
             ))
 
     # Learning notes
-    explanation.learning_notes = _generate_learning_notes(semantics, content, language)
+    explanation.learning_notes = _generate_learning_notes(semantics, content, language, lines)
 
     return explanation
