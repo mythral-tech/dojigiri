@@ -1215,6 +1215,25 @@ def analyze_file_static(filepath: str, content: str, language: str, custom_rules
         findings.extend(check_long_method(semantics, filepath))
         findings.extend(check_semantic_clones({filepath: semantics}))
 
+    # v0.11.0: AST-based taint analysis with variable indirection tracking
+    # Catches patterns tree-sitter taint misses: f-string interpolation,
+    # multi-hop variable chains, function parameter taint.
+    # Only runs on Python files (uses built-in ast module).
+    if language == "python":
+        try:
+            from .taint import analyze_taint_ast
+
+            ast_taint_findings = analyze_taint_ast(filepath, content)
+            # Deduplicate against existing taint-flow findings (same file + line + rule)
+            existing_taint_keys = {
+                (f.file, f.line, f.rule) for f in findings if f.rule == "taint-flow"
+            }
+            for tf in ast_taint_findings:
+                if (tf.file, tf.line, tf.rule) not in existing_taint_keys:
+                    findings.append(tf)
+        except Exception as e:
+            logger.debug("AST taint analysis skipped: %s", e)
+
     # Inline suppression post-filter for AST/semantic findings.
     # Regex findings (Source.STATIC) are already filtered in run_regex_checks,
     # so only check AST/semantic findings here. Cache parse per-line.

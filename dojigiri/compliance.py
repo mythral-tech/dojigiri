@@ -130,6 +130,7 @@ CWE_MAP: dict[str, str] = {
     "resource-leak": "CWE-404",
     # Taint analysis
     "taint-flow": "CWE-20",
+    "taint-flow-cross-file": "CWE-20",
     # Code smells
     "god-class": "CWE-1075",
     "feature-envy": "CWE-1075",
@@ -159,6 +160,7 @@ NIST_MAP: dict[str, list[str]] = {
     "shell-true": ["SI-10", "SI-16"],
     "subprocess-audit": ["SI-10", "SI-16"],
     "taint-flow": ["SI-10", "SI-16"],
+    "taint-flow-cross-file": ["SI-10", "SI-16"],
     # XSS
     "innerhtml": ["SI-10", "SI-16"],
     "insert-adjacent-html": ["SI-10", "SI-16"],

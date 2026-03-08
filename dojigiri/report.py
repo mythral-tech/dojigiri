@@ -868,3 +868,90 @@ def print_explain_json(explanation: Any) -> None:
         "learning_notes": explanation.learning_notes,
     }
     print(json.dumps(data, indent=2))
+
+
+# ─── PR review rendering ─────────────────────────────────────────────
+
+
+def print_pr_review(review: Any) -> None:
+    """Print PR review in terminal-friendly format."""
+    from .pr_review import PRReview
+
+    assert isinstance(review, PRReview)
+
+    risk_color = {"Low": "green", "Medium": "yellow", "High": "red", "Critical": "red"}.get(review.risk_level, "yellow")
+
+    print()
+    print(_c("bold", "=" * 70))
+    print(_c("bold", "  Dojigiri Security Review"))
+    print(_c("bold", "=" * 70))
+    print()
+    print(f"  Base ref:    {review.base_ref}")
+    print(f"  Risk level:  {_c(risk_color, review.risk_level)}")
+    print(f"  Findings:    {review.summary}")
+    print()
+
+    if not review.file_reviews:
+        print(f"  {_c('green', 'No security findings on changed lines.')}")
+        print()
+        return
+
+    for fr in review.file_reviews:
+        # File header
+        counts = []
+        if fr.critical_count:
+            counts.append(_c("red", f"{fr.critical_count} critical"))
+        if fr.warning_count:
+            counts.append(_c("yellow", f"{fr.warning_count} warning"))
+        if fr.info_count:
+            counts.append(_c("blue", f"{fr.info_count} info"))
+        summary = ", ".join(counts)
+
+        print(f"  {_c('bold', fr.path)}  [{summary}]")
+        print("  " + "-" * 66)
+
+        # Prefer LLM analysis if available
+        if fr.llm_analysis:
+            for finding in fr.llm_analysis:
+                sev = finding.get("severity", "warning")
+                sev_color_name = _SEVERITY_COLOR_NAME.get(sev, "yellow")
+                sev_label = sev.upper().ljust(8)
+                title = finding.get("title", "Finding")
+                line_num = finding.get("line", "?")
+
+                print(f"    {_c(sev_color_name, sev_label)}  {_c('bold', title)}  {_c('dim', f'(line {line_num})')}")
+
+                snippet = finding.get("snippet", "")
+                if snippet:
+                    for snippet_line in snippet.splitlines():
+                        print(f"              {_c('gray', snippet_line)}")
+
+                risk = finding.get("risk", "")
+                if risk:
+                    print(f"              {risk}")
+
+                fix = finding.get("fix", "")
+                if fix:
+                    print(f"              {_c('green', 'Fix:')}")
+                    for fix_line in fix.splitlines():
+                        print(f"                {_c('green', fix_line)}")
+                print()
+        else:
+            # Static-only fallback
+            for f in fr.findings:
+                color, label = SEVERITY_STYLE[f.severity]
+                print(f"    {_c(color, label)}  {_c('dim', f'[{f.rule}]')}  line {f.line}")
+                print(f"              {f.message}")
+                if f.suggestion:
+                    print(f"              {_c('green', '-> ' + f.suggestion)}")
+                print()
+
+    # Cost
+    if review.llm_cost_usd > 0:
+        print(f"  LLM cost: ${review.llm_cost_usd:.4f}")
+    print()
+
+
+def print_pr_review_json(review: Any) -> None:
+    """Print PR review as JSON."""
+    print(json.dumps(review.to_dict(), indent=2))

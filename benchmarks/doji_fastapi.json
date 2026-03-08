@@ -1,0 +1,5870 @@
+[
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 927,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'openapi_schema' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'openapi_schema' (e.g., 'if openapi_schema is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1018,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'middleware_stack' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'middleware_stack' (e.g., 'if middleware_stack is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 45,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'FastAPI' is overly large: 31 methods (>15), 30 attributes (>10)",
+    "suggestion": "Consider splitting 'FastAPI' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 61,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 37 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 61,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.__init__' is 959 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 929,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert self.title, \"A title must be provided for OpenAPI, e.g.: 'My API'\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 930,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert self.version, \"A version must be provided for OpenAPI, e.g.: '2.1.0'\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 931,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove when discarding the openapi_prefix parameter",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1102,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.setup' is 54 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'setup' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1162,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'add_api_route' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1162,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.add_api_route' is 56 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'add_api_route' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1219,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'api_route' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1219,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.api_route' is 59 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'api_route' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1294,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.websocket' is 64 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'websocket' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1359,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'include_router' has 9 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1359,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.include_router' is 204 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'include_router' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1564,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'get' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1564,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.get' is 372 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1564,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'get' is semantically similar (87%) to 'put' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:1937",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1937,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'put' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1937,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.put' is 377 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'put' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 1937,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'put' is semantically similar (87%) to 'post' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:2315",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 2315,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'post' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 2315,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.post' is 377 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'post' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 2315,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'post' is semantically similar (87%) to 'delete' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:2693",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 2693,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'delete' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 2693,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.delete' is 372 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'delete' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 2693,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'delete' is semantically similar (87%) to 'options' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:3066",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3066,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'options' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3066,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.options' is 372 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'options' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3066,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'options' is semantically similar (87%) to 'head' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:3439",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3439,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'head' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3439,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.head' is 372 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'head' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3439,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'head' is semantically similar (87%) to 'patch' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:3812",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3812,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'patch' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3812,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.patch' is 377 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'patch' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 3812,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'patch' is semantically similar (87%) to 'trace' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:4190",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 4190,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'trace' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "line": 4190,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'FastAPI.trace' is 372 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'trace' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\concurrency.py",
+    "line": 8,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'iterate_in_threadpool' is never used",
+    "suggestion": "Remove unused import 'iterate_in_threadpool'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\concurrency.py",
+    "line": 10,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'run_until_first_complete' is never used",
+    "suggestion": "Remove unused import 'run_until_first_complete'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "line": 12,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'URL' is never used",
+    "suggestion": "Remove unused import 'URL'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "line": 13,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Address' is never used",
+    "suggestion": "Remove unused import 'Address'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "line": 14,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'FormData' is never used",
+    "suggestion": "Remove unused import 'FormData'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "line": 16,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'QueryParams' is never used",
+    "suggestion": "Remove unused import 'QueryParams'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "line": 17,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'State' is never used",
+    "suggestion": "Remove unused import 'State'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "line": 86,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'size' shadows name from class scope (line 60)",
+    "suggestion": "Rename 'size' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "line": 42,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: pv2 should this return strings instead?",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "line": 101,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'encoders_by_class_tuples' shadows name from module scope (line 109)",
+    "suggestion": "Rename 'encoders_by_class_tuples' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "line": 112,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'jsonable_encoder' has high cyclomatic complexity (35 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "line": 112,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'jsonable_encoder' has 8 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "line": 112,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'jsonable_encoder' is 236 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'jsonable_encoder' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "line": 243,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert not isinstance(obj, type)",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "line": 157,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'RequestErrorModel' is assigned but never used",
+    "suggestion": "Remove unused variable 'RequestErrorModel' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "line": 158,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'WebSocketErrorModel' is assigned but never used",
+    "suggestion": "Remove unused variable 'WebSocketErrorModel' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "line": 185,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'endpoint_function' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'endpoint_function' (e.g., 'if endpoint_function is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "line": 186,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'endpoint_path' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'endpoint_path' (e.g., 'if endpoint_path is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "line": 187,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'endpoint_file' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'endpoint_file' (e.g., 'if endpoint_file is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "line": 188,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'endpoint_line' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'endpoint_line' (e.g., 'if endpoint_line is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\logger.py",
+    "line": 3,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'logger' is assigned but never used",
+    "suggestion": "Remove unused variable 'logger' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 30,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 29 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 30,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Param.__init__' is 103 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 30,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function '__init__' is semantically similar (86%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py:471",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 141,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 29 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 141,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Path.__init__' is 79 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 141,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py:307",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 186,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert default is ..., \"Path parameters cannot have a default value\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 187,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'in_' shadows name from class scope (line 139)",
+    "suggestion": "Rename 'in_' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 225,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 29 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 225,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Query.__init__' is 77 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 307,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 30 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 307,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Header.__init__' is 79 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 391,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 29 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 391,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Cookie.__init__' is 77 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 471,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 31 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 471,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Body.__init__' is 106 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 583,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 30 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 583,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Form.__init__' is 79 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 665,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 30 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "line": 665,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'File.__init__' is 79 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 14,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'Path' has 28 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 14,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Path' is 342 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Path' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 14,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'Path' is semantically similar (88%) to 'Query' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:358",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 358,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'Query' has 28 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 358,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Query' is 342 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Query' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 358,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'Query' is semantically similar (86%) to 'Header' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:702",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 702,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'Header' has 29 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 702,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Header' is 315 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Header' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 702,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'Header' is semantically similar (86%) to 'Cookie' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1019",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1019,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'Cookie' has 28 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1019,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Cookie' is 303 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Cookie' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1019,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'Cookie' is semantically similar (86%) to 'Form' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1654",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1324,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'Body' has 30 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1324,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Body' is 328 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Body' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1324,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'Body' is semantically similar (86%) to 'Form' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1654",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1654,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'Form' has 29 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1654,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Form' is 313 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Form' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1654,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'Form' is semantically similar (88%) to 'File' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1969",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1969,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'File' has 29 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 1969,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'File' is 313 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'File' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 2284,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Depends' is 87 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Depends' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "line": 2373,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'Security' is 89 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'Security' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\requests.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPConnection' is never used",
+    "suggestion": "Remove unused import 'HTTPConnection'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\requests.py",
+    "line": 2,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Request' is never used",
+    "suggestion": "Remove unused import 'Request'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 4,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'EventSourceResponse' is never used",
+    "suggestion": "Remove unused import 'EventSourceResponse'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 5,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'FileResponse' is never used",
+    "suggestion": "Remove unused import 'FileResponse'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 6,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTMLResponse' is never used",
+    "suggestion": "Remove unused import 'HTMLResponse'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 8,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'PlainTextResponse' is never used",
+    "suggestion": "Remove unused import 'PlainTextResponse'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 9,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'RedirectResponse' is never used",
+    "suggestion": "Remove unused import 'RedirectResponse'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'StreamingResponse' is never used",
+    "suggestion": "Remove unused import 'StreamingResponse'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 52,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert ujson is not None, \"ujson must be installed to use UJSONResponse\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "line": 82,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert orjson is not None, \"orjson must be installed to use ORJSONResponse\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 87,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Mount' is never used",
+    "suggestion": "Remove unused import 'Mount'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 403,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'body' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'body' (e.g., 'if body is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 405,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'body' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'body' (e.g., 'if body is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 470,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'data' may be used before assignment (first assigned line 489)",
+    "suggestion": "Ensure 'data' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 573,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 573,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 612,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 614,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 615,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 648,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 667,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'content' may be used before assignment (first assigned line 691)",
+    "suggestion": "Ensure 'content' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 668,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 712,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 713,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 714,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'response' (e.g., 'if response is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 842,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'stream_item_type' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'stream_item_type' (e.g., 'if stream_item_type is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 860,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'stream_item_type' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'stream_item_type' (e.g., 'if stream_item_type is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 864,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response_model' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'response_model' (e.g., 'if response_model is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 900,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response_model' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'response_model' (e.g., 'if response_model is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 905,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response_field' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'response_field' (e.g., 'if response_field is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 911,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'response_field' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'response_field' (e.g., 'if response_field is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 912,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'stream_item_type' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'stream_item_type' (e.g., 'if stream_item_type is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 914,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'stream_item_field' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'stream_item_field' (e.g., 'if stream_item_field is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 920,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'stream_item_field' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'stream_item_field' (e.g., 'if stream_item_field is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1770,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'methods' may be used before assignment (first assigned line 1794)",
+    "suggestion": "Ensure 'methods' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 137,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'websocket_session' is semantically similar (100%) to 'app' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:145",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 273,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'serialize_response' has 10 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 321,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert dependant.call is not None, \"dependant.call must be a function\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 347,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'get_request_handler' has 15 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 347,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_request_handler' is 379 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_request_handler' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 365,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert dependant.call is not None, \"dependant.call must be a function\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 378,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'app' has high cyclomatic complexity (28 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 378,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'app' is 346 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'app' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 381,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(file_stack, AsyncExitStack), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 450,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(async_exit_stack, AsyncExitStack), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 462,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert dependant.call  # For types",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 722,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert response",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 728,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'get_websocket_app' is semantically similar (90%) to 'app' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:733",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 744,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(async_exit_stack, AsyncExitStack), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 759,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert dependant.call is not None, \"dependant.call must be a function\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 807,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'APIRoute' is overly large: 41 attributes (>10)",
+    "suggestion": "Consider splitting 'APIRoute' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 808,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function '__init__' has high cyclomatic complexity (24 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 808,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 25 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 808,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRoute.__init__' is 165 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 901,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert is_body_allowed_for_status_code(status_code), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 928,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(response, dict), \"An additional response must be a dict\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 931,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert is_body_allowed_for_status_code(additional_status_code), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 944,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert callable(endpoint), \"An endpoint must be a callable\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1001,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'APIRouter' is overly large: 25 methods (>15), 47 attributes (>10)",
+    "suggestion": "Consider splitting 'APIRouter' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1028,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 18 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1028,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.__init__' is 284 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1285,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert prefix.startswith(\"/\"), \"A path prefix must start with '/'\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1286,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert not prefix.endswith(\"/\"), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1292,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: deprecate this once the lifespan (or alternative) interface is improved",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1332,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'add_api_route' has 25 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1332,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.add_api_route' is 82 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'add_api_route' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1415,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'api_route' has 23 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1415,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.api_route' is 61 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'api_route' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1498,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.websocket' is 66 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'websocket' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1574,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'include_router' has high cyclomatic complexity (25 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1574,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'include_router' has 9 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1574,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.include_router' is 252 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'include_router' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1709,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert self is not router, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1714,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert prefix.startswith(\"/\"), \"A path prefix must start with '/'\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1715,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert not prefix.endswith(\"/\"), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1827,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'get' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1827,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.get' is 376 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 1827,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'get' is semantically similar (100%) to 'put' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:2204",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2204,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'put' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2204,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.put' is 381 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'put' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2204,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'put' is semantically similar (100%) to 'post' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:2586",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2586,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'post' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2586,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.post' is 381 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'post' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2586,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'post' is semantically similar (100%) to 'delete' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:2968",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2968,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'delete' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2968,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.delete' is 376 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'delete' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 2968,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'delete' is semantically similar (100%) to 'options' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:3345",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 3345,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'options' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 3345,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.options' is 376 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'options' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 3345,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'options' is semantically similar (100%) to 'head' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:3722",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 3722,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'head' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 3722,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.head' is 381 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'head' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 3722,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'head' is semantically similar (100%) to 'patch' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:4104",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4104,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'patch' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4104,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.patch' is 381 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'patch' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4104,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'patch' is semantically similar (100%) to 'trace' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:4486",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4486,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'trace' has 22 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4486,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIRouter.trace' is 381 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'trace' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4868,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove this once the lifespan (or alternative) interface is improved",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4884,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove this once the lifespan (or alternative) interface is improved",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4900,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove this once the lifespan (or alternative) interface is improved",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "line": 4914,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert event_type in (\"startup\", \"shutdown\")",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "line": 137,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'data' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'data' (e.g., 'if data is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "line": 164,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "shadowed-builtin",
+    "message": "Parameter 'id' in 'format_sse_event' shadows builtin",
+    "suggestion": "Rename parameter to avoid shadowing builtin 'id'",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "line": 164,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "shadowed-builtin-param",
+    "message": "Parameter 'id' in 'format_sse_event' shadows builtin",
+    "suggestion": "Rename parameter to avoid shadowing builtin 'id'",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "line": 218,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'KEEPALIVE_COMMENT' is assigned but never used",
+    "suggestion": "Remove unused variable 'KEEPALIVE_COMMENT' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "line": 146,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'format_sse_event' is 69 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'format_sse_event' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\staticfiles.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'StaticFiles' is never used",
+    "suggestion": "Remove unused import 'StaticFiles'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\templating.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Jinja2Templates' is never used",
+    "suggestion": "Remove unused import 'Jinja2Templates'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\testclient.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'TestClient' is never used",
+    "suggestion": "Remove unused import 'TestClient'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "line": 7,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'IncEx' is never used",
+    "suggestion": "Remove unused import 'IncEx'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "line": 10,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'UnionType' is assigned but never used",
+    "suggestion": "Remove unused variable 'UnionType' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'ModelNameMap' is assigned but never used",
+    "suggestion": "Remove unused variable 'ModelNameMap' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "line": 12,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'DependencyCacheKey' is assigned but never used",
+    "suggestion": "Remove unused variable 'DependencyCacheKey' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\utils.py",
+    "line": 98,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert route.methods",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\websockets.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'WebSocket' is never used",
+    "suggestion": "Remove unused import 'WebSocket'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\websockets.py",
+    "line": 2,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'WebSocketDisconnect' is never used",
+    "suggestion": "Remove unused import 'WebSocketDisconnect'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\websockets.py",
+    "line": 3,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'WebSocketState' is never used",
+    "suggestion": "Remove unused import 'WebSocketState'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 5,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'status' is never used",
+    "suggestion": "Remove unused import 'status'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 8,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'BackgroundTasks' is never used",
+    "suggestion": "Remove unused import 'BackgroundTasks'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 9,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'UploadFile' is never used",
+    "suggestion": "Remove unused import 'UploadFile'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 10,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPException' is never used",
+    "suggestion": "Remove unused import 'HTTPException'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'WebSocketException' is never used",
+    "suggestion": "Remove unused import 'WebSocketException'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 12,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Body' is never used",
+    "suggestion": "Remove unused import 'Body'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 13,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Cookie' is never used",
+    "suggestion": "Remove unused import 'Cookie'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 14,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Depends' is never used",
+    "suggestion": "Remove unused import 'Depends'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 15,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'File' is never used",
+    "suggestion": "Remove unused import 'File'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 16,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Form' is never used",
+    "suggestion": "Remove unused import 'Form'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 17,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Header' is never used",
+    "suggestion": "Remove unused import 'Header'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 18,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Path' is never used",
+    "suggestion": "Remove unused import 'Path'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 19,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Query' is never used",
+    "suggestion": "Remove unused import 'Query'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 20,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Security' is never used",
+    "suggestion": "Remove unused import 'Security'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 21,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Request' is never used",
+    "suggestion": "Remove unused import 'Request'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 22,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Response' is never used",
+    "suggestion": "Remove unused import 'Response'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 23,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'APIRouter' is never used",
+    "suggestion": "Remove unused import 'APIRouter'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 24,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'WebSocket' is never used",
+    "suggestion": "Remove unused import 'WebSocket'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "line": 25,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'WebSocketDisconnect' is never used",
+    "suggestion": "Remove unused import 'WebSocketDisconnect'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 26,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'func' may be used before assignment (first assigned line 27)",
+    "suggestion": "Ensure 'func' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 55,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'parent_oauth_scopes' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'parent_oauth_scopes' (e.g., 'if parent_oauth_scopes is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 57,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'own_oauth_scopes' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'own_oauth_scopes' (e.g., 'if own_oauth_scopes is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 75,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'own_oauth_scopes' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'own_oauth_scopes' (e.g., 'if own_oauth_scopes is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 77,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'security_scopes_param_name' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'security_scopes_param_name' (e.g., 'if security_scopes_param_name is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 189,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'scope' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'scope' (e.g., 'if scope is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 32,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Dependant' is overly large: 19 attributes (>10)",
+    "suggestion": "Consider splitting 'Dependant' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 57,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'scope' shadows name from class scope (line 51)",
+    "suggestion": "Rename 'scope' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "line": 97,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(unwrapped, SecurityBase)",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 244,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'annotation' may be used before assignment (first assigned line 245)",
+    "suggestion": "Ensure 'annotation' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 401,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'annotation' may be used before assignment (first assigned line 403)",
+    "suggestion": "Ensure 'annotation' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 442,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'field_info' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'field_info' (e.g., 'if field_info is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 444,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'field_info' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'field_info' (e.g., 'if field_info is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 449,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'field_info' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'field_info' (e.g., 'if field_info is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 451,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'field_info' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'field_info' (e.g., 'if field_info is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 552,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'field' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'field' (e.g., 'if field is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 553,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'field' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'field' (e.g., 'if field is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 626,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'call' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'call' (e.g., 'if call is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 627,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'call' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'call' (e.g., 'if call is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 633,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'call' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'call' (e.g., 'if call is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 821,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'alias' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'alias' (e.g., 'if alias is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 975,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'value' may be used before assignment (first assigned line 980)",
+    "suggestion": "Ensure 'value' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 99,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert __version__ > \"0.0.12\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 105,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert __version__",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 112,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert parse_options_header",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 122,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert callable(depends.dependency), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 136,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_flat_dependant' is 52 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_flat_dependant' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 284,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_dependant' is 73 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_dependant' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 316,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert param_details.depends.dependency",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 322,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert dependant.call",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 347,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert param_details.field is None, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 351,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert param_details.field is not None",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 390,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'analyze_param' has high cyclomatic complexity (33 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 390,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'analyze_param' is 167 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'analyze_param' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 441,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 448,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert not is_path_param, \"Path parameters cannot have default values\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 457,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert depends is None, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 461,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert field_info is None, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 468,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert field_info is None, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 496,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert field_info is None, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 521,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(field_info, params.Path), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 546,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert is_scalar_field(field=field), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 550,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 569,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert field_info_in == params.ParamTypes.cookie, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 578,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert dependant.call",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 595,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'solve_dependencies' has high cyclomatic complexity (24 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 595,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'solve_dependencies' has 9 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 595,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'solve_dependencies' is 138 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'solve_dependencies' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 604,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove this parameter later, no longer used, not removing it yet as some",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 610,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(request_astack, AsyncExitStack), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 614,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(function_astack, AsyncExitStack), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 781,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'request_params_to_args' has high cyclomatic complexity (17 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 781,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'request_params_to_args' is 83 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'request_params_to_args' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 840,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(field_info, params.Param), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 852,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(field_info, params.Param), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 930,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(value, sequence_types)",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 955,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert body_fields, \"request_body_to_args() should be called with fields\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "line": 998,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_body_field' is 52 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_body_field' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\cors.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'CORSMiddleware' is never used",
+    "suggestion": "Remove unused import 'CORSMiddleware'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\gzip.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'GZipMiddleware' is never used",
+    "suggestion": "Remove unused import 'GZipMiddleware'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\httpsredirect.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPSRedirectMiddleware' is never used",
+    "suggestion": "Remove unused import 'HTTPSRedirectMiddleware'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\trustedhost.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'TrustedHostMiddleware' is never used",
+    "suggestion": "Remove unused import 'TrustedHostMiddleware'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\wsgi.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'WSGIMiddleware' is never used",
+    "suggestion": "Remove unused import 'WSGIMiddleware'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\__init__.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Middleware' is never used",
+    "suggestion": "Remove unused import 'Middleware'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\constants.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'METHODS_WITH_BODY' is assigned but never used",
+    "suggestion": "Remove unused variable 'METHODS_WITH_BODY' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\constants.py",
+    "line": 2,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'REF_PREFIX' is assigned but never used",
+    "suggestion": "Remove unused variable 'REF_PREFIX' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\constants.py",
+    "line": 3,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'REF_TEMPLATE' is assigned but never used",
+    "suggestion": "Remove unused variable 'REF_TEMPLATE' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "line": 40,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'get_swagger_ui_html' has 8 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "line": 40,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_swagger_ui_html' is 155 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_swagger_ui_html' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "line": 197,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_redoc_html' is 102 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_redoc_html' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "line": 301,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_swagger_ui_oauth2_redirect_html' is 89 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_swagger_ui_oauth2_redirect_html' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "line": 209,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'SchemaOrBool' is assigned but never used",
+    "suggestion": "Remove unused variable 'SchemaOrBool' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "line": 19,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert email_validator  # make autoflake ignore the unused import",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "line": 123,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Schema' is overly large: 61 attributes (>10)",
+    "suggestion": "Consider splitting 'Schema' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "line": 289,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Operation' is overly large: 12 attributes (>10)",
+    "suggestion": "Consider splitting 'Operation' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "line": 305,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'PathItem' is overly large: 13 attributes (>10)",
+    "suggestion": "Consider splitting 'PathItem' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 365,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'field' may be used before assignment (first assigned line 430)",
+    "suggestion": "Ensure 'field' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 108,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function '_get_openapi_operation_parameters' is 71 lines long (>50)",
+    "suggestion": "Consider extracting parts of '_get_openapi_operation_parameters' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 192,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(body_field, ModelField)",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 263,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'get_openapi_path' has high cyclomatic complexity (36 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 263,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_openapi_path' is 219 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_openapi_path' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 276,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert route.methods is not None, \"Methods must be a list\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 281,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert current_response_class, \"A response class is needed to generate OpenAPI\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 349,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: probably make status_code a default class attribute for all",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 427,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(process_response, dict), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 496,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(route.body_field, ModelField), (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 517,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'get_openapi' has high cyclomatic complexity (27 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 517,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'get_openapi' has 11 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "line": 517,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_openapi' is 93 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_openapi' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py",
+    "line": 85,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'APIKeyQuery.__init__' is 54 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py",
+    "line": 85,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py:177",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py",
+    "line": 177,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py:265",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\http.py",
+    "line": 140,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'HTTPBasic.__init__' is 56 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\http.py",
+    "line": 303,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function '__call__' is semantically similar (100%) to '__call__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\http.py:404",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "line": 59,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'OAuth2PasswordRequestForm.__init__' is 101 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "line": 226,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'OAuth2PasswordRequestFormStrict.__init__' is 102 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "line": 343,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'OAuth2.__init__' is 57 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "line": 442,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'OAuth2PasswordBearer.__init__' is 93 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "line": 442,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py:553",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "line": 536,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function '__call__' is semantically similar (100%) to '__call__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py:642",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "line": 553,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'OAuth2AuthorizationCodeBearer.__init__' is 88 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\open_id_connect_url.py",
+    "line": 22,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'OpenIdConnect.__init__' is 57 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'APIKeyCookie' is never used",
+    "suggestion": "Remove unused import 'APIKeyCookie'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 2,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'APIKeyHeader' is never used",
+    "suggestion": "Remove unused import 'APIKeyHeader'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 3,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'APIKeyQuery' is never used",
+    "suggestion": "Remove unused import 'APIKeyQuery'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 4,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPAuthorizationCredentials' is never used",
+    "suggestion": "Remove unused import 'HTTPAuthorizationCredentials'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 5,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPBasic' is never used",
+    "suggestion": "Remove unused import 'HTTPBasic'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 6,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPBasicCredentials' is never used",
+    "suggestion": "Remove unused import 'HTTPBasicCredentials'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 7,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPBearer' is never used",
+    "suggestion": "Remove unused import 'HTTPBearer'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 8,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HTTPDigest' is never used",
+    "suggestion": "Remove unused import 'HTTPDigest'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 9,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'OAuth2' is never used",
+    "suggestion": "Remove unused import 'OAuth2'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 10,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'OAuth2AuthorizationCodeBearer' is never used",
+    "suggestion": "Remove unused import 'OAuth2AuthorizationCodeBearer'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'OAuth2PasswordBearer' is never used",
+    "suggestion": "Remove unused import 'OAuth2PasswordBearer'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 12,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'OAuth2PasswordRequestForm' is never used",
+    "suggestion": "Remove unused import 'OAuth2PasswordRequestForm'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 13,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'OAuth2PasswordRequestFormStrict' is never used",
+    "suggestion": "Remove unused import 'OAuth2PasswordRequestFormStrict'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 14,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'SecurityScopes' is never used",
+    "suggestion": "Remove unused import 'SecurityScopes'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "line": 15,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'OpenIdConnect' is never used",
+    "suggestion": "Remove unused import 'OpenIdConnect'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "line": 31,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'PYDANTIC_VERSION_MINOR_TUPLE' is assigned but never used",
+    "suggestion": "Remove unused variable 'PYDANTIC_VERSION_MINOR_TUPLE' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "line": 126,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "semantic-clone",
+    "message": "Function 'is_bytes_or_nonable_bytes_annotation' is semantically similar (100%) to 'is_uploadfile_or_nonable_uploadfile_annotation' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py:137",
+    "suggestion": "Consider extracting shared logic into a common function",
+    "snippet": null,
+    "cwe": "CWE-1041",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "line": 179,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove this function once the required version of Pydantic fully",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "line": 191,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove this function once the required version of Pydantic fully",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 22,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'PydanticSchemaGenerationError' is never used",
+    "suggestion": "Remove unused import 'PydanticSchemaGenerationError'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 23,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'PydanticUndefinedAnnotation' is never used",
+    "suggestion": "Remove unused import 'PydanticUndefinedAnnotation'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 25,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'GetJsonSchemaHandler' is never used",
+    "suggestion": "Remove unused import 'GetJsonSchemaHandler'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 34,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Url' is never used",
+    "suggestion": "Remove unused import 'Url'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 35,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'with_info_plain_validator_function' is never used",
+    "suggestion": "Remove unused import 'with_info_plain_validator_function'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 39,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'RequiredParam' is assigned but never used",
+    "suggestion": "Remove unused variable 'RequiredParam' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 41,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'evaluate_forwardref' is assigned but never used",
+    "suggestion": "Remove unused variable 'evaluate_forwardref' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 152,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'config' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'config' (e.g., 'if config is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 160,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "mutable-default",
+    "message": "Mutable default argument in 'validate' \u2014 shared across all calls",
+    "suggestion": "Use None as default and create inside function body",
+    "snippet": null,
+    "cwe": "CWE-1188"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 389,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'model_config' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'model_config' (e.g., 'if model_config is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 45,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove when this is merged (or equivalent): https://github.com/pydantic/pydantic/pull/12841",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 60,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove when dropping support for Pydantic < v2.12.3",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 86,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove when dropping support for Pydantic < v2.12.3",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 140,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: remove after setting the min Pydantic to v2.12.3",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 177,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'serialize' has 8 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 177,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'mode' shadows name from class scope (line 104)",
+    "suggestion": "Rename 'mode' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 264,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO remove when deprecating Pydantic v1",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 272,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_definitions' is 62 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_definitions' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "line": 362,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert issubclass(origin_type, shared.sequence_types)  # type: ignore[arg-type]",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 1,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'PYDANTIC_VERSION_MINOR_TUPLE' is never used",
+    "suggestion": "Remove unused import 'PYDANTIC_VERSION_MINOR_TUPLE'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 2,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'annotation_is_pydantic_v1' is never used",
+    "suggestion": "Remove unused import 'annotation_is_pydantic_v1'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 3,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'field_annotation_is_scalar' is never used",
+    "suggestion": "Remove unused import 'field_annotation_is_scalar'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 4,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'field_annotation_is_scalar_sequence' is never used",
+    "suggestion": "Remove unused import 'field_annotation_is_scalar_sequence'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 7,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'field_annotation_is_sequence' is never used",
+    "suggestion": "Remove unused import 'field_annotation_is_sequence'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 8,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'is_bytes_or_nonable_bytes_annotation' is never used",
+    "suggestion": "Remove unused import 'is_bytes_or_nonable_bytes_annotation'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'is_bytes_sequence_annotation' is never used",
+    "suggestion": "Remove unused import 'is_bytes_sequence_annotation'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 12,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'is_pydantic_v1_model_instance' is never used",
+    "suggestion": "Remove unused import 'is_pydantic_v1_model_instance'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 13,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'is_uploadfile_or_nonable_uploadfile_annotation' is never used",
+    "suggestion": "Remove unused import 'is_uploadfile_or_nonable_uploadfile_annotation'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 16,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'is_uploadfile_sequence_annotation' is never used",
+    "suggestion": "Remove unused import 'is_uploadfile_sequence_annotation'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 19,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'lenient_issubclass' is never used",
+    "suggestion": "Remove unused import 'lenient_issubclass'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 20,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'sequence_types' is never used",
+    "suggestion": "Remove unused import 'sequence_types'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 21,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'value_is_sequence' is never used",
+    "suggestion": "Remove unused import 'value_is_sequence'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 22,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'ModelField' is never used",
+    "suggestion": "Remove unused import 'ModelField'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 23,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'PydanticSchemaGenerationError' is never used",
+    "suggestion": "Remove unused import 'PydanticSchemaGenerationError'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 24,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'RequiredParam' is never used",
+    "suggestion": "Remove unused import 'RequiredParam'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 25,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Undefined' is never used",
+    "suggestion": "Remove unused import 'Undefined'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 26,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Url' is never used",
+    "suggestion": "Remove unused import 'Url'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 27,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'copy_field_info' is never used",
+    "suggestion": "Remove unused import 'copy_field_info'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 28,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'create_body_model' is never used",
+    "suggestion": "Remove unused import 'create_body_model'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 29,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'evaluate_forwardref' is never used",
+    "suggestion": "Remove unused import 'evaluate_forwardref'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 30,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_cached_model_fields' is never used",
+    "suggestion": "Remove unused import 'get_cached_model_fields'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 31,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_definitions' is never used",
+    "suggestion": "Remove unused import 'get_definitions'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 32,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_flat_models_from_fields' is never used",
+    "suggestion": "Remove unused import 'get_flat_models_from_fields'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 33,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_missing_field_error' is never used",
+    "suggestion": "Remove unused import 'get_missing_field_error'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 34,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_model_name_map' is never used",
+    "suggestion": "Remove unused import 'get_model_name_map'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 35,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_schema_from_model_field' is never used",
+    "suggestion": "Remove unused import 'get_schema_from_model_field'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 36,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'is_scalar_field' is never used",
+    "suggestion": "Remove unused import 'is_scalar_field'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 37,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'serialize_sequence_value' is never used",
+    "suggestion": "Remove unused import 'serialize_sequence_value'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "line": 38,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'with_info_plain_validator_function' is never used",
+    "suggestion": "Remove unused import 'with_info_plain_validator_function'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  }
+]

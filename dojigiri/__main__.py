@@ -1,8 +1,9 @@
 """CLI entry point for the `doji` command.
 
 Parses arguments and dispatches to subcommands: scan, debug, optimize,
-analyze (project-level), fix, report, cost, setup, and hooks. Orchestrates
-the full pipeline from file discovery through analysis to output/reporting.
+analyze (project-level), review (PR security review), fix, report, cost,
+setup, and hooks. Orchestrates the full pipeline from file discovery through
+analysis to output/reporting.
 
 Called by: user (python -m dojigiri / doji command)
 Calls into: config.py, analyzer.py, detector.py, storage.py, report.py,
@@ -1046,6 +1047,64 @@ def cmd_stats(args) -> int:
     return 0
 
 
+def cmd_review(args: argparse.Namespace) -> int:
+    """Review a PR or branch diff like a senior security engineer."""
+    from .pr_review import format_pr_comment, review_diff
+
+    root = Path(".").resolve()
+
+    # Load project config
+    if getattr(args, "no_config", False):
+        project_config = {}
+        custom_rules = []
+    else:
+        project_config = load_project_config(root)
+        custom_rules = compile_custom_rules(project_config)
+
+    use_llm = getattr(args, "llm", False)
+    pr_number = getattr(args, "pr", None)
+    base_ref = getattr(args, "base", None)
+    output_format = getattr(args, "output", "text")
+
+    # LLM setup and confirmation
+    if use_llm:
+        _setup_llm_backend(args, project_config)
+        if not _confirm_llm_usage(args):
+            return 1
+
+    is_json = output_format == "json"
+    is_comment = output_format == "comment"
+
+    if not is_json:
+        if pr_number is not None:
+            print(f"Reviewing PR #{pr_number} ...\n")
+        else:
+            print("Reviewing branch diff ...\n")
+
+    try:
+        review = review_diff(
+            root,
+            base_ref=base_ref,
+            pr_number=pr_number,
+            use_llm=use_llm,
+            custom_rules=custom_rules,
+        )
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    if is_json:
+        rpt.print_pr_review_json(review)
+    elif is_comment:
+        print(format_pr_comment(review))
+    else:
+        rpt.print_pr_review(review)
+
+    if review.critical > 0:
+        return 2
+    return 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="doji",
@@ -1180,6 +1239,32 @@ def main() -> None:
     p_fix.add_argument("--base-url", default=None, help="LLM API base URL")
     p_fix.add_argument("--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_fix.set_defaults(func=cmd_fix)
+
+    # review
+    p_review = subparsers.add_parser("review", help="Security review of PR or branch diff")
+    p_review.add_argument(
+        "--pr",
+        type=int,
+        default=None,
+        metavar="NUMBER",
+        help="GitHub PR number to review (requires gh CLI)",
+    )
+    p_review.add_argument("--base", default=None, metavar="REF", help="Git ref to diff against (default: main/master)")
+    p_review.add_argument("--llm", action="store_true", help="Enrich review with LLM analysis (costs money)")
+    p_review.add_argument(
+        "--output",
+        choices=["text", "json", "comment"],
+        default="text",
+        help="Output format: text (terminal), json (structured), comment (GitHub PR comment markdown)",
+    )
+    p_review.add_argument(
+        "--no-config", action="store_true", help="Ignore .doji.toml project config"
+    )
+    p_review.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None, help="LLM backend")
+    p_review.add_argument("--model", default=None, help="LLM model name")
+    p_review.add_argument("--base-url", default=None, help="LLM API base URL")
+    p_review.add_argument("--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)")
+    p_review.set_defaults(func=cmd_review)
 
     # analyze
     p_analyze = subparsers.add_parser("analyze", help="Analyze project for cross-file issues")

@@ -1,4 +1,4 @@
-"""Tests for dojigiri/report.py — SARIF, JSON, ANSI console output."""
+"""Tests for dojigiri/report.py and dojigiri/sarif.py — SARIF, JSON, ANSI console output."""
 
 import json
 import sys
@@ -15,6 +15,8 @@ from dojigiri.report import (
     print_finding, print_file_analysis, print_scan_summary,
     print_fix_report, print_fix_json, _c,
 )
+from dojigiri.sarif import to_sarif as sarif_to_sarif, SARIF_SCHEMA
+from dojigiri import __version__
 
 
 def _make_finding(
@@ -67,12 +69,13 @@ class TestToSarif:
         report = _make_report()
         sarif = to_sarif(report)
         assert sarif["version"] == "2.1.0"
-        assert "$schema" in sarif
+        assert sarif["$schema"] == SARIF_SCHEMA
         assert len(sarif["runs"]) == 1
         run = sarif["runs"][0]
         assert "tool" in run
         assert "results" in run
-        assert run["tool"]["driver"]["name"] == "Dojigiri"
+        assert run["tool"]["driver"]["name"] == "dojigiri"
+        assert run["tool"]["driver"]["semanticVersion"] == __version__
 
     def test_sarif_results_count(self):
         """SARIF results match the number of findings."""
@@ -193,6 +196,41 @@ class TestToSarif:
         assert run_props["mode"] == "quick"
         assert run_props["filesScanned"] == 1
         assert run_props["filesSkipped"] == 0
+
+    def test_sarif_message_includes_suggestion(self):
+        """SARIF result message.text includes both message and suggestion."""
+        report = _make_report()
+        sarif = to_sarif(report)
+        result = sarif["runs"][0]["results"][0]
+        # Should contain the suggestion appended after a dash
+        assert "Fix rule1" in result["message"]["text"]
+        assert "Issue from rule1" in result["message"]["text"]
+
+    def test_sarif_taxa_cwe_reference(self):
+        """SARIF results with CWE-mapped rules have taxa references."""
+        # Use a rule that has a CWE mapping (e.g. eval-usage -> CWE-95)
+        report = _make_report([
+            ("eval-usage", Severity.CRITICAL, Category.SECURITY, Source.STATIC, None),
+        ])
+        sarif = to_sarif(report)
+        result = sarif["runs"][0]["results"][0]
+        assert "taxa" in result
+        assert result["taxa"][0]["id"] == "95"
+        assert result["taxa"][0]["toolComponent"]["name"] == "cwe"
+
+    def test_sarif_rule_tags_always_list(self):
+        """SARIF rule properties.tags is always a list, even without CWE."""
+        report = _make_report()
+        sarif = to_sarif(report)
+        for rule in sarif["runs"][0]["tool"]["driver"]["rules"]:
+            assert isinstance(rule["properties"]["tags"], list)
+
+    def test_sarif_delegates_to_sarif_module(self):
+        """report.to_sarif delegates to sarif.to_sarif."""
+        report = _make_report()
+        from_report = to_sarif(report)
+        from_sarif = sarif_to_sarif(report)
+        assert from_report == from_sarif
 
 
 # ─── JSON output tests ───────────────────────────────────────────────

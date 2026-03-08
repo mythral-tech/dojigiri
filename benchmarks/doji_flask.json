@@ -1,0 +1,3979 @@
+[
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 64,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'T_shell_context_processor' is assigned but never used",
+    "suggestion": "Remove unused variable 'T_shell_context_processor' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 67,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'T_teardown' is assigned but never used",
+    "suggestion": "Remove unused variable 'T_teardown' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 68,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'T_template_filter' is assigned but never used",
+    "suggestion": "Remove unused variable 'T_template_filter' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 69,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'T_template_global' is assigned but never used",
+    "suggestion": "Remove unused variable 'T_template_global' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 70,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'T_template_test' is assigned but never used",
+    "suggestion": "Remove unused variable 'T_template_test' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 1165,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'endpoint' may be used before assignment (first assigned line 1167)",
+    "suggestion": "Ensure 'endpoint' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 1285,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'rv' may be used before assignment (first assigned line 1290)",
+    "suggestion": "Ensure 'rv' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 1601,
+    "severity": "warning",
+    "category": "bug",
+    "source": "static",
+    "rule": "bare-except",
+    "message": "Bare except catches all exceptions including SystemExit and KeyboardInterrupt",
+    "suggestion": "Use 'except Exception:' to avoid catching KeyboardInterrupt/SystemExit",
+    "snippet": "except:",
+    "cwe": "CWE-396",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 109,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Flask' is overly large: 35 methods (>15)",
+    "suggestion": "Consider splitting 'Flask' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 254,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.__init_subclass__' is 55 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init_subclass__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 310,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 9 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 310,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.__init__' is 54 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 352,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert bool(static_host) == host_matching, (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 509,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.create_url_adapter' is 52 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'create_url_adapter' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 632,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.run' is 122 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'run' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 755,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.test_client' is 57 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'test_client' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 897,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.handle_exception' is 52 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'handle_exception' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 1102,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.url_for' is 121 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'url_for' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 1224,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'make_response' has high cyclomatic complexity (16 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 1224,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.make_response' is 141 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'make_response' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "line": 1566,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Flask.wsgi_app' is 51 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'wsgi_app' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\blueprints.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'BlueprintSetupState' is never used",
+    "suggestion": "Remove unused import 'BlueprintSetupState'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\blueprints.py",
+    "line": 19,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 8 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 1023,
+    "severity": "critical",
+    "category": "security",
+    "source": "static",
+    "rule": "eval-usage",
+    "message": "eval() can execute arbitrary code",
+    "suggestion": "Use ast.literal_eval() for safe evaluation, or avoid entirely",
+    "snippet": "eval(compile(f.read(), startup, \"exec\"), ctx)",
+    "cwe": "CWE-95",
+    "nist": [
+      "SI-10",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 331,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_loaded_app' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_loaded_app' (e.g., 'if _loaded_app is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 338,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_loaded_app' which may be None",
+    "suggestion": "Add a None check before accessing attributes on '_loaded_app' (e.g., 'if _loaded_app is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 371,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_loaded_app' which may be None",
+    "suggestion": "Add a None check before accessing attributes on '_loaded_app' (e.g., 'if _loaded_app is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 757,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'data' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'data' (e.g., 'if data is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 804,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'value' may be used before assignment (first assigned line 806)",
+    "suggestion": "Ensure 'value' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 810,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'cryptography' is never used",
+    "suggestion": "Remove unused import 'cryptography'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 975,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'reload' may be used before assignment (first assigned line 976)",
+    "suggestion": "Ensure 'reload' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 978,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'debugger' may be used before assignment (first assigned line 979)",
+    "suggestion": "Ensure 'debugger' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 1022,
+    "severity": "warning",
+    "category": "security",
+    "source": "ast",
+    "rule": "taint-flow",
+    "message": "Tainted data from 'startup' (env_var, line 1020) reaches sink 'open' (path_traversal) \u2014 path-sensitive analysis",
+    "suggestion": "Sanitize 'startup' before passing to 'open', or use parameterized queries/safe APIs",
+    "snippet": null,
+    "cwe": "CWE-20",
+    "nist": [
+      "SI-10",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 1036,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 1036,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 1098,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 1098,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 41,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'find_best_app' is 51 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'find_best_app' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 120,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'find_app_by_string' is 78 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'find_app_by_string' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 224,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "sys-path-modify",
+    "message": "sys.path modification \u2014 could enable module hijacking if path is untrusted",
+    "suggestion": "Avoid dynamic sys.path changes with untrusted paths",
+    "snippet": "sys.path.insert(0, path)",
+    "cwe": "CWE-426",
+    "nist": [
+      "CM-6",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 422,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'AppGroup' accesses 14 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 698,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'load_dotenv' is 66 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'load_dotenv' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 754,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if path is not None and os.path.isfile(path):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 935,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'run_command' has 9 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 935,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'run_command' is 59 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'run_command' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "line": 1021,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if startup and os.path.isfile(startup):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 209,
+    "severity": "critical",
+    "category": "security",
+    "source": "static",
+    "rule": "exec-usage",
+    "message": "exec() can execute arbitrary code",
+    "suggestion": "Avoid exec() \u2014 restructure code to not need it",
+    "snippet": "exec(compile(config_file.read(), filename, \"exec\"), d.__dict__)",
+    "cwe": "CWE-95",
+    "nist": [
+      "SI-10",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 163,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 163,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 250,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'obj' may be used before assignment (first assigned line 251)",
+    "suggestion": "Ensure 'obj' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 23,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__init__' in 'ConfigAttribute' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving '__init__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 30,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__get__' in 'ConfigAttribute' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving '__get__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 33,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__get__' in 'ConfigAttribute' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving '__get__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 35,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__get__' in 'ConfigAttribute' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving '__get__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 46,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__set__' in 'ConfigAttribute' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving '__set__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "line": 126,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Config.from_prefixed_env' is 60 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'from_prefixed_env' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 141,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'ctx' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'ctx' (e.g., 'if ctx is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 147,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'ctx' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'ctx' (e.g., 'if ctx is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 315,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'url_adapter' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'url_adapter' (e.g., 'if url_adapter is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 322,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_flashes' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_flashes' (e.g., 'if _flashes is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 326,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'url_adapter' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'url_adapter' (e.g., 'if url_adapter is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 331,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_cv_token' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_cv_token' (e.g., 'if _cv_token is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 465,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_cv_token' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_cv_token' (e.g., 'if _cv_token is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 154,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'copy_current_request_context' is 53 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'copy_current_request_context' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "line": 446,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'AppContext.pop' is 59 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'pop' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\debughelpers.py",
+    "line": 141,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'blueprint' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'blueprint' (e.g., 'if blueprint is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\debughelpers.py",
+    "line": 59,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(exc, RequestRedirect)",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\debughelpers.py",
+    "line": 124,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'explain_template_loading_attempts' is 56 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'explain_template_loading_attempts' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "line": 44,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'current_app' is assigned but never used",
+    "suggestion": "Remove unused variable 'current_app' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "line": 47,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'g' is assigned but never used",
+    "suggestion": "Remove unused variable 'g' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "line": 57,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'request' is assigned but never used",
+    "suggestion": "Remove unused variable 'request' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "line": 60,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'session' is assigned but never used",
+    "suggestion": "Remove unused variable 'session' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 599,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'mod' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'mod' (e.g., 'if mod is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 611,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'loader' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'loader' (e.g., 'if loader is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 63,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'stream_with_context' is 86 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'stream_with_context' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 121,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'gen' shadows name from function scope (line 117)",
+    "suggestion": "Rename 'gen' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 200,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'url_for' is 52 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'url_for' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 417,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'send_file' has 8 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 417,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'send_file' is 124 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'send_file' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "line": 587,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'get_root_path' is 55 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'get_root_path' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "line": 281,
+    "severity": "warning",
+    "category": "security",
+    "source": "static",
+    "rule": "weak-hash",
+    "message": "MD5/SHA1 are cryptographically weak hash algorithms",
+    "suggestion": "Use hashlib.sha256() or stronger for security-sensitive hashing",
+    "snippet": "return hashlib.sha1(string)",
+    "cwe": "CWE-328",
+    "nist": [
+      "SC-13",
+      "SC-12"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "line": 28,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'permanent' in 'SessionMixin' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'permanent' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "line": 33,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'permanent' in 'SessionMixin' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'permanent' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "line": 77,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'on_update' in 'SecureCookieSession' accesses 4 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'on_update' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "line": 78,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'modified' shadows name from class scope (line 71)",
+    "suggestion": "Rename 'modified' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 8,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'template_rendered' is assigned but never used",
+    "suggestion": "Remove unused variable 'template_rendered' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 9,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'before_render_template' is assigned but never used",
+    "suggestion": "Remove unused variable 'before_render_template' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 10,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'request_started' is assigned but never used",
+    "suggestion": "Remove unused variable 'request_started' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'request_finished' is assigned but never used",
+    "suggestion": "Remove unused variable 'request_finished' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 12,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'request_tearing_down' is assigned but never used",
+    "suggestion": "Remove unused variable 'request_tearing_down' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 13,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'got_request_exception' is assigned but never used",
+    "suggestion": "Remove unused variable 'got_request_exception' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 14,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'appcontext_tearing_down' is assigned but never used",
+    "suggestion": "Remove unused variable 'appcontext_tearing_down' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 15,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'appcontext_pushed' is assigned but never used",
+    "suggestion": "Remove unused variable 'appcontext_pushed' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 16,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'appcontext_popped' is assigned but never used",
+    "suggestion": "Remove unused variable 'appcontext_popped' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "line": 17,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'message_flashed' is assigned but never used",
+    "suggestion": "Remove unused variable 'message_flashed' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "line": 151,
+    "severity": "critical",
+    "category": "security",
+    "source": "static",
+    "rule": "ssti-risk",
+    "message": "Template constructed from string \u2014 may allow server-side template injection",
+    "suggestion": "Use pre-compiled templates from files, never from user-controlled strings",
+    "snippet": "def render_template_string(source: str, **context: t.Any) -> str:",
+    "cwe": "CWE-1336",
+    "nist": [
+      "SI-10",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "line": 159,
+    "severity": "critical",
+    "category": "security",
+    "source": "static",
+    "rule": "ssti-risk",
+    "message": "Template constructed from string \u2014 may allow server-side template injection",
+    "suggestion": "Use pre-compiled templates from files, never from user-controlled strings",
+    "snippet": "template = ctx.app.jinja_env.from_string(source)",
+    "cwe": "CWE-1336",
+    "nist": [
+      "SI-10",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "line": 211,
+    "severity": "critical",
+    "category": "security",
+    "source": "static",
+    "rule": "ssti-risk",
+    "message": "Template constructed from string \u2014 may allow server-side template injection",
+    "suggestion": "Use pre-compiled templates from files, never from user-controlled strings",
+    "snippet": "template = ctx.app.jinja_env.from_string(source)",
+    "cwe": "CWE-1336",
+    "nist": [
+      "SI-10",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "line": 94,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed-continue",
+    "message": "Exception caught and silently continued (except: continue)",
+    "suggestion": "Log the exception before continuing, or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "line": 235,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "resource-leak",
+    "message": "Resource 'response' (file) opened but never closed",
+    "suggestion": "Close 'response' explicitly or use a context manager (e.g., 'with' statement)",
+    "snippet": null,
+    "cwe": "CWE-404",
+    "nist": [
+      "SC-24"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "line": 49,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__init__' in 'EnvironBuilder' accesses 3 external vs 0 internal attributes",
+    "suggestion": "Consider moving '__init__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "line": 59,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert not (base_url or subdomain or url_scheme) or (",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "line": 88,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'json_dumps' in 'EnvironBuilder' accesses 3 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'json_dumps' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "line": 101,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "global-keyword",
+    "message": "'global' keyword used for: _werkzeug_version",
+    "suggestion": "Consider passing values as arguments or using a class",
+    "snippet": null,
+    "cwe": "CWE-1108"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 49,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'AppOrBlueprintKey' is assigned but never used",
+    "suggestion": "Remove unused variable 'AppOrBlueprintKey' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 50,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'AfterRequestCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'AfterRequestCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 54,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'BeforeFirstRequestCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'BeforeFirstRequestCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 55,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'BeforeRequestCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'BeforeRequestCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 59,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'ShellContextProcessorCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'ShellContextProcessorCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 60,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'TeardownCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'TeardownCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 64,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'TemplateContextProcessorCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'TemplateContextProcessorCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 67,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'TemplateFilterCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'TemplateFilterCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 68,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'TemplateGlobalCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'TemplateGlobalCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 69,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'TemplateTestCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'TemplateTestCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 70,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'URLDefaultCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'URLDefaultCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 71,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'URLValuePreprocessorCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'URLValuePreprocessorCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 79,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'ErrorHandlerCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'ErrorHandlerCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "line": 84,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'RouteCallable' is assigned but never used",
+    "suggestion": "Remove unused variable 'RouteCallable' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "line": 9,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'F' is assigned but never used",
+    "suggestion": "Remove unused variable 'F' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "line": 133,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'methods' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'methods' (e.g., 'if methods is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "line": 134,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'provide_automatic_options' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'provide_automatic_options' (e.g., 'if provide_automatic_options is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "line": 78,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'dispatch_request' in 'View' accesses 14 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'dispatch_request' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "line": 86,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'as_view' in 'View' accesses 14 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'as_view' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "line": 107,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'self' shadows name from function scope (line 113)",
+    "suggestion": "Rename 'self' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "line": 190,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert meth is not None, f\"Unimplemented method {request.method!r}\"",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 80,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_max_content_length' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_max_content_length' (e.g., 'if _max_content_length is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 90,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_max_content_length' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_max_content_length' (e.g., 'if _max_content_length is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 107,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_max_form_memory_size' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_max_form_memory_size' (e.g., 'if _max_form_memory_size is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 117,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_max_form_memory_size' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_max_form_memory_size' (e.g., 'if _max_form_memory_size is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 134,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_max_form_parts' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_max_form_parts' (e.g., 'if _max_form_parts is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 144,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_max_form_parts' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_max_form_parts' (e.g., 'if _max_form_parts is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 156,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'url_rule' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'url_rule' (e.g., 'if url_rule is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 60,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'max_content_length' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'max_content_length' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 89,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'max_content_length' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'max_content_length' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 93,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'max_form_memory_size' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'max_form_memory_size' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 116,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'max_form_memory_size' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'max_form_memory_size' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 120,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'max_form_parts' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'max_form_parts' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 143,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'max_form_parts' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'max_form_parts' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 147,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'endpoint' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'endpoint' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 162,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'blueprint' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'blueprint' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 181,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'blueprints' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'blueprints' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 197,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '_load_form_data' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving '_load_form_data' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "line": 212,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'on_json_loading_failed' in 'Request' accesses 7 external vs 3 internal attributes",
+    "suggestion": "Consider moving 'on_json_loading_failed' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 2,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Flask' is never used",
+    "suggestion": "Remove unused import 'Flask'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 3,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Blueprint' is never used",
+    "suggestion": "Remove unused import 'Blueprint'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 4,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Config' is never used",
+    "suggestion": "Remove unused import 'Config'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 5,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'after_this_request' is never used",
+    "suggestion": "Remove unused import 'after_this_request'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 6,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'copy_current_request_context' is never used",
+    "suggestion": "Remove unused import 'copy_current_request_context'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 7,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'has_app_context' is never used",
+    "suggestion": "Remove unused import 'has_app_context'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 8,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'has_request_context' is never used",
+    "suggestion": "Remove unused import 'has_request_context'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 9,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'current_app' is never used",
+    "suggestion": "Remove unused import 'current_app'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 10,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'g' is never used",
+    "suggestion": "Remove unused import 'g'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 11,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'request' is never used",
+    "suggestion": "Remove unused import 'request'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 12,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'session' is never used",
+    "suggestion": "Remove unused import 'session'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 13,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'abort' is never used",
+    "suggestion": "Remove unused import 'abort'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 14,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'flash' is never used",
+    "suggestion": "Remove unused import 'flash'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 15,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_flashed_messages' is never used",
+    "suggestion": "Remove unused import 'get_flashed_messages'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 16,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'get_template_attribute' is never used",
+    "suggestion": "Remove unused import 'get_template_attribute'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 17,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'make_response' is never used",
+    "suggestion": "Remove unused import 'make_response'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 18,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'redirect' is never used",
+    "suggestion": "Remove unused import 'redirect'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 19,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'send_file' is never used",
+    "suggestion": "Remove unused import 'send_file'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 20,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'send_from_directory' is never used",
+    "suggestion": "Remove unused import 'send_from_directory'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 21,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'stream_with_context' is never used",
+    "suggestion": "Remove unused import 'stream_with_context'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 22,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'url_for' is never used",
+    "suggestion": "Remove unused import 'url_for'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 23,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'jsonify' is never used",
+    "suggestion": "Remove unused import 'jsonify'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 24,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'appcontext_popped' is never used",
+    "suggestion": "Remove unused import 'appcontext_popped'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 25,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'appcontext_pushed' is never used",
+    "suggestion": "Remove unused import 'appcontext_pushed'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 26,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'appcontext_tearing_down' is never used",
+    "suggestion": "Remove unused import 'appcontext_tearing_down'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 27,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'before_render_template' is never used",
+    "suggestion": "Remove unused import 'before_render_template'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 28,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'got_request_exception' is never used",
+    "suggestion": "Remove unused import 'got_request_exception'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 29,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'message_flashed' is never used",
+    "suggestion": "Remove unused import 'message_flashed'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 30,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'request_finished' is never used",
+    "suggestion": "Remove unused import 'request_finished'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 31,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'request_started' is never used",
+    "suggestion": "Remove unused import 'request_started'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 32,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'request_tearing_down' is never used",
+    "suggestion": "Remove unused import 'request_tearing_down'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 33,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'template_rendered' is never used",
+    "suggestion": "Remove unused import 'template_rendered'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 34,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'render_template' is never used",
+    "suggestion": "Remove unused import 'render_template'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 35,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'render_template_string' is never used",
+    "suggestion": "Remove unused import 'render_template_string'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 36,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'stream_template' is never used",
+    "suggestion": "Remove unused import 'stream_template'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 37,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'stream_template_string' is never used",
+    "suggestion": "Remove unused import 'stream_template_string'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 38,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Request' is never used",
+    "suggestion": "Remove unused import 'Request'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "line": 39,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Response' is never used",
+    "suggestion": "Remove unused import 'Response'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "line": 208,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'compact' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on 'compact' (e.g., 'if compact is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "line": 166,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'dumps' in 'DefaultJSONProvider' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'dumps' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "line": 181,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'loads' in 'DefaultJSONProvider' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'loads' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "line": 189,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'response' in 'DefaultJSONProvider' accesses 6 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'response' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\tag.py",
+    "line": 310,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'value' may be used before assignment (first assigned line 312)",
+    "suggestion": "Ensure 'value' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\tag.py",
+    "line": 111,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'key' shadows name from class scope (line 101)",
+    "suggestion": "Rename 'key' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\tag.py",
+    "line": 115,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'key' shadows name from class scope (line 101)",
+    "suggestion": "Rename 'key' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 997,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'error' may be used before assignment (first assigned line 1000)",
+    "suggestion": "Ensure 'error' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 59,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'App' is overly large: 38 methods (>15), 28 attributes (>10)",
+    "suggestion": "Consider splitting 'App' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 279,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 9 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 279,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__init__' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving '__init__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 279,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'App.__init__' is 130 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 410,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '_check_setup_finished' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving '_check_setup_finished' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 423,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'name' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'name' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 440,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'logger' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'logger' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 467,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'jinja_env' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'jinja_env' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 476,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'create_jinja_environment' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'create_jinja_environment' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 479,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'make_config' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'make_config' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 495,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'make_aborter' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'make_aborter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 507,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'auto_find_instance_path' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'auto_find_instance_path' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 520,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'create_global_jinja_loader' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'create_global_jinja_loader' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 533,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'select_jinja_autoescape' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'select_jinja_autoescape' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 547,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'debug' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'debug' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 560,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'debug' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'debug' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 567,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'register_blueprint' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'register_blueprint' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 594,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'iter_blueprints' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'iter_blueprints' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 602,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_url_rule' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'add_url_rule' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 602,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'App.add_url_rule' is 57 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'add_url_rule' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 661,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_filter' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 663,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_filter' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 667,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_filter' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 689,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'App' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 696,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_template_filter' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'add_template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 711,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_test' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 713,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_test' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 717,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_test' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 746,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'App' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 753,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_template_test' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'add_template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 770,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_global' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 772,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_global' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 776,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'template_global' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 800,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'App' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 807,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_template_global' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'add_template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 824,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'teardown_appcontext' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'teardown_appcontext' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 855,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'shell_context_processor' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'shell_context_processor' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 865,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '_find_error_handler' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving '_find_error_handler' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 890,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'trap_http_exception' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'trap_http_exception' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 936,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'redirect' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'redirect' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 957,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'inject_url_defaults' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'inject_url_defaults' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "line": 978,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'handle_url_build_error' in 'App' accesses 17 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'handle_url_build_error' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 66,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'subdomain' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'subdomain' (e.g., 'if subdomain is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 70,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'subdomain' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'subdomain' (e.g., 'if subdomain is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 74,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'url_prefix' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'url_prefix' (e.g., 'if url_prefix is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 77,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'url_prefix' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'url_prefix' (e.g., 'if url_prefix is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 99,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'rule' may be used before assignment (first assigned line 100)",
+    "suggestion": "Ensure 'rule' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 195,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'name' may be used before assignment (first assigned line 201)",
+    "suggestion": "Ensure 'name' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 369,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'bp_url_prefix' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'bp_url_prefix' (e.g., 'if bp_url_prefix is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 119,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Blueprint' is overly large: 38 methods (>15), 14 attributes (>10)",
+    "suggestion": "Consider splitting 'Blueprint' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 174,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 8 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 174,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '__init__' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving '__init__' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 213,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '_check_setup_finished' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving '_check_setup_finished' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 224,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'record' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'record' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 233,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'record_once' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'record_once' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 246,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'make_setup_state' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'make_setup_state' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 256,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'register_blueprint' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'register_blueprint' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 273,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'register' has high cyclomatic complexity (19 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 273,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'register' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'register' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 273,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Blueprint.register' is 105 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'register' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 313,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "fstring-no-expr",
+    "message": "f-string without any expressions \u2014 unnecessary f prefix",
+    "suggestion": "Remove the f prefix",
+    "snippet": "f\" provide a unique name.\"",
+    "cwe": "CWE-1078"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 379,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method '_merge_blueprint_funcs' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving '_merge_blueprint_funcs' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 380,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'extend' in 'Blueprint' accesses 30 external vs 8 internal attributes",
+    "suggestion": "Consider moving 'extend' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 385,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'key' shadows name from function scope (line 389)",
+    "suggestion": "Rename 'key' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 413,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_url_rule' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'add_url_rule' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 444,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_filter' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 446,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_filter' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 450,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_filter' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 469,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'Blueprint' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 476,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_app_template_filter' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'add_app_template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 492,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'register_template_filter' in 'Blueprint' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'register_template_filter' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 498,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_test' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 500,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_test' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 504,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_test' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 525,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'Blueprint' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 532,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_app_template_test' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'add_app_template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 550,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'register_template_test' in 'Blueprint' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'register_template_test' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 556,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_global' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 558,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_global' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 562,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_template_global' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 583,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'Blueprint' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 590,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'add_app_template_global' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'add_app_template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 608,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'register_template_global' in 'Blueprint' accesses 3 external vs 1 internal attributes",
+    "suggestion": "Consider moving 'register_template_global' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 614,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'before_app_request' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'before_app_request' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 624,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'after_app_request' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'after_app_request' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 634,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'teardown_app_request' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'teardown_app_request' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 644,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_context_processor' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_context_processor' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 656,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_errorhandler' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_errorhandler' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 673,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_url_value_preprocessor' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_url_value_preprocessor' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "line": 685,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'app_url_defaults' in 'Blueprint' accesses 12 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'app_url_defaults' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 228,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_static_folder' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_static_folder' (e.g., 'if _static_folder is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 235,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'value' may be used before assignment (first assigned line 236)",
+    "suggestion": "Ensure 'value' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 238,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_static_folder' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_static_folder' (e.g., 'if _static_folder is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 255,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_static_url_path' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_static_url_path' (e.g., 'if _static_url_path is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 266,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'value' may be used before assignment (first assigned line 267)",
+    "suggestion": "Ensure 'value' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 269,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_static_url_path' which may be None (typed as Optional)",
+    "suggestion": "Add a None check before accessing attributes on '_static_url_path' (e.g., 'if _static_url_path is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 52,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Scaffold' is overly large: 30 methods (>15), 17 attributes (>10)",
+    "suggestion": "Consider splitting 'Scaffold' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 75,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Scaffold.__init__' is 141 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 360,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'decorator' in 'Scaffold' accesses 4 external vs 0 internal attributes",
+    "suggestion": "Consider moving 'decorator' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 368,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Scaffold.add_url_rule' is 66 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'add_url_rule' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "line": 705,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert view_func is not None, \"expected view func if endpoint is not provided.\"",
+    "cwe": "CWE-617"
+  }
+]

@@ -114,7 +114,8 @@ class TestCoverage:
             "global-keyword", "unreachable-code", "high-complexity",
             "too-many-args", "empty-exception-handler", "unused-variable",
             "variable-shadowing", "possibly-uninitialized", "null-dereference",
-            "resource-leak", "taint-flow", "god-class", "feature-envy",
+            "resource-leak", "taint-flow", "taint-flow-cross-file",
+            "god-class", "feature-envy",
             "long-method", "near-duplicate", "semantic-clone", "dead-function",
             "arg-count-mismatch", "cross-file-issue", "mutable-default",
         }

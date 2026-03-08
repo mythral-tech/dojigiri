@@ -1,0 +1,310 @@
+[
+  {
+    "code": "210             \"PROPAGATE_EXCEPTIONS\": None,\n211             \"SECRET_KEY\": None,\n212             \"SECRET_KEY_FALLBACKS\": None,\n213             \"PERMANENT_SESSION_LIFETIME\": timedelta(days=31),\n214             \"USE_X_SENDFILE\": False,\n215             \"TRUSTED_HOSTS\": None,\n216             \"SERVER_NAME\": None,\n217             \"APPLICATION_ROOT\": \"/\",\n218             \"SESSION_COOKIE_NAME\": \"session\",\n219             \"SESSION_COOKIE_DOMAIN\": None,\n220             \"SESSION_COOKIE_PATH\": None,\n221             \"SESSION_COOKIE_HTTPONLY\": True,\n222             \"SESSION_COOKIE_SECURE\": False,\n223             \"SESSION_COOKIE_PARTITIONED\": False,\n224             \"SESSION_COOKIE_SAMESITE\": None,\n225             \"SESSION_REFRESH_EACH_REQUEST\": True,\n226             \"MAX_CONTENT_LENGTH\": None,\n227             \"MAX_FORM_MEMORY_SIZE\": 500_000,\n228             \"MAX_FORM_PARTS\": 1_000,\n229             \"SEND_FILE_MAX_AGE_DEFAULT\": None,\n230             \"TRAP_BAD_REQUEST_ERRORS\": None,\n231             \"TRAP_HTTP_EXCEPTIONS\": False,\n232             \"EXPLAIN_TEMPLATE_LOADING\": False,\n233             \"PREFERRED_URL_SCHEME\": \"http\",\n234             \"TEMPLATES_AUTO_RELOAD\": None,\n235             \"MAX_COOKIE_SIZE\": 4093,\n236             \"PROVIDE_AUTOMATIC_OPTIONS\": True,\n237         }\n238     )\n239 \n240     #: The class that is used for request objects.  See :class:`~flask.Request`\n241     #: for more information.\n242     request_class: type[Request] = Request\n",
+    "col_offset": 12,
+    "end_col_offset": 24,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "issue_confidence": "MEDIUM",
+    "issue_cwe": {
+      "id": 259,
+      "link": "https://cwe.mitre.org/data/definitions/259.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Possible hardcoded password: 'None'",
+    "line_number": 211,
+    "line_range": [
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      223,
+      224,
+      225,
+      226,
+      227,
+      228,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+    "test_id": "B105",
+    "test_name": "hardcoded_password_string"
+  },
+  {
+    "code": "211             \"SECRET_KEY\": None,\n212             \"SECRET_KEY_FALLBACKS\": None,\n213             \"PERMANENT_SESSION_LIFETIME\": timedelta(days=31),\n214             \"USE_X_SENDFILE\": False,\n215             \"TRUSTED_HOSTS\": None,\n216             \"SERVER_NAME\": None,\n217             \"APPLICATION_ROOT\": \"/\",\n218             \"SESSION_COOKIE_NAME\": \"session\",\n219             \"SESSION_COOKIE_DOMAIN\": None,\n220             \"SESSION_COOKIE_PATH\": None,\n221             \"SESSION_COOKIE_HTTPONLY\": True,\n222             \"SESSION_COOKIE_SECURE\": False,\n223             \"SESSION_COOKIE_PARTITIONED\": False,\n224             \"SESSION_COOKIE_SAMESITE\": None,\n225             \"SESSION_REFRESH_EACH_REQUEST\": True,\n226             \"MAX_CONTENT_LENGTH\": None,\n227             \"MAX_FORM_MEMORY_SIZE\": 500_000,\n228             \"MAX_FORM_PARTS\": 1_000,\n229             \"SEND_FILE_MAX_AGE_DEFAULT\": None,\n230             \"TRAP_BAD_REQUEST_ERRORS\": None,\n231             \"TRAP_HTTP_EXCEPTIONS\": False,\n232             \"EXPLAIN_TEMPLATE_LOADING\": False,\n233             \"PREFERRED_URL_SCHEME\": \"http\",\n234             \"TEMPLATES_AUTO_RELOAD\": None,\n235             \"MAX_COOKIE_SIZE\": 4093,\n236             \"PROVIDE_AUTOMATIC_OPTIONS\": True,\n237         }\n238     )\n239 \n240     #: The class that is used for request objects.  See :class:`~flask.Request`\n241     #: for more information.\n242     request_class: type[Request] = Request\n243 \n",
+    "col_offset": 12,
+    "end_col_offset": 34,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "issue_confidence": "MEDIUM",
+    "issue_cwe": {
+      "id": 259,
+      "link": "https://cwe.mitre.org/data/definitions/259.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Possible hardcoded password: 'None'",
+    "line_number": 212,
+    "line_range": [
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221,
+      222,
+      223,
+      224,
+      225,
+      226,
+      227,
+      228,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
+    "test_id": "B105",
+    "test_name": "hardcoded_password_string"
+  },
+  {
+    "code": "351         if self.has_static_folder:\n352             assert bool(static_host) == host_matching, (\n353                 \"Invalid static_host/host_matching combination\"\n354             )\n355             # Use a weakref to avoid creating a reference cycle between the app\n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 352,
+    "line_range": [
+      352,
+      353,
+      354
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "1022         with open(startup) as f:\n1023             eval(compile(f.read(), startup, \"exec\"), ctx)\n1024 \n",
+    "col_offset": 12,
+    "end_col_offset": 57,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 78,
+      "link": "https://cwe.mitre.org/data/definitions/78.html"
+    },
+    "issue_severity": "MEDIUM",
+    "issue_text": "Use of possibly insecure function - consider using safer ast.literal_eval.",
+    "line_number": 1023,
+    "line_range": [
+      1023
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b307-eval",
+    "test_id": "B307",
+    "test_name": "blacklist"
+  },
+  {
+    "code": "162                 value = loads(value)\n163             except Exception:\n164                 # Keep the value as a string if loading failed.\n165                 pass\n166 \n",
+    "col_offset": 12,
+    "end_col_offset": 20,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Try, Except, Pass detected.",
+    "line_number": 163,
+    "line_range": [
+      163,
+      164,
+      165
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html",
+    "test_id": "B110",
+    "test_name": "try_except_pass"
+  },
+  {
+    "code": "208             with open(filename, mode=\"rb\") as config_file:\n209                 exec(compile(config_file.read(), filename, \"exec\"), d.__dict__)\n210         except OSError as e:\n",
+    "col_offset": 16,
+    "end_col_offset": 79,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 78,
+      "link": "https://cwe.mitre.org/data/definitions/78.html"
+    },
+    "issue_severity": "MEDIUM",
+    "issue_text": "Use of exec detected.",
+    "line_number": 209,
+    "line_range": [
+      209
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b102_exec_used.html",
+    "test_id": "B102",
+    "test_name": "exec_used"
+  },
+  {
+    "code": "58         exc = request.routing_exception\n59         assert isinstance(exc, RequestRedirect)\n60         buf = [\n",
+    "col_offset": 8,
+    "end_col_offset": 47,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\debughelpers.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 59,
+    "line_range": [
+      59
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "187     def to_python(self, value: t.Any) -> t.Any:\n188         return Markup(value)\n189 \n",
+    "col_offset": 15,
+    "end_col_offset": 28,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\tag.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 79,
+      "link": "https://cwe.mitre.org/data/definitions/79.html"
+    },
+    "issue_severity": "MEDIUM",
+    "issue_text": "Potential XSS with ``markupsafe.Markup`` detected. Do not use ``Markup`` on untrusted data.",
+    "line_number": 188,
+    "line_range": [
+      188
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b704_markupsafe_markup_xss.html",
+    "test_id": "B704",
+    "test_name": "markupsafe_markup_xss"
+  },
+  {
+    "code": "704     \"\"\"\n705     assert view_func is not None, \"expected view func if endpoint is not provided.\"\n706     return view_func.__name__\n",
+    "col_offset": 4,
+    "end_col_offset": 83,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 705,
+    "line_range": [
+      705
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "280     \"\"\"\n281     return hashlib.sha1(string)\n282 \n",
+    "col_offset": 11,
+    "end_col_offset": 31,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 327,
+      "link": "https://cwe.mitre.org/data/definitions/327.html"
+    },
+    "issue_severity": "HIGH",
+    "issue_text": "Use of weak SHA1 hash for security. Consider usedforsecurity=False",
+    "line_number": 281,
+    "line_range": [
+      281
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html",
+    "test_id": "B324",
+    "test_name": "hashlib"
+  },
+  {
+    "code": "58     ) -> None:\n59         assert not (base_url or subdomain or url_scheme) or (\n60             base_url is not None\n61         ) != bool(subdomain or url_scheme), (\n62             'Cannot pass \"subdomain\" or \"url_scheme\" with \"base_url\".'\n63         )\n64 \n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 59,
+    "line_range": [
+      59,
+      60,
+      61,
+      62,
+      63
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "189 \n190         assert meth is not None, f\"Unimplemented method {request.method!r}\"\n191         return current_app.ensure_sync(meth)(**kwargs)  # type: ignore[no-any-return]\n",
+    "col_offset": 8,
+    "end_col_offset": 75,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 190,
+    "line_range": [
+      190
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  }
+]

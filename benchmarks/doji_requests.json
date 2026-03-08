@@ -1,0 +1,2192 @@
+[
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 10,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'socket' is never used",
+    "suggestion": "Remove unused import 'socket'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 72,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'DEFAULT_POOLBLOCK' is assigned but never used",
+    "suggestion": "Remove unused variable 'DEFAULT_POOLBLOCK' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 73,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'DEFAULT_POOLSIZE' is assigned but never used",
+    "suggestion": "Remove unused variable 'DEFAULT_POOLSIZE' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 75,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'DEFAULT_POOL_TIMEOUT' is assigned but never used",
+    "suggestion": "Remove unused variable 'DEFAULT_POOL_TIMEOUT' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 646,
+    "severity": "warning",
+    "category": "security",
+    "source": "static",
+    "rule": "url-scheme-audit",
+    "message": "urlopen permits file:/ and custom schemes \u2014 verify URL scheme is restricted to https",
+    "suggestion": "Validate URL scheme against allowlist (e.g., only https://) before opening",
+    "snippet": "resp = conn.urlopen(",
+    "cwe": "CWE-918",
+    "nist": [
+      "SI-10",
+      "SC-7"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 94,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if not os.path.isdir(verify):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 282,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'HTTPAdapter.cert_verify' is 55 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'cert_verify' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 304,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if not cert_loc or not os.path.exists(cert_loc):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 306,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "fstring-no-expr",
+    "message": "f-string without any expressions \u2014 unnecessary f prefix",
+    "suggestion": "Remove the f prefix",
+    "snippet": "f\"Could not find a suitable TLS CA certificate bundle, \"",
+    "cwe": "CWE-1078"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 312,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if not os.path.isdir(cert_loc):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 330,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "fstring-no-expr",
+    "message": "f-string without any expressions \u2014 unnecessary f prefix",
+    "suggestion": "Remove the f prefix",
+    "snippet": "f\"Could not find the TLS certificate file, \"",
+    "cwe": "CWE-1078"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 592,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'send' has high cyclomatic complexity (21 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 592,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'HTTPAdapter.send' is 107 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'send' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 638,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "fstring-no-expr",
+    "message": "f-string without any expressions \u2014 unnecessary f prefix",
+    "suggestion": "Remove the f prefix",
+    "snippet": "f\"or a single float to set both timeouts to the same value.\"",
+    "cwe": "CWE-1078"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "line": 665,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: Remove this in 3.0.0: see #2811",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 21,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'CONTENT_TYPE_FORM_URLENCODED' is assigned but never used",
+    "suggestion": "Remove unused variable 'CONTENT_TYPE_FORM_URLENCODED' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 22,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'CONTENT_TYPE_MULTI_PART' is assigned but never used",
+    "suggestion": "Remove unused variable 'CONTENT_TYPE_MULTI_PART' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 141,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'algorithm' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'algorithm' (e.g., 'if algorithm is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 148,
+    "severity": "warning",
+    "category": "security",
+    "source": "static",
+    "rule": "weak-hash",
+    "message": "MD5/SHA1 are cryptographically weak hash algorithms",
+    "suggestion": "Use hashlib.sha256() or stronger for security-sensitive hashing",
+    "snippet": "return hashlib.md5(x).hexdigest()",
+    "cwe": "CWE-328",
+    "nist": [
+      "SC-13",
+      "SC-12"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 156,
+    "severity": "warning",
+    "category": "security",
+    "source": "static",
+    "rule": "weak-hash",
+    "message": "MD5/SHA1 are cryptographically weak hash algorithms",
+    "suggestion": "Use hashlib.sha256() or stronger for security-sensitive hashing",
+    "snippet": "return hashlib.sha1(x).hexdigest()",
+    "cwe": "CWE-328",
+    "nist": [
+      "SC-13",
+      "SC-12"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 176,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 's' may be used before assignment (first assigned line 200)",
+    "suggestion": "Ensure 's' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 205,
+    "severity": "warning",
+    "category": "security",
+    "source": "static",
+    "rule": "weak-hash",
+    "message": "MD5/SHA1 are cryptographically weak hash algorithms",
+    "suggestion": "Use hashlib.sha256() or stronger for security-sensitive hashing",
+    "snippet": "cnonce = hashlib.sha1(s).hexdigest()[:16]",
+    "cwe": "CWE-328",
+    "nist": [
+      "SC-13",
+      "SC-12"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 211,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'qop' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'qop' (e.g., 'if qop is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 126,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'build_digest_header' has high cyclomatic complexity (18 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 126,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'HTTPDigestAuth.build_digest_header' is 109 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'build_digest_header' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 145,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'md5_utf8' in 'HTTPDigestAuth' accesses 49 external vs 14 internal attributes",
+    "suggestion": "Consider moving 'md5_utf8' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 153,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'sha_utf8' in 'HTTPDigestAuth' accesses 49 external vs 14 internal attributes",
+    "suggestion": "Consider moving 'sha_utf8' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 161,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'sha256_utf8' in 'HTTPDigestAuth' accesses 49 external vs 14 internal attributes",
+    "suggestion": "Consider moving 'sha256_utf8' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 169,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "feature-envy",
+    "message": "Method 'sha512_utf8' in 'HTTPDigestAuth' accesses 49 external vs 14 internal attributes",
+    "suggestion": "Consider moving 'sha512_utf8' to the class it references most, or extract the external access into a helper",
+    "snippet": null,
+    "cwe": "CWE-1075"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 181,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# XXX not implemented yet",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 215,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# XXX handle auth-int.",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "line": 220,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# XXX should the partial digests be encoded too?",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 20,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'is_urllib3_1' is assigned but never used",
+    "suggestion": "Remove unused variable 'is_urllib3_1' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 23,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'is_urllib3_1' is assigned but never used",
+    "suggestion": "Remove unused variable 'is_urllib3_1' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 37,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 37,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 52,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'is_py2' is assigned but never used",
+    "suggestion": "Remove unused variable 'is_py2' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 55,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'is_py3' is assigned but never used",
+    "suggestion": "Remove unused variable 'is_py3' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 64,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'json' is never used",
+    "suggestion": "Remove unused import 'json'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 69,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'JSONDecodeError' is never used",
+    "suggestion": "Remove unused import 'JSONDecodeError'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 72,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'OrderedDict' is never used",
+    "suggestion": "Remove unused import 'OrderedDict'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 73,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Callable' is never used",
+    "suggestion": "Remove unused import 'Callable'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 74,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'cookielib' is never used",
+    "suggestion": "Remove unused import 'cookielib'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 75,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Morsel' is never used",
+    "suggestion": "Remove unused import 'Morsel'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 76,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'StringIO' is never used",
+    "suggestion": "Remove unused import 'StringIO'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 81,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'quote' is never used",
+    "suggestion": "Remove unused import 'quote'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 93,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'getproxies' is never used",
+    "suggestion": "Remove unused import 'getproxies'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 101,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'builtin_str' is assigned but never used",
+    "suggestion": "Remove unused variable 'builtin_str' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 102,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "shadowed-builtin",
+    "message": "Assignment shadows builtin 'str'",
+    "suggestion": "Rename variable to avoid shadowing builtin 'str'",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 103,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "shadowed-builtin",
+    "message": "Assignment shadows builtin 'bytes'",
+    "suggestion": "Rename variable to avoid shadowing builtin 'bytes'",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 104,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'basestring' is assigned but never used",
+    "suggestion": "Remove unused variable 'basestring' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 105,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'numeric_types' is assigned but never used",
+    "suggestion": "Remove unused variable 'numeric_types' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 106,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'integer_types' is assigned but never used",
+    "suggestion": "Remove unused variable 'integer_types' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 36,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "dynamic-import",
+    "message": "Dynamic module import \u2014 arbitrary code execution if module name is user-controlled",
+    "suggestion": "Validate module name against an allowlist",
+    "snippet": "chardet = importlib.import_module(lib)",
+    "cwe": "CWE-502",
+    "nist": [
+      "SI-10",
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "line": 36,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'chardet' shadows name from module scope (line 42)",
+    "suggestion": "Rename 'chardet' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\cookies.py",
+    "line": 176,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'RequestsCookieJar' is overly large: 24 methods (>15)",
+    "suggestion": "Consider splitting 'RequestsCookieJar' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\help.py",
+    "line": 66,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'info' is 57 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'info' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\hooks.py",
+    "line": 26,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'hooks' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'hooks' (e.g., 'if hooks is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\hooks.py",
+    "line": 20,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "todo-marker",
+    "message": "TODO/FIXME marker found",
+    "suggestion": null,
+    "snippet": "# TODO: response is the only one",
+    "cwe": "CWE-546"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 13,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'encodings.idna' is never used",
+    "suggestion": "Remove unused import 'encodings.idna'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 81,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'DEFAULT_REDIRECT_LIMIT' is assigned but never used",
+    "suggestion": "Remove unused variable 'DEFAULT_REDIRECT_LIMIT' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 83,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'ITER_CHUNK_SIZE' is assigned but never used",
+    "suggestion": "Remove unused variable 'ITER_CHUNK_SIZE' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 200,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "possibly-uninitialized",
+    "message": "Variable 'content_type' may be used before assignment (first assigned line 203)",
+    "suggestion": "Ensure 'content_type' is assigned before use on all code paths",
+    "snippet": null,
+    "cwe": "CWE-457"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 338,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'method' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'method' (e.g., 'if method is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 340,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'url' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'url' (e.g., 'if url is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 342,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'headers' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'headers' (e.g., 'if headers is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 345,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_cookies' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_cookies' (e.g., 'if _cookies is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 347,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'body' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'body' (e.g., 'if body is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 351,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_body_position' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_body_position' (e.g., 'if _body_position is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 517,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'body' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'body' (e.g., 'if body is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 539,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'body' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'body' (e.g., 'if body is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 572,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'body' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'body' (e.g., 'if body is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 663,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_next' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_next' (e.g., 'if _next is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 666,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'status_code' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'status_code' (e.g., 'if status_code is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 676,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'raw' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'raw' (e.g., 'if raw is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 679,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'url' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'url' (e.g., 'if url is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 682,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'encoding' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'encoding' (e.g., 'if encoding is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 690,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'reason' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'reason' (e.g., 'if reason is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 705,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'request' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'request' (e.g., 'if request is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 896,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_content' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_content' (e.g., 'if _content is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 902,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_content' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_content' (e.g., 'if _content is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 904,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_content' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_content' (e.g., 'if _content is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 909,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on '_content' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on '_content' (e.g., 'if _content is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 928,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'content' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'content' (e.g., 'if content is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 968,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 968,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 139,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function '_encode_files' has high cyclomatic complexity (18 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 139,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'RequestEncodingMixin._encode_files' is 67 lines long (>50)",
+    "suggestion": "Consider extracting parts of '_encode_files' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 260,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function '__init__' has 10 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 315,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'PreparedRequest' is overly large: 13 attributes (>10)",
+    "suggestion": "Consider splitting 'PreparedRequest' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 353,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'prepare' has 10 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 411,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'prepare_url' has high cyclomatic complexity (18 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 411,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'PreparedRequest.prepare_url' is 73 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'prepare_url' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 496,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'prepare_body' has high cyclomatic complexity (19 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 496,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'PreparedRequest.prepare_body' is 77 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'prepare_body' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 642,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Response' is overly large: 23 methods (>15), 24 attributes (>10)",
+    "suggestion": "Consider splitting 'Response' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "line": 801,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Response.iter_content' is 57 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'iter_content' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 34,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'REDIRECT_STATI' is never used",
+    "suggestion": "Remove unused import 'REDIRECT_STATI'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 42,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'should_bypass_proxies' is never used",
+    "suggestion": "Remove unused import 'should_bypass_proxies'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 399,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'auth' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'auth' (e.g., 'if auth is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 431,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'cert' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'cert' (e.g., 'if cert is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 452,
+    "severity": "warning",
+    "category": "security",
+    "source": "static",
+    "rule": "insecure-http",
+    "message": "Insecure HTTP URL (not localhost)",
+    "suggestion": "Use HTTPS instead",
+    "snippet": "self.mount(\"http://\", HTTPAdapter())",
+    "cwe": "CWE-319",
+    "nist": [
+      "SC-8",
+      "SC-13"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 683,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'stream' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'stream' (e.g., 'if stream is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 745,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 745,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 779,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'verify' which may be None (from nullable return value)",
+    "suggestion": "Add a None check before accessing attributes on 'verify' (e.g., 'if verify is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 160,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'resolve_redirects' has 8 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 160,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'SessionRedirectMixin.resolve_redirects' is 122 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'resolve_redirects' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 357,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "god-class",
+    "message": "Class 'Session' is overly large: 19 methods (>15), 13 attributes (>10)",
+    "suggestion": "Consider splitting 'Session' into smaller, focused classes",
+    "snippet": null,
+    "cwe": "CWE-1075",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 391,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Session.__init__' is 62 lines long (>50)",
+    "suggestion": "Consider extracting parts of '__init__' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 503,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "too-many-args",
+    "message": "Function 'request' has 16 arguments",
+    "suggestion": "Consider using a dataclass or config object to group parameters",
+    "snippet": null,
+    "cwe": "CWE-1064",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 503,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Session.request' is 92 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'request' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "line": 676,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Method 'Session.send' is 76 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'send' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\status_codes.py",
+    "line": 116,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'code' shadows name from function scope (line 110)",
+    "suggestion": "Rename 'code' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\status_codes.py",
+    "line": 120,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "global-keyword",
+    "message": "'global' keyword used for: __doc__",
+    "suggestion": "Consider passing values as arguments or using a class",
+    "snippet": null,
+    "cwe": "CWE-1108"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 28,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'HEADER_VALIDATORS' is never used",
+    "suggestion": "Remove unused import 'HEADER_VALIDATORS'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 62,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'DEFAULT_CA_BUNDLE_PATH' is assigned but never used",
+    "suggestion": "Remove unused variable 'DEFAULT_CA_BUNDLE_PATH' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 64,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'DEFAULT_PORTS' is assigned but never used",
+    "suggestion": "Remove unused variable 'DEFAULT_PORTS' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 152,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 152,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 245,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 245,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 109,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "regex-injection",
+    "message": "Regex pattern from variable \u2014 potential ReDoS if user-controlled",
+    "suggestion": "Use re.escape() on user input or set a timeout with regex module",
+    "snippet": "if re.match(test, host, re.I):",
+    "cwe": "CWE-1333",
+    "nist": [
+      "SI-10"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 134,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'super_len' has high cyclomatic complexity (18 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 134,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'super_len' is 69 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'super_len' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 221,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if os.path.exists(loc):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 261,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if os.path.exists(path):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 268,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "while archive and not os.path.exists(archive):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 286,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "toctou-file-check",
+    "message": "File existence check before use \u2014 potential TOCTOU race condition",
+    "suggestion": "Use try/except around the file operation instead of checking first",
+    "snippet": "if not os.path.exists(extracted_path):",
+    "cwe": "CWE-367",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 753,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "high-complexity",
+    "message": "Function 'should_bypass_proxies' has high cyclomatic complexity (16 branches)",
+    "suggestion": "Consider breaking into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1121",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 753,
+    "severity": "info",
+    "category": "style",
+    "source": "ast",
+    "rule": "long-method",
+    "message": "Function 'should_bypass_proxies' is 59 lines long (>50)",
+    "suggestion": "Consider extracting parts of 'should_bypass_proxies' into smaller functions",
+    "snippet": null,
+    "cwe": "CWE-1080",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "line": 1047,
+    "severity": "info",
+    "category": "style",
+    "source": "static",
+    "rule": "fstring-no-expr",
+    "message": "f-string without any expressions \u2014 unnecessary f prefix",
+    "suggestion": "Remove the f prefix",
+    "snippet": "f\"Invalid leading whitespace, reserved character(s), or return \"",
+    "cwe": "CWE-1078"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "line": 20,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-variable",
+    "message": "Variable 'HEADER_VALIDATORS' is assigned but never used",
+    "suggestion": "Remove unused variable 'HEADER_VALIDATORS' or prefix with _",
+    "snippet": null,
+    "cwe": "CWE-563",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "line": 13,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "regex-injection",
+    "message": "Regex pattern from variable \u2014 potential ReDoS if user-controlled",
+    "suggestion": "Use re.escape() on user input or set a timeout with regex module",
+    "snippet": "_VALID_HEADER_NAME_RE_BYTE = re.compile(rb\"^[^:\\s][^:\\r\\n]*$\")",
+    "cwe": "CWE-1333",
+    "nist": [
+      "SI-10"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "line": 15,
+    "severity": "info",
+    "category": "security",
+    "source": "static",
+    "rule": "regex-injection",
+    "message": "Regex pattern from variable \u2014 potential ReDoS if user-controlled",
+    "suggestion": "Use re.escape() on user input or set a timeout with regex module",
+    "snippet": "_VALID_HEADER_VALUE_RE_BYTE = re.compile(rb\"^\\S[^\\r\\n]*$|^$\")",
+    "cwe": "CWE-1333",
+    "nist": [
+      "SI-10"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "line": 46,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert isinstance(u_string, str)",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 81,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "null-dereference",
+    "message": "Attribute access on 'charset_normalizer_version' which may be None (assigned None)",
+    "suggestion": "Add a None check before accessing attributes on 'charset_normalizer_version' (e.g., 'if charset_normalizer_version is not None:')",
+    "snippet": null,
+    "cwe": "CWE-476",
+    "nist": [
+      "SI-16"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 138,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "empty-exception-handler",
+    "message": "Exception caught and silently ignored",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 138,
+    "severity": "warning",
+    "category": "bug",
+    "source": "ast",
+    "rule": "exception-swallowed",
+    "message": "Exception caught and silently ignored (except: pass)",
+    "suggestion": "Log the exception or handle it explicitly",
+    "snippet": null,
+    "cwe": "CWE-390",
+    "nist": [
+      "SI-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 150,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'packages' is never used",
+    "suggestion": "Remove unused import 'packages'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 163,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'delete' is never used",
+    "suggestion": "Remove unused import 'delete'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 164,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'ConnectionError' is never used",
+    "suggestion": "Remove unused import 'ConnectionError'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 176,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'PreparedRequest' is never used",
+    "suggestion": "Remove unused import 'PreparedRequest'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 177,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'Session' is never used",
+    "suggestion": "Remove unused import 'Session'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 178,
+    "severity": "warning",
+    "category": "dead_code",
+    "source": "ast",
+    "rule": "unused-import",
+    "message": "Import 'codes' is never used",
+    "suggestion": "Remove unused import 'codes'",
+    "snippet": null,
+    "cwe": "CWE-561",
+    "nist": [
+      "SA-11"
+    ]
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 58,
+    "severity": "info",
+    "category": "bug",
+    "source": "ast",
+    "rule": "variable-shadowing",
+    "message": "Variable 'chardet_version' shadows name from module scope (line 55)",
+    "suggestion": "Rename 'chardet_version' to avoid shadowing",
+    "snippet": null,
+    "cwe": "CWE-710"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 60,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert urllib3_version != [\"dev\"]  # Verify urllib3 isn't installed from git.",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 70,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert major >= 1",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 72,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert minor >= 21",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 79,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert (3, 0, 2) <= (major, minor, patch) < (8, 0, 0)",
+    "cwe": "CWE-617"
+  },
+  {
+    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "line": 84,
+    "severity": "info",
+    "category": "bug",
+    "source": "static",
+    "rule": "assert-statement",
+    "message": "Assert statements are stripped with -O flag",
+    "suggestion": "Use explicit if/raise for production checks",
+    "snippet": "assert (2, 0, 0) <= (major, minor, patch) < (4, 0, 0)",
+    "cwe": "CWE-617"
+  }
+]

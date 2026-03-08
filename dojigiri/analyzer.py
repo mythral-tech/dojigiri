@@ -208,6 +208,24 @@ def scan_quick(
                         )
                     )
 
+    # Cross-file taint analysis (Python files only)
+    python_files: dict[str, str] = {}
+    for fa in analyses:
+        if fa.language == "python":
+            try:
+                content = Path(fa.path).read_text(encoding="utf-8", errors="replace")
+                python_files[fa.path] = content
+            except OSError:
+                pass
+    if len(python_files) >= 2:
+        try:
+            from .taint import analyze_taint_cross_file
+
+            xfile_taint = analyze_taint_cross_file(python_files)
+            cross_file_findings.extend(xfile_taint)
+        except Exception as e:
+            logger.debug("Cross-file taint analysis skipped: %s", e)
+
     # Clear semantics references to free memory (not needed after this point)
     for fa in analyses:
         fa.semantics = None

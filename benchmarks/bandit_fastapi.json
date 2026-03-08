@@ -1,0 +1,1222 @@
+[
+  {
+    "code": "361             break\n362     assert issubclass(origin_type, shared.sequence_types)  # type: ignore[arg-type]\n363     return shared.sequence_annotation_to_type[origin_type](value)  # type: ignore[no-any-return,index]\n",
+    "col_offset": 4,
+    "end_col_offset": 57,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 362,
+    "line_range": [
+      362
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "928         if self.openapi_url:\n929             assert self.title, \"A title must be provided for OpenAPI, e.g.: 'My API'\"\n930             assert self.version, \"A version must be provided for OpenAPI, e.g.: '2.1.0'\"\n",
+    "col_offset": 12,
+    "end_col_offset": 85,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 929,
+    "line_range": [
+      929
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "929             assert self.title, \"A title must be provided for OpenAPI, e.g.: 'My API'\"\n930             assert self.version, \"A version must be provided for OpenAPI, e.g.: '2.1.0'\"\n931         # TODO: remove when discarding the openapi_prefix parameter\n",
+    "col_offset": 12,
+    "end_col_offset": 88,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 930,
+    "line_range": [
+      930
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "96         unwrapped = _unwrapped_call(self.call)\n97         assert isinstance(unwrapped, SecurityBase)\n98         return unwrapped\n",
+    "col_offset": 8,
+    "end_col_offset": 50,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 97,
+    "line_range": [
+      97
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "98         # Import an attribute that can be mocked/deleted in testing\n99         assert __version__ > \"0.0.12\"\n100     except (ImportError, AssertionError):\n",
+    "col_offset": 8,
+    "end_col_offset": 37,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 99,
+    "line_range": [
+      99
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "104 \n105             assert __version__\n106             try:\n",
+    "col_offset": 12,
+    "end_col_offset": 30,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 105,
+    "line_range": [
+      105
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "111 \n112                 assert parse_options_header\n113             except ImportError:\n",
+    "col_offset": 16,
+    "end_col_offset": 43,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 112,
+    "line_range": [
+      112
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "121 def get_parameterless_sub_dependant(*, depends: params.Depends, path: str) -> Dependant:\n122     assert callable(depends.dependency), (\n123         \"A parameter-less dependency must have a callable dependency\"\n124     )\n125     own_oauth_scopes: list[str] = []\n",
+    "col_offset": 4,
+    "end_col_offset": 5,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 122,
+    "line_range": [
+      122,
+      123,
+      124
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "315         if param_details.depends is not None:\n316             assert param_details.depends.dependency\n317             if (\n",
+    "col_offset": 12,
+    "end_col_offset": 51,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 316,
+    "line_range": [
+      316
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "321             ):\n322                 assert dependant.call\n323                 raise DependencyScopeError(\n",
+    "col_offset": 16,
+    "end_col_offset": 37,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 322,
+    "line_range": [
+      322
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "346         ):\n347             assert param_details.field is None, (\n348                 f\"Cannot specify multiple FastAPI annotations for {param_name!r}\"\n349             )\n350             continue\n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 347,
+    "line_range": [
+      347,
+      348,
+      349
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "350             continue\n351         assert param_details.field is not None\n352         if isinstance(param_details.field.field_info, params.Body):\n",
+    "col_offset": 8,
+    "end_col_offset": 46,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 351,
+    "line_range": [
+      351
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "440             )\n441             assert (\n442                 field_info.default == Undefined or field_info.default == RequiredParam\n443             ), (\n444                 f\"`{field_info.__class__.__name__}` default value cannot be set in\"\n445                 f\" `Annotated` for {param_name!r}. Set the default value with `=` instead.\"\n446             )\n447             if value is not inspect.Signature.empty:\n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 441,
+    "line_range": [
+      441,
+      442,
+      443,
+      444,
+      445,
+      446
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "447             if value is not inspect.Signature.empty:\n448                 assert not is_path_param, \"Path parameters cannot have default values\"\n449                 field_info.default = value\n",
+    "col_offset": 16,
+    "end_col_offset": 86,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 448,
+    "line_range": [
+      448
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "456     if isinstance(value, params.Depends):\n457         assert depends is None, (\n458             \"Cannot specify `Depends` in `Annotated` and default value\"\n459             f\" together for {param_name!r}\"\n460         )\n461         assert field_info is None, (\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 457,
+    "line_range": [
+      457,
+      458,
+      459,
+      460
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "460         )\n461         assert field_info is None, (\n462             \"Cannot specify a FastAPI annotation in `Annotated` and `Depends` as a\"\n463             f\" default value together for {param_name!r}\"\n464         )\n465         depends = value\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 461,
+    "line_range": [
+      461,
+      462,
+      463,
+      464
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "467     elif isinstance(value, FieldInfo):\n468         assert field_info is None, (\n469             \"Cannot specify FastAPI annotations in `Annotated` and default value\"\n470             f\" together for {param_name!r}\"\n471         )\n472         field_info = value\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 468,
+    "line_range": [
+      468,
+      469,
+      470,
+      471
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "495     ):\n496         assert field_info is None, (\n497             f\"Cannot specify FastAPI annotation for type {type_annotation!r}\"\n498         )\n499     # Handle default assignations, neither field_info nor depends was not found in Annotated nor default value\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 496,
+    "line_range": [
+      496,
+      497,
+      498
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "520         if is_path_param:\n521             assert isinstance(field_info, params.Path), (\n522                 f\"Cannot use `{field_info.__class__.__name__}` for path param\"\n523                 f\" {param_name!r}\"\n524             )\n525         elif (\n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 521,
+    "line_range": [
+      521,
+      522,
+      523,
+      524
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "545         if is_path_param:\n546             assert is_scalar_field(field=field), (\n547                 \"Path params must be of one of the supported types\"\n548             )\n549         elif isinstance(field_info, params.Query):\n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 546,
+    "line_range": [
+      546,
+      547,
+      548
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "549         elif isinstance(field_info, params.Query):\n550             assert (\n551                 is_scalar_field(field)\n552                 or field_annotation_is_scalar_sequence(field.field_info.annotation)\n553                 or lenient_issubclass(field.field_info.annotation, BaseModel)\n554             ), f\"Query parameter {param_name!r} must be one of the supported types\"\n555 \n",
+    "col_offset": 12,
+    "end_col_offset": 83,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 550,
+    "line_range": [
+      550,
+      551,
+      552,
+      553,
+      554
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "568     else:\n569         assert field_info_in == params.ParamTypes.cookie, (\n570             f\"non-body parameters must be in path, query, header or cookie: {field.name}\"\n571         )\n572         dependant.cookie_params.append(field)\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 569,
+    "line_range": [
+      569,
+      570,
+      571
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "577 ) -> Any:\n578     assert dependant.call\n579     if dependant.is_async_gen_callable:\n",
+    "col_offset": 4,
+    "end_col_offset": 25,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 578,
+    "line_range": [
+      578
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "609     request_astack = request.scope.get(\"fastapi_inner_astack\")\n610     assert isinstance(request_astack, AsyncExitStack), (\n611         \"fastapi_inner_astack not found in request scope\"\n612     )\n613     function_astack = request.scope.get(\"fastapi_function_astack\")\n",
+    "col_offset": 4,
+    "end_col_offset": 5,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 610,
+    "line_range": [
+      610,
+      611,
+      612
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "613     function_astack = request.scope.get(\"fastapi_function_astack\")\n614     assert isinstance(function_astack, AsyncExitStack), (\n615         \"fastapi_function_astack not found in request scope\"\n616     )\n617     values: dict[str, Any] = {}\n",
+    "col_offset": 4,
+    "end_col_offset": 5,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 614,
+    "line_range": [
+      614,
+      615,
+      616
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "839         field_info = first_field.field_info\n840         assert isinstance(field_info, params.Param), (\n841             \"Params must be subclasses of Param\"\n842         )\n843         loc: tuple[str, ...] = (field_info.in_.value,)\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 840,
+    "line_range": [
+      840,
+      841,
+      842
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "851         field_info = field.field_info\n852         assert isinstance(field_info, params.Param), (\n853             \"Params must be subclasses of Param\"\n854         )\n855         loc = (field_info.in_.value, get_validation_alias(field))\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 852,
+    "line_range": [
+      852,
+      853,
+      854
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "929             # For types\n930             assert isinstance(value, sequence_types)\n931             results: list[bytes | str] = []\n",
+    "col_offset": 12,
+    "end_col_offset": 52,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 930,
+    "line_range": [
+      930
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "954     errors: list[dict[str, Any]] = []\n955     assert body_fields, \"request_body_to_args() should be called with fields\"\n956     single_not_embedded_field = len(body_fields) == 1 and not embed_body_fields\n",
+    "col_offset": 4,
+    "end_col_offset": 77,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 955,
+    "line_range": [
+      955
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "242     if dataclasses.is_dataclass(obj):\n243         assert not isinstance(obj, type)\n244         obj_dict = dataclasses.asdict(obj)\n",
+    "col_offset": 8,
+    "end_col_offset": 40,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 243,
+    "line_range": [
+      243
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "18 \n19     assert email_validator  # make autoflake ignore the unused import\n20     from pydantic import EmailStr\n",
+    "col_offset": 4,
+    "end_col_offset": 26,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 19,
+    "line_range": [
+      19
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "191         return None\n192     assert isinstance(body_field, ModelField)\n193     body_schema = get_schema_from_model_field(\n",
+    "col_offset": 4,
+    "end_col_offset": 45,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 192,
+    "line_range": [
+      192
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "275     definitions: dict[str, Any] = {}\n276     assert route.methods is not None, \"Methods must be a list\"\n277     if isinstance(route.response_class, DefaultPlaceholder):\n",
+    "col_offset": 4,
+    "end_col_offset": 62,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 276,
+    "line_range": [
+      276
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "280         current_response_class = route.response_class\n281     assert current_response_class, \"A response class is needed to generate OpenAPI\"\n282     route_response_media_type: str | None = current_response_class.media_type\n",
+    "col_offset": 4,
+    "end_col_offset": 83,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 281,
+    "line_range": [
+      281
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "426                     )\n427                     assert isinstance(process_response, dict), (\n428                         \"An additional response must be a dict\"\n429                     )\n430                     field = route.response_fields.get(additional_status_code)\n",
+    "col_offset": 20,
+    "end_col_offset": 21,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 427,
+    "line_range": [
+      427,
+      428,
+      429
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "495             if route.body_field:\n496                 assert isinstance(route.body_field, ModelField), (\n497                     \"A request body must be a Pydantic Field\"\n498                 )\n499                 body_fields_from_routes.append(route.body_field)\n",
+    "col_offset": 16,
+    "end_col_offset": 17,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 496,
+    "line_range": [
+      496,
+      497,
+      498
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "185     ):\n186         assert default is ..., \"Path parameters cannot have a default value\"\n187         self.in_ = self.in_\n",
+    "col_offset": 8,
+    "end_col_offset": 76,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 186,
+    "line_range": [
+      186
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "51     def render(self, content: Any) -> bytes:\n52         assert ujson is not None, \"ujson must be installed to use UJSONResponse\"\n53         return ujson.dumps(content, ensure_ascii=False).encode(\"utf-8\")\n",
+    "col_offset": 8,
+    "end_col_offset": 80,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 52,
+    "line_range": [
+      52
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "81     def render(self, content: Any) -> bytes:\n82         assert orjson is not None, \"orjson must be installed to use ORJSONResponse\"\n83         return orjson.dumps(\n",
+    "col_offset": 8,
+    "end_col_offset": 83,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 82,
+    "line_range": [
+      82
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "320     # facilitate profiling endpoints, since inner functions are harder to profile.\n321     assert dependant.call is not None, \"dependant.call must be a function\"\n322 \n",
+    "col_offset": 4,
+    "end_col_offset": 74,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 321,
+    "line_range": [
+      321
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "364 ) -> Callable[[Request], Coroutine[Any, Any, Response]]:\n365     assert dependant.call is not None, \"dependant.call must be a function\"\n366     is_coroutine = dependant.is_coroutine_callable\n",
+    "col_offset": 4,
+    "end_col_offset": 74,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 365,
+    "line_range": [
+      365
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "380         file_stack = request.scope.get(\"fastapi_middleware_astack\")\n381         assert isinstance(file_stack, AsyncExitStack), (\n382             \"fastapi_middleware_astack not found in request scope\"\n383         )\n384 \n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 381,
+    "line_range": [
+      381,
+      382,
+      383
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "449         async_exit_stack = request.scope.get(\"fastapi_inner_astack\")\n450         assert isinstance(async_exit_stack, AsyncExitStack), (\n451             \"fastapi_inner_astack not found in request scope\"\n452         )\n453         solved_result = await solve_dependencies(\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 450,
+    "line_range": [
+      450,
+      451,
+      452
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "461         errors = solved_result.errors\n462         assert dependant.call  # For types\n463         if not errors:\n",
+    "col_offset": 8,
+    "end_col_offset": 29,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 462,
+    "line_range": [
+      462
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "721         # Return response\n722         assert response\n723         return response\n",
+    "col_offset": 8,
+    "end_col_offset": 23,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 722,
+    "line_range": [
+      722
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "743         async_exit_stack = websocket.scope.get(\"fastapi_inner_astack\")\n744         assert isinstance(async_exit_stack, AsyncExitStack), (\n745             \"fastapi_inner_astack not found in request scope\"\n746         )\n747         solved_result = await solve_dependencies(\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 744,
+    "line_range": [
+      744,
+      745,
+      746
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "758             )\n759         assert dependant.call is not None, \"dependant.call must be a function\"\n760         await dependant.call(**solved_result.values)\n",
+    "col_offset": 8,
+    "end_col_offset": 78,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 759,
+    "line_range": [
+      759
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "900         if self.response_model:\n901             assert is_body_allowed_for_status_code(status_code), (\n902                 f\"Status code {status_code} must not have a response body\"\n903             )\n904             response_name = \"Response_\" + self.unique_id\n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 901,
+    "line_range": [
+      901,
+      902,
+      903
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "927         for additional_status_code, response in self.responses.items():\n928             assert isinstance(response, dict), \"An additional response must be a dict\"\n929             model = response.get(\"model\")\n",
+    "col_offset": 12,
+    "end_col_offset": 86,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 928,
+    "line_range": [
+      928
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "930             if model:\n931                 assert is_body_allowed_for_status_code(additional_status_code), (\n932                     f\"Status code {additional_status_code} must not have a response body\"\n933                 )\n934                 response_name = f\"Response_{additional_status_code}_{self.unique_id}\"\n",
+    "col_offset": 16,
+    "end_col_offset": 17,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 931,
+    "line_range": [
+      931,
+      932,
+      933
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "943 \n944         assert callable(endpoint), \"An endpoint must be a callable\"\n945         self.dependant = get_dependant(\n",
+    "col_offset": 8,
+    "end_col_offset": 67,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 944,
+    "line_range": [
+      944
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "1284         if prefix:\n1285             assert prefix.startswith(\"/\"), \"A path prefix must start with '/'\"\n1286             assert not prefix.endswith(\"/\"), (\n",
+    "col_offset": 12,
+    "end_col_offset": 78,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 1285,
+    "line_range": [
+      1285
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "1285             assert prefix.startswith(\"/\"), \"A path prefix must start with '/'\"\n1286             assert not prefix.endswith(\"/\"), (\n1287                 \"A path prefix must not end with '/', as the routes will start with '/'\"\n1288             )\n1289 \n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 1286,
+    "line_range": [
+      1286,
+      1287,
+      1288
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "1708         \"\"\"\n1709         assert self is not router, (\n1710             \"Cannot include the same APIRouter instance into itself. \"\n1711             \"Did you mean to include a different router?\"\n1712         )\n1713         if prefix:\n",
+    "col_offset": 8,
+    "end_col_offset": 9,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 1709,
+    "line_range": [
+      1709,
+      1710,
+      1711,
+      1712
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "1713         if prefix:\n1714             assert prefix.startswith(\"/\"), \"A path prefix must start with '/'\"\n1715             assert not prefix.endswith(\"/\"), (\n",
+    "col_offset": 12,
+    "end_col_offset": 78,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 1714,
+    "line_range": [
+      1714
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "1714             assert prefix.startswith(\"/\"), \"A path prefix must start with '/'\"\n1715             assert not prefix.endswith(\"/\"), (\n1716                 \"A path prefix must not end with '/', as the routes will start with '/'\"\n1717             )\n1718         else:\n",
+    "col_offset": 12,
+    "end_col_offset": 13,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 1715,
+    "line_range": [
+      1715,
+      1716,
+      1717
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "4913         \"\"\"\n4914         assert event_type in (\"startup\", \"shutdown\")\n4915         if event_type == \"startup\":\n",
+    "col_offset": 8,
+    "end_col_offset": 52,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 4914,
+    "line_range": [
+      4914
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  },
+  {
+    "code": "97     operation_id = re.sub(r\"\\W\", \"_\", operation_id)\n98     assert route.methods\n99     operation_id = f\"{operation_id}_{list(route.methods)[0].lower()}\"\n",
+    "col_offset": 4,
+    "end_col_offset": 24,
+    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\utils.py",
+    "issue_confidence": "HIGH",
+    "issue_cwe": {
+      "id": 703,
+      "link": "https://cwe.mitre.org/data/definitions/703.html"
+    },
+    "issue_severity": "LOW",
+    "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+    "line_number": 98,
+    "line_range": [
+      98
+    ],
+    "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
+    "test_id": "B101",
+    "test_name": "assert_used"
+  }
+]

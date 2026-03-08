@@ -1,0 +1,119 @@
+name: 'Dojigiri Security Scan'
+description: 'Static security analysis with CWE/NIST compliance mapping'
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  path:
+    description: 'Path to scan'
+    default: '.'
+  min-severity:
+    description: 'Minimum severity to report (info, warning, critical)'
+    default: 'warning'
+  output-format:
+    description: 'Output format (text, json, sarif)'
+    default: 'sarif'
+  fail-on-critical:
+    description: 'Fail the action if critical issues are found'
+    default: 'true'
+  diff-only:
+    description: 'Only scan changed files (PR mode)'
+    default: 'false'
+  profile:
+    description: 'Compliance profile preset (owasp, dod, ci)'
+    default: ''
+  ignore-rules:
+    description: 'Comma-separated rule names to suppress'
+    default: ''
+  python-version:
+    description: 'Python version to use'
+    default: '3.12'
+
+outputs:
+  findings-count:
+    description: 'Total number of findings'
+    value: ${{ steps.scan.outputs.findings-count }}
+  critical-count:
+    description: 'Number of critical findings'
+    value: ${{ steps.scan.outputs.critical-count }}
+  sarif-file:
+    description: 'Path to SARIF output file'
+    value: ${{ steps.scan.outputs.sarif-file }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Dojigiri
+      shell: bash
+      run: |
+        pip install --quiet "${{ github.action_path }}"
+
+    - name: Run scan
+      id: scan
+      shell: bash
+      run: |
+        set +e
+
+        SCAN_ARGS="${{ inputs.path }}"
+        SCAN_ARGS="$SCAN_ARGS --min-severity ${{ inputs.min-severity }}"
+        SCAN_ARGS="$SCAN_ARGS --output ${{ inputs.output-format }}"
+
+        # Profile
+        if [ -n "${{ inputs.profile }}" ]; then
+          SCAN_ARGS="$SCAN_ARGS --profile ${{ inputs.profile }}"
+        fi
+
+        # Ignore rules
+        if [ -n "${{ inputs.ignore-rules }}" ]; then
+          SCAN_ARGS="$SCAN_ARGS --ignore ${{ inputs.ignore-rules }}"
+        fi
+
+        # Diff-only mode for PRs
+        if [ "${{ inputs.diff-only }}" = "true" ]; then
+          SCAN_ARGS="$SCAN_ARGS --diff"
+        fi
+
+        # Run the scan
+        if [ "${{ inputs.output-format }}" = "sarif" ]; then
+          python -m dojigiri scan $SCAN_ARGS > dojigiri-results.sarif 2>/tmp/doji-stderr.txt
+          EXIT_CODE=$?
+          # Also run text output for the log
+          python -m dojigiri scan ${{ inputs.path }} --min-severity ${{ inputs.min-severity }} --output text 2>/dev/null || true
+        else
+          python -m dojigiri scan $SCAN_ARGS 2>/tmp/doji-stderr.txt
+          EXIT_CODE=$?
+        fi
+
+        # Parse counts from a JSON run
+        COUNTS=$(python -m dojigiri scan ${{ inputs.path }} --min-severity ${{ inputs.min-severity }} --output json 2>/dev/null || echo '{}')
+        FINDINGS=$(echo "$COUNTS" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('total_findings',0))" 2>/dev/null || echo "0")
+        CRITICAL=$(echo "$COUNTS" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('critical',0))" 2>/dev/null || echo "0")
+
+        echo "findings-count=$FINDINGS" >> "$GITHUB_OUTPUT"
+        echo "critical-count=$CRITICAL" >> "$GITHUB_OUTPUT"
+
+        if [ "${{ inputs.output-format }}" = "sarif" ]; then
+          echo "sarif-file=dojigiri-results.sarif" >> "$GITHUB_OUTPUT"
+        fi
+
+        # Fail on critical if configured
+        if [ "${{ inputs.fail-on-critical }}" = "true" ] && [ "$EXIT_CODE" = "2" ]; then
+          echo "::error::Dojigiri found critical security issues ($CRITICAL critical findings)"
+          exit 1
+        fi
+
+        exit 0
+
+    - name: Upload SARIF to GitHub Code Scanning
+      if: inputs.output-format == 'sarif' && always()
+      uses: github/codeql-action/upload-sarif@v3
+      continue-on-error: true
+      with:
+        sarif_file: dojigiri-results.sarif
+        category: dojigiri
