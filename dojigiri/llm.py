@@ -8,16 +8,15 @@ Calls into: config.py, llm_backend.py, chunker.py, metrics.py
 Data in -> Data out: code Chunk -> list[Finding] + cost metadata
 """
 
+from __future__ import annotations
+
 import json
 import logging
-import time
-import threading
-from typing import Optional
-
 import re
+import threading
+import time
 
-
-_CONTROL_CHAR_RE = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
+_CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
 def _sanitize_for_prompt(text: str, max_length: int = 2000) -> str:
@@ -29,7 +28,7 @@ def _sanitize_for_prompt(text: str, max_length: int = 2000) -> str:
     if not text:  # doji:ignore(possibly-uninitialized)
         return ""
     # Strip control characters (keep newlines and tabs)
-    text = _CONTROL_CHAR_RE.sub('', text)
+    text = _CONTROL_CHAR_RE.sub("", text)
     # Truncate
     if len(text) > max_length:
         text = text[:max_length] + " [truncated]"
@@ -42,22 +41,29 @@ def _sanitize_code(code: str) -> str:
     Keeps newlines, tabs, and carriage returns — strips NUL, BEL, ESC, etc.
     that could confuse the model or be used for prompt injection via invisible chars.
     """
-    return _CONTROL_CHAR_RE.sub('', code) if code else ""
+    return _CONTROL_CHAR_RE.sub("", code) if code else ""
+
 
 logger = logging.getLogger(__name__)
 
-from .types import Finding, Severity, Category, Source, Confidence
-from .config import (
-    LLM_MAX_TOKENS, LLM_DEBUG_MAX_TOKENS,
-    LLM_ANALYZE_MAX_TOKENS, LLM_SYNTHESIS_MAX_TOKENS, LLM_FIX_MAX_TOKENS,
-    LLM_EXPLAIN_MAX_TOKENS,
-    LLM_TEMPERATURE, LLM_INPUT_COST_PER_M, LLM_OUTPUT_COST_PER_M,
-    LANGUAGE_DEBUG_HINTS, LANGUAGE_OPTIMIZE_HINTS,
-    CHUNK_SIZE,
-)
-from .llm_backend import LLMBackend, LLMResponse, get_tiered_backend, TIER_SCAN, TIER_DEEP
 from .chunker import Chunk, chunk_file
-from .llm_focus import build_micro_queries, MicroQuery
+from .config import (
+    CHUNK_SIZE,
+    LANGUAGE_DEBUG_HINTS,
+    LANGUAGE_OPTIMIZE_HINTS,
+    LLM_ANALYZE_MAX_TOKENS,
+    LLM_DEBUG_MAX_TOKENS,
+    LLM_EXPLAIN_MAX_TOKENS,
+    LLM_FIX_MAX_TOKENS,
+    LLM_INPUT_COST_PER_M,
+    LLM_MAX_TOKENS,
+    LLM_OUTPUT_COST_PER_M,
+    LLM_SYNTHESIS_MAX_TOKENS,
+    LLM_TEMPERATURE,
+)
+from .llm_backend import TIER_DEEP, TIER_SCAN, LLMBackend, LLMResponse, get_tiered_backend
+from .llm_focus import MicroQuery, build_micro_queries
+from .types import Category, Confidence, Finding, Severity, Source
 
 # Module-level backend config — set by CLI before any LLM calls
 _backend_config: dict = {}
@@ -85,6 +91,7 @@ def _strip_markdown_fences(text: str) -> str:
 
 class CostLimitExceeded(LLMError):
     """Raised when the cost tracker exceeds the configured max_cost."""
+
     pass
 
 
@@ -96,7 +103,7 @@ class CostTracker:
     Sonnet for deep) is tracked accurately.
     """
 
-    def __init__(self, backend: Optional[LLMBackend] = None, max_cost: Optional[float] = None) -> None:
+    def __init__(self, backend: LLMBackend | None = None, max_cost: float | None = None) -> None:
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         self._total_cache_read = 0
@@ -104,16 +111,25 @@ class CostTracker:
         self._accumulated_cost = 0.0  # exact dollar cost from per-call pricing
         self.max_cost = max_cost
         self._lock = threading.Lock()
+        # Signal flag: set once cost limit is exceeded so parallel workers
+        # can skip remaining LLM calls without making additional API requests.
+        self._limit_exceeded = threading.Event()
         # Track which models were used (for transparency reporting)
         self._models_used: set[str] = set()
         # Fallback pricing when no backend passed to add()
         self._default_input_cost = backend.cost_per_million_input if backend else LLM_INPUT_COST_PER_M
         self._default_output_cost = backend.cost_per_million_output if backend else LLM_OUTPUT_COST_PER_M
 
-    def add(self, input_tokens: int, output_tokens: int,
-            cache_read_tokens: int = 0, cache_create_tokens: int = 0,
-            backend: Optional[LLMBackend] = None) -> None:
-        from .llm_backend import _CACHE_READ_DISCOUNT, _CACHE_CREATE_PREMIUM, AnthropicBackend
+    def add(
+        self,
+        input_tokens: int,
+        output_tokens: int,
+        cache_read_tokens: int = 0,
+        cache_create_tokens: int = 0,
+        backend: LLMBackend | None = None,
+    ) -> None:
+        from .llm_backend import _CACHE_CREATE_PREMIUM, _CACHE_READ_DISCOUNT, AnthropicBackend
+
         input_rate = backend.cost_per_million_input if backend else self._default_input_cost
         output_rate = backend.cost_per_million_output if backend else self._default_output_cost
         # Track model names for transparency
@@ -136,26 +152,28 @@ class CostTracker:
             self._accumulated_cost += call_cost
             # Check cost limit inside lock to avoid TOCTOU race
             if self.max_cost is not None and self._accumulated_cost > self.max_cost:
-                raise CostLimitExceeded(
-                    f"Cost limit exceeded: ${self._accumulated_cost:.4f} > ${self.max_cost:.2f}"
-                )
+                self._limit_exceeded.set()
+                raise CostLimitExceeded(f"Cost limit exceeded: ${self._accumulated_cost:.4f} > ${self.max_cost:.2f}")
         # Record in session metrics (best-effort)
         try:
             from .metrics import get_session
+
             session = get_session()
             if session:
                 session.record_llm_call(input_tokens, output_tokens)
         except Exception as e:
             logger.debug("Failed to record LLM call metrics: %s", e)
 
-    def add_response(self, response: LLMResponse, backend: Optional[LLMBackend] = None) -> None:
+    def add_response(self, response: LLMResponse, backend: LLMBackend | None = None) -> None:
         """Record costs from an LLMResponse — convenience wrapper around add().
 
         Avoids repeating the response field extraction at every call site.
         """
         self.add(
-            response.input_tokens, response.output_tokens,
-            response.cache_read_tokens, response.cache_create_tokens,
+            response.input_tokens,
+            response.output_tokens,
+            response.cache_read_tokens,
+            response.cache_create_tokens,
             backend=backend,
         )
 
@@ -169,6 +187,11 @@ class CostTracker:
         """Return sorted list of model names used in this session."""
         with self._lock:
             return sorted(self._models_used)
+
+    @property
+    def limit_exceeded(self) -> bool:
+        """True if the cost limit has been exceeded. Lock-free (Event.is_set is atomic)."""
+        return self._limit_exceeded.is_set()
 
 
 def _get_backend(tier: str = TIER_DEEP) -> LLMBackend:
@@ -295,6 +318,7 @@ If no issues found, return: {{"summary": "Code is well-optimized", "findings": [
 
 # ─── Helpers ─────────────────────────────────────────────────────────
 
+
 def _recover_truncated_json(text: str) -> list | None:
     """Attempt to recover a truncated JSON array by finding the last complete object.
 
@@ -312,12 +336,12 @@ def _recover_truncated_json(text: str) -> list | None:
 
     # Try from the last } backwards — first success is the longest valid prefix
     for pos in reversed(brace_positions):
-        candidate = stripped[:pos + 1].rstrip().rstrip(",") + "]"
+        candidate = stripped[: pos + 1].rstrip().rstrip(",") + "]"
         try:
             result = json.loads(candidate)
             if isinstance(result, list):
                 # Estimate how many objects we dropped
-                remaining = stripped[pos + 1:].strip().rstrip("]").strip()
+                remaining = stripped[pos + 1 :].strip().rstrip("]").strip()
                 dropped_hint = remaining.count("{")
                 msg = f"  [llm] Recovered {len(result)} findings from truncated JSON"
                 if dropped_hint > 0:
@@ -335,7 +359,7 @@ def _estimate_chunk_tokens(chunk: Chunk) -> int:
     return len(chunk.content) // 4 + 500
 
 
-def _parse_python_traceback(error_msg: str) -> Optional[dict]:
+def _parse_python_traceback(error_msg: str) -> dict | None:
     """Parse a Python traceback string into structured data.
 
     Returns dict with 'frames' (list of {file, line, function, code}),
@@ -403,8 +427,10 @@ def _format_static_findings_for_llm(findings: list[Finding]) -> str:
     if not findings:
         return ""
 
-    parts = ["Static analysis already found these issues. Confirm, refine, or dismiss them. "
-             "Focus on issues static analysis CANNOT find.\n"]
+    parts = [
+        "Static analysis already found these issues. Confirm, refine, or dismiss them. "
+        "Focus on issues static analysis CANNOT find.\n"
+    ]
     for f in findings:
         severity = f.severity.value.upper()
         source = f.source.value
@@ -417,7 +443,7 @@ def _format_static_findings_for_llm(findings: list[Finding]) -> str:
     return "\n".join(parts)
 
 
-def _parse_debug_response(text: str) -> Optional[dict]:
+def _parse_debug_response(text: str) -> dict | None:
     """Parse a JSON response from debug/optimize LLM call.
 
     Tries json.loads first, then strips markdown fences,
@@ -451,7 +477,7 @@ def _parse_debug_response(text: str) -> Optional[dict]:
     first_brace = stripped.find("{")
     last_brace = stripped.rfind("}")
     if first_brace != -1 and last_brace > first_brace:
-        candidate = stripped[first_brace:last_brace + 1]
+        candidate = stripped[first_brace : last_brace + 1]
         try:
             result = json.loads(candidate)
             if isinstance(result, dict):
@@ -462,7 +488,7 @@ def _parse_debug_response(text: str) -> Optional[dict]:
     return None
 
 
-def _parse_scan_response(text: str) -> Optional[list]:
+def _parse_scan_response(text: str) -> list | None:
     """Parse a JSON array response from scan LLM calls with full resilience.
 
     Applies the same recovery strategies as _parse_debug_response but for
@@ -501,7 +527,7 @@ def _parse_scan_response(text: str) -> Optional[list]:
     first_bracket = stripped.find("[")
     last_bracket = stripped.rfind("]")
     if first_bracket != -1 and last_bracket > first_bracket:
-        candidate = stripped[first_bracket:last_bracket + 1]
+        candidate = stripped[first_bracket : last_bracket + 1]
         try:
             result = json.loads(candidate)
             if isinstance(result, list):
@@ -559,8 +585,11 @@ _RETRIABLE_STATUS_CODES = {408, 429, 500, 502, 503, 529}
 
 
 def _api_call_with_retry(
-    backend: LLMBackend, system: str, messages: list[dict[str, str]],
-    max_tokens: int = 4096, temperature: float = 0.0,
+    backend: LLMBackend,
+    system: str,
+    messages: list[dict[str, str]],
+    max_tokens: int = 4096,
+    temperature: float = 0.0,
 ) -> LLMResponse:
     """Call backend.chat with exponential backoff on transient errors."""
     last_err = None
@@ -579,8 +608,7 @@ def _api_call_with_retry(
 
             if is_retriable and attempt < len(_RETRY_DELAYS):
                 delay = _RETRY_DELAYS[attempt]
-                logger.debug("Retry %d/%d after %ds (status=%s)",
-                             attempt + 1, len(_RETRY_DELAYS), delay, status)
+                logger.debug("Retry %d/%d after %ds (status=%s)", attempt + 1, len(_RETRY_DELAYS), delay, status)
                 time.sleep(delay)
                 last_err = e
             else:
@@ -627,7 +655,9 @@ def _analyze_via_micro_queries(
     total_est = sum(mq.estimated_tokens for mq in queries) + 300
     logger.debug(
         "Micro-query mode: %d queries, ~%d est tokens for %s",
-        len(queries), total_est, filepath,
+        len(queries),
+        total_est,
+        filepath,
     )
 
     # Adaptive output budget: scale max_tokens to query count.
@@ -694,17 +724,19 @@ def _raw_to_findings(
                 suggestion = str(suggestion)[:500]
             rule = str(rf.get("rule", "llm-finding"))[:100]
 
-            findings.append(Finding(
-                file=filepath,
-                line=line,
-                severity=Severity(rf.get("severity", "info")),
-                category=Category(rf.get("category", "bug")),
-                source=Source.LLM,
-                rule=rule,
-                message=message,
-                suggestion=suggestion,
-                confidence=confidence,
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=line,
+                    severity=Severity(rf.get("severity", "info")),
+                    category=Category(rf.get("category", "bug")),
+                    source=Source.LLM,
+                    rule=rule,
+                    message=message,
+                    suggestion=suggestion,
+                    confidence=confidence,
+                )
+            )
         except (ValueError, KeyError):
             continue
 
@@ -748,8 +780,9 @@ def _should_escalate_to_sonnet(
 
 
 def analyze_chunk(
-    chunk: Chunk, cost_tracker: CostTracker,
-    static_findings: Optional[list[Finding]] = None,
+    chunk: Chunk,
+    cost_tracker: CostTracker,
+    static_findings: list[Finding] | None = None,
 ) -> list[Finding]:
     """Send a code chunk to Claude for analysis. Returns findings.
 
@@ -769,30 +802,37 @@ def analyze_chunk(
     """
     est_tokens = _estimate_chunk_tokens(chunk)
     if est_tokens > MAX_CHUNK_TOKENS:
-        logger.debug("Chunk ~%s tokens (>%s) — %s lines %d-%d",
-                     f"{est_tokens:,}", f"{MAX_CHUNK_TOKENS:,}",
-                     chunk.filepath, chunk.start_line, chunk.end_line)
+        logger.debug(
+            "Chunk ~%s tokens (>%s) — %s lines %d-%d",
+            f"{est_tokens:,}",
+            f"{MAX_CHUNK_TOKENS:,}",
+            chunk.filepath,
+            chunk.start_line,
+            chunk.end_line,
+        )
 
     backend = _get_backend(tier=TIER_SCAN)
 
     # Filter static findings to those within this chunk's line range
     chunk_static = []
     if static_findings:
-        chunk_static = [
-            f for f in static_findings
-            if chunk.start_line <= f.line <= chunk.end_line
-        ]
+        chunk_static = [f for f in static_findings if chunk.start_line <= f.line <= chunk.end_line]
 
     # Micro-query path: when we have a manageable number of static findings,
     # send targeted snippets instead of the full chunk. Saves 5-10x tokens.
     if 1 <= len(chunk_static) <= MICRO_QUERY_THRESHOLD:
         micro_queries = build_micro_queries(
-            chunk_static, chunk.content, max_queries=5,
+            chunk_static,
+            chunk.content,
+            max_queries=5,
         )
         if micro_queries:
             findings = _analyze_via_micro_queries(
-                micro_queries, chunk.filepath, chunk.language,
-                backend, cost_tracker,
+                micro_queries,
+                chunk.filepath,
+                chunk.language,
+                backend,
+                cost_tracker,
             )
             # Haiku quality gate — escalate to Sonnet if suspicious 0 results
             if _should_escalate_to_sonnet(findings, chunk_static, backend):
@@ -801,12 +841,17 @@ def analyze_chunk(
                     "(%s) — escalating to Sonnet: %s lines %d-%d",
                     len(chunk_static),
                     "has critical" if any(f.severity == Severity.CRITICAL for f in chunk_static) else "threshold",
-                    chunk.filepath, chunk.start_line, chunk.end_line,
+                    chunk.filepath,
+                    chunk.start_line,
+                    chunk.end_line,
                 )
                 sonnet = _get_backend(tier=TIER_DEEP)
                 findings = _analyze_via_micro_queries(
-                    micro_queries, chunk.filepath, chunk.language,
-                    sonnet, cost_tracker,
+                    micro_queries,
+                    chunk.filepath,
+                    chunk.language,
+                    sonnet,
+                    cost_tracker,
                 )
             return findings
 
@@ -841,7 +886,8 @@ def analyze_chunk(
     cost_tracker.add_response(response, backend=backend)
 
     findings_list = _raw_to_findings(
-        response.text, chunk.filepath,
+        response.text,
+        chunk.filepath,
         chunk_index=chunk.chunk_index,
         chunk_start_line=chunk.start_line,
     )
@@ -849,11 +895,12 @@ def analyze_chunk(
     # Haiku quality gate — escalate full-chunk path too
     if _should_escalate_to_sonnet(findings_list, chunk_static, backend):
         logger.info(
-            "Haiku returned 0 findings on chunk with %d static findings "
-            "(%s) — escalating to Sonnet: %s lines %d-%d",
+            "Haiku returned 0 findings on chunk with %d static findings (%s) — escalating to Sonnet: %s lines %d-%d",
             len(chunk_static),
             "has critical" if any(f.severity == Severity.CRITICAL for f in chunk_static) else "threshold",
-            chunk.filepath, chunk.start_line, chunk.end_line,
+            chunk.filepath,
+            chunk.start_line,
+            chunk.end_line,
         )
         sonnet = _get_backend(tier=TIER_DEEP)
         # Escalation gets full budget — Sonnet is the quality backstop
@@ -866,7 +913,8 @@ def analyze_chunk(
         )
         cost_tracker.add_response(response, backend=sonnet)
         findings_list = _raw_to_findings(
-            response.text, chunk.filepath,
+            response.text,
+            chunk.filepath,
             chunk_index=chunk.chunk_index,
             chunk_start_line=chunk.start_line,
         )
@@ -891,11 +939,15 @@ def _build_optimize_system_prompt(language: str) -> str:
 
 
 def _debug_single_chunk(
-    backend: LLMBackend, chunk_content: str, filepath: str, language: str,
-    system_prompt: str, extra_context: str,
+    backend: LLMBackend,
+    chunk_content: str,
+    filepath: str,
+    language: str,
+    system_prompt: str,
+    extra_context: str,
     cost_tracker: CostTracker,
     chunk_header: str = "",
-) -> tuple[Optional[dict], str]:
+) -> tuple[dict | None, str]:
     """Send a single chunk for debug/optimize analysis.
 
     Returns (parsed_dict_or_None, raw_text).
@@ -955,8 +1007,11 @@ def _merge_chunked_results(results: list[dict]) -> dict:
 
 
 def _analyze_file_chunked(
-    content: str, filepath: str, language: str,
-    system_prompt: str, extra_context: str,
+    content: str,
+    filepath: str,
+    language: str,
+    system_prompt: str,
+    extra_context: str,
     cost_tracker: CostTracker,
 ) -> tuple[dict, CostTracker]:
     """Shared chunking logic for debug_file and optimize_file."""
@@ -967,10 +1022,15 @@ def _analyze_file_chunked(
         results = []
         for chunk in chunks:
             parsed, raw = _debug_single_chunk(
-                backend, chunk.content, filepath, language,
-                system_prompt, extra_context, cost_tracker,
+                backend,
+                chunk.content,
+                filepath,
+                language,
+                system_prompt,
+                extra_context,
+                cost_tracker,
                 chunk_header=f"Lines {chunk.start_line}-{chunk.end_line} "
-                             f"(chunk {chunk.chunk_index + 1}/{chunk.total_chunks})",
+                f"(chunk {chunk.chunk_index + 1}/{chunk.total_chunks})",
             )
             if parsed:
                 results.append(parsed)
@@ -982,8 +1042,13 @@ def _analyze_file_chunked(
 
     # Single-chunk path
     parsed, raw = _debug_single_chunk(
-        backend, content, filepath, language,
-        system_prompt, extra_context, cost_tracker,
+        backend,
+        content,
+        filepath,
+        language,
+        system_prompt,
+        extra_context,
+        cost_tracker,
     )
     if parsed:
         return parsed, cost_tracker
@@ -991,11 +1056,13 @@ def _analyze_file_chunked(
 
 
 def debug_file(
-    content: str, filepath: str, language: str,
-    error_msg: Optional[str] = None,
-    static_findings: Optional[list[Finding]] = None,
-    context_files: Optional[dict[str, str]] = None,
-    cost_tracker: Optional[CostTracker] = None,
+    content: str,
+    filepath: str,
+    language: str,
+    error_msg: str | None = None,
+    static_findings: list[Finding] | None = None,
+    context_files: dict[str, str] | None = None,
+    cost_tracker: CostTracker | None = None,
 ) -> tuple[dict, CostTracker]:
     """Send file to Claude for debugging analysis.
 
@@ -1015,17 +1082,16 @@ def debug_file(
     if error_msg:
         tb = _parse_python_traceback(error_msg)
         if tb:
-            exc_type = _sanitize_for_prompt(tb['exception_type'], max_length=200)
-            exc_msg = _sanitize_for_prompt(tb['exception_message'], max_length=500)
+            exc_type = _sanitize_for_prompt(tb["exception_type"], max_length=200)
+            exc_msg = _sanitize_for_prompt(tb["exception_message"], max_length=500)
             extra_parts.append(f"Error: {exc_type}: {exc_msg}")
             extra_parts.append(f"Pay special attention to lines: {sorted(tb['relevant_lines'])}")
             for frame in tb["frames"]:
-                frame_file = _sanitize_for_prompt(frame['file'], max_length=200)
-                frame_fn = _sanitize_for_prompt(frame['function'], max_length=100)
-                frame_code = _sanitize_for_prompt(frame['code'], max_length=300) if frame['code'] else ""
+                frame_file = _sanitize_for_prompt(frame["file"], max_length=200)
+                frame_fn = _sanitize_for_prompt(frame["function"], max_length=100)
+                frame_code = _sanitize_for_prompt(frame["code"], max_length=300) if frame["code"] else ""
                 extra_parts.append(
-                    f"  Frame: {frame_file}:{frame['line']} in {frame_fn}"
-                    + (f" → {frame_code}" if frame_code else "")
+                    f"  Frame: {frame_file}:{frame['line']} in {frame_fn}" + (f" → {frame_code}" if frame_code else "")
                 )
         else:
             extra_parts.append(f"Error message:\n```\n{_sanitize_for_prompt(error_msg, max_length=1000)}\n```")
@@ -1041,7 +1107,7 @@ def debug_file(
         for ctx_path, ctx_content in context_files.items():
             sanitized_ctx = _sanitize_for_prompt(ctx_content, max_length=50_000)
             extra_parts.append(
-                f"<CONTEXT_FILE path=\"{_sanitize_for_prompt(ctx_path, max_length=200)}\">\n"
+                f'<CONTEXT_FILE path="{_sanitize_for_prompt(ctx_path, max_length=200)}">\n'
                 f"```\n{sanitized_ctx}\n```\n</CONTEXT_FILE>"
             )
 
@@ -1050,10 +1116,12 @@ def debug_file(
 
 
 def optimize_file(
-    content: str, filepath: str, language: str,
-    static_findings: Optional[list[Finding]] = None,
-    context_files: Optional[dict[str, str]] = None,
-    cost_tracker: Optional[CostTracker] = None,
+    content: str,
+    filepath: str,
+    language: str,
+    static_findings: list[Finding] | None = None,
+    context_files: dict[str, str] | None = None,
+    cost_tracker: CostTracker | None = None,
 ) -> tuple[dict, CostTracker]:
     """Send file to Claude for optimization analysis.
 
@@ -1070,9 +1138,9 @@ def optimize_file(
     extra_parts = []
     if static_findings:
         perf_relevant = [
-            f for f in static_findings
-            if f.category in (Category.PERFORMANCE, Category.STYLE)
-            or f.rule in ("high-complexity", "too-many-args")
+            f
+            for f in static_findings
+            if f.category in (Category.PERFORMANCE, Category.STYLE) or f.rule in ("high-complexity", "too-many-args")
         ]
         static_text = _format_static_findings_for_llm(perf_relevant)
         if static_text:
@@ -1083,7 +1151,7 @@ def optimize_file(
         for ctx_path, ctx_content in context_files.items():
             sanitized_ctx = _sanitize_for_prompt(ctx_content, max_length=50_000)
             extra_parts.append(
-                f"<CONTEXT_FILE path=\"{_sanitize_for_prompt(ctx_path, max_length=200)}\">\n"
+                f'<CONTEXT_FILE path="{_sanitize_for_prompt(ctx_path, max_length=200)}">\n'
                 f"```\n{sanitized_ctx}\n```\n</CONTEXT_FILE>"
             )
 
@@ -1182,8 +1250,8 @@ def analyze_file_with_context(
     language: str,
     context_files: dict[str, str],
     graph_summary: str,
-    static_findings: Optional[list[Finding]] = None,
-    cost_tracker: Optional[CostTracker] = None,
+    static_findings: list[Finding] | None = None,
+    cost_tracker: CostTracker | None = None,
 ) -> tuple[dict, CostTracker]:
     """Pass 1: Analyze one file with its dependency context.
 
@@ -1206,7 +1274,9 @@ def analyze_file_with_context(
     if context_files:
         parts.append("\n--- Context files ---")
         for ctx_path, ctx_content in context_files.items():
-            parts.append(f"\nFile: {ctx_path}\n<CONTEXT_FILE>\n```\n{_sanitize_code(ctx_content)}\n```\n</CONTEXT_FILE>")
+            parts.append(
+                f"\nFile: {ctx_path}\n<CONTEXT_FILE>\n```\n{_sanitize_code(ctx_content)}\n```\n</CONTEXT_FILE>"
+            )
 
     if graph_summary:
         parts.append(f"\n--- Dependency graph ---\n{graph_summary}")
@@ -1240,7 +1310,7 @@ def synthesize_project(
     graph_summary: str,
     per_file_summaries: list[dict],
     all_cross_file_findings: list[dict],
-    cost_tracker: Optional[CostTracker] = None,
+    cost_tracker: CostTracker | None = None,
 ) -> tuple[dict, CostTracker]:
     """Pass 2: Synthesize project-level insights from all per-file results.
 
@@ -1336,60 +1406,75 @@ If no fixes can be generated, return an empty array: []"""
 # Each entry: (category_label, list_of_compiled_regexes).
 # Patterns match at word boundaries with optional whitespace before parens.
 _DANGER_CHECKS: list[tuple[str, list[re.Pattern]]] = [
-    ("dangerous call", [
-        re.compile(r'\beval\s*\('),
-        re.compile(r'\bexec\s*\('),
-        re.compile(r'\bcompile\s*\('),
-        re.compile(r'\b__import__\s*\('),
-        re.compile(r'\bos\s*\.\s*system\s*\('),           # doji:ignore(os-system)
-        re.compile(r'\bos\s*\.\s*popen\s*\('),
-        re.compile(r'\bsubprocess\s*\.\s*call\s*\('),
-        re.compile(r'\bsubprocess\s*\.\s*run\s*\('),
-        re.compile(r'\bsubprocess\s*\.\s*Popen\s*\('),
-        re.compile(r'\bsubprocess\s*\.\s*check_output\s*\('),
-        re.compile(r'\bsubprocess\s*\.\s*check_call\s*\('),
-    ]),
-    ("process replacement", [
-        re.compile(r'\bos\s*\.\s*exec[lv]p?e?\s*\('),
-        re.compile(r'\bos\s*\.\s*spawn[lv]p?e?\s*\('),
-        re.compile(r'\bos\s*\.\s*posix_spawn\s*\('),
-    ]),
-    ("file write/delete", [
-        re.compile(r'\bopen\s*\([^)]*["\'][waxWAX][+bta]*["\']'),
-        re.compile(r'\.write_text\s*\('),
-        re.compile(r'\.write_bytes\s*\('),
-        re.compile(r'\bos\s*\.\s*(?:remove|unlink|rmdir|rename)\s*\('),
-        re.compile(r'\bshutil\s*\.\s*(?:rmtree|move|copy2?)\s*\('),
-        re.compile(r'\bPath\s*\([^)]*\)\s*\.\s*(?:unlink|rmdir|rename)\s*\('),
-        re.compile(r'\.unlink\s*\('),
-    ]),
-    ("indirect execution", [
-        re.compile(r'\bgetattr\s*\(.+["\'](?:system|popen|exec|eval|compile)["\']'),
-        re.compile(r'\bglobals\s*\(\s*\)\s*\['),
-        re.compile(r'\bvars\s*\(\s*\)\s*\['),
-        re.compile(r'\bbuiltins\b.*\b(?:eval|exec|compile|__import__)\b'),
-        re.compile(r'\b__builtins__\b.*\b(?:eval|exec|compile|__import__)\b'),
-        re.compile(r'\bimportlib\s*\.\s*import_module\s*\('),
-        re.compile(r'\bpickle\s*\.\s*loads?\s*\('),
-        re.compile(r'\bctypes\s*\.\s*(?:CDLL|cdll|windll|oledll)\b'),
-        re.compile(r'\bcode\s*\.\s*(?:interact|InteractiveConsole)\s*\('),
-    ]),
-    ("network call", [
-        re.compile(r'\burllib\s*\.\s*request\s*\.\s*urlopen\s*\('),
-        re.compile(r'\brequests\s*\.\s*(?:get|post|put|patch|delete|head)\s*\('),
-        re.compile(r'\bhttpx\s*\.\s*(?:get|post|put|patch|delete|head)\s*\('),
-        re.compile(r'\bsocket\s*\.\s*(?:connect|create_connection)\s*\('),
-        re.compile(r'\burlopen\s*\('),
-    ]),
+    (
+        "dangerous call",
+        [
+            re.compile(r"\beval\s*\("),
+            re.compile(r"\bexec\s*\("),
+            re.compile(r"\bcompile\s*\("),
+            re.compile(r"\b__import__\s*\("),
+            re.compile(r"\bos\s*\.\s*system\s*\("),  # doji:ignore(os-system)
+            re.compile(r"\bos\s*\.\s*popen\s*\("),
+            re.compile(r"\bsubprocess\s*\.\s*call\s*\("),
+            re.compile(r"\bsubprocess\s*\.\s*run\s*\("),
+            re.compile(r"\bsubprocess\s*\.\s*Popen\s*\("),
+            re.compile(r"\bsubprocess\s*\.\s*check_output\s*\("),
+            re.compile(r"\bsubprocess\s*\.\s*check_call\s*\("),
+        ],
+    ),
+    (
+        "process replacement",
+        [
+            re.compile(r"\bos\s*\.\s*exec[lv]p?e?\s*\("),
+            re.compile(r"\bos\s*\.\s*spawn[lv]p?e?\s*\("),
+            re.compile(r"\bos\s*\.\s*posix_spawn\s*\("),
+        ],
+    ),
+    (
+        "file write/delete",
+        [
+            re.compile(r'\bopen\s*\([^)]*["\'][waxWAX][+bta]*["\']'),
+            re.compile(r"\.write_text\s*\("),
+            re.compile(r"\.write_bytes\s*\("),
+            re.compile(r"\bos\s*\.\s*(?:remove|unlink|rmdir|rename)\s*\("),
+            re.compile(r"\bshutil\s*\.\s*(?:rmtree|move|copy2?)\s*\("),
+            re.compile(r"\bPath\s*\([^)]*\)\s*\.\s*(?:unlink|rmdir|rename)\s*\("),
+            re.compile(r"\.unlink\s*\("),
+        ],
+    ),
+    (
+        "indirect execution",
+        [
+            re.compile(r'\bgetattr\s*\(.+["\'](?:system|popen|exec|eval|compile)["\']'),
+            re.compile(r"\bglobals\s*\(\s*\)\s*\["),
+            re.compile(r"\bvars\s*\(\s*\)\s*\["),
+            re.compile(r"\bbuiltins\b.*\b(?:eval|exec|compile|__import__)\b"),
+            re.compile(r"\b__builtins__\b.*\b(?:eval|exec|compile|__import__)\b"),
+            re.compile(r"\bimportlib\s*\.\s*import_module\s*\("),
+            re.compile(r"\bpickle\s*\.\s*loads?\s*\("),
+            re.compile(r"\bctypes\s*\.\s*(?:CDLL|cdll|windll|oledll)\b"),
+            re.compile(r"\bcode\s*\.\s*(?:interact|InteractiveConsole)\s*\("),
+        ],
+    ),
+    (
+        "network call",
+        [
+            re.compile(r"\burllib\s*\.\s*request\s*\.\s*urlopen\s*\("),
+            re.compile(r"\brequests\s*\.\s*(?:get|post|put|patch|delete|head)\s*\("),
+            re.compile(r"\bhttpx\s*\.\s*(?:get|post|put|patch|delete|head)\s*\("),
+            re.compile(r"\bsocket\s*\.\s*(?:connect|create_connection)\s*\("),
+            re.compile(r"\burlopen\s*\("),
+        ],
+    ),
 ]
 
 # Import of dangerous modules that weren't in the original
 _DANGEROUS_IMPORT_RE = re.compile(
-    r'(?:^|\n)\s*(?:import|from)\s+(?:os|subprocess|shlex|socket|http|urllib|requests|httpx|importlib|pickle|ctypes|shutil|code|webbrowser)\b'
+    r"(?:^|\n)\s*(?:import|from)\s+(?:os|subprocess|shlex|socket|http|urllib|requests|httpx|importlib|pickle|ctypes|shutil|code|webbrowser)\b"
 )
 
 
-def _check_fix_introduces_danger(original: str, fixed: str) -> Optional[str]:
+def _check_fix_introduces_danger(original: str, fixed: str) -> str | None:
     """Check if a proposed LLM fix introduces dangerous patterns not in the original.
 
     Returns a rejection reason string, or None if safe.
@@ -1427,9 +1512,7 @@ def _add_line_numbers(code: str) -> str:
     """
     lines = code.splitlines()
     width = len(str(len(lines)))
-    return "\n".join(
-        f"{i + 1:>{width}} | {line}" for i, line in enumerate(lines)
-    )
+    return "\n".join(f"{i + 1:>{width}} | {line}" for i, line in enumerate(lines))
 
 
 def _build_finding_snippet(content: str, line: int, context: int = 5) -> str:
@@ -1450,10 +1533,12 @@ def _build_finding_snippet(content: str, line: int, context: int = 5) -> str:
 
 
 def fix_file(
-    content: str, filepath: str, language: str,
+    content: str,
+    filepath: str,
+    language: str,
     findings: list[dict],
     cost_tracker=None,
-) -> tuple[list[dict], "CostTracker"]:
+) -> tuple[list[dict], CostTracker]:
     """Ask LLM to generate fixes for the given findings.
 
     Returns (list_of_fix_dicts, cost_tracker).
@@ -1473,9 +1558,9 @@ def fix_file(
     findings_parts = []
     for f in findings:
         entry = f"  Line {f['line']}: [{f['rule']}] {f['message']}"
-        if f.get('suggestion'):
+        if f.get("suggestion"):
             entry += f" (suggestion: {f['suggestion']})"
-        snippet = _build_finding_snippet(content, f['line'])
+        snippet = _build_finding_snippet(content, f["line"])
         entry += f"\n  Context:\n{snippet}"
         findings_parts.append(entry)
     findings_text = "\n\n".join(findings_parts)
@@ -1515,7 +1600,7 @@ def fix_file(
     validated = []
     # Regex to strip line number prefixes the LLM may have accidentally included
     # Matches patterns like "  42 | ", ">>> 42 | ", "   5 | "
-    _line_prefix_re = re.compile(r'^(?:>>>)?\s*\d+\s*\|\s?', re.MULTILINE)
+    _line_prefix_re = re.compile(r"^(?:>>>)?\s*\d+\s*\|\s?", re.MULTILINE)
 
     for fix in raw_fixes:
         if not isinstance(fix, dict):
@@ -1530,13 +1615,13 @@ def fix_file(
             continue
         # Strip line number prefixes if the LLM accidentally included them
         if original not in content and _line_prefix_re.search(original):
-            original_cleaned = _line_prefix_re.sub('', original)
+            original_cleaned = _line_prefix_re.sub("", original)
             if original_cleaned in content:
                 logger.debug("Fix: stripped line number prefixes from original_code")
                 fix["original_code"] = original_cleaned
                 original = original_cleaned
         if fixed and _line_prefix_re.search(fixed):
-            fixed_cleaned = _line_prefix_re.sub('', fixed)
+            fixed_cleaned = _line_prefix_re.sub("", fixed)
             fix["fixed_code"] = fixed_cleaned
             fixed = fixed_cleaned
         if original not in content:
@@ -1595,9 +1680,9 @@ def explain_file_llm(
     content: str,
     filepath: str,
     language: str,
-    static_findings: Optional[list] = None,
-    cost_tracker: Optional["CostTracker"] = None,
-) -> tuple[dict, "CostTracker"]:
+    static_findings: list | None = None,
+    cost_tracker: CostTracker | None = None,
+) -> tuple[dict, CostTracker]:
     """LLM-powered deep explanation of a source file.
 
     Returns (explanation_dict, cost_tracker).
@@ -1623,10 +1708,7 @@ def explain_file_llm(
             msg = f.message if hasattr(f, "message") else ""
             findings_text.append(f"  - [{rule}] {line_info}: {msg}")
         if findings_text:
-            parts.append(
-                "\n--- Static analysis findings to explain ---\n"
-                + "\n".join(findings_text)
-            )
+            parts.append("\n--- Static analysis findings to explain ---\n" + "\n".join(findings_text))
 
     user_msg = "\n".join(parts)
 

@@ -8,13 +8,14 @@ Calls into: types.py (enums for custom rule compilation)
 Data in → Data out: .doji.toml files → config dicts; regex strings → compiled rules.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import re
 from pathlib import Path
-from typing import Optional
 
-from .types import Severity, Category
+from .types import Category, Severity
 
 logger = logging.getLogger(__name__)
 
@@ -70,23 +71,63 @@ LANGUAGE_EXTENSIONS = {
 }
 
 SKIP_DIRS = {
-    ".git", ".svn", ".hg", "node_modules", "__pycache__", ".mypy_cache",
-    ".pytest_cache", "venv", ".venv", "env", ".env", "dist", "build",
-    ".tox", ".eggs", "*.egg-info", ".claude", ".next", ".nuxt",
-    "target", "out", "bin", "obj",
+    ".git",
+    ".svn",
+    ".hg",
+    "node_modules",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    "venv",
+    ".venv",
+    "env",
+    ".env",
+    "dist",
+    "build",
+    ".tox",
+    ".eggs",
+    "*.egg-info",
+    ".claude",
+    ".next",
+    ".nuxt",
+    "target",
+    "out",
+    "bin",
+    "obj",
 }
 
 SKIP_FILES = {
-    "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "Pipfile.lock",
-    "poetry.lock", "composer.lock", "Cargo.lock", "Gemfile.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "Pipfile.lock",
+    "poetry.lock",
+    "composer.lock",
+    "Cargo.lock",
+    "Gemfile.lock",
 }
 
 SENSITIVE_FILE_PATTERNS = [
-    ".env", ".env.local", ".env.development", ".env.production",
-    ".env.staging", ".env.test",
-    "*.pem", "*.key", "*.p12", "*.pfx", "*.jks", "*.keystore",
-    "secrets.json", "credentials.json", "service-account.json",
-    ".netrc", ".npmrc", "id_rsa", "id_ed25519", "id_ecdsa",
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.production",
+    ".env.staging",
+    ".env.test",
+    "*.pem",
+    "*.key",
+    "*.p12",
+    "*.pfx",
+    "*.jks",
+    "*.keystore",
+    "secrets.json",
+    "credentials.json",
+    "service-account.json",
+    ".netrc",
+    ".npmrc",
+    "id_rsa",
+    "id_ed25519",
+    "id_ecdsa",
 ]
 
 MAX_FILE_SIZE = 1_000_000  # 1MB — skip binary/huge files
@@ -154,8 +195,15 @@ LLM_OUTPUT_COST_PER_M = 15.0
 # "deep" (debug, optimize, cross-file, synthesis, fix) uses Sonnet for quality.
 # Set DOJI_LLM_TIER_MODE=off to force single-model (Sonnet) for everything.
 LLM_TIER_MODE = "auto"  # "auto" | "off"
-LLM_SCAN_MODEL = "claude-haiku-4-20250514"   # fast/cheap for scan chunks
+LLM_SCAN_MODEL = "claude-haiku-4-20250514"  # fast/cheap for scan chunks
 LLM_DEEP_MODEL = "claude-sonnet-4-20250514"  # reasoning-heavy tasks
+
+# Skip LLM for statically-clean files: when True, files with 0 static findings
+# are not sent to the LLM during deep scan. This saves the "fishing" cost on
+# clean files — typically 60-70% of files in a healthy codebase. The LLM's
+# value-add is strongest when confirming/deepening static findings, not fishing
+# blindly through clean code. Set DOJI_LLM_FISH_CLEAN=1 to force LLM on all files.
+LLM_SKIP_CLEAN_FILES = True
 
 # Chunking
 CHUNK_SIZE = 400  # lines per chunk
@@ -234,11 +282,12 @@ LANGUAGE_OPTIMIZE_HINTS = {
 
 # ─── Configuration loading ───────────────────────────────────────────
 
-def get_api_key() -> Optional[str]:
+
+def get_api_key() -> str | None:
     return os.environ.get("ANTHROPIC_API_KEY")
 
 
-def get_llm_config(project_config: Optional[dict] = None) -> dict:
+def get_llm_config(project_config: dict | None = None) -> dict:
     """Build LLM backend config from env vars and .doji.toml [dojigiri.llm] section.
 
     Priority: env vars > .doji.toml > defaults.
@@ -327,8 +376,8 @@ class CustomRule(NamedTuple):
     category: Category
     name: str
     message: str
-    suggestion: Optional[str]
-    languages: Optional[list[str]]
+    suggestion: str | None
+    languages: list[str] | None
 
 
 def _is_safe_regex(pattern_str: str) -> bool:
@@ -345,19 +394,21 @@ def _is_safe_regex(pattern_str: str) -> bool:
     # Reject nested quantifiers: a group (including non-capturing (?:), lookahead
     # (?=), etc.) containing a quantifier, with a quantifier on the group itself.
     # e.g. (a+)+, (?:a+)+, (?=a+)+, (x*){2,}
-    if re.search(r'(?:\((?:\?[:!=<])?[^)]*[+*?{][^)]*\)[+*?{])', pattern_str):
+    if re.search(r"(?:\((?:\?[:!=<])?[^)]*[+*?{][^)]*\)[+*?{])", pattern_str):
         return False
     # Reject alternation with single-char overlapping branches inside quantified groups
     # e.g. (a|a)+, but NOT (error|warning)+ which is safe
-    if re.search(r'\((?:\?:)?([a-zA-Z])\|(\1)\)[+*{]', pattern_str):
+    if re.search(r"\((?:\?:)?([a-zA-Z])\|(\1)\)[+*{]", pattern_str):
         return False
     # Test-run: compile and match against adversarial strings with a timeout thread
     try:
         compiled = re.compile(pattern_str)
         import concurrent.futures
+
         def _test_regex():
             for test_str in ["a" * 10000, "b" * 10000, "ab" * 5000, "\x00" * 10000]:
                 compiled.search(test_str)
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
             future = pool.submit(_test_regex)
             future.result(timeout=2.0)  # 2-second hard timeout
@@ -429,13 +480,13 @@ def compile_custom_rules(config: dict) -> list[CustomRule]:
         # Parse severity (default: warning)
         severity = severity_map.get(rule.get("severity", "warning"))
         if severity is None:
-            logger.warning("Skipping custom rule '%s': invalid severity '%s'", name, rule.get('severity'))
+            logger.warning("Skipping custom rule '%s': invalid severity '%s'", name, rule.get("severity"))
             continue
 
         # Parse category (default: bug)
         category = category_map.get(rule.get("category", "bug"))
         if category is None:
-            logger.warning("Skipping custom rule '%s': invalid category '%s'", name, rule.get('category'))
+            logger.warning("Skipping custom rule '%s': invalid category '%s'", name, rule.get("category"))
             continue
 
         suggestion = rule.get("suggestion")

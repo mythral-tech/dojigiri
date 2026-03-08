@@ -10,14 +10,16 @@ Calls into: config.py, languages.py, semantic/checks.py, semantic/core.py,
 Data in → Data out: (filepath, content, language) in → list[Finding] out.
 """
 
+from __future__ import annotations
+
 import ast
 import logging
 import re
 
 logger = logging.getLogger(__name__)
 
-from .types import Finding, Severity, Category, Source
 from .languages import get_rules_for_language
+from .types import Category, Finding, Severity, Source
 
 # Security-related categories where string lines should still be scanned
 _SECURITY_CATEGORIES = {Category.SECURITY}
@@ -36,14 +38,25 @@ _EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/")
 # Inline comment patterns per language family
 _INLINE_COMMENT_RE = {
     "hash": re.compile(r"""(?<!['"\\])#(?![!])"""),  # Python/Ruby/Bash style
-    "slash": re.compile(r"""(?<!['"\\:])//"""),       # C-family style
+    "slash": re.compile(r"""(?<!['"\\:])//"""),  # C-family style
 }
 
 # Single source of truth: language -> comment style ("hash" or "slash")
-_SLASH_LANGUAGES = frozenset({
-    "javascript", "typescript", "go", "rust", "java",
-    "c", "cpp", "csharp", "swift", "kotlin", "pine",
-})
+_SLASH_LANGUAGES = frozenset(
+    {
+        "javascript",
+        "typescript",
+        "go",
+        "rust",
+        "java",
+        "c",
+        "cpp",
+        "csharp",
+        "swift",
+        "kotlin",
+        "pine",
+    }
+)
 _HASH_LANGUAGES = frozenset({"python", "ruby", "bash"})
 
 
@@ -66,7 +79,7 @@ _STRING_CONTENT_RE = re.compile(
 # \b prevents matching "undoji:ignore" etc. Empty parens doji:ignore()
 # won't match the inner group ([a-z0-9...]+) so fall through to bare
 # doji:ignore behavior (suppress all) — this is intentional.
-_DOJI_IGNORE_RE = re.compile(r'\bdoji:ignore(?:\(([a-z0-9_,\s-]+)\))?')
+_DOJI_IGNORE_RE = re.compile(r"\bdoji:ignore(?:\(([a-z0-9_,\s-]+)\))?")
 
 
 def _parse_line_suppression(line: str, language: str) -> set[str] | bool | None:
@@ -91,7 +104,7 @@ def _parse_line_suppression(line: str, language: str) -> set[str] | bool | None:
     if last_match is None:
         return None
 
-    comment_text = line[last_match.start():]
+    comment_text = line[last_match.start() :]
     ignore_match = _DOJI_IGNORE_RE.search(comment_text)
     if not ignore_match:
         return None
@@ -137,12 +150,11 @@ def _strip_inline_comment(line: str, language: str) -> str:
 
     m = _INLINE_COMMENT_RE[style].search(line)
     if m:
-        return line[:m.start()]
+        return line[: m.start()]
     return line
 
 
-def run_regex_checks(content: str, filepath: str, language: str,
-                     custom_rules=None) -> list[Finding]:
+def run_regex_checks(content: str, filepath: str, language: str, custom_rules=None) -> list[Finding]:
     """Run regex-based pattern matching against file content.
 
     Args:
@@ -175,7 +187,7 @@ def run_regex_checks(content: str, filepath: str, language: str,
     lines = content.splitlines()
 
     # Language-aware comment prefixes for full-line detection
-    comment_prefixes = {"//"}  if language in _SLASH_LANGUAGES else {"#"}
+    comment_prefixes = {"//"} if language in _SLASH_LANGUAGES else {"#"}
 
     # Block comment state tracking
     in_block_comment = False
@@ -207,11 +219,11 @@ def run_regex_checks(content: str, filepath: str, language: str,
                 block_start_match = stripped.startswith(block_open)
             else:
                 block_start_match = block_open in stripped
-            
+
             if block_start_match:
                 # Check if block opens and closes on same line
                 idx = stripped.index(block_open)
-                rest = stripped[idx + len(block_open):]
+                rest = stripped[idx + len(block_open) :]
                 if block_close not in rest:  # type: ignore[operator]  # block_close is non-None here
                     in_block_comment = True
                     block_comment_delimiter = block_close
@@ -226,7 +238,7 @@ def run_regex_checks(content: str, filepath: str, language: str,
 
                 if alt_start_match:
                     idx = stripped.index(alt_block_open)
-                    rest = stripped[idx + len(alt_block_open):]
+                    rest = stripped[idx + len(alt_block_open) :]
                     if alt_block_close not in rest:  # type: ignore[operator]  # alt_block_close is non-None here
                         in_block_comment = True
                         block_comment_delimiter = alt_block_close
@@ -242,7 +254,8 @@ def run_regex_checks(content: str, filepath: str, language: str,
         # Skip lines that are purely string content (inside quotes)
         is_string_line = (
             (stripped.startswith('"') or stripped.startswith("'"))
-            and not stripped.startswith('"""') and not stripped.startswith("'''")
+            and not stripped.startswith('"""')
+            and not stripped.startswith("'''")
         )
 
         # Inline suppression: parse once per line, reuse for all rule checks.
@@ -298,57 +311,63 @@ def run_regex_checks(content: str, filepath: str, language: str,
                 if _line_is_suppressed(rule_name):
                     continue
 
-                findings.append(Finding(
-                    file=filepath,
-                    line=line_num,
-                    severity=severity,
-                    category=category,
-                    source=Source.STATIC,
-                    rule=rule_name,
-                    message=message,
-                    suggestion=suggestion,
-                    snippet=stripped[:120],
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=line_num,
+                        severity=severity,
+                        category=category,
+                        source=Source.STATIC,
+                        rule=rule_name,
+                        message=message,
+                        suggestion=suggestion,
+                        snippet=stripped[:120],
+                    )
+                )
 
         # Custom rules: match against the full line (no comment stripping)
         for pattern, severity, category, rule_name, message, suggestion in applicable_custom_rules:
             if pattern.search(line):
                 if _line_is_suppressed(rule_name):
                     continue
-                findings.append(Finding(
-                    file=filepath,
-                    line=line_num,
-                    severity=severity,
-                    category=category,
-                    source=Source.STATIC,
-                    rule=rule_name,
-                    message=message,
-                    suggestion=suggestion,
-                    snippet=stripped[:120],
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=line_num,
+                        severity=severity,
+                        category=category,
+                        source=Source.STATIC,
+                        rule=rule_name,
+                        message=message,
+                        suggestion=suggestion,
+                        snippet=stripped[:120],
+                    )
+                )
     return findings
 
 
 def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
     """Run Python-specific AST analysis for structural issues.
-    
+
     Refactored to reduce complexity by delegating to focused helper functions.
     """
     findings = []
     try:
         tree = ast.parse(content, filename=filepath)
     except SyntaxError as e:
-        findings.append(Finding(
-            file=filepath,
-            line=e.lineno or 1,
-            severity=Severity.CRITICAL,
-            category=Category.BUG,
-            source=Source.AST,
-            rule="syntax-error",
-            message=f"Syntax error: {e.msg}",
-            suggestion="Fix the syntax error before other checks can run",
-            snippet=e.text.strip()[:120] if e.text else None,
-        ))
+        findings.append(
+            Finding(
+                file=filepath,
+                line=e.lineno or 1,
+                severity=Severity.CRITICAL,
+                category=Category.BUG,
+                source=Source.AST,
+                rule="syntax-error",
+                message=f"Syntax error: {e.msg}",
+                suggestion="Fix the syntax error before other checks can run",
+                snippet=e.text.strip()[:120] if e.text else None,
+            )
+        )
         return findings
 
     # Run focused checks
@@ -430,16 +449,18 @@ def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
             root_name = name.split(".")[0]
             is_used = root_name in used_names
         if not is_used:
-            findings.append(Finding(
-                file=filepath,
-                line=lineno,
-                severity=Severity.WARNING,
-                category=Category.DEAD_CODE,
-                source=Source.AST,
-                rule="unused-import",
-                message=f"Import '{name}' is never used",
-                suggestion=f"Remove unused import '{name}'",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=lineno,
+                    severity=Severity.WARNING,
+                    category=Category.DEAD_CODE,
+                    source=Source.AST,
+                    rule="unused-import",
+                    message=f"Import '{name}' is never used",
+                    suggestion=f"Remove unused import '{name}'",
+                )
+            )
 
 
 def _find_type_checking_lines(tree: ast.AST) -> set[int]:
@@ -449,9 +470,8 @@ def _find_type_checking_lines(tree: ast.AST) -> set[int]:
         if isinstance(node, ast.If):
             # Check for `if TYPE_CHECKING:` or `if typing.TYPE_CHECKING:`
             test = node.test
-            is_type_checking = (
-                (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING")
-                or (isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING")
+            is_type_checking = (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+                isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
             )
             if is_type_checking:
                 for child in ast.walk(node):
@@ -472,24 +492,52 @@ def _check_exception_handling(tree: ast.AST, filepath: str, findings: list[Findi
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler):
             if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
-                findings.append(Finding(
-                    file=filepath,
-                    line=node.lineno,
-                    severity=Severity.WARNING,
-                    category=Category.BUG,
-                    source=Source.AST,
-                    rule="exception-swallowed",
-                    message="Exception caught and silently ignored (except: pass)",
-                    suggestion="Log the exception or handle it explicitly",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=node.lineno,
+                        severity=Severity.WARNING,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="exception-swallowed",
+                        message="Exception caught and silently ignored (except: pass)",
+                        suggestion="Log the exception or handle it explicitly",
+                    )
+                )
 
 
 # Builtins that should not be shadowed by variables or parameters
 _SHADOW_BUILTINS = {
-    "list", "dict", "type", "str", "int", "float", "set", "tuple",
-    "len", "range", "open", "input", "print", "sum", "min", "max",
-    "id", "sorted", "next", "map", "filter", "zip", "hash", "iter",
-    "bool", "bytes", "complex", "frozenset", "object", "super",
+    "list",
+    "dict",
+    "type",
+    "str",
+    "int",
+    "float",
+    "set",
+    "tuple",
+    "len",
+    "range",
+    "open",
+    "input",
+    "print",
+    "sum",
+    "min",
+    "max",
+    "id",
+    "sorted",
+    "next",
+    "map",
+    "filter",
+    "zip",
+    "hash",
+    "iter",
+    "bool",
+    "bytes",
+    "complex",
+    "frozenset",
+    "object",
+    "super",
 }
 
 
@@ -499,16 +547,18 @@ def _check_shadowed_builtins(tree: ast.AST, filepath: str, findings: list[Findin
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id in _SHADOW_BUILTINS:
-                    findings.append(Finding(
-                        file=filepath,
-                        line=node.lineno,
-                        severity=Severity.WARNING,
-                        category=Category.BUG,
-                        source=Source.AST,
-                        rule="shadowed-builtin",
-                        message=f"Assignment shadows builtin '{target.id}'",
-                        suggestion=f"Rename variable to avoid shadowing builtin '{target.id}'",
-                    ))
+                    findings.append(
+                        Finding(
+                            file=filepath,
+                            line=node.lineno,
+                            severity=Severity.WARNING,
+                            category=Category.BUG,
+                            source=Source.AST,
+                            rule="shadowed-builtin",
+                            message=f"Assignment shadows builtin '{target.id}'",
+                            suggestion=f"Rename variable to avoid shadowing builtin '{target.id}'",
+                        )
+                    )
 
 
 def _check_type_comparisons(tree: ast.AST, filepath: str, findings: list[Finding]):
@@ -517,19 +567,23 @@ def _check_type_comparisons(tree: ast.AST, filepath: str, findings: list[Finding
         if isinstance(node, ast.Compare):
             for op in node.ops:
                 if isinstance(op, (ast.Eq, ast.NotEq)):
-                    if (isinstance(node.left, ast.Call)
-                            and isinstance(node.left.func, ast.Name)
-                            and node.left.func.id == "type"):
-                        findings.append(Finding(
-                            file=filepath,
-                            line=node.lineno,
-                            severity=Severity.WARNING,
-                            category=Category.BUG,
-                            source=Source.AST,
-                            rule="type-comparison",
-                            message="Use isinstance() instead of type() comparison",
-                            suggestion="Replace type(x) == Y with isinstance(x, Y)",
-                        ))
+                    if (
+                        isinstance(node.left, ast.Call)
+                        and isinstance(node.left.func, ast.Name)
+                        and node.left.func.id == "type"
+                    ):
+                        findings.append(
+                            Finding(
+                                file=filepath,
+                                line=node.lineno,
+                                severity=Severity.WARNING,
+                                category=Category.BUG,
+                                source=Source.AST,
+                                rule="type-comparison",
+                                message="Use isinstance() instead of type() comparison",
+                                suggestion="Replace type(x) == Y with isinstance(x, Y)",
+                            )
+                        )
                         break
 
 
@@ -539,16 +593,18 @@ def _check_global_usage(tree: ast.AST, filepath: str, findings: list[Finding]):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             for stmt in ast.walk(node):
                 if isinstance(stmt, ast.Global):
-                    findings.append(Finding(
-                        file=filepath,
-                        line=stmt.lineno,
-                        severity=Severity.INFO,
-                        category=Category.STYLE,
-                        source=Source.AST,
-                        rule="global-keyword",
-                        message=f"'global' keyword used for: {', '.join(stmt.names)}",
-                        suggestion="Consider passing values as arguments or using a class",
-                    ))
+                    findings.append(
+                        Finding(
+                            file=filepath,
+                            line=stmt.lineno,
+                            severity=Severity.INFO,
+                            category=Category.STYLE,
+                            source=Source.AST,
+                            rule="global-keyword",
+                            message=f"'global' keyword used for: {', '.join(stmt.names)}",
+                            suggestion="Consider passing values as arguments or using a class",
+                        )
+                    )
 
 
 def _check_mutable_defaults(tree: ast.AST, filepath: str, findings: list[Finding]):
@@ -563,22 +619,27 @@ def _check_mutable_defaults(tree: ast.AST, filepath: str, findings: list[Finding
                 continue
             is_mutable = isinstance(default, _MUTABLE_TYPES)
             # Also catch set() call
-            if (isinstance(default, ast.Call)
-                    and isinstance(default.func, ast.Name)
-                    and default.func.id == "set"
-                    and not default.args and not default.keywords):
+            if (
+                isinstance(default, ast.Call)
+                and isinstance(default.func, ast.Name)
+                and default.func.id == "set"
+                and not default.args
+                and not default.keywords
+            ):
                 is_mutable = True
             if is_mutable:
-                findings.append(Finding(
-                    file=filepath,
-                    line=node.lineno,
-                    severity=Severity.WARNING,
-                    category=Category.BUG,
-                    source=Source.AST,
-                    rule="mutable-default",
-                    message=f"Mutable default argument in '{node.name}' — shared across all calls",
-                    suggestion="Use None as default and create inside function body",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=node.lineno,
+                        severity=Severity.WARNING,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="mutable-default",
+                        message=f"Mutable default argument in '{node.name}' — shared across all calls",
+                        suggestion="Use None as default and create inside function body",
+                    )
+                )
                 break  # One report per function is enough
 
 
@@ -587,23 +648,23 @@ def _check_shadowed_builtin_params(tree: ast.AST, filepath: str, findings: list[
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
-        all_args = (
-            node.args.args + node.args.posonlyargs + node.args.kwonlyargs
-        )
+        all_args = node.args.args + node.args.posonlyargs + node.args.kwonlyargs
         for arg in all_args:
             if arg.arg in ("self", "cls"):
                 continue
             if arg.arg in _SHADOW_BUILTINS:
-                findings.append(Finding(
-                    file=filepath,
-                    line=arg.lineno if hasattr(arg, 'lineno') else node.lineno,
-                    severity=Severity.WARNING,
-                    category=Category.BUG,
-                    source=Source.AST,
-                    rule="shadowed-builtin-param",
-                    message=f"Parameter '{arg.arg}' in '{node.name}' shadows builtin",
-                    suggestion=f"Rename parameter to avoid shadowing builtin '{arg.arg}'",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=arg.lineno if hasattr(arg, "lineno") else node.lineno,
+                        severity=Severity.WARNING,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="shadowed-builtin-param",
+                        message=f"Parameter '{arg.arg}' in '{node.name}' shadows builtin",
+                        suggestion=f"Rename parameter to avoid shadowing builtin '{arg.arg}'",
+                    )
+                )
 
 
 def _count_branches(node: ast.AST) -> int:
@@ -612,8 +673,7 @@ def _count_branches(node: ast.AST) -> int:
     for child in ast.iter_child_nodes(node):
         if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue  # Don't count branches inside nested functions
-        if isinstance(child, (ast.If, ast.For, ast.While, ast.Try,
-                              ast.ExceptHandler, ast.With)):
+        if isinstance(child, (ast.If, ast.For, ast.While, ast.Try, ast.ExceptHandler, ast.With)):
             count += 1
         count += _count_branches(child)
     return count
@@ -626,69 +686,74 @@ def _check_function(node: ast.FunctionDef, filepath: str, findings: list[Finding
         if isinstance(stmt, (ast.Return, ast.Raise, ast.Break, ast.Continue)):
             if i < len(node.body) - 1:
                 next_stmt = node.body[i + 1]
-                findings.append(Finding(
-                    file=filepath,
-                    line=next_stmt.lineno,
-                    severity=Severity.WARNING,
-                    category=Category.DEAD_CODE,
-                    source=Source.AST,
-                    rule="unreachable-code",
-                    message="Unreachable code after return/raise/break/continue",
-                    suggestion="Remove dead code or restructure control flow",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=next_stmt.lineno,
+                        severity=Severity.WARNING,
+                        category=Category.DEAD_CODE,
+                        source=Source.AST,
+                        rule="unreachable-code",
+                        message="Unreachable code after return/raise/break/continue",
+                        suggestion="Remove dead code or restructure control flow",
+                    )
+                )
                 break  # Only report the first unreachable block
 
     # Overly complex functions (too many branches)
     # Use _count_branches to avoid counting nested function bodies
     branch_count = _count_branches(node)
     if branch_count > 15:
-        findings.append(Finding(
-            file=filepath,
-            line=node.lineno,
-            severity=Severity.INFO,
-            category=Category.STYLE,
-            rule="high-complexity",
-            source=Source.AST,
-            message=f"Function '{node.name}' has high cyclomatic complexity ({branch_count} branches)",
-            suggestion="Consider breaking into smaller functions",
-        ))
+        findings.append(
+            Finding(
+                file=filepath,
+                line=node.lineno,
+                severity=Severity.INFO,
+                category=Category.STYLE,
+                rule="high-complexity",
+                source=Source.AST,
+                message=f"Function '{node.name}' has high cyclomatic complexity ({branch_count} branches)",
+                suggestion="Consider breaking into smaller functions",
+            )
+        )
 
     # Too many arguments
-    total_args = (
-        len(node.args.args) + len(node.args.posonlyargs)
-        + len(node.args.kwonlyargs)
-    )
+    total_args = len(node.args.args) + len(node.args.posonlyargs) + len(node.args.kwonlyargs)
     # Don't count 'self' and 'cls'
     if node.args.args and node.args.args[0].arg in ("self", "cls"):
         total_args -= 1
     if total_args > 7:
-        findings.append(Finding(
-            file=filepath,
-            line=node.lineno,
-            severity=Severity.INFO,
-            category=Category.STYLE,
-            source=Source.AST,
-            rule="too-many-args",
-            message=f"Function '{node.name}' has {total_args} arguments",
-            suggestion="Consider using a dataclass or config object to group parameters",
-        ))
+        findings.append(
+            Finding(
+                file=filepath,
+                line=node.lineno,
+                severity=Severity.INFO,
+                category=Category.STYLE,
+                source=Source.AST,
+                rule="too-many-args",
+                message=f"Function '{node.name}' has {total_args} arguments",
+                suggestion="Consider using a dataclass or config object to group parameters",
+            )
+        )
 
 
-def analyze_file_static(filepath: str, content: str, language: str,
-                        custom_rules=None) -> "StaticAnalysisResult":
+def analyze_file_static(filepath: str, content: str, language: str, custom_rules=None) -> StaticAnalysisResult:  # noqa: F821
     """Run all static checks (regex + tree-sitter AST + Python AST fallback + semantic).
 
     Always returns a StaticAnalysisResult with findings, semantics, and type_map.
     Callers that only need findings can use result.findings.
     """
-    from .types import StaticAnalysisResult
     import time as _time
+
+    from .types import StaticAnalysisResult
+
     _scan_start = _time.perf_counter()
 
     findings = run_regex_checks(content, filepath, language, custom_rules=custom_rules)
 
     # AST checks: tree-sitter for all languages, Python ast as supplement/fallback
     from .semantic.checks import run_tree_sitter_checks
+
     ts_findings = run_tree_sitter_checks(content, filepath, language)
     if ts_findings:
         findings.extend(ts_findings)
@@ -702,16 +767,17 @@ def analyze_file_static(filepath: str, content: str, language: str,
     # v0.8.0: Semantic analysis (scope, taint, smells)
     from .semantic.core import extract_semantics
     from .semantic.lang_config import get_config
+
     _file_type_map = None  # captured for return_semantics
     semantics = extract_semantics(content, filepath, language)
     if semantics:
         from .semantic.scope import (
+            check_uninitialized_variables,
             check_unused_variables,
             check_variable_shadowing,
-            check_uninitialized_variables,
         )
+        from .semantic.smells import check_feature_envy, check_god_class, check_long_method, check_semantic_clones
         from .semantic.taint import analyze_taint
-        from .semantic.smells import check_god_class, check_feature_envy, check_long_method, check_semantic_clones
 
         findings.extend(check_unused_variables(semantics, filepath))
         findings.extend(check_variable_shadowing(semantics, filepath))
@@ -723,14 +789,14 @@ def analyze_file_static(filepath: str, content: str, language: str,
 
             # v0.9.0: Build CFG and use path-sensitive analysis when available
             from .semantic.cfg import build_cfg
+
             cfgs = build_cfg(semantics, source_bytes, config)
             if cfgs:
-                from .semantic.taint import analyze_taint_pathsensitive
                 from .semantic.resource import check_resource_leaks
-                findings.extend(analyze_taint_pathsensitive(
-                    semantics, source_bytes, config, filepath, cfgs))
-                findings.extend(check_resource_leaks(
-                    semantics, source_bytes, config, filepath, cfgs))
+                from .semantic.taint import analyze_taint_pathsensitive
+
+                findings.extend(analyze_taint_pathsensitive(semantics, source_bytes, config, filepath, cfgs))
+                findings.extend(check_resource_leaks(semantics, source_bytes, config, filepath, cfgs))
             else:
                 # Fallback to flow-insensitive taint analysis
                 findings.extend(analyze_taint(semantics, source_bytes, config, filepath))
@@ -738,13 +804,15 @@ def analyze_file_static(filepath: str, content: str, language: str,
         # v0.10.0: Type inference + null safety
         if config:
             try:
-                from .semantic.types import infer_types
                 from .semantic.nullsafety import check_null_safety
+                from .semantic.types import infer_types
+
                 _file_type_map = infer_types(semantics, source_bytes, config, cfgs=cfgs if config else None)
                 type_map = _file_type_map
                 if type_map and type_map.types:
-                    findings.extend(check_null_safety(
-                        semantics, type_map, config, filepath, cfgs=cfgs if config else None))
+                    findings.extend(
+                        check_null_safety(semantics, type_map, config, filepath, cfgs=cfgs if config else None)
+                    )
             except (ValueError, OSError, AttributeError) as e:
                 logger.debug("Type inference/null safety skipped: %s", e)
 
@@ -764,8 +832,7 @@ def analyze_file_static(filepath: str, content: str, language: str,
             if line_no < 1 or line_no > len(lines):
                 _suppression_cache[line_no] = None
             else:
-                _suppression_cache[line_no] = _parse_line_suppression(
-                    lines[line_no - 1], language)
+                _suppression_cache[line_no] = _parse_line_suppression(lines[line_no - 1], language)
         result = _suppression_cache[line_no]
         if result is None:
             return False
@@ -773,10 +840,7 @@ def analyze_file_static(filepath: str, content: str, language: str,
             return True
         return rule in result
 
-    findings = [
-        f for f in findings
-        if f.source == Source.STATIC or not _check_suppressed(f.line, f.rule)
-    ]
+    findings = [f for f in findings if f.source == Source.STATIC or not _check_suppressed(f.line, f.rule)]
 
     # Deduplicate: same file + line + rule
     seen = set()
@@ -789,12 +853,14 @@ def analyze_file_static(filepath: str, content: str, language: str,
 
     # Sort by severity (critical first), then line number
     from .types import SEVERITY_ORDER
+
     unique.sort(key=lambda f: (SEVERITY_ORDER[f.severity], f.line))
 
     # Record metrics
     _scan_ms = (_time.perf_counter() - _scan_start) * 1000
     try:
         from .metrics import get_session
+
         session = get_session()
         if session:
             session.record_file(_scan_ms)

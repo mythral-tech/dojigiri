@@ -9,14 +9,18 @@ Data in -> Data out: filepath + content + findings -> list[Fix] with source=LLM
 """
 
 import logging
+
 from ..types import Finding, Fix, FixSource
 
 logger = logging.getLogger(__name__)
 
 
 def generate_llm_fixes(
-    filepath: str, content: str, language: str,
-    findings: list[Finding], cost_tracker=None,
+    filepath: str,
+    content: str,
+    language: str,
+    findings: list[Finding],
+    cost_tracker=None,
 ) -> list[Fix]:
     """Send findings to LLM, get back structured fixes.
 
@@ -26,36 +30,45 @@ def generate_llm_fixes(
         return []
 
     try:
-        from ..llm import fix_file as llm_fix_file, CostTracker
+        from ..llm import CostTracker
+        from ..llm import fix_file as llm_fix_file
 
         if cost_tracker is None:
             cost_tracker = CostTracker()
 
         findings_dicts = []
         for f in findings:
-            findings_dicts.append({
-                "line": f.line,
-                "rule": f.rule,
-                "message": f.message,
-                "suggestion": f.suggestion or "",
-            })
+            findings_dicts.append(
+                {
+                    "line": f.line,
+                    "rule": f.rule,
+                    "message": f.message,
+                    "suggestion": f.suggestion or "",
+                }
+            )
 
         raw_fixes, cost_tracker = llm_fix_file(
-            content, filepath, language, findings_dicts, cost_tracker,
+            content,
+            filepath,
+            language,
+            findings_dicts,
+            cost_tracker,
         )
 
         fixes = []
         for rf in raw_fixes:
             try:
-                fixes.append(Fix(
-                    file=filepath,
-                    line=rf.get("line", 0),
-                    rule=rf.get("rule", "llm-fix"),
-                    original_code=rf.get("original_code", ""),
-                    fixed_code=rf.get("fixed_code", ""),
-                    explanation=rf.get("explanation", "LLM-generated fix"),
-                    source=FixSource.LLM,
-                ))
+                fixes.append(
+                    Fix(
+                        file=filepath,
+                        line=rf.get("line", 0),
+                        rule=rf.get("rule", "llm-fix"),
+                        original_code=rf.get("original_code", ""),
+                        fixed_code=rf.get("fixed_code", ""),
+                        explanation=rf.get("explanation", "LLM-generated fix"),
+                        source=FixSource.LLM,
+                    )
+                )
             except (KeyError, TypeError):
                 continue
 

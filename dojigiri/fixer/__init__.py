@@ -16,7 +16,8 @@ Data in -> Data out: (re-export hub, no data transformation)
 """
 
 # ─── Engine (orchestration, application, verification) ────────────────
-from .engine import apply_fixes, fix_file, verify_fixes  # doji:ignore(unused-import)
+# ─── Cascade derivation ──────────────────────────────────────────────
+from .cascade import derive_expected_cascades  # doji:ignore(unused-import)
 
 # ─── Deterministic fixers (the catalog) ───────────────────────────────
 from .deterministic import (  # doji:ignore(unused-import)
@@ -43,18 +44,16 @@ from .deterministic import (  # doji:ignore(unused-import)
     _fix_weak_hash,
     _fix_yaml_unsafe,
 )
-
-# ─── Cascade derivation ──────────────────────────────────────────────
-from .cascade import derive_expected_cascades  # doji:ignore(unused-import)
-
-# ─── LLM fixes ───────────────────────────────────────────────────────
-from .llm_fixes import generate_llm_fixes  # doji:ignore(unused-import)
+from .engine import apply_fixes, fix_file, verify_fixes  # doji:ignore(unused-import)
 
 # ─── Helpers (re-exported for tests that import them directly) ────────
 from .helpers import (
     _in_multiline_string,
     _pattern_outside_strings,
 )
+
+# ─── LLM fixes ───────────────────────────────────────────────────────
+from .llm_fixes import generate_llm_fixes  # doji:ignore(unused-import)
 
 __all__ = [
     # Engine

@@ -14,13 +14,12 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
-from .lang_config import LanguageConfig
 from .core import FileSemantics
-
+from .lang_config import LanguageConfig
 
 # ─── Type model ──────────────────────────────────────────────────────
+
 
 class InferredType(Enum):
     INT = "int"
@@ -64,7 +63,7 @@ _ANNOTATION_TYPE_MAP: dict[str, InferredType] = {
 @dataclass
 class TypeInfo:
     inferred_type: InferredType
-    class_name: Optional[str] = None
+    class_name: str | None = None
     nullable: bool = False
     source: str = "literal"  # "literal", "annotation", "constructor", "return_type", "propagated"
 
@@ -80,6 +79,7 @@ class TypeInfo:
 @dataclass
 class FileTypeMap:
     """Type information for all variables in a file."""
+
     types: dict[tuple[str, int], TypeInfo] = field(default_factory=dict)  # (var_name, scope_id)
     return_types: dict[str, TypeInfo] = field(default_factory=dict)  # qualified_fn_name → return type
 
@@ -87,29 +87,33 @@ class FileTypeMap:
 @dataclass
 class FunctionContract:
     """Inferred behavioral contract for a function."""
+
     qualified_name: str
     returns_nullable: bool = False
     param_nullability: dict[str, bool] = field(default_factory=dict)  # param_name → nullable
-    return_type: Optional[TypeInfo] = None
+    return_type: TypeInfo | None = None
 
 
 # ─── Inference rules ─────────────────────────────────────────────────
 
-def _infer_from_literal(value_node_type: str, config: LanguageConfig) -> Optional[TypeInfo]:
+
+def _infer_from_literal(value_node_type: str, config: LanguageConfig) -> TypeInfo | None:
     """Rule 1: Infer type from literal assignment."""
     mapped = config.literal_type_map.get(value_node_type)
     if mapped:
-        itype = InferredType(mapped.lower()) if mapped.lower() in [e.value for e in InferredType] else InferredType.UNKNOWN
+        itype = (
+            InferredType(mapped.lower()) if mapped.lower() in [e.value for e in InferredType] else InferredType.UNKNOWN
+        )
         return TypeInfo(inferred_type=itype, source="literal")
     return None
 
 
-def _infer_from_constructor(value_text: str, semantics: FileSemantics) -> Optional[TypeInfo]:
+def _infer_from_constructor(value_text: str, semantics: FileSemantics) -> TypeInfo | None:
     """Rule 2: Infer type from constructor call — `x = MyClass()`."""
     # Check if value looks like a constructor: CapitalizedName(...)
     stripped = value_text.strip()
     if "(" in stripped:
-        name = stripped[:stripped.index("(")].strip()
+        name = stripped[: stripped.index("(")].strip()
         if name and name[0].isupper() and name.isidentifier():
             # Check if this class exists in the file
             for cdef in semantics.class_defs:
@@ -128,7 +132,7 @@ def _infer_from_constructor(value_text: str, semantics: FileSemantics) -> Option
     return None
 
 
-def _infer_from_annotation(value_text: str, language: str) -> Optional[TypeInfo]:
+def _infer_from_annotation(value_text: str, language: str) -> TypeInfo | None:
     """Rule 3: Infer from type annotation (Python: x: int, TS: x: number)."""
     # This is called with annotation text extracted from AST
     text = value_text.strip()
@@ -155,7 +159,7 @@ def _infer_from_annotation(value_text: str, language: str) -> Optional[TypeInfo]
     return None
 
 
-def _infer_nullable_from_call(value_text: str, config: LanguageConfig) -> Optional[TypeInfo]:
+def _infer_nullable_from_call(value_text: str, config: LanguageConfig) -> TypeInfo | None:
     """Rule 5: Infer nullable from known nullable-return patterns.
 
     Special case: .get(key, default) with a non-None default is NOT nullable.
@@ -173,7 +177,7 @@ def _infer_nullable_from_call(value_text: str, config: LanguageConfig) -> Option
         # Check for .get() with a non-None default value
         if pattern.endswith(".get") or pattern == ".get":
             # Match .get(key, default) — if there's a second arg, check if it's None
-            m = re.search(r'\.get\s*\([^,]+,\s*(.+?)\s*\)', value_text)
+            m = re.search(r"\.get\s*\([^,]+,\s*(.+?)\s*\)", value_text)
             if m:
                 default_val = m.group(1).strip()
                 if default_val not in ("None", "null", "nil"):
@@ -187,7 +191,7 @@ def _infer_nullable_from_call(value_text: str, config: LanguageConfig) -> Option
     return None
 
 
-def _infer_none_literal(value_text: str, value_node_type: str) -> Optional[TypeInfo]:
+def _infer_none_literal(value_text: str, value_node_type: str) -> TypeInfo | None:
     """Detect explicit None/null/nil assignment."""
     if value_node_type in ("none", "null", "nil"):
         return TypeInfo(inferred_type=InferredType.NONE, nullable=True, source="literal")
@@ -198,6 +202,7 @@ def _infer_none_literal(value_text: str, value_node_type: str) -> Optional[TypeI
 
 # ─── Type annotation extraction ─────────────────────────────────────
 
+
 def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes) -> dict[tuple[str, int], str]:
     """Extract type annotations from the cached tree-sitter AST.
 
@@ -205,7 +210,7 @@ def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes
     Only works for Python and TypeScript (languages with type annotations in AST).
     """
     annotations: dict[tuple[str, int], str] = {}
-    root = getattr(semantics, '_tree_root', None)
+    root = getattr(semantics, "_tree_root", None)
     if root is None:
         return annotations
 
@@ -224,7 +229,7 @@ def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes
                 line = lines[line_idx]
                 # Match pattern: varname: type = value  or  varname: type
                 m = re.match(
-                    r'\s*' + re.escape(asgn.name) + r'\s*:\s*([^=]+?)(?:\s*=|$)',
+                    r"\s*" + re.escape(asgn.name) + r"\s*:\s*([^=]+?)(?:\s*=|$)",
                     line,
                 )
                 if m:
@@ -238,7 +243,7 @@ def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes
             line_idx = fdef.line - 1
             if 0 <= line_idx < len(lines):
                 line = lines[line_idx]
-                m = re.search(r'->\s*(.+?):', line)
+                m = re.search(r"->\s*(.+?):", line)
                 if m:
                     ret_text = m.group(1).strip()
                     # Use the function's OWN scope ID (not the outer scope
@@ -257,7 +262,7 @@ def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes
                 line = lines[line_idx]
                 # Match: let/const/var name: Type = ...
                 m = re.search(
-                    re.escape(asgn.name) + r'\s*:\s*([^=;]+?)(?:\s*[=;]|$)',
+                    re.escape(asgn.name) + r"\s*:\s*([^=;]+?)(?:\s*[=;]|$)",
                     line,
                 )
                 if m:
@@ -270,11 +275,12 @@ def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes
 
 # ─── Main entry points ───────────────────────────────────────────────
 
+
 def infer_types(
     semantics: FileSemantics,
     source_bytes: bytes,
     config: LanguageConfig,
-    cfgs: Optional[dict] = None,
+    cfgs: dict | None = None,
 ) -> FileTypeMap:
     """Infer types for all variables in the file.
 
@@ -396,7 +402,7 @@ def infer_types(
 def infer_contracts(
     semantics_by_file: dict[str, FileSemantics],
     type_maps: dict[str, FileTypeMap],
-    call_graph: Optional[dict] = None,
+    call_graph: dict | None = None,
 ) -> dict[str, FunctionContract]:
     """Infer function contracts from type maps across files.
 

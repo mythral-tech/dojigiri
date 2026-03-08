@@ -9,21 +9,22 @@ Calls into: config.py (constants + ignore patterns)
 Data in -> Data out: Path in -> list[Path] / bool / Optional[str] out
 """
 
+from __future__ import annotations
+
 import fnmatch
 from pathlib import Path
-from typing import Optional
 
 from .config import (
     LANGUAGE_EXTENSIONS,
-    SKIP_DIRS,
-    SKIP_FILES,
     MAX_FILE_SIZE,
     SENSITIVE_FILE_PATTERNS,
+    SKIP_DIRS,
+    SKIP_FILES,
     load_ignore_patterns,
 )
 
 
-def detect_language(filepath: Path) -> Optional[str]:
+def detect_language(filepath: Path) -> str | None:
     """Detect language from file extension."""
     return LANGUAGE_EXTENSIONS.get(filepath.suffix.lower())
 
@@ -53,7 +54,7 @@ def should_skip_file(filepath: Path) -> bool:
 
 def collect_files(
     root: Path,
-    language_filter: Optional[str] = None,
+    language_filter: str | None = None,
 ) -> tuple[list[Path], int]:
     """Walk directory tree and collect analyzable files.
     Returns (files, skipped_count).
@@ -98,8 +99,7 @@ def collect_files(
             continue
         # Check .doji-ignore patterns
         rel = str(item.relative_to(root))
-        if any(fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(item.name, pat)
-               for pat in ignore_patterns):
+        if any(fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(item.name, pat) for pat in ignore_patterns):
             skipped += 1
             continue
         lang = detect_language(item)
@@ -116,7 +116,7 @@ def collect_files(
 
 def collect_files_with_lang(
     root: Path,
-    language_filter: Optional[str] = None,
+    language_filter: str | None = None,
 ) -> list[tuple[Path, str]]:
     """Collect analyzable files under root, each paired with its detected language.
 

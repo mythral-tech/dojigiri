@@ -8,10 +8,11 @@ Calls into: config.py (types only)
 Data in -> Data out: source text + AST nodes -> transformed text / boolean checks
 """
 
+from __future__ import annotations
+
 import ast
 import logging
 import re
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ def _in_multiline_string(content: str, line_num: int) -> bool:
         tree = ast.parse(content)
         for node in ast.walk(tree):
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
-                if hasattr(node, 'end_lineno') and node.end_lineno is not None:
+                if hasattr(node, "end_lineno") and node.end_lineno is not None:
                     if node.lineno < line_num < node.end_lineno:
                         return True
                     # Same start and end line is a single-line string, skip
@@ -71,7 +72,7 @@ def _sub_outside_strings(line: str, pattern: str, replacement: str) -> str:
     last_end = 0
     for m in _STRING_LITERAL_RE.finditer(line):
         # Apply substitution to code segment before this string literal
-        code_seg = line[last_end:m.start()]
+        code_seg = line[last_end : m.start()]
         parts.append(re.sub(pattern, replacement, code_seg))
         parts.append(m.group())  # preserve string literal unchanged
         last_end = m.end()
@@ -82,7 +83,7 @@ def _sub_outside_strings(line: str, pattern: str, replacement: str) -> str:
 
 def _pattern_outside_strings(line: str, pattern: re.Pattern) -> bool:
     """Check if pattern matches in code portions of a line (outside string literals)."""
-    code_only = _STRING_LITERAL_RE.sub(lambda m: ' ' * len(m.group()), line)
+    code_only = _STRING_LITERAL_RE.sub(lambda m: " " * len(m.group()), line)
     return bool(pattern.search(code_only))
 
 
@@ -102,7 +103,7 @@ def _find_ast_node(content: str, line: int, node_type, predicate=None):
     for node in ast.walk(tree):
         if not isinstance(node, node_type):
             continue
-        if not hasattr(node, 'lineno') or node.lineno != line:
+        if not hasattr(node, "lineno") or node.lineno != line:
             continue
         if predicate is None or predicate(node):
             return node
@@ -123,12 +124,12 @@ def _replace_node_source(content: str, node, replacement_text: str) -> str:
 
     # Build prefix (everything before the node) and suffix (everything after)
     prefix = "".join(lines[:start_line]) + lines[start_line][:start_col]
-    suffix = lines[end_line][end_col:] + "".join(lines[end_line + 1:])
+    suffix = lines[end_line][end_col:] + "".join(lines[end_line + 1 :])
 
     return prefix + replacement_text + suffix
 
 
-def _extract_name_from_message(message: str) -> Optional[str]:
+def _extract_name_from_message(message: str) -> str | None:
     """Extract a quoted identifier from a finding message."""
     for pattern in [r"'(\w+)'", r"\"(\w+)\""]:
         m = re.search(pattern, message)
@@ -138,9 +139,16 @@ def _extract_name_from_message(message: str) -> Optional[str]:
 
 
 _OP_MAP: dict[type, str] = {
-    ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=",
-    ast.Gt: ">", ast.GtE: ">=", ast.Is: "is", ast.IsNot: "is not",
-    ast.In: "in", ast.NotIn: "not in",
+    ast.Eq: "==",
+    ast.NotEq: "!=",
+    ast.Lt: "<",
+    ast.LtE: "<=",
+    ast.Gt: ">",
+    ast.GtE: ">=",
+    ast.Is: "is",
+    ast.IsNot: "is not",
+    ast.In: "in",
+    ast.NotIn: "not in",
 }
 
 
@@ -149,14 +157,19 @@ def _op_str(op) -> str:
     return _OP_MAP.get(type(op), "==")
 
 
-def _is_empty_mutable(node) -> Optional[str]:
+def _is_empty_mutable(node) -> str | None:
     """If node is an empty mutable literal ([], {}, set()), return its string repr."""
     if isinstance(node, ast.List) and not node.elts:
         return "[]"
     if isinstance(node, ast.Dict) and not node.keys:
         return "{}"
-    if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-            and node.func.id == 'set' and not node.args and not node.keywords):
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "set"
+        and not node.args
+        and not node.keywords
+    ):
         return "set()"
     return None
 
@@ -211,7 +224,7 @@ def _semantic_var_is_used_in_child_scope(name: str, assign_scope_id: int, semant
 def _semantic_var_in_all_export(name: str, semantics) -> bool:
     """Check if a variable is listed in __all__ (re-export)."""
     for assign in semantics.assignments:
-        if assign.name == '__all__' and assign.value_text:
+        if assign.name == "__all__" and assign.value_text:
             # value_text is the raw source of the RHS — check if our name is in it
             if re.search(r"""['"]""" + re.escape(name) + r"""['"]""", assign.value_text):
                 return True
@@ -231,6 +244,7 @@ def _record_fix_metric(rule: str, succeeded: bool, duration_ms: float) -> None:
     """Record a fix attempt in the current metrics session (best-effort)."""
     try:
         from ..metrics import get_session
+
         session = get_session()
         if session:
             session.record_fix(rule, succeeded, duration_ms)

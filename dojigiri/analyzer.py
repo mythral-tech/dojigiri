@@ -10,27 +10,36 @@ Calls into: discovery.py, config.py, detector.py, chunker.py, llm.py,
 Data in → Data out: Path (file or directory) in → ScanReport out.
 """
 
+from __future__ import annotations
+
 import logging
+import os
 import re
 import subprocess
 import sys
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
 
-from .types import (
-    Finding, FileAnalysis, ScanReport, CrossFileFinding, Severity, Confidence, Category, Source,
-    SEVERITY_ORDER,
-)
-from .discovery import detect_language, collect_files
-from .detector import analyze_file_static
 from .chunker import chunk_file, estimate_tokens
-from .llm import analyze_chunk, CostTracker, LLMError, CostLimitExceeded
+from .detector import analyze_file_static
+from .discovery import collect_files, detect_language
+from .llm import CostLimitExceeded, CostTracker, LLMError, analyze_chunk
 from .storage import file_hash, load_cache, save_cache, save_report
+from .types import (
+    SEVERITY_ORDER,
+    Category,
+    Confidence,
+    CrossFileFinding,
+    FileAnalysis,
+    Finding,
+    ScanReport,
+    Severity,
+    Source,
+)
 
 
 def _safe_enum(enum_cls, value):
@@ -45,9 +54,9 @@ def _analyze_single_file(
     filepath: Path,
     cache: dict,
     use_cache: bool,
-    cache_lock: Optional[threading.Lock] = None,
+    cache_lock: threading.Lock | None = None,
     custom_rules=None,
-) -> tuple[Optional[FileAnalysis], Optional[str], bool]:
+) -> tuple[FileAnalysis | None, str | None, bool]:
     """Analyze a single file.
 
     Returns (FileAnalysis, updated_hash, is_error):
@@ -90,7 +99,7 @@ def _analyze_single_file(
 
 def scan_quick(
     root: Path,
-    language_filter: Optional[str] = None,
+    language_filter: str | None = None,
     use_cache: bool = True,
     max_workers: int = 4,
     custom_rules=None,
@@ -111,8 +120,7 @@ def scan_quick(
     if max_workers == 1:
         # Sequential processing
         for filepath in files:
-            fa, updated_hash, is_error = _analyze_single_file(
-                filepath, cache, use_cache, custom_rules=custom_rules)
+            fa, updated_hash, is_error = _analyze_single_file(filepath, cache, use_cache, custom_rules=custom_rules)
             if fa:
                 analyses.append(fa)
                 if use_cache and updated_hash:
@@ -124,8 +132,9 @@ def scan_quick(
         cache_lock = threading.Lock()
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_file = {
-                executor.submit(_analyze_single_file, filepath, cache, use_cache, cache_lock,
-                                custom_rules=custom_rules): filepath
+                executor.submit(
+                    _analyze_single_file, filepath, cache, use_cache, cache_lock, custom_rules=custom_rules
+                ): filepath
                 for filepath in files
             }
 
@@ -155,41 +164,49 @@ def scan_quick(
             semantics_by_file[fa.path] = fa.semantics
     if len(semantics_by_file) >= 2:
         from .semantic.smells import find_semantic_clone_pairs
+
         clone_pairs = find_semantic_clone_pairs(semantics_by_file)
         # Dict lookup for intra-file clone insertion (O(1) vs O(N) scan)
         analysis_by_path = {fa.path: fa for fa in analyses}
         for p in clone_pairs:
             if p.file_a != p.file_b:
                 # Cross-file clone → structured CrossFileFinding
-                cross_file_findings.append(CrossFileFinding(
-                    source_file=p.file_a,
-                    target_file=p.file_b,
-                    line=p.func_a_line,
-                    target_line=p.func_b_line,
-                    severity=Severity.INFO,
-                    category=Category.STYLE,
-                    rule="semantic-clone",
-                    message=(
-                        f"Function '{p.func_a_name}' is semantically similar "
-                        f"({p.similarity:.0%}) to '{p.func_b_name}'"
-                    ),
-                    suggestion="Consider extracting shared logic into a common function",
-                ))
+                cross_file_findings.append(
+                    CrossFileFinding(
+                        source_file=p.file_a,
+                        target_file=p.file_b,
+                        line=p.func_a_line,
+                        target_line=p.func_b_line,
+                        severity=Severity.INFO,
+                        category=Category.STYLE,
+                        rule="semantic-clone",
+                        message=(
+                            f"Function '{p.func_a_name}' is semantically similar "
+                            f"({p.similarity:.0%}) to '{p.func_b_name}'"
+                        ),
+                        suggestion="Consider extracting shared logic into a common function",
+                    )
+                )
             else:
                 # Intra-file clone → regular Finding on the file
                 fa = analysis_by_path.get(p.file_a)
                 if fa:
-                    fa.findings.append(Finding(
-                        file=p.file_a, line=p.func_a_line,
-                        severity=Severity.INFO, category=Category.STYLE,
-                        source=Source.AST, rule="semantic-clone",
-                        message=(
-                            f"Function '{p.func_a_name}' is semantically similar "
-                            f"({p.similarity:.0%}) to '{p.func_b_name}' "
-                            f"at line {p.func_b_line}"
-                        ),
-                        suggestion="Consider extracting shared logic into a common function",
-                    ))
+                    fa.findings.append(
+                        Finding(
+                            file=p.file_a,
+                            line=p.func_a_line,
+                            severity=Severity.INFO,
+                            category=Category.STYLE,
+                            source=Source.AST,
+                            rule="semantic-clone",
+                            message=(
+                                f"Function '{p.func_a_name}' is semantically similar "
+                                f"({p.similarity:.0%}) to '{p.func_b_name}' "
+                                f"at line {p.func_b_line}"
+                            ),
+                            suggestion="Consider extracting shared logic into a common function",
+                        )
+                    )
 
     # Clear semantics references to free memory (not needed after this point)
     for fa in analyses:
@@ -210,11 +227,11 @@ def scan_quick(
 
 def scan_deep(
     root: Path,
-    language_filter: Optional[str] = None,
+    language_filter: str | None = None,
     use_cache: bool = True,
     max_workers: int = 4,
     custom_rules=None,
-    max_cost: Optional[float] = None,
+    max_cost: float | None = None,
 ) -> ScanReport:
     """Deep scan — static + Claude API analysis.
 
@@ -237,18 +254,18 @@ def scan_deep(
     # Phase 1: Static analysis and cache check
     file_data = []  # list of (fp_str, lang, content, line_count, static_findings, fhash, from_cache)
     cached_analyses = []  # FileAnalyses loaded from cache
-    
+
     for filepath in files:
         fp_str = str(filepath)
         lang = detect_language(filepath)
-        
+
         # Compute hash first
         try:
             fhash = file_hash(fp_str)
         except OSError:
             skipped += 1
             continue
-        
+
         # Check cache - if file unchanged, skip LLM analysis
         if use_cache and fp_str in cache and isinstance(cache[fp_str], dict):
             cached_data = cache[fp_str]
@@ -278,7 +295,7 @@ def scan_deep(
                 )
                 cached_analyses.append(fa)
                 continue
-        
+
         # Cache miss or disabled - need to analyze
         try:
             content = filepath.read_text(encoding="utf-8", errors="replace")
@@ -295,31 +312,81 @@ def scan_deep(
     cache_write_lock = threading.Lock()
     print_lock = threading.Lock()
 
+    # Resolve skip-clean-files setting: config flag + env override
+    from .config import LLM_SKIP_CLEAN_FILES
+
+    skip_clean = LLM_SKIP_CLEAN_FILES and not os.environ.get("DOJI_LLM_FISH_CLEAN")
+    skipped_clean_count = 0
+
     def _analyze_file_deep(index, fp_str, lang, content, line_count, static_findings, fhash):
         """Per-file LLM analysis — runs in a thread."""
-        with print_lock:
-            print(f"  [{index+1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
+        nonlocal skipped_clean_count
 
-        llm_findings = []
-        try:
-            chunks = chunk_file(content, fp_str, lang)
-            for chunk in chunks:
-                chunk_findings = analyze_chunk(chunk, cost_tracker, static_findings=static_findings)
-                llm_findings.extend(chunk_findings)
+        # Skip LLM for statically-clean files — the "fishing" path has low yield
+        # and high cost. Files with 0 static findings rarely produce LLM findings
+        # worth the API call. Users can override with DOJI_LLM_FISH_CLEAN=1.
+        if skip_clean and not static_findings:
+            with print_lock:
+                print(
+                    f"  [{index + 1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines) [clean — skipped LLM]",
+                    flush=True,
+                )
+            fa = FileAnalysis(
+                path=fp_str,
+                language=lang,
+                lines=line_count,
+                findings=[],
+                file_hash=fhash,
+            )
+            with analyses_lock:
+                analyses.append(fa)
+                skipped_clean_count += 1
+            if use_cache:
+                with cache_write_lock:
+                    cache[fp_str] = {
+                        "hash": fhash,
+                        "language": lang,
+                        "lines": line_count,
+                        "findings": [],
+                    }
+            return
+
+        # Check cost limit flag *before* making any API calls — prevents
+        # parallel workers from spending money after another thread hit the limit.
+        if cost_tracker.limit_exceeded:
+            with print_lock:
+                print(f"  [{index + 1}/{len(file_data)}] {fp_str} (static only — cost limit)", flush=True)
+            llm_findings = []
+        else:
+            with print_lock:
+                print(f"  [{index + 1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
+
+            llm_findings = []
+            try:
+                chunks = chunk_file(content, fp_str, lang)
+                for chunk in chunks:
+                    # Re-check between chunks for multi-chunk files
+                    if cost_tracker.limit_exceeded:
+                        break
+                    chunk_findings = analyze_chunk(chunk, cost_tracker, static_findings=static_findings)
+                    llm_findings.extend(chunk_findings)
+                    if len(chunks) > 1:
+                        with print_lock:
+                            sys.stdout.write(".")
+                            sys.stdout.flush()
                 if len(chunks) > 1:
                     with print_lock:
-                        sys.stdout.write(".")
-                        sys.stdout.flush()
-            if len(chunks) > 1:
+                        print()
+            except CostLimitExceeded:
                 with print_lock:
-                    print()
-        except CostLimitExceeded:
-            with print_lock:
-                print(f"\n  Cost limit reached (${cost_tracker.total_cost:.4f}). "
-                      "Remaining files will use static analysis only.", flush=True)
-        except LLMError as e:
-            with print_lock:
-                logger.warning("LLM error for %s: %s", fp_str, e)
+                    print(
+                        f"\n  Cost limit reached (${cost_tracker.total_cost:.4f}). "
+                        "Remaining files will use static analysis only.",
+                        flush=True,
+                    )
+            except LLMError as e:
+                with print_lock:
+                    logger.warning("LLM error for %s: %s", fp_str, e)
 
         merged = _merge_findings(static_findings, llm_findings)
 
@@ -349,13 +416,22 @@ def scan_deep(
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = []
             for i, (fp_str, lang, content, line_count, static_findings, fhash) in enumerate(file_data):
-                futures.append(executor.submit(
-                    _analyze_file_deep, i, fp_str, lang, content, line_count, static_findings, fhash))
+                futures.append(
+                    executor.submit(_analyze_file_deep, i, fp_str, lang, content, line_count, static_findings, fhash)
+                )
             for future in as_completed(futures):
                 try:
                     future.result()
                 except Exception as e:  # future.result() — any worker error must be caught
                     logger.warning("Worker error: %s", e)
+
+    # Report clean-file savings
+    if skipped_clean_count:
+        print(
+            f"  Skipped LLM for {skipped_clean_count}/{len(file_data)} statically-clean files "
+            f"(override with DOJI_LLM_FISH_CLEAN=1)",
+            flush=True,
+        )
 
     # Save cache with updated analyses
     if use_cache:
@@ -414,9 +490,9 @@ def _merge_findings(static: list[Finding], llm: list[Finding]) -> list[Finding]:
 
 def filter_report(
     report: ScanReport,
-    ignore_rules: Optional[set[str]] = None,
-    min_severity: Optional[Severity] = None,
-    min_confidence: Optional[Confidence] = None,
+    ignore_rules: set[str] | None = None,
+    min_severity: Severity | None = None,
+    min_confidence: Confidence | None = None,
 ) -> ScanReport:
     """Apply post-scan filters (ignore rules, min severity, min confidence) to a report."""
     if not ignore_rules and not min_severity and not min_confidence:
@@ -442,12 +518,13 @@ def filter_report(
     return report
 
 
-def _normalize_path(path_str: str, root: Optional[str] = None) -> str:
+def _normalize_path(path_str: str, root: str | None = None) -> str:
     """Normalize a path for baseline comparison.
 
     Converts absolute paths to relative (using root) and normalizes separators.
     """
     import os
+
     p = os.path.normpath(path_str)
     if root and os.path.isabs(p):
         try:
@@ -489,17 +566,14 @@ def diff_reports(
     scan_root = report.root
     for fa in report.file_analyses:
         norm_path = _normalize_path(fa.path, scan_root)
-        fa.findings = [
-            f for f in fa.findings
-            if (norm_path, f.line // 5, f.rule) not in baseline_signatures
-        ]
+        fa.findings = [f for f in fa.findings if (norm_path, f.line // 5, f.rule) not in baseline_signatures]
 
     return report
 
 
 def cost_estimate(
     root: Path,
-    language_filter: Optional[str] = None,
+    language_filter: str | None = None,
 ) -> tuple[int, int, int, float]:
     """Estimate deep scan cost without running it.
     Returns (total_lines, total_files, est_tokens, est_cost_usd).
@@ -523,13 +597,11 @@ def cost_estimate(
     est_output = est_tokens // 4
 
     # Use tiered pricing from the backend's pricing table (avoids hardcoded prices)
-    from .llm_backend import get_tier_pricing, TIER_SCAN
+    from .llm_backend import TIER_SCAN, get_tier_pricing
+
     input_cost_per_m, output_cost_per_m = get_tier_pricing(tier=TIER_SCAN)
 
-    est_cost = (
-        (est_tokens / 1_000_000) * input_cost_per_m
-        + (est_output / 1_000_000) * output_cost_per_m
-    )
+    est_cost = (est_tokens / 1_000_000) * input_cost_per_m + (est_output / 1_000_000) * output_cost_per_m
 
     return total_lines, len(files), est_tokens, est_cost
 
@@ -546,8 +618,11 @@ def _git_run(args: list[str], cwd: str) -> subprocess.CompletedProcess:
     if not cwd_path.is_dir():
         raise OSError(f"Invalid working directory: {cwd}")
     result = subprocess.run(
-        args, capture_output=True, cwd=str(cwd_path),
-        encoding="utf-8", errors="replace",
+        args,
+        capture_output=True,
+        cwd=str(cwd_path),
+        encoding="utf-8",
+        errors="replace",
     )
     # Ensure stdout/stderr are never None
     if result.stdout is None:
@@ -557,7 +632,7 @@ def _git_run(args: list[str], cwd: str) -> subprocess.CompletedProcess:
     return result
 
 
-def _find_git_root(path: Path) -> Optional[Path]:
+def _find_git_root(path: Path) -> Path | None:
     """Find the git root for a path, or None."""
     try:
         result = _git_run(
@@ -571,12 +646,12 @@ def _find_git_root(path: Path) -> Optional[Path]:
     return None
 
 
-def _resolve_base_ref(git_root: Path, base: Optional[str] = None) -> Optional[str]:
+def _resolve_base_ref(git_root: Path, base: str | None = None) -> str | None:
     """Resolve the base ref to diff against. Tries base arg, then main, then master."""
     candidates = [base] if base else ["main", "master"]
     for ref in candidates:
         # Validate ref format to prevent flag injection into git commands
-        if ref and (ref.startswith("-") or not re.match(r'^[a-zA-Z0-9._/~^@{}\-]+$', ref)):
+        if ref and (ref.startswith("-") or not re.match(r"^[a-zA-Z0-9._/~^@{}\-]+$", ref)):
             logger.warning("Invalid git ref rejected: %s", ref)
             return None
         result = _git_run(
@@ -668,8 +743,8 @@ def get_changed_lines(git_root: Path, base_ref: str, filepath: Path) -> set[int]
 
 def scan_diff(
     root: Path,
-    base_ref: Optional[str] = None,
-    language_filter: Optional[str] = None,
+    base_ref: str | None = None,
+    language_filter: str | None = None,
     custom_rules=None,
 ) -> tuple[ScanReport, str]:
     """Scan only files changed vs a git base ref, filtering to changed lines.
@@ -678,10 +753,7 @@ def scan_diff(
     """
     git_root = _find_git_root(root)
     if not git_root:
-        raise ValueError(
-            "Not a git repository (or git is not installed). "
-            "--diff requires git on PATH."
-        )
+        raise ValueError("Not a git repository (or git is not installed). --diff requires git on PATH.")
 
     ref = _resolve_base_ref(git_root, base_ref)
     if not ref:
@@ -691,7 +763,10 @@ def scan_diff(
     changed_files = get_changed_files(git_root, ref)
     if not changed_files:
         return ScanReport(
-            root=str(root), mode="diff", files_scanned=0, files_skipped=0,
+            root=str(root),
+            mode="diff",
+            files_scanned=0,
+            files_skipped=0,
             timestamp=datetime.now().isoformat(timespec="seconds"),
         ), ref
 
@@ -736,13 +811,18 @@ def scan_diff(
                 rel_path = str(filepath.relative_to(git_root))
             except ValueError:
                 rel_path = str(filepath)
-            file_analyses.append(FileAnalysis(
-                path=rel_path, language=lang,
-                lines=lines_count, findings=findings,
-            ))
+            file_analyses.append(
+                FileAnalysis(
+                    path=rel_path,
+                    language=lang,
+                    lines=lines_count,
+                    findings=findings,
+                )
+            )
 
     report = ScanReport(
-        root=str(root), mode="diff",
+        root=str(root),
+        mode="diff",
         files_scanned=len(changed_files) - skipped,
         files_skipped=skipped,
         file_analyses=file_analyses,

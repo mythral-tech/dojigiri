@@ -10,7 +10,8 @@ Data in → Data out: file content (string) in → list[Chunk] out.
 
 import ast
 from dataclasses import dataclass
-from .config import CHUNK_SIZE, CHUNK_OVERLAP
+
+from .config import CHUNK_OVERLAP, CHUNK_SIZE
 
 
 @dataclass
@@ -90,15 +91,17 @@ def _chunk_by_boundaries(
         # If adding this segment would exceed chunk_size, flush current chunk
         if current_end > current_start and (current_end - current_start) + seg_len > chunk_size:
             chunk_content = "\n".join(lines[current_start:current_end])
-            chunks.append(Chunk(
-                content=chunk_content,
-                start_line=current_start + 1,
-                end_line=current_end,
-                chunk_index=len(chunks),
-                total_chunks=0,
-                filepath=filepath,
-                language=language,
-            ))
+            chunks.append(
+                Chunk(
+                    content=chunk_content,
+                    start_line=current_start + 1,
+                    end_line=current_end,
+                    chunk_index=len(chunks),
+                    total_chunks=0,
+                    filepath=filepath,
+                    language=language,
+                )
+            )
             current_start = seg_start
             current_end = seg_end
         else:
@@ -107,15 +110,17 @@ def _chunk_by_boundaries(
     # Flush remaining
     if current_end > current_start:
         chunk_content = "\n".join(lines[current_start:current_end])
-        chunks.append(Chunk(
-            content=chunk_content,
-            start_line=current_start + 1,
-            end_line=current_end,
-            chunk_index=len(chunks),
-            total_chunks=0,
-            filepath=filepath,
-            language=language,
-        ))
+        chunks.append(
+            Chunk(
+                content=chunk_content,
+                start_line=current_start + 1,
+                end_line=current_end,
+                chunk_index=len(chunks),
+                total_chunks=0,
+                filepath=filepath,
+                language=language,
+            )
+        )
 
     return _finalize_chunks(chunks)
 
@@ -137,15 +142,17 @@ def chunk_file(
     total_lines = len(lines)
 
     if total_lines <= chunk_size:
-        return [Chunk(
-            content=content,
-            start_line=1,
-            end_line=total_lines,
-            chunk_index=0,
-            total_chunks=1,
-            filepath=filepath,
-            language=language,
-        )]
+        return [
+            Chunk(
+                content=content,
+                start_line=1,
+                end_line=total_lines,
+                chunk_index=0,
+                total_chunks=1,
+                filepath=filepath,
+                language=language,
+            )
+        ]
 
     # Python: try AST-aware chunking
     if language == "python":
@@ -178,15 +185,17 @@ def _chunk_lines(
         chunk_lines = lines[start:end]
         chunk_content = "\n".join(chunk_lines)
 
-        chunks.append(Chunk(
-            content=chunk_content,
-            start_line=start + 1,
-            end_line=end,
-            chunk_index=len(chunks),
-            total_chunks=0,  # filled in below
-            filepath=filepath,
-            language=language,
-        ))
+        chunks.append(
+            Chunk(
+                content=chunk_content,
+                start_line=start + 1,
+                end_line=end,
+                chunk_index=len(chunks),
+                total_chunks=0,  # filled in below
+                filepath=filepath,
+                language=language,
+            )
+        )
 
         if end >= total_lines:
             break

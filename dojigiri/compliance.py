@@ -8,8 +8,7 @@ Calls into: nothing (pure data, no dojigiri imports)
 Data in -> Data out: rule name string -> CWE/NIST identifier strings
 """
 
-from typing import Optional
-
+from __future__ import annotations
 
 # CWE (Common Weakness Enumeration) mappings
 # Maps rule names to CWE IDs
@@ -21,7 +20,6 @@ CWE_MAP: dict[str, str] = {
     "long-line": "CWE-1078",
     "insecure-http": "CWE-319",
     "sql-injection": "CWE-89",
-
     # Python rules
     "bare-except": "CWE-396",
     "mutable-default": "CWE-1188",
@@ -38,23 +36,19 @@ CWE_MAP: dict[str, str] = {
     "yaml-unsafe": "CWE-502",
     "weak-hash": "CWE-328",
     "weak-random": "CWE-330",
-
     # JavaScript/TypeScript rules
     "loose-equality": "CWE-597",
     "console-log": "CWE-532",
     "innerhtml": "CWE-79",
     "insert-adjacent-html": "CWE-79",
     "document-write": "CWE-79",
-
     # Go rules
     "unchecked-error": "CWE-252",
     "fmt-print": "CWE-532",
-
     # Rust rules
     "unwrap": "CWE-252",
     "expect-panic": "CWE-252",
     "unsafe-block": "CWE-676",
-
     # Security rules
     "path-traversal": "CWE-22",
     "private-key": "CWE-321",
@@ -69,7 +63,6 @@ CWE_MAP: dict[str, str] = {
     "hardcoded-ip": "CWE-547",
     "unsafe-deserialization": "CWE-502",
     "insecure-tempfile": "CWE-377",
-
     # Semantic/AST rules (detector.py, semantic/)
     "syntax-error": "CWE-670",
     "unused-import": "CWE-561",
@@ -82,28 +75,22 @@ CWE_MAP: dict[str, str] = {
     "high-complexity": "CWE-1121",
     "too-many-args": "CWE-1064",
     "empty-exception-handler": "CWE-390",
-
     # Scope analysis
     "unused-variable": "CWE-563",
     "variable-shadowing": "CWE-710",
     "possibly-uninitialized": "CWE-457",
-
     # Null safety
     "null-dereference": "CWE-476",
-
     # Resource analysis
     "resource-leak": "CWE-404",
-
     # Taint analysis
     "taint-flow": "CWE-20",
-
     # Code smells
     "god-class": "CWE-1075",
     "feature-envy": "CWE-1075",
     "long-method": "CWE-1080",
     "near-duplicate": "CWE-1041",
     "semantic-clone": "CWE-1041",
-
     # Graph analysis
     "dead-function": "CWE-561",
     "arg-count-mismatch": "CWE-628",
@@ -119,7 +106,6 @@ NIST_MAP: dict[str, list[str]] = {
     "aws-credentials": ["SC-12", "SC-28", "IA-5"],
     "private-key": ["SC-12", "SC-28", "IA-5"],
     "db-connection-string": ["SC-12", "SC-28", "IA-5"],
-
     # Injection
     "sql-injection": ["SI-10", "SI-16"],
     "eval-usage": ["SI-10", "SI-16"],
@@ -127,50 +113,38 @@ NIST_MAP: dict[str, list[str]] = {
     "os-system": ["SI-10", "SI-16"],
     "shell-true": ["SI-10", "SI-16"],
     "taint-flow": ["SI-10", "SI-16"],
-
     # XSS
     "innerhtml": ["SI-10", "SI-16"],
     "insert-adjacent-html": ["SI-10", "SI-16"],
     "document-write": ["SI-10", "SI-16"],
-
     # Deserialization
     "pickle-unsafe": ["SI-10", "SI-16"],
     "yaml-unsafe": ["SI-10", "SI-16"],
     "unsafe-deserialization": ["SI-10", "SI-16"],
-
     # SSRF
     "ssrf-risk": ["SI-10", "SC-7"],
-
     # SSTI
     "ssti-risk": ["SI-10", "SI-16"],
-
     # XXE
     "xxe-risk": ["SI-10", "SC-4"],
-
     # JWT
     "jwt-insecure": ["SC-13", "IA-5"],
-
     # Hardcoded config
     "hardcoded-ip": ["CM-6"],
-
     # Tempfile
     "insecure-tempfile": ["SC-28"],
-
     # Cryptography
     "weak-hash": ["SC-13", "SC-12"],
     "weak-random": ["SC-13", "SC-12"],
     "insecure-crypto": ["SC-13", "SC-12"],
     "insecure-ecb-mode": ["SC-13", "SC-12"],
     "insecure-http": ["SC-8", "SC-13"],
-
     # Path traversal
     "path-traversal": ["SI-10", "AC-3"],
-
     # Logging
     "logging-sensitive-data": ["AU-3", "SI-11"],
     "console-log": ["AU-3"],
     "fmt-print": ["AU-3"],
-
     # Error handling
     "bare-except": ["SI-11"],
     "exception-swallowed": ["SI-11"],
@@ -178,12 +152,10 @@ NIST_MAP: dict[str, list[str]] = {
     "unchecked-error": ["SI-11"],
     "unwrap": ["SI-11"],
     "expect-panic": ["SI-11"],
-
     # Resource management
     "open-without-with": ["SC-24"],
     "resource-leak": ["SC-24"],
     "null-dereference": ["SI-16"],
-
     # Code quality (mapped to SA family — System and Services Acquisition)
     "high-complexity": ["SA-11"],
     "too-many-args": ["SA-11"],
@@ -198,7 +170,7 @@ NIST_MAP: dict[str, list[str]] = {
 }
 
 
-def get_cwe(rule: str) -> Optional[str]:
+def get_cwe(rule: str) -> str | None:
     """Return the CWE ID for a rule name, or None if unmapped."""
     return CWE_MAP.get(rule)
 

@@ -13,16 +13,16 @@ Data in → Data out: (source bytes, filepath, language) → FileSemantics
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from collections.abc import Iterator
-from typing import Any, Optional
+from dataclasses import dataclass, field
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
-from .lang_config import get_config, LanguageConfig
-
+from .lang_config import LanguageConfig, get_config
 
 # ─── Data structures ─────────────────────────────────────────────────
+
 
 @dataclass
 class Assignment:
@@ -51,7 +51,7 @@ class FunctionDef:
     end_line: int
     params: list[str]
     scope_id: int
-    parent_class: Optional[str]
+    parent_class: str | None
     has_varargs: bool = False
 
 
@@ -61,7 +61,7 @@ class FunctionCall:
     line: int
     scope_id: int
     arg_count: int
-    receiver: Optional[str]  # "obj" in obj.method()
+    receiver: str | None  # "obj" in obj.method()
 
 
 @dataclass
@@ -77,11 +77,11 @@ class ClassDef:
 @dataclass
 class ScopeInfo:
     scope_id: int
-    parent_id: Optional[int]
+    parent_id: int | None
     kind: str  # "module", "function", "class", "block"
     start_line: int
     end_line: int
-    name: Optional[str]
+    name: str | None
 
 
 @dataclass
@@ -100,16 +100,15 @@ class FileSemantics:
 
 # ─── Helpers ─────────────────────────────────────────────────────────
 
-from ._utils import _get_text, _line, _end_line  # noqa: E402
-
+from ._utils import _end_line, _get_text, _line  # noqa: E402
 
 # ─── Extraction engine ───────────────────────────────────────────────
+
 
 class _Extractor:
     """Walks the AST once, maintaining a scope stack."""
 
-    def __init__(self, source_bytes: bytes, config: LanguageConfig,
-                 filepath: str, language: str):
+    def __init__(self, source_bytes: bytes, config: LanguageConfig, filepath: str, language: str):
         self.src = source_bytes
         self.config = config
         self.filepath = filepath
@@ -119,7 +118,7 @@ class _Extractor:
         self._scope_counter = 0
         self._scope_stack: list[int] = []
         self._scope_info: dict[int, ScopeInfo] = {}
-        self._current_class: Optional[str] = None
+        self._current_class: str | None = None
 
         # Sets for fast lookup
         self._assignment_types = set(config.assignment_node_types)
@@ -135,7 +134,7 @@ class _Extractor:
     def _current_scope(self) -> int:
         return self._scope_stack[-1] if self._scope_stack else 0
 
-    def _push_scope(self, kind: str, node, name: Optional[str] = None) -> int:
+    def _push_scope(self, kind: str, node, name: str | None = None) -> int:
         self._scope_counter += 1
         sid = self._scope_counter
         parent = self._current_scope
@@ -238,15 +237,17 @@ class _Extractor:
         fn_scope = self._current_scope
 
         for pname in params:
-            self.result.assignments.append(Assignment(
-                name=pname,
-                line=_line(node),
-                scope_id=fn_scope,
-                value_node_type="parameter",
-                value_text="",
-                is_parameter=True,
-                is_augmented=False,
-            ))
+            self.result.assignments.append(
+                Assignment(
+                    name=pname,
+                    line=_line(node),
+                    scope_id=fn_scope,
+                    value_node_type="parameter",
+                    value_text="",
+                    is_parameter=True,
+                    is_augmented=False,
+                )
+            )
 
         # Walk function body
         for child in node.children:
@@ -276,16 +277,13 @@ class _Extractor:
                 if asgn.name not in attribute_names:
                     attribute_names.append(asgn.name)
 
-        actual_methods = sum(
-            1 for fd in self.result.function_defs if fd.parent_class == name
-        )
+        actual_methods = sum(1 for fd in self.result.function_defs if fd.parent_class == name)
 
         # Collect self.attr assignments as class attributes
         self_kw = self.config.self_keyword
         if self_kw:
             for asgn in self.result.assignments:
-                if (asgn.value_node_type == "self_attr"
-                        and asgn.name not in attribute_names):
+                if asgn.value_node_type == "self_attr" and asgn.name not in attribute_names:
                     attribute_names.append(asgn.name)
 
         cdef = ClassDef(
@@ -337,33 +335,55 @@ class _Extractor:
         # Extract identifier(s) from the loop target
         if left.type == "identifier":
             name = _get_text(left, self.src)
-            self.result.assignments.append(Assignment(
-                name=name, line=_line(node), scope_id=self._current_scope,
-                value_node_type="loop_variable", value_text="",
-                is_parameter=False, is_augmented=False,
-            ))
+            self.result.assignments.append(
+                Assignment(
+                    name=name,
+                    line=_line(node),
+                    scope_id=self._current_scope,
+                    value_node_type="loop_variable",
+                    value_text="",
+                    is_parameter=False,
+                    is_augmented=False,
+                )
+            )
         elif left.type in ("pattern_list", "tuple_pattern", "expression_list"):
             # Tuple unpacking in for: for a, b in items
             for child in left.children:
                 if child.type == "identifier":
                     name = _get_text(child, self.src)
-                    self.result.assignments.append(Assignment(
-                        name=name, line=_line(node), scope_id=self._current_scope,
-                        value_node_type="loop_variable", value_text="",
-                        is_parameter=False, is_augmented=False,
-                    ))
+                    self.result.assignments.append(
+                        Assignment(
+                            name=name,
+                            line=_line(node),
+                            scope_id=self._current_scope,
+                            value_node_type="loop_variable",
+                            value_text="",
+                            is_parameter=False,
+                            is_augmented=False,
+                        )
+                    )
 
     def _record_assignment(
-        self, name: str, node: Any, rhs_type: str = "", rhs_text: str = "",
-        is_augmented: bool = False, value_node_type: str | None = None,
+        self,
+        name: str,
+        node: Any,
+        rhs_type: str = "",
+        rhs_text: str = "",
+        is_augmented: bool = False,
+        value_node_type: str | None = None,
     ) -> None:
         """Record a variable assignment. Shared by all language handlers."""
-        self.result.assignments.append(Assignment(
-            name=name, line=_line(node), scope_id=self._current_scope,
-            value_node_type=value_node_type or rhs_type,
-            value_text=rhs_text,
-            is_parameter=False, is_augmented=is_augmented,
-        ))
+        self.result.assignments.append(
+            Assignment(
+                name=name,
+                line=_line(node),
+                scope_id=self._current_scope,
+                value_node_type=value_node_type or rhs_type,
+                value_text=rhs_text,
+                is_parameter=False,
+                is_augmented=is_augmented,
+            )
+        )
 
     def _extract_lhs_rhs(self, node: Any) -> tuple[Any | None, Any | None]:
         """Extract left/right children from an assignment node."""
@@ -383,10 +403,14 @@ class _Extractor:
             if left and left.type == "identifier":
                 name = _get_text(left, self.src)
                 self._record_assignment(name, node, value_node_type="augmented", is_augmented=True)
-                self.result.references.append(NameReference(
-                    name=name, line=_line(node), scope_id=self._current_scope,
-                    context="read",
-                ))
+                self.result.references.append(
+                    NameReference(
+                        name=name,
+                        line=_line(node),
+                        scope_id=self._current_scope,
+                        context="read",
+                    )
+                )
         else:
             left, right = self._extract_lhs_rhs(node)
 
@@ -437,7 +461,9 @@ class _Extractor:
             for child in left.children:
                 if child.type == "identifier":
                     self._record_assignment(
-                        _get_text(child, self.src), node, rhs_type,
+                        _get_text(child, self.src),
+                        node,
+                        rhs_type,
                         is_augmented=(is_augmented and node.type != "short_var_declaration"),
                     )
 
@@ -520,13 +546,15 @@ class _Extractor:
                 if child.is_named and child.type not in ("(", ")", ","):
                     arg_count += 1
 
-        self.result.function_calls.append(FunctionCall(
-            name=name,
-            line=_line(node),
-            scope_id=self._current_scope,
-            arg_count=arg_count,
-            receiver=receiver,
-        ))
+        self.result.function_calls.append(
+            FunctionCall(
+                name=name,
+                line=_line(node),
+                scope_id=self._current_scope,
+                arg_count=arg_count,
+                receiver=receiver,
+            )
+        )
 
     def _handle_identifier(self, node: Any) -> None:
         parent = node.parent
@@ -537,9 +565,15 @@ class _Extractor:
         # (those are handled by their parent node handlers)
         parent_type = parent.type
         skip_parents = {
-            "import_statement", "import_from_statement", "import_specifier",
-            "import_clause", "dotted_name", "aliased_import",
-            "import_declaration", "import_spec", "use_declaration",
+            "import_statement",
+            "import_from_statement",
+            "import_specifier",
+            "import_clause",
+            "dotted_name",
+            "aliased_import",
+            "import_declaration",
+            "import_spec",
+            "use_declaration",
             "using_directive",
         }
         if parent_type in skip_parents:
@@ -563,9 +597,15 @@ class _Extractor:
 
         # Skip parameter names
         param_parents = {
-            "parameters", "formal_parameters", "parameter_list",
-            "typed_parameter", "default_parameter", "typed_default_parameter",
-            "parameter", "formal_parameter", "required_parameter",
+            "parameters",
+            "formal_parameters",
+            "parameter_list",
+            "typed_parameter",
+            "default_parameter",
+            "typed_default_parameter",
+            "parameter",
+            "formal_parameter",
+            "required_parameter",
         }
         if parent_type in param_parents:
             return
@@ -601,12 +641,14 @@ class _Extractor:
         if parent_type in self._attr_types:
             context = "attribute_access"
 
-        self.result.references.append(NameReference(
-            name=name,
-            line=_line(node),
-            scope_id=self._current_scope,
-            context=context,
-        ))
+        self.result.references.append(
+            NameReference(
+                name=name,
+                line=_line(node),
+                scope_id=self._current_scope,
+                context=context,
+            )
+        )
 
     def _extract_params(self, func_node) -> list[str]:
         """Extract parameter names from a function node."""
@@ -625,18 +667,22 @@ class _Extractor:
                 # Check this is the name, not a type annotation
                 if parent_type in ("parameters", "formal_parameters", "parameter_list"):
                     params.append(_get_text(child, self.src))
-                elif parent_type in ("typed_parameter", "default_parameter",
-                                     "typed_default_parameter"):
+                elif parent_type in (
+                    "typed_parameter",
+                    "default_parameter",
+                    "typed_default_parameter",
+                ) or parent_type in ("parameter", "formal_parameter", "required_parameter"):
                     name_field = child.parent.child_by_field_name("name")
                     if name_field and name_field.id == child.id:
                         params.append(_get_text(child, self.src))
-                elif parent_type in ("parameter", "formal_parameter", "required_parameter"):
-                    name_field = child.parent.child_by_field_name("name")
-                    if name_field and name_field.id == child.id:
-                        params.append(_get_text(child, self.src))
-            elif child.type in ("typed_parameter", "default_parameter",
-                                "typed_default_parameter", "parameter",
-                                "formal_parameter", "required_parameter"):
+            elif child.type in (
+                "typed_parameter",
+                "default_parameter",
+                "typed_default_parameter",
+                "parameter",
+                "formal_parameter",
+                "required_parameter",
+            ):
                 self._collect_param_names(child, params)
             elif child.type == "list_splat_pattern" or child.type == "dictionary_splat_pattern":
                 # *args, **kwargs in Python
@@ -654,8 +700,12 @@ class _Extractor:
         for child in func_node.children:
             if child.type in ("parameters", "formal_parameters", "parameter_list"):
                 for param in self._walk_all(child):
-                    if param.type in ("list_splat_pattern", "dictionary_splat_pattern",
-                                      "rest_pattern", "spread_element"):
+                    if param.type in (
+                        "list_splat_pattern",
+                        "dictionary_splat_pattern",
+                        "rest_pattern",
+                        "spread_element",
+                    ):
                         return True
         return False
 
@@ -668,7 +718,8 @@ class _Extractor:
 
 # ─── Entry point ─────────────────────────────────────────────────────
 
-def extract_semantics(content: str, filepath: str, language: str) -> Optional[FileSemantics]:
+
+def extract_semantics(content: str, filepath: str, language: str) -> FileSemantics | None:
     """Single-pass extraction. Returns None if tree-sitter unavailable."""
     config = get_config(language)
     if config is None:

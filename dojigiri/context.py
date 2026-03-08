@@ -10,7 +10,6 @@ Data in -> Data out: filepath + language -> {filepath: content} dict
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 # Maximum total bytes of context files to collect (avoids blowing token budget)
 _MAX_CONTEXT_BYTES = 50_000
@@ -70,16 +69,18 @@ def auto_discover_imports(filepath: str, content: str, lang: str) -> dict[str, s
     Works for Python, JS, and TS (not just Python).
     """
     try:
-        from .graph.depgraph import build_dependency_graph
         from .discovery import collect_files
+        from .graph.depgraph import build_dependency_graph
 
         fp = Path(filepath).resolve()
         project_root = fp.parent
 
         # Try to find the actual project root (look for common markers)
         for parent in [fp.parent] + list(fp.parents):
-            if any((parent / marker).exists() for marker in
-                   [".git", "pyproject.toml", "setup.py", "package.json", ".doji.toml"]):
+            if any(
+                (parent / marker).exists()
+                for marker in [".git", "pyproject.toml", "setup.py", "package.json", ".doji.toml"]
+            ):
                 project_root = parent
                 break
 
@@ -93,8 +94,8 @@ def auto_discover_imports(filepath: str, content: str, lang: str) -> dict[str, s
         # Find our file in the graph
         try:
             rel = str(fp.relative_to(project_root)).replace("\\", "/")
-        except ValueError:
-            raise ValueError("File not in project root")
+        except ValueError as err:
+            raise ValueError("File not in project root") from err
 
         if rel not in graph.nodes:
             raise ValueError(f"File {rel} not in graph")
@@ -138,8 +139,7 @@ def auto_discover_imports(filepath: str, content: str, lang: str) -> dict[str, s
         return {}
 
 
-def collect_context_files(context_arg: str, filepath: str, lang: str,
-                          content: str) -> Optional[dict[str, str]]:
+def collect_context_files(context_arg: str, filepath: str, lang: str, content: str) -> dict[str, str] | None:
     """Collect context files based on --context argument.
 
     "auto" → auto-discover imports using depgraph (v2) with legacy fallback

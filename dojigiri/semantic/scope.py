@@ -11,11 +11,11 @@ Data in → Data out: FileSemantics → list[Finding] (unused vars, shadowing, u
 
 from __future__ import annotations
 
-from ..types import Finding, Severity, Category, Source
+from ..types import Category, Finding, Severity, Source
 from .core import FileSemantics, ScopeInfo
 
-
 # ─── Helpers ─────────────────────────────────────────────────────────
+
 
 def _child_scope_ids(scopes: list[ScopeInfo], scope_id: int) -> set[int]:
     """Get all descendant scope IDs (children, grandchildren, etc.)."""
@@ -54,18 +54,76 @@ def _ancestor_scope_ids(scopes: list[ScopeInfo], scope_id: int) -> list[int]:
 # Names to never flag as unused
 _IGNORE_PREFIXES = ("_",)
 _PYTHON_BUILTINS = {
-    "print", "len", "range", "type", "int", "float", "str", "bool",
-    "list", "dict", "set", "tuple", "open", "input", "sum", "min",
-    "max", "sorted", "next", "id", "map", "filter", "zip", "hash",
-    "iter", "bytes", "complex", "frozenset", "object", "super",
-    "True", "False", "None", "Exception", "ValueError", "TypeError",
-    "KeyError", "IndexError", "AttributeError", "ImportError",
-    "RuntimeError", "StopIteration", "OSError", "IOError",
-    "isinstance", "issubclass", "hasattr", "getattr", "setattr",
-    "delattr", "callable", "repr", "abs", "all", "any", "enumerate",
-    "reversed", "round", "chr", "ord", "hex", "oct", "bin",
-    "classmethod", "staticmethod", "property",
-    "__name__", "__file__", "__all__", "__doc__",
+    "print",
+    "len",
+    "range",
+    "type",
+    "int",
+    "float",
+    "str",
+    "bool",
+    "list",
+    "dict",
+    "set",
+    "tuple",
+    "open",
+    "input",
+    "sum",
+    "min",
+    "max",
+    "sorted",
+    "next",
+    "id",
+    "map",
+    "filter",
+    "zip",
+    "hash",
+    "iter",
+    "bytes",
+    "complex",
+    "frozenset",
+    "object",
+    "super",
+    "True",
+    "False",
+    "None",
+    "Exception",
+    "ValueError",
+    "TypeError",
+    "KeyError",
+    "IndexError",
+    "AttributeError",
+    "ImportError",
+    "RuntimeError",
+    "StopIteration",
+    "OSError",
+    "IOError",
+    "isinstance",
+    "issubclass",
+    "hasattr",
+    "getattr",
+    "setattr",
+    "delattr",
+    "callable",
+    "repr",
+    "abs",
+    "all",
+    "any",
+    "enumerate",
+    "reversed",
+    "round",
+    "chr",
+    "ord",
+    "hex",
+    "oct",
+    "bin",
+    "classmethod",
+    "staticmethod",
+    "property",
+    "__name__",
+    "__file__",
+    "__all__",
+    "__doc__",
 }
 
 
@@ -74,8 +132,13 @@ _PYTHON_BUILTINS = {
 # Module-scope call patterns that define type system or framework objects
 # (never flagged as unused — they're consumed by type checkers or external imports)
 _TYPE_DEFINITION_CALLS = (
-    "TypeVar(", "TypeAlias(", "ParamSpec(", "TypeVarTuple(",
-    "NewType(", "NamedTuple(", "TypedDict(",
+    "TypeVar(",
+    "TypeAlias(",
+    "ParamSpec(",
+    "TypeVarTuple(",
+    "NewType(",
+    "NamedTuple(",
+    "TypedDict(",
     "namedtuple(",
 )
 
@@ -134,21 +197,24 @@ def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Find
                     break
 
         if not used:
-            findings.append(Finding(
-                file=filepath,
-                line=asgn.line,
-                severity=Severity.WARNING,
-                category=Category.DEAD_CODE,
-                source=Source.AST,
-                rule="unused-variable",
-                message=f"Variable '{asgn.name}' is assigned but never used",
-                suggestion=f"Remove unused variable '{asgn.name}' or prefix with _",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=asgn.line,
+                    severity=Severity.WARNING,
+                    category=Category.DEAD_CODE,
+                    source=Source.AST,
+                    rule="unused-variable",
+                    message=f"Variable '{asgn.name}' is assigned but never used",
+                    suggestion=f"Remove unused variable '{asgn.name}' or prefix with _",
+                )
+            )
 
     return findings
 
 
 # ─── Check: Variable Shadowing ───────────────────────────────────────
+
 
 def check_variable_shadowing(semantics: FileSemantics, filepath: str) -> list[Finding]:
     """Find variables in inner scopes that shadow names from outer scopes.
@@ -192,21 +258,24 @@ def check_variable_shadowing(semantics: FileSemantics, filepath: str) -> list[Fi
                 outer_scope_id, outer_line = ancestor_names[name]
                 outer_scope = scope_map.get(outer_scope_id)
                 outer_kind = outer_scope.kind if outer_scope else "outer"
-                findings.append(Finding(
-                    file=filepath,
-                    line=line,
-                    severity=Severity.INFO,
-                    category=Category.BUG,
-                    source=Source.AST,
-                    rule="variable-shadowing",
-                    message=f"Variable '{name}' shadows name from {outer_kind} scope (line {outer_line})",
-                    suggestion=f"Rename '{name}' to avoid shadowing",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=line,
+                        severity=Severity.INFO,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="variable-shadowing",
+                        message=f"Variable '{name}' shadows name from {outer_kind} scope (line {outer_line})",
+                        suggestion=f"Rename '{name}' to avoid shadowing",
+                    )
+                )
 
     return findings
 
 
 # ─── Check: Possibly Uninitialized Variables ─────────────────────────
+
 
 def check_uninitialized_variables(semantics: FileSemantics, filepath: str) -> list[Finding]:
     """Find variables referenced before any assignment in the same scope.
@@ -270,15 +339,17 @@ def check_uninitialized_variables(semantics: FileSemantics, filepath: str) -> li
                 key = (name, ref.scope_id)
                 if key not in seen_flagged:
                     seen_flagged.add(key)
-                    findings.append(Finding(
-                        file=filepath,
-                        line=ref.line,
-                        severity=Severity.WARNING,
-                        category=Category.BUG,
-                        source=Source.AST,
-                        rule="possibly-uninitialized",
-                        message=f"Variable '{name}' may be used before assignment (first assigned line {scope_assigns[name]})",
-                        suggestion=f"Ensure '{name}' is assigned before use on all code paths",
-                    ))
+                    findings.append(
+                        Finding(
+                            file=filepath,
+                            line=ref.line,
+                            severity=Severity.WARNING,
+                            category=Category.BUG,
+                            source=Source.AST,
+                            rule="possibly-uninitialized",
+                            message=f"Variable '{name}' may be used before assignment (first assigned line {scope_assigns[name]})",
+                            suggestion=f"Ensure '{name}' is assigned before use on all code paths",
+                        )
+                    )
 
     return findings

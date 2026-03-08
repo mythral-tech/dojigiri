@@ -8,13 +8,15 @@ Calls into: nothing (uses urllib, anthropic SDK directly)
 Data in -> Data out: messages list -> LLMResponse (text + token counts)
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import os
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import dataclass
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class LLMResponse:
     """Unified response from any LLM backend."""
+
     text: str
     input_tokens: int
     output_tokens: int
@@ -61,17 +64,17 @@ _ANTHROPIC_PRICING: dict[str, tuple[float, float]] = {
 }
 
 # Task tiers for model selection
-TIER_SCAN = "scan"   # basic scan chunks — high volume, structured output
-TIER_DEEP = "deep"   # debug/optimize/cross-file/synthesis/fix — needs reasoning
+TIER_SCAN = "scan"  # basic scan chunks — high volume, structured output
+TIER_DEEP = "deep"  # debug/optimize/cross-file/synthesis/fix — needs reasoning
 # Cache pricing multipliers relative to base input price
-_CACHE_READ_DISCOUNT = 0.1    # cache reads cost 10% of base
+_CACHE_READ_DISCOUNT = 0.1  # cache reads cost 10% of base
 _CACHE_CREATE_PREMIUM = 1.25  # cache creation costs 125% of base
 
 
 class AnthropicBackend:
     """Wraps the Anthropic SDK."""
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         self._model = model or os.environ.get("DOJI_LLM_MODEL", "claude-sonnet-4-20250514")
         self._client: Any = None
@@ -81,20 +84,16 @@ class AnthropicBackend:
             return self._client
         if not self._api_key:
             raise RuntimeError(
-                "ANTHROPIC_API_KEY not set. "
-                "Set the environment variable or use --backend ollama for local models."
+                "ANTHROPIC_API_KEY not set. Set the environment variable or use --backend ollama for local models."
             )
         try:
             import anthropic
-        except ImportError:
-            raise RuntimeError(
-                "anthropic package not installed. "
-                "Install with: pip install anthropic"
-            )
+        except ImportError as err:
+            raise RuntimeError("anthropic package not installed. Install with: pip install anthropic") from err
         self._client = anthropic.Anthropic(api_key=self._api_key)
         return self._client
 
-    def with_model(self, model: str) -> "AnthropicBackend":
+    def with_model(self, model: str) -> AnthropicBackend:
         """Return a new backend instance using a different model but same API key/client."""
         clone = AnthropicBackend(api_key=self._api_key, model=model)
         clone._client = self._client  # reuse the authenticated client
@@ -125,16 +124,17 @@ class AnthropicBackend:
             messages=messages,
         )
         # Handle potential empty/unexpected response format
-        if not response.content or not hasattr(response.content[0], 'text'):
+        if not response.content or not hasattr(response.content[0], "text"):
             return LLMResponse(text="[]", input_tokens=0, output_tokens=0)
         # Track cache performance if available
         usage = response.usage
-        cache_read = getattr(usage, 'cache_read_input_tokens', 0)
-        cache_create = getattr(usage, 'cache_creation_input_tokens', 0)
+        cache_read = getattr(usage, "cache_read_input_tokens", 0)
+        cache_create = getattr(usage, "cache_creation_input_tokens", 0)
         if cache_read or cache_create:
             logger.debug(
                 "Prompt cache: %d read, %d created, %d uncached",
-                cache_read, cache_create,
+                cache_read,
+                cache_create,
                 usage.input_tokens - cache_read - cache_create,
             )
         return LLMResponse(
@@ -172,7 +172,7 @@ class OpenAICompatibleBackend:
     def __init__(
         self,
         base_url: str,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "default",
         is_local: bool = False,
     ):
@@ -217,13 +217,9 @@ class OpenAICompatibleBackend:
                 error_body = e.read().decode("utf-8", errors="replace")[:500]
             except Exception as e2:
                 logger.debug("Failed to read error body: %s", e2)
-            raise RuntimeError(
-                f"LLM API error {e.code}: {error_body}"
-            ) from e
+            raise RuntimeError(f"LLM API error {e.code}: {error_body}") from e
         except urllib.error.URLError as e:
-            raise RuntimeError(
-                f"Cannot connect to LLM at {self._base_url}: {e.reason}"
-            ) from e
+            raise RuntimeError(f"Cannot connect to LLM at {self._base_url}: {e.reason}") from e
 
         # Parse response
         choices = body.get("choices", [])
@@ -254,7 +250,7 @@ class OpenAICompatibleBackend:
 class OllamaBackend(OpenAICompatibleBackend):
     """Ollama backend — sets base_url from OLLAMA_HOST or localhost:11434."""
 
-    def __init__(self, model: Optional[str] = None):
+    def __init__(self, model: str | None = None):
         host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")  # doji:ignore(insecure-http)
         if not host.startswith("http"):
             host = f"http://{host}"  # doji:ignore(insecure-http)
@@ -266,7 +262,7 @@ class OllamaBackend(OpenAICompatibleBackend):
         )
 
 
-def get_backend(config: Optional[dict] = None) -> LLMBackend:
+def get_backend(config: dict | None = None) -> LLMBackend:
     """Factory: create the right backend from config/env vars.
 
     Config keys (also settable via env vars):
@@ -282,10 +278,7 @@ def get_backend(config: Optional[dict] = None) -> LLMBackend:
     """
     config = config or {}
 
-    backend_type = (
-        config.get("backend")
-        or os.environ.get("DOJI_LLM_BACKEND")
-    )
+    backend_type = config.get("backend") or os.environ.get("DOJI_LLM_BACKEND")
     model = config.get("model") or os.environ.get("DOJI_LLM_MODEL")
     base_url = config.get("base_url") or os.environ.get("DOJI_LLM_BASE_URL")
 
@@ -313,12 +306,15 @@ def get_backend(config: Optional[dict] = None) -> LLMBackend:
         return OllamaBackend(model=model)
     elif backend_type in ("openai", "openai-compatible"):
         if not base_url:
-            raise RuntimeError(
-                "OpenAI-compatible backend requires --base-url or DOJI_LLM_BASE_URL"
-            )
+            raise RuntimeError("OpenAI-compatible backend requires --base-url or DOJI_LLM_BASE_URL")
         # Validate URL scheme
-        if not base_url.startswith("https://") and not base_url.startswith("http://localhost") and not base_url.startswith("http://127.0.0.1"):
+        if (
+            not base_url.startswith("https://")
+            and not base_url.startswith("http://localhost")
+            and not base_url.startswith("http://127.0.0.1")
+        ):
             import logging as _logging
+
             _logging.getLogger(__name__).warning(
                 "LLM base URL '%s' is not HTTPS. API keys will be sent in plaintext.", base_url
             )
@@ -328,10 +324,7 @@ def get_backend(config: Optional[dict] = None) -> LLMBackend:
             model=model or "default",
         )
     else:
-        raise RuntimeError(
-            f"Unknown LLM backend '{backend_type}'. "
-            "Use: anthropic, ollama, or openai"
-        )
+        raise RuntimeError(f"Unknown LLM backend '{backend_type}'. Use: anthropic, ollama, or openai")
 
 
 def get_tier_pricing(tier: str = TIER_SCAN) -> tuple[float, float]:
@@ -342,7 +335,8 @@ def get_tier_pricing(tier: str = TIER_SCAN) -> tuple[float, float]:
     Use this for cost estimation to avoid hardcoding model prices.
     """
     import os as _os
-    from .config import LLM_TIER_MODE, LLM_SCAN_MODEL, LLM_DEEP_MODEL, LLM_INPUT_COST_PER_M, LLM_OUTPUT_COST_PER_M
+
+    from .config import LLM_DEEP_MODEL, LLM_INPUT_COST_PER_M, LLM_OUTPUT_COST_PER_M, LLM_SCAN_MODEL, LLM_TIER_MODE
 
     tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
     user_model = _os.environ.get("DOJI_LLM_MODEL")
@@ -367,7 +361,7 @@ def get_tier_pricing(tier: str = TIER_SCAN) -> tuple[float, float]:
     return (3.0, 15.0)
 
 
-def get_tiered_backend(config: Optional[dict] = None, tier: str = TIER_DEEP) -> LLMBackend:
+def get_tiered_backend(config: dict | None = None, tier: str = TIER_DEEP) -> LLMBackend:
     """Get a backend appropriate for the given task tier.
 
     For Anthropic backends with tier_mode='auto':
@@ -377,7 +371,8 @@ def get_tiered_backend(config: Optional[dict] = None, tier: str = TIER_DEEP) -> 
     For non-Anthropic backends or tier_mode='off', returns the default backend.
     """
     import os as _os
-    from .config import LLM_TIER_MODE, LLM_SCAN_MODEL, LLM_DEEP_MODEL
+
+    from .config import LLM_DEEP_MODEL, LLM_SCAN_MODEL, LLM_TIER_MODE
 
     tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
 

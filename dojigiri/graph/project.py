@@ -10,24 +10,29 @@ Calls into: graph/depgraph.py, graph/callgraph.py, config.py, discovery.py,
 Data in -> Data out: directory path -> ProjectAnalysis
 """
 
+from __future__ import annotations
+
 import ast as ast_mod
 import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-from ..types import (
-    FileAnalysis, CrossFileFinding, ProjectAnalysis,
-    Severity, Category, Confidence,
-)
-from ..discovery import collect_files, detect_language
 from ..detector import analyze_file_static
-from .depgraph import build_dependency_graph, build_call_graph, compute_metrics, DepGraph, GraphMetrics
-
+from ..discovery import collect_files, detect_language
+from ..types import (
+    Category,
+    Confidence,
+    CrossFileFinding,
+    FileAnalysis,
+    ProjectAnalysis,
+    Severity,
+)
+from .depgraph import DepGraph, GraphMetrics, build_call_graph, build_dependency_graph, compute_metrics
 
 # ─── Signature extraction ────────────────────────────────────────────
+
 
 def _extract_signatures_python(content: str) -> str:
     """Extract class names, function signatures, and top-level constants from Python."""
@@ -71,8 +76,7 @@ def _extract_signatures_js(content: str) -> str:
             lines.append(f"export {name.strip()}")
 
     # Also grab top-level function declarations
-    for match in re.finditer(r"^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(([^)]*)\)",
-                              content, re.MULTILINE):
+    for match in re.finditer(r"^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\(([^)]*)\)", content, re.MULTILINE):
         sig = f"function {match.group(1)}({match.group(2)})"
         if sig not in lines:
             lines.append(sig)
@@ -146,6 +150,7 @@ def _select_context_for_file(
 
 # ─── Graph summary formatting ────────────────────────────────────────
 
+
 def _format_graph_summary(graph: DepGraph, metrics: GraphMetrics) -> str:
     """Format graph metrics as a readable text summary for LLM context."""
     lines = [
@@ -177,9 +182,10 @@ def _format_graph_summary(graph: DepGraph, metrics: GraphMetrics) -> str:
 
 # ─── Main orchestrator ───────────────────────────────────────────────
 
+
 def analyze_project(
     root: str,
-    language_filter: Optional[str] = None,
+    language_filter: str | None = None,
     depth: int = 2,
     use_llm: bool = True,
 ) -> ProjectAnalysis:
@@ -227,6 +233,7 @@ def analyze_project(
 
     # 4b. Semantic extraction + cross-file analysis (v0.8.0)
     from ..semantic.core import extract_semantics
+
     semantics_by_file = {}
     for rel, content in file_contents.items():
         lang = detect_language(root_path / rel)
@@ -241,8 +248,8 @@ def analyze_project(
     if semantics_by_file:
         call_graph = build_call_graph(graph, semantics_by_file)
 
-        from .callgraph import find_dead_functions, find_arg_count_mismatches
         from ..semantic.smells import check_near_duplicate_functions, check_semantic_clones
+        from .callgraph import find_arg_count_mismatches, find_dead_functions
 
         cross_file_static_findings.extend(find_dead_functions(call_graph, graph))
         cross_file_static_findings.extend(find_arg_count_mismatches(call_graph, semantics_by_file))
@@ -251,8 +258,9 @@ def analyze_project(
 
         # v0.10.0: Cross-file contract inference
         try:
-            from ..semantic.types import infer_types
             from ..semantic.lang_config import get_config as get_lang_config
+            from ..semantic.types import infer_types
+
             type_maps = {}
             for rel, sem in semantics_by_file.items():
                 lang_cfg = get_lang_config(sem.language)
@@ -294,6 +302,7 @@ def analyze_project(
 
     # 6. LLM analysis
     from ..llm import CostTracker, LLMError, analyze_file_with_context, synthesize_project
+
     cost_tracker = CostTracker()
 
     # Get topo order (dependencies analyzed first)
@@ -314,7 +323,7 @@ def analyze_project(
             continue
 
         abs_path = str(root_path / rel_path)
-        print(f"  [{i+1}/{len(topo_order)}] {rel_path} ({lang})", flush=True)
+        print(f"  [{i + 1}/{len(topo_order)}] {rel_path} ({lang})", flush=True)
 
         # Static analysis
         static_findings = analyze_file_static(abs_path, content, lang).findings
@@ -330,7 +339,9 @@ def analyze_project(
         # LLM cross-file analysis
         try:
             result, cost_tracker = analyze_file_with_context(
-                content, rel_path, lang,
+                content,
+                rel_path,
+                lang,
                 context_files=context,
                 graph_summary=graph_summary,
                 static_findings=static_findings,
@@ -371,18 +382,20 @@ def analyze_project(
     cross_findings = []
     for cf in all_cross_file_findings:
         try:
-            cross_findings.append(CrossFileFinding(
-                source_file=cf.get("source_file", ""),
-                target_file=cf.get("target_file", ""),
-                line=cf.get("line", 0),
-                target_line=cf.get("target_line"),
-                severity=Severity(cf.get("severity", "warning")),
-                category=Category(cf.get("category", "bug")),
-                rule=cf.get("rule", "cross-file-issue"),
-                message=cf.get("message", ""),
-                suggestion=cf.get("suggestion"),
-                confidence=Confidence(cf.get("confidence", "medium")) if cf.get("confidence") else None,
-            ))
+            cross_findings.append(
+                CrossFileFinding(
+                    source_file=cf.get("source_file", ""),
+                    target_file=cf.get("target_file", ""),
+                    line=cf.get("line", 0),
+                    target_line=cf.get("target_line"),
+                    severity=Severity(cf.get("severity", "warning")),
+                    category=Category(cf.get("category", "bug")),
+                    rule=cf.get("rule", "cross-file-issue"),
+                    message=cf.get("message", ""),
+                    suggestion=cf.get("suggestion"),
+                    confidence=Confidence(cf.get("confidence", "medium")) if cf.get("confidence") else None,
+                )
+            )
         except (ValueError, KeyError):
             continue
 

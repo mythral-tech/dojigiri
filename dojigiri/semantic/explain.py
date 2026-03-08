@@ -12,20 +12,19 @@ Data in → Data out: (source content, filepath, language) → FileExplanation
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ..types import Finding
-from .core import FileSemantics, FunctionDef, ClassDef
+from .core import ClassDef, FileSemantics, FunctionDef
 from .types import FileTypeMap
 
-
 # ─── Data structures ─────────────────────────────────────────────────
+
 
 @dataclass
 class ExplainSection:
     title: str
     content: str
-    code_snippet: Optional[str] = None
+    code_snippet: str | None = None
 
 
 @dataclass
@@ -133,15 +132,13 @@ _FINDING_EXPLANATIONS: dict[str, str] = {
         "This is dead code — either remove it or restructure the control flow."
     ),
     "syntax-error": (
-        "The code has a syntax error — it's not valid Python/JavaScript/etc. "
-        "Fix the error before the code can run."
+        "The code has a syntax error — it's not valid Python/JavaScript/etc. Fix the error before the code can run."
     ),
 }
 
 # Default explanation for unknown rules
 _DEFAULT_EXPLANATION = (
-    "The static analyzer flagged a potential issue here. Review the message "
-    "and suggestion for details on what to fix."
+    "The static analyzer flagged a potential issue here. Review the message and suggestion for details on what to fix."
 )
 
 
@@ -155,8 +152,7 @@ _PATTERN_DESCRIPTIONS: dict[str, tuple[str, str]] = {
     ),
     "singleton": (
         "Singleton Pattern",
-        "A class designed so only one instance can exist. Often used for "
-        "configuration, logging, or shared resources.",
+        "A class designed so only one instance can exist. Often used for configuration, logging, or shared resources.",
     ),
     "decorator": (
         "Decorator Pattern",
@@ -193,45 +189,47 @@ def _detect_patterns(
         if any(kw in fdef.name.lower() for kw in ("create", "make", "build", "factory", "get_instance")):
             # Count different return values
             returns_in_func = sum(
-                1 for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))
+                1
+                for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))
                 if lines[i].strip().startswith("return ")
             )
             if returns_in_func >= 2:
                 name, desc = _PATTERN_DESCRIPTIONS["factory"]
-                patterns.append(ExplainSection(
-                    title=name,
-                    content=f"Function '{fdef.name}' appears to be a factory. {desc}",
-                ))
+                patterns.append(
+                    ExplainSection(
+                        title=name,
+                        content=f"Function '{fdef.name}' appears to be a factory. {desc}",
+                    )
+                )
 
     # Singleton: class with __new__ or _instance pattern
     for cdef in semantics.class_defs:
-        class_lines = [
-            lines[i] for i in range(cdef.line - 1, min(cdef.end_line, len(lines)))
-        ]
+        class_lines = [lines[i] for i in range(cdef.line - 1, min(cdef.end_line, len(lines)))]
         class_text = "\n".join(class_lines)
         if "_instance" in class_text or "__new__" in class_text:
             name, desc = _PATTERN_DESCRIPTIONS["singleton"]
-            patterns.append(ExplainSection(
-                title=name,
-                content=f"Class '{cdef.name}' appears to be a singleton. {desc}",
-            ))
+            patterns.append(
+                ExplainSection(
+                    title=name,
+                    content=f"Class '{cdef.name}' appears to be a singleton. {desc}",
+                )
+            )
 
     # Decorator: function that takes a function and returns a function
     for fdef in semantics.function_defs:
         if fdef.name.startswith("_"):
             continue
         # Check if it returns a nested function
-        func_lines = [
-            lines[i].strip() for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))
-        ]
+        func_lines = [lines[i].strip() for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))]
         func_text = " ".join(func_lines)
-        if ("def wrapper" in func_text or "def inner" in func_text or
-                "def decorated" in func_text):
+        if "def wrapper" in func_text or "def inner" in func_text or "def decorated" in func_text:
             name, desc = _PATTERN_DESCRIPTIONS["decorator"]
-            patterns.append(ExplainSection(
-                title=name,
-                content=f"Function '{fdef.name}' appears to be a decorator. {desc}",
-            ))
+            patterns.append(
+                ExplainSection(
+                    title=name,
+                    content=f"Function '{fdef.name}' appears to be a decorator. {desc}",
+                )
+            )
 
     # Builder: class with method chaining (returns self)
     for cdef in semantics.class_defs:
@@ -241,43 +239,49 @@ def _detect_patterns(
                 return_self_count += 1
         if return_self_count >= 3:
             name, desc = _PATTERN_DESCRIPTIONS["builder"]
-            patterns.append(ExplainSection(
-                title=name,
-                content=f"Class '{cdef.name}' appears to use the builder pattern. {desc}",
-            ))
+            patterns.append(
+                ExplainSection(
+                    title=name,
+                    content=f"Class '{cdef.name}' appears to use the builder pattern. {desc}",
+                )
+            )
 
     # Observer: class with subscribe/register/on_ methods
     for cdef in semantics.class_defs:
         observer_methods = sum(
-            1 for fd in semantics.function_defs
-            if fd.parent_class == cdef.name and
-            any(kw in fd.name.lower() for kw in ("subscribe", "register", "on_", "emit", "notify", "publish"))
+            1
+            for fd in semantics.function_defs
+            if fd.parent_class == cdef.name
+            and any(kw in fd.name.lower() for kw in ("subscribe", "register", "on_", "emit", "notify", "publish"))
         )
         if observer_methods >= 2:
             name, desc = _PATTERN_DESCRIPTIONS["observer"]
-            patterns.append(ExplainSection(
-                title=name,
-                content=f"Class '{cdef.name}' appears to use the observer pattern. {desc}",
-            ))
+            patterns.append(
+                ExplainSection(
+                    title=name,
+                    content=f"Class '{cdef.name}' appears to use the observer pattern. {desc}",
+                )
+            )
 
     # Iterator: class with __iter__ and __next__
     for cdef in semantics.class_defs:
         has_iter = any(
-            fd.name in ("__iter__", "__next__")
-            for fd in semantics.function_defs
-            if fd.parent_class == cdef.name
+            fd.name in ("__iter__", "__next__") for fd in semantics.function_defs if fd.parent_class == cdef.name
         )
         if has_iter:
             name, desc = _PATTERN_DESCRIPTIONS["iterator"]
-            patterns.append(ExplainSection(
-                title=name,
-                content=f"Class '{cdef.name}' implements the iterator pattern. {desc}",
-            ))
+            patterns.append(
+                ExplainSection(
+                    title=name,
+                    content=f"Class '{cdef.name}' implements the iterator pattern. {desc}",
+                )
+            )
 
     return patterns
 
 
 # ─── Structure extraction ───────────────────────────────────────────
+
 
 def _explain_function(fdef: FunctionDef, lines: list[str]) -> ExplainSection:
     """Generate an explanation for a function."""
@@ -326,8 +330,7 @@ def _explain_class(cdef: ClassDef, semantics: FileSemantics, lines: list[str]) -
     length = cdef.end_line - cdef.line + 1
 
     parts = [
-        f"Class with {cdef.method_count} method(s) and "
-        f"{len(cdef.attribute_names)} attribute(s).",
+        f"Class with {cdef.method_count} method(s) and {len(cdef.attribute_names)} attribute(s).",
         f"Spans {length} lines ({cdef.line}-{cdef.end_line}).",
     ]
 
@@ -345,6 +348,7 @@ def _explain_class(cdef: ClassDef, semantics: FileSemantics, lines: list[str]) -
 
 
 # ─── Learning notes ─────────────────────────────────────────────────
+
 
 def _generate_learning_notes(
     semantics: FileSemantics,
@@ -410,13 +414,14 @@ def _generate_learning_notes(
 
 # ─── Main entry point ───────────────────────────────────────────────
 
+
 def explain_file(
     content: str,
     filepath: str,
     language: str,
-    semantics: Optional[FileSemantics] = None,
-    findings: Optional[list[Finding]] = None,
-    type_map: Optional[FileTypeMap] = None,
+    semantics: FileSemantics | None = None,
+    findings: list[Finding] | None = None,
+    type_map: FileTypeMap | None = None,
 ) -> FileExplanation:
     """Generate a beginner-friendly explanation of a code file.
 
@@ -437,6 +442,7 @@ def explain_file(
     # Extract semantics if not provided
     if semantics is None:
         from .core import extract_semantics
+
         semantics = extract_semantics(content, filepath, language)
 
     lines = content.splitlines()
@@ -461,9 +467,7 @@ def explain_file(
     )
 
     if semantics is None:
-        explanation.learning_notes.append(
-            f"This is a {language} file. Install tree-sitter for deeper analysis."
-        )
+        explanation.learning_notes.append(f"This is a {language} file. Install tree-sitter for deeper analysis.")
         return explanation
 
     # Structure: explain each class and function
@@ -486,11 +490,13 @@ def explain_file(
 
             beginner_text = _FINDING_EXPLANATIONS.get(f.rule, _DEFAULT_EXPLANATION)
 
-            explanation.findings_explained.append(ExplainSection(
-                title=f"Issue: {f.rule} (line {f.line})",
-                content=f"{beginner_text}\n\nSpecific: {f.message}",
-                code_snippet=f.snippet,
-            ))
+            explanation.findings_explained.append(
+                ExplainSection(
+                    title=f"Issue: {f.rule} (line {f.line})",
+                    content=f"{beginner_text}\n\nSpecific: {f.message}",
+                    code_snippet=f.snippet,
+                )
+            )
 
     # Learning notes
     explanation.learning_notes = _generate_learning_notes(semantics, content, language, lines)

@@ -12,21 +12,20 @@ Data in → Data out: FileSemantics + source bytes → dict[scope_id, FunctionCF
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
-from .lang_config import LanguageConfig
 from .core import FileSemantics, FunctionDef
-
+from .lang_config import LanguageConfig
 
 # ─── Data structures ─────────────────────────────────────────────────
+
 
 @dataclass
 class CfgStatement:
     line: int
     kind: str  # "assignment", "call", "return", "break", "continue", "other"
     text: str
-    assignment_idx: Optional[int] = None  # index into FileSemantics.assignments
-    call_idx: Optional[int] = None  # index into FileSemantics.function_calls
+    assignment_idx: int | None = None  # index into FileSemantics.assignments
+    call_idx: int | None = None  # index into FileSemantics.function_calls
     # Additional indices when multiple assignments/calls share the same line
     # (e.g., `a = 1; b = 2` or `foo(); bar()`)
     extra_assignment_idxs: list[int] = field(default_factory=list)
@@ -56,16 +55,15 @@ class FunctionCFG:
 
 # ─── Helpers ─────────────────────────────────────────────────────────
 
-from ._utils import _get_text, _line, _end_line  # noqa: E402
-
+from ._utils import _get_text, _line  # noqa: E402
 
 # ─── CFG Builder ─────────────────────────────────────────────────────
+
 
 class _CfgBuilder:
     """Builds a CFG for a single function body."""
 
-    def __init__(self, source_bytes: bytes, config: LanguageConfig,
-                 semantics: FileSemantics, fdef: FunctionDef):
+    def __init__(self, source_bytes: bytes, config: LanguageConfig, semantics: FileSemantics, fdef: FunctionDef):
         self.src = source_bytes
         self.config = config
         self.semantics = semantics
@@ -174,8 +172,7 @@ class _CfgBuilder:
             line_to_block=self.line_to_block,
         )
 
-    def _process_body(self, body_node, current_block: BasicBlock,
-                      exit_block: BasicBlock) -> list[int]:
+    def _process_body(self, body_node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:
         """Process a sequence of statements. Returns list of block IDs that
         are the 'tails' (blocks that fall through to the next statement)."""
         tails = [current_block.id]
@@ -247,8 +244,7 @@ class _CfgBuilder:
 
         return tails
 
-    def _process_if(self, node, current_block: BasicBlock,
-                    exit_block: BasicBlock) -> list[int]:
+    def _process_if(self, node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:
         """Process if/elif/else chain. Returns tail block IDs."""
         # Add the condition as a statement on the current block
         condition = node.child_by_field_name("condition")
@@ -305,8 +301,7 @@ class _CfgBuilder:
 
         return tails
 
-    def _process_loop(self, node, current_block: BasicBlock,
-                      exit_block: BasicBlock) -> list[int]:
+    def _process_loop(self, node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:
         """Process for/while loop. Returns tail block IDs (the loop exit)."""
         header = self._new_block()
         self._link(current_block.id, header.id)
@@ -343,8 +338,7 @@ class _CfgBuilder:
 
         return [loop_exit.id]
 
-    def _process_try(self, node, current_block: BasicBlock,
-                     exit_block: BasicBlock) -> list[int]:
+    def _process_try(self, node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:
         """Process try/catch/finally. Returns tail block IDs."""
         tails = []
 
@@ -407,15 +401,20 @@ class _CfgBuilder:
 
         return tails
 
-    def _process_switch(self, node, current_block: BasicBlock,
-                        exit_block: BasicBlock) -> list[int]:
+    def _process_switch(self, node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:
         """Process switch/match statement. Returns tail block IDs."""
         tails = []
 
         for ch in node.children:
-            if ch.type in ("switch_case", "switch_default", "match_arm",
-                           "expression_case", "type_case", "default_case",
-                           "switch_section"):
+            if ch.type in (
+                "switch_case",
+                "switch_default",
+                "match_arm",
+                "expression_case",
+                "type_case",
+                "default_case",
+                "switch_section",
+            ):
                 case_block = self._new_block()
                 self._link(current_block.id, case_block.id)
                 case_tails = self._process_body(ch, case_block, exit_block)
@@ -434,9 +433,9 @@ class _CfgBuilder:
         """
         # Container types that should be unwrapped (not treated as statements)
         _CONTAINER_TYPES = {
-            "statement_list",      # Go
-            "declaration_list",    # C#
-            "expression_list",     # Go
+            "statement_list",  # Go
+            "declaration_list",  # C#
+            "expression_list",  # Go
         }
 
         children = []
@@ -455,6 +454,7 @@ class _CfgBuilder:
 
 # ─── Entry point ─────────────────────────────────────────────────────
 
+
 def build_cfg(
     semantics: FileSemantics,
     source_bytes: bytes,
@@ -469,7 +469,7 @@ def build_cfg(
     if not config.cfg_if_node_types and not config.cfg_for_node_types:
         return {}
 
-    root_node = getattr(semantics, '_tree_root', None)
+    root_node = getattr(semantics, "_tree_root", None)
     if root_node is None:
         return {}
 

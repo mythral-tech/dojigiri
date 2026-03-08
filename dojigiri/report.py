@@ -8,15 +8,26 @@ Calls into: config.py
 Data in -> Data out: ScanReport -> stdout (ANSI-colored text)
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import sys
 import textwrap
 from collections import Counter
 from typing import Any
+
 from .types import (
-    Finding, FileAnalysis, ScanReport, Severity, Source, Category,
-    ProjectAnalysis, FixReport, FixSource, FixStatus,
+    Category,
+    FileAnalysis,
+    Finding,
+    FixReport,
+    FixSource,
+    FixStatus,
+    ProjectAnalysis,
+    ScanReport,
+    Severity,
+    Source,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,6 +84,7 @@ def _c(color: str, text: str) -> str:
 def print_finding(f: Finding, show_file: bool = True) -> None:
     """Print a single finding."""
     from .compliance import get_cwe
+
     color, label = SEVERITY_STYLE[f.severity]
     src = SOURCE_LABEL.get(f.source, f.source.value)
 
@@ -108,8 +120,7 @@ def print_file_analysis(fa: FileAnalysis) -> None:
         print_finding(f, show_file=False)
 
 
-def print_scan_summary(report: ScanReport, duration: float | None = None,
-                       classification: str | None = None) -> None:
+def print_scan_summary(report: ScanReport, duration: float | None = None, classification: str | None = None) -> None:
     """Print the scan summary."""
     if classification:
         print(f"\n{_c('bold', f'// {classification} //')}")
@@ -141,8 +152,10 @@ def print_scan_summary(report: ScanReport, duration: float | None = None,
     if cat_counts:
         print()
         cat_labels = [
-            (Category.BUG, "Bug"), (Category.SECURITY, "Security"),
-            (Category.PERFORMANCE, "Performance"), (Category.STYLE, "Style"),
+            (Category.BUG, "Bug"),
+            (Category.SECURITY, "Security"),
+            (Category.PERFORMANCE, "Performance"),
+            (Category.STYLE, "Style"),
             (Category.DEAD_CODE, "Dead code"),
         ]
         parts = [f"{label}: {cat_counts[cat]}" for cat, label in cat_labels if cat_counts[cat]]
@@ -169,8 +182,9 @@ def print_scan_summary(report: ScanReport, duration: float | None = None,
     print()
 
 
-def print_report(report: ScanReport, verbose: bool = False, duration: float | None = None,
-                 classification: str | None = None) -> None:
+def print_report(
+    report: ScanReport, verbose: bool = False, duration: float | None = None, classification: str | None = None
+) -> None:
     """Print full report — file analyses + summary."""
     # Show files with findings (or all files in verbose mode)
     for fa in report.file_analyses:
@@ -209,8 +223,10 @@ def _print_debug_finding(f: dict, index: int) -> None:
     category = f.get("category", "")
     line_range = f"line {line}" + (f"-{end_line}" if end_line else "")
 
-    print(f"  {_c(sev_color, sev_label)} {_c(conf_color, f'[{conf_label}]')}  "
-          f"{_c('bold', title)}  {_c('dim', f'({line_range}, {category})')}")
+    print(
+        f"  {_c(sev_color, sev_label)} {_c(conf_color, f'[{conf_label}]')}  "
+        f"{_c('bold', title)}  {_c('dim', f'({line_range}, {category})')}"
+    )
 
     description = f.get("description", "")
     if description:
@@ -231,11 +247,11 @@ def _print_debug_finding(f: dict, index: int) -> None:
 def _print_llm_analysis_result(
     filepath: str,
     static_findings: list[Finding],
-    llm_result: "Optional[dict]",
+    llm_result: dict | None,
     *,
     title: str,
     static_label: str,
-    static_filter: "Optional[tuple]" = None,
+    static_filter: tuple | None = None,
     summary_label: str = "Summary:",
     findings_label_fmt: str = "Claude found {n} issue(s):",
     empty_msg: str = "No additional issues found by Claude.",
@@ -295,11 +311,12 @@ def _print_llm_analysis_result(
     print()
 
 
-def print_debug_result(filepath: str, static_findings: list[Finding],
-                       llm_result: "Optional[dict]" = None) -> None:
+def print_debug_result(filepath: str, static_findings: list[Finding], llm_result: dict | None = None) -> None:
     """Print debug command output."""
     _print_llm_analysis_result(
-        filepath, static_findings, llm_result,
+        filepath,
+        static_findings,
+        llm_result,
         title="Debug",
         static_label="Static analysis findings:",
         summary_label="Summary:",
@@ -308,11 +325,12 @@ def print_debug_result(filepath: str, static_findings: list[Finding],
     )
 
 
-def print_optimize_result(filepath: str, static_findings: list[Finding],
-                          llm_result: "Optional[dict]" = None) -> None:
+def print_optimize_result(filepath: str, static_findings: list[Finding], llm_result: dict | None = None) -> None:
     """Print optimize command output."""
     _print_llm_analysis_result(
-        filepath, static_findings, llm_result,
+        filepath,
+        static_findings,
+        llm_result,
         title="Optimize",
         static_label="Static analysis (perf-relevant):",
         static_filter=(Category.PERFORMANCE, Category.STYLE),
@@ -322,8 +340,9 @@ def print_optimize_result(filepath: str, static_findings: list[Finding],
     )
 
 
-def print_analysis_json(filepath: str, static_findings: list[Finding],
-                        llm_result: "Optional[dict]", tracker: "Optional[Any]" = None) -> None:
+def print_analysis_json(
+    filepath: str, static_findings: list[Finding], llm_result: dict | None, tracker: Any | None = None
+) -> None:
     """Print analysis result as JSON to stdout."""
     output = {
         "filepath": filepath,
@@ -351,7 +370,9 @@ def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est
     print(f"  {_c('bold', f'Est. cost:           ${est_cost:.4f}')}")
     # Show actual model used for pricing (tiered mode uses Haiku for scan chunks)
     import os as _os
-    from .config import LLM_TIER_MODE, LLM_SCAN_MODEL, LLM_DEEP_MODEL
+
+    from .config import LLM_DEEP_MODEL, LLM_SCAN_MODEL, LLM_TIER_MODE
+
     _tier_mode = _os.environ.get("DOJI_LLM_TIER_MODE", LLM_TIER_MODE)
     _user_model = _os.environ.get("DOJI_LLM_MODEL")
     if _tier_mode == "auto" and not _user_model:
@@ -392,6 +413,7 @@ def print_setup_status(api_key_set: bool, anthropic_installed: bool) -> None:
 
 
 # ─── Project analysis rendering ──────────────────────────────────────
+
 
 def print_graph_summary(graph_dict: dict, metrics_dict: dict) -> None:
     """ASCII dependency graph summary with fan-in/fan-out, hubs, cycles, dead modules."""
@@ -577,7 +599,7 @@ def print_sarif(report: ScanReport) -> None:
 
 def to_sarif(report: ScanReport) -> dict:
     """Convert ScanReport to SARIF 2.1.0 format.
-    
+
     SARIF (Static Analysis Results Interchange Format) is the standard format
     for GitHub Code Scanning and other result management systems.
     """
@@ -587,7 +609,7 @@ def to_sarif(report: ScanReport) -> dict:
         Severity.WARNING: "warning",
         Severity.INFO: "note",
     }
-    
+
     from .compliance import get_cwe, get_nist
 
     # Collect unique rules from all findings
@@ -598,19 +620,13 @@ def to_sarif(report: ScanReport) -> dict:
                 rule_entry = {
                     "id": f.rule,
                     "name": f.message.split(" ")[0],  # First word as short name
-                    "shortDescription": {
-                        "text": f.message
-                    },
-                    "fullDescription": {
-                        "text": f.message
-                    },
-                    "defaultConfiguration": {
-                        "level": severity_to_level[f.severity]
-                    },
+                    "shortDescription": {"text": f.message},
+                    "fullDescription": {"text": f.message},
+                    "defaultConfiguration": {"level": severity_to_level[f.severity]},
                     "properties": {
                         "category": f.category.value,
                         "source": f.source.value,
-                    }
+                    },
                 }
                 # Add CWE tag for GitHub Code Scanning
                 cwe = get_cwe(f.rule)
@@ -621,7 +637,7 @@ def to_sarif(report: ScanReport) -> dict:
                 if nist:
                     rule_entry["properties"]["nist"] = nist
                 rules_map[f.rule] = rule_entry
-    
+
     # Convert findings to SARIF results
     results = []
     for fa in report.file_analyses:
@@ -629,55 +645,39 @@ def to_sarif(report: ScanReport) -> dict:
             # Create partial fingerprint for deduplication across runs
             # Use file + rule + line as fingerprint
             fingerprint = f"{f.file}:{f.rule}:{f.line}"
-            
+
             result = {
                 "ruleId": f.rule,
                 "level": severity_to_level[f.severity],
-                "message": {
-                    "text": f.message
-                },
+                "message": {"text": f.message},
                 "locations": [
                     {
                         "physicalLocation": {
-                            "artifactLocation": {
-                                "uri": f.file,
-                                "uriBaseId": "%SRCROOT%"
-                            },
-                            "region": {
-                                "startLine": f.line,
-                                "startColumn": 1
-                            }
+                            "artifactLocation": {"uri": f.file, "uriBaseId": "%SRCROOT%"},
+                            "region": {"startLine": f.line, "startColumn": 1},
                         }
                     }
                 ],
-                "partialFingerprints": {
-                    "primaryLocationLineHash": fingerprint
-                }
+                "partialFingerprints": {"primaryLocationLineHash": fingerprint},
             }
-            
+
             # Add snippet if available (redact secrets)
             snippet = f.to_dict()["snippet"]
             if snippet:
                 result["locations"][0]["physicalLocation"]["region"]["snippet"] = {  # type: ignore[index]  # SARIF result dict is dynamically built
                     "text": snippet
                 }
-            
+
             # Add suggestion as fix if available
             if f.suggestion:
-                result["fixes"] = [
-                    {
-                        "description": {
-                            "text": f.suggestion
-                        }
-                    }
-                ]
-            
+                result["fixes"] = [{"description": {"text": f.suggestion}}]
+
             # Add confidence property if available (LLM findings)
             if f.confidence:
                 result.setdefault("properties", {})["confidence"] = f.confidence.value  # type: ignore[index]  # SARIF result dict is dynamically built
-            
+
             results.append(result)
-    
+
     # Build SARIF document
     sarif = {
         "version": "2.1.0",
@@ -689,19 +689,19 @@ def to_sarif(report: ScanReport) -> dict:
                         "name": "Dojigiri",
                         "informationUri": "https://github.com/Inklling/Genesis",
                         "semanticVersion": "1.1.0",
-                        "rules": list(rules_map.values())
+                        "rules": list(rules_map.values()),
                     }
                 },
                 "results": results,
                 "properties": {
                     "mode": report.mode,
                     "filesScanned": report.files_scanned,
-                    "filesSkipped": report.files_skipped
-                }
+                    "filesSkipped": report.files_skipped,
+                },
             }
-        ]
+        ],
     }
-    
+
     return sarif
 
 
@@ -735,10 +735,12 @@ def print_fix_report(report: FixReport, dry_run: bool = True) -> None:
         src_color, src_label = SOURCE_BADGE.get(fix.source, ("gray", "unknown"))
         stat_color, stat_label = STATUS_BADGE.get(fix.status, ("gray", "unknown"))
 
-        print(f"\n  {_c('bold', f'{fix.file}:{fix.line}')} "
-              f"{_c('dim', f'[{fix.rule}]')} "
-              f"({_c(src_color, src_label)}) "
-              f"[{_c(stat_color, stat_label)}]")
+        print(
+            f"\n  {_c('bold', f'{fix.file}:{fix.line}')} "
+            f"{_c('dim', f'[{fix.rule}]')} "
+            f"({_c(src_color, src_label)}) "
+            f"[{_c(stat_color, stat_label)}]"
+        )
 
         # Show diff
         if fix.original_code:
@@ -751,7 +753,7 @@ def print_fix_report(report: FixReport, dry_run: bool = True) -> None:
             print(f"  {_c('green', '+ (removed)')}")
 
         print(f"  {_c('dim', fix.explanation)}")
-        if fix.status == FixStatus.FAILED and getattr(fix, 'fail_reason', None):
+        if fix.status == FixStatus.FAILED and getattr(fix, "fail_reason", None):
             print(f"  {_c('red', '^ ' + fix.fail_reason)}")
 
     # Summary
@@ -793,6 +795,7 @@ def print_fix_json(report: FixReport) -> None:
 
 # ─── Explain output (v1.0.0) ────────────────────────────────────────
 
+
 def print_explanation(explanation: Any) -> None:
     """Print a FileExplanation in beginner-friendly format."""
     print()
@@ -832,8 +835,7 @@ def print_explanation(explanation: Any) -> None:
         print("  " + "-" * 66)
         for section in explanation.findings_explained:
             print(f"\n  {_c('yellow', section.title)}")
-            print(textwrap.fill(section.content, width=72,
-                                initial_indent="    ", subsequent_indent="    "))
+            print(textwrap.fill(section.content, width=72, initial_indent="    ", subsequent_indent="    "))
             if section.code_snippet:
                 print(f"    {_c('gray', section.code_snippet)}")
         print()
@@ -857,16 +859,11 @@ def print_explain_json(explanation: Any) -> None:
         "language": explanation.language,
         "summary": explanation.summary,
         "structure": [
-            {"title": s.title, "content": s.content, "snippet": s.code_snippet}
-            for s in explanation.structure
+            {"title": s.title, "content": s.content, "snippet": s.code_snippet} for s in explanation.structure
         ],
-        "patterns": [
-            {"title": s.title, "content": s.content}
-            for s in explanation.patterns
-        ],
+        "patterns": [{"title": s.title, "content": s.content} for s in explanation.patterns],
         "findings_explained": [
-            {"title": s.title, "content": s.content, "snippet": s.code_snippet}
-            for s in explanation.findings_explained
+            {"title": s.title, "content": s.content, "snippet": s.code_snippet} for s in explanation.findings_explained
         ],
         "learning_notes": explanation.learning_notes,
     }

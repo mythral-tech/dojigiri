@@ -13,20 +13,45 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..types import Finding, Severity, Category, Source
+from ..types import Category, Finding, Severity, Source
 from .depgraph import CallGraph, DepGraph
-
 
 # Names/patterns to exclude from dead function detection
 _ENTRY_PATTERNS = {
-    "main", "__init__", "__new__", "__del__", "__repr__", "__str__",
-    "__eq__", "__hash__", "__lt__", "__le__", "__gt__", "__ge__",
-    "__len__", "__iter__", "__next__", "__getitem__", "__setitem__",
-    "__delitem__", "__contains__", "__enter__", "__exit__",
-    "__call__", "__bool__", "__getattr__", "__setattr__",
-    "__get__", "__set__", "__delete__",
-    "setUp", "tearDown", "setUpClass", "tearDownClass",
-    "setup_method", "teardown_method",
+    "main",
+    "__init__",
+    "__new__",
+    "__del__",
+    "__repr__",
+    "__str__",
+    "__eq__",
+    "__hash__",
+    "__lt__",
+    "__le__",
+    "__gt__",
+    "__ge__",
+    "__len__",
+    "__iter__",
+    "__next__",
+    "__getitem__",
+    "__setitem__",
+    "__delitem__",
+    "__contains__",
+    "__enter__",
+    "__exit__",
+    "__call__",
+    "__bool__",
+    "__getattr__",
+    "__setattr__",
+    "__get__",
+    "__set__",
+    "__delete__",
+    "setUp",
+    "tearDown",
+    "setUpClass",
+    "tearDownClass",
+    "setup_method",
+    "teardown_method",
 }
 
 _TEST_PREFIXES = ("test_", "test")
@@ -46,6 +71,7 @@ def _is_dunder(name: str) -> bool:
 
 
 # ─── Check: Dead Functions ───────────────────────────────────────────
+
 
 def find_dead_functions(
     call_graph: CallGraph,
@@ -89,21 +115,24 @@ def find_dead_functions(
             # Only flag if we're fairly confident
             continue
 
-        findings.append(Finding(
-            file=filepath,
-            line=fnode.line,
-            severity=Severity.INFO,
-            category=Category.DEAD_CODE,
-            source=Source.AST,
-            rule="dead-function",
-            message=f"Function '{name}' is defined but never called",
-            suggestion=f"Remove '{name}' if it's not needed, or add a caller",
-        ))
+        findings.append(
+            Finding(
+                file=filepath,
+                line=fnode.line,
+                severity=Severity.INFO,
+                category=Category.DEAD_CODE,
+                source=Source.AST,
+                rule="dead-function",
+                message=f"Function '{name}' is defined but never called",
+                suggestion=f"Remove '{name}' if it's not needed, or add a caller",
+            )
+        )
 
     return findings
 
 
 # ─── Check: Argument Count Mismatches ────────────────────────────────
+
 
 def find_arg_count_mismatches(
     call_graph: CallGraph,
@@ -146,34 +175,38 @@ def find_arg_count_mismatches(
                     # Determine if cross-file
                     target_file = fnode.file
                     if target_file == rel_path:
-                        findings.append(Finding(
-                            file=rel_path,
-                            line=call.line,
-                            severity=Severity.WARNING,
-                            category=Category.BUG,
-                            source=Source.AST,
-                            rule="arg-count-mismatch",
-                            message=(
-                                f"Function '{call_name}' called with {actual} arg(s), "
-                                f"but defined with {expected} parameter(s) (line {fnode.line})"
-                            ),
-                            suggestion=f"Check argument count for '{call_name}'",
-                        ))
+                        findings.append(
+                            Finding(
+                                file=rel_path,
+                                line=call.line,
+                                severity=Severity.WARNING,
+                                category=Category.BUG,
+                                source=Source.AST,
+                                rule="arg-count-mismatch",
+                                message=(
+                                    f"Function '{call_name}' called with {actual} arg(s), "
+                                    f"but defined with {expected} parameter(s) (line {fnode.line})"
+                                ),
+                                suggestion=f"Check argument count for '{call_name}'",
+                            )
+                        )
                     else:
-                        findings.append(Finding(
-                            file=rel_path,
-                            line=call.line,
-                            severity=Severity.WARNING,
-                            category=Category.BUG,
-                            source=Source.AST,
-                            rule="arg-count-mismatch",
-                            message=(
-                                f"Function '{call_name}' called with {actual} arg(s), "
-                                f"but defined with {expected} parameter(s) "
-                                f"in {target_file}:{fnode.line}"
-                            ),
-                            suggestion=f"Check argument count for '{call_name}'",
-                        ))
+                        findings.append(
+                            Finding(
+                                file=rel_path,
+                                line=call.line,
+                                severity=Severity.WARNING,
+                                category=Category.BUG,
+                                source=Source.AST,
+                                rule="arg-count-mismatch",
+                                message=(
+                                    f"Function '{call_name}' called with {actual} arg(s), "
+                                    f"but defined with {expected} parameter(s) "
+                                    f"in {target_file}:{fnode.line}"
+                                ),
+                                suggestion=f"Check argument count for '{call_name}'",
+                            )
+                        )
                     break  # Only report first match per call site
 
     return findings

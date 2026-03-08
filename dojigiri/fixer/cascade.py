@@ -9,7 +9,10 @@ Calls into: config.py (FixStatus, Fix types)
 Data in -> Data out: file content + applied fixes + semantics -> set of rule names
 """
 
+from __future__ import annotations
+
 import ast
+
 from ..types import Fix, FixStatus
 
 

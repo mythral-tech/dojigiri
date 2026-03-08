@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
-from typing import Sequence
+from collections.abc import Sequence
 
 from mcp.server.fastmcp import FastMCP
 
@@ -50,6 +50,7 @@ _allowed_roots: list[Path] = [Path.cwd().resolve()]
 # arbitrary directories (e.g. mcp_allowed_roots = ["/"]).
 try:
     from .config import load_project_config as _load_cfg
+
     _mcp_cfg = _load_cfg(Path.cwd())
     _extra = _mcp_cfg.get("mcp_allowed_roots", [])
     _cwd_resolved = Path.cwd().resolve()
@@ -60,12 +61,15 @@ try:
                 _allowed_roots.append(_resolved)
             else:
                 import logging as _logging
+
                 _logging.getLogger(__name__).warning(
                     "Ignoring mcp_allowed_roots entry '%s' — must be under cwd (%s)",
-                    _r, _cwd_resolved,
+                    _r,
+                    _cwd_resolved,
                 )
 except Exception as _e:
     import logging as _logging
+
     _logging.getLogger(__name__).debug("MCP config loading failed: %s", _e)
 
 
@@ -85,8 +89,11 @@ def _configure_allowed_roots(extra_roots: Sequence[str | Path] | None = None) ->
                 _allowed_roots.append(resolved)
             else:
                 import logging as _log
+
                 _log.getLogger(__name__).warning(
-                    "Ignoring allowed root '%s' — must be under cwd (%s)", r, cwd,
+                    "Ignoring allowed root '%s' — must be under cwd (%s)",
+                    r,
+                    cwd,
                 )
 
 
@@ -130,7 +137,7 @@ def _read_file(path: str) -> tuple[str, str, str]:
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
     except OSError as e:
-        raise ValueError(f"Error reading file: {e}")
+        raise ValueError(f"Error reading file: {e}") from e
 
     return content, lang, str(filepath)
 
@@ -138,6 +145,7 @@ def _read_file(path: str) -> tuple[str, str, str]:
 def _collect_files_with_lang(root: Path) -> list[tuple[Path, str]]:
     """Collect analyzable files under root, each paired with its detected language."""
     from .discovery import collect_files_with_lang
+
     return collect_files_with_lang(root)
 
 
@@ -148,6 +156,7 @@ def _filter_findings_by_severity(findings: list, min_severity: Severity) -> list
 
 
 # ─── Tools ───────────────────────────────────────────────────────────
+
 
 @mcp.tool()
 def doji_scan(
@@ -168,8 +177,8 @@ def doji_scan(
         min_severity: Minimum severity to include: "critical", "warning", or "info".
         ignore_rules: Comma-separated rule names to suppress (e.g. "todo-marker,long-line").
     """
-    from .analyzer import scan_quick, scan_diff, filter_report
-    from .config import load_project_config, compile_custom_rules
+    from .analyzer import filter_report, scan_diff, scan_quick
+    from .config import compile_custom_rules, load_project_config
     from .mcp_format import format_scan_report
 
     sev = _parse_severity(min_severity)
@@ -253,11 +262,11 @@ def doji_fix(
         rules: Comma-separated rule names to fix (e.g. "bare-except,unused-import").
         min_severity: Minimum severity: "critical", "warning", or "info".
     """
+    from .config import compile_custom_rules, load_project_config
     from .detector import analyze_file_static
     from .fixer import fix_file as fixer_fix_file
-    from .types import FixReport
-    from .config import load_project_config, compile_custom_rules
     from .mcp_format import format_fix_report
+    from .types import FixReport
 
     sev = _parse_severity(min_severity)
     if isinstance(sev, str):
@@ -292,17 +301,21 @@ def doji_fix(
             errors.append(f"{filepath.name}: {e}")
             continue
 
-        findings = analyze_file_static(str(filepath), content, file_lang,
-                                       custom_rules=custom_rules).findings
+        findings = analyze_file_static(str(filepath), content, file_lang, custom_rules=custom_rules).findings
         findings = _filter_findings_by_severity(findings, sev)
         if not findings:
             continue
 
         try:
             report = fixer_fix_file(
-                str(filepath), content, file_lang, findings,
-                use_llm=False, dry_run=True,
-                rules=rules_list, custom_rules=custom_rules,
+                str(filepath),
+                content,
+                file_lang,
+                findings,
+                use_llm=False,
+                dry_run=True,
+                rules=rules_list,
+                custom_rules=custom_rules,
             )
         except (OSError, ValueError, RuntimeError) as e:
             errors.append(f"{filepath.name}: {e}")
@@ -340,8 +353,8 @@ def doji_explain(path: str) -> str:
         path: Path to the file to explain.
     """
     from .detector import analyze_file_static
-    from .semantic.explain import explain_file
     from .mcp_format import format_explanation
+    from .semantic.explain import explain_file
 
     try:
         content, lang, filepath = _read_file(path)
@@ -352,7 +365,9 @@ def doji_explain(path: str) -> str:
     result = analyze_file_static(filepath, content, lang)
 
     explanation = explain_file(
-        content, filepath, lang,
+        content,
+        filepath,
+        lang,
         semantics=result.semantics,
         findings=result.findings,
         type_map=result.type_map,

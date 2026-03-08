@@ -12,8 +12,8 @@ import re
 from collections.abc import Iterator
 from typing import Any
 
-from ..types import Finding, Severity, Category, Source
-from .lang_config import get_config, LanguageConfig
+from ..types import Category, Finding, Severity, Source
+from .lang_config import LanguageConfig, get_config
 
 
 def _get_named_children(node) -> list:
@@ -23,7 +23,7 @@ def _get_named_children(node) -> list:
 
 def _get_node_text(node, source_bytes: bytes) -> str:
     """Extract the source text for a tree-sitter node."""
-    return source_bytes[node.start_byte:node.end_byte].decode("utf-8", errors="replace")
+    return source_bytes[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
 
 def _walk_tree(node: Any) -> Iterator[Any]:
@@ -40,8 +40,8 @@ def _node_line(node) -> int:
 
 # ─── Check: Unused Imports ─────────────────────────────────────────────────
 
-def check_unused_imports(tree, source_bytes: bytes, config: LanguageConfig,
-                         filepath: str) -> list[Finding]:
+
+def check_unused_imports(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Detect imports where the imported name never appears elsewhere in the file."""
     if not config.import_node_types:
         return []
@@ -53,7 +53,7 @@ def check_unused_imports(tree, source_bytes: bytes, config: LanguageConfig,
         if node.type not in config.import_node_types:
             continue
 
-        import_text = _get_node_text(node, source_bytes)
+        _import_text = _get_node_text(node, source_bytes)
         import_line = _node_line(node)
         import_start = node.start_byte
         import_end = node.end_byte
@@ -71,24 +71,25 @@ def check_unused_imports(tree, source_bytes: bytes, config: LanguageConfig,
                 continue
             # Use word-boundary regex to avoid matching substrings
             # (e.g. "io" inside "collections")
-            pattern = re.compile(rb'\b' + re.escape(name.encode("utf-8")) + rb'\b')
+            pattern = re.compile(rb"\b" + re.escape(name.encode("utf-8")) + rb"\b")
             if not pattern.search(rest_of_source):
-                findings.append(Finding(
-                    file=filepath,
-                    line=import_line,
-                    severity=Severity.WARNING,
-                    category=Category.DEAD_CODE,
-                    source=Source.AST,
-                    rule="unused-import",
-                    message=f"Import '{name}' is never used",
-                    suggestion=f"Remove unused import '{name}'",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=import_line,
+                        severity=Severity.WARNING,
+                        category=Category.DEAD_CODE,
+                        source=Source.AST,
+                        rule="unused-import",
+                        message=f"Import '{name}' is never used",
+                        suggestion=f"Remove unused import '{name}'",
+                    )
+                )
 
     return findings
 
 
-def _extract_import_names(node, source_bytes: bytes,
-                          config: LanguageConfig) -> list[str]:
+def _extract_import_names(node, source_bytes: bytes, config: LanguageConfig) -> list[str]:
     """Extract the names introduced by an import statement."""
     names = []
     lang = config.ts_language_name
@@ -197,8 +198,15 @@ def _extract_import_names(node, source_bytes: bytes,
                 if alias:
                     names.append(_get_node_text(alias, source_bytes))
                     break
-            elif child.type == "identifier" and child.parent and child.parent.type in (
-                "use_declaration", "scoped_identifier", "use_list",
+            elif (
+                child.type == "identifier"
+                and child.parent
+                and child.parent.type
+                in (
+                    "use_declaration",
+                    "scoped_identifier",
+                    "use_list",
+                )
             ):
                 # Get the last identifier in the path
                 pass
@@ -217,13 +225,12 @@ def _extract_import_names(node, source_bytes: bytes,
 
 # ─── Check: Unreachable Code ──────────────────────────────────────────────
 
-def check_unreachable_code(tree, source_bytes: bytes, config: LanguageConfig,
-                           filepath: str) -> list[Finding]:
+
+def check_unreachable_code(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Detect statements after return/break/continue/throw within a block."""
     findings = []
     terminal_types = set(
-        config.return_node_types + config.break_node_types +
-        config.continue_node_types + config.throw_node_types
+        config.return_node_types + config.break_node_types + config.continue_node_types + config.throw_node_types
     )
     if not terminal_types:
         return []
@@ -244,16 +251,18 @@ def check_unreachable_code(tree, source_bytes: bytes, config: LanguageConfig,
                 # Skip comment nodes — they're not real code
                 if child.type in config.comment_node_types:
                     continue
-                findings.append(Finding(
-                    file=filepath,
-                    line=_node_line(child),
-                    severity=Severity.WARNING,
-                    category=Category.DEAD_CODE,
-                    source=Source.AST,
-                    rule="unreachable-code",
-                    message="Unreachable code after return/raise/break/continue",
-                    suggestion="Remove dead code or restructure control flow",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=_node_line(child),
+                        severity=Severity.WARNING,
+                        category=Category.DEAD_CODE,
+                        source=Source.AST,
+                        rule="unreachable-code",
+                        message="Unreachable code after return/raise/break/continue",
+                        suggestion="Remove dead code or restructure control flow",
+                    )
+                )
                 break  # One report per block
             if child.type in terminal_types:
                 found_terminal = True
@@ -263,8 +272,8 @@ def check_unreachable_code(tree, source_bytes: bytes, config: LanguageConfig,
 
 # ─── Check: Empty Catch/Except ────────────────────────────────────────────
 
-def check_empty_catch(tree, source_bytes: bytes, config: LanguageConfig,
-                      filepath: str) -> list[Finding]:
+
+def check_empty_catch(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Detect catch/except blocks with empty or pass-only bodies."""
     if not config.catch_node_types:
         return []
@@ -284,27 +293,25 @@ def check_empty_catch(tree, source_bytes: bytes, config: LanguageConfig,
         # Check if body is empty or pass-only
         named = _get_named_children(body)
         # Filter out comments
-        meaningful = [n for n in named
-                      if n.type not in config.comment_node_types]
+        meaningful = [n for n in named if n.type not in config.comment_node_types]
 
         is_empty = False
-        if len(meaningful) == 0:
-            is_empty = True
-        elif (len(meaningful) == 1 and
-              meaningful[0].type in config.pass_node_types):
+        if len(meaningful) == 0 or (len(meaningful) == 1 and meaningful[0].type in config.pass_node_types):
             is_empty = True
 
         if is_empty:
-            findings.append(Finding(
-                file=filepath,
-                line=_node_line(node),
-                severity=Severity.WARNING,
-                category=Category.BUG,
-                source=Source.AST,
-                rule="empty-exception-handler",
-                message="Exception caught and silently ignored",
-                suggestion="Log the exception or handle it explicitly",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=_node_line(node),
+                    severity=Severity.WARNING,
+                    category=Category.BUG,
+                    source=Source.AST,
+                    rule="empty-exception-handler",
+                    message="Exception caught and silently ignored",
+                    suggestion="Log the exception or handle it explicitly",
+                )
+            )
 
     return findings
 
@@ -322,8 +329,8 @@ def _get_catch_body(node: Any, config: LanguageConfig) -> Any:
 
 # ─── Check: Shadowed Builtins ─────────────────────────────────────────────
 
-def check_shadowed_builtins(tree, source_bytes: bytes, config: LanguageConfig,
-                            filepath: str) -> list[Finding]:
+
+def check_shadowed_builtins(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Detect function parameters that shadow language builtins."""
     if not config.builtin_names or not config.function_node_types:
         return []
@@ -342,24 +349,26 @@ def check_shadowed_builtins(tree, source_bytes: bytes, config: LanguageConfig,
             if param_name in ("self", "cls"):
                 continue
             if param_name in config.builtin_names:
-                findings.append(Finding(
-                    file=filepath,
-                    line=param_line,
-                    severity=Severity.WARNING,
-                    category=Category.BUG,
-                    source=Source.AST,
-                    rule="shadowed-builtin",
-                    message=f"Parameter '{param_name}' in '{func_name}' shadows builtin",
-                    suggestion=f"Rename parameter to avoid shadowing builtin '{param_name}'",
-                ))
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=param_line,
+                        severity=Severity.WARNING,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="shadowed-builtin",
+                        message=f"Parameter '{param_name}' in '{func_name}' shadows builtin",
+                        suggestion=f"Rename parameter to avoid shadowing builtin '{param_name}'",
+                    )
+                )
 
     return findings
 
 
 # ─── Check: Function Complexity ───────────────────────────────────────────
 
-def check_function_complexity(tree, source_bytes: bytes, config: LanguageConfig,
-                              filepath: str) -> list[Finding]:
+
+def check_function_complexity(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Flag functions with cyclomatic complexity > 15."""
     if not config.function_node_types:
         return []
@@ -376,16 +385,18 @@ def check_function_complexity(tree, source_bytes: bytes, config: LanguageConfig,
         complexity = _count_complexity(node, branch_types, func_types)
 
         if complexity > 15:
-            findings.append(Finding(
-                file=filepath,
-                line=_node_line(node),
-                severity=Severity.INFO,
-                category=Category.STYLE,
-                source=Source.AST,
-                rule="high-complexity",
-                message=f"Function '{func_name}' has high cyclomatic complexity ({complexity} branches)",
-                suggestion="Consider breaking into smaller functions",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=_node_line(node),
+                    severity=Severity.INFO,
+                    category=Category.STYLE,
+                    source=Source.AST,
+                    rule="high-complexity",
+                    message=f"Function '{func_name}' has high cyclomatic complexity ({complexity} branches)",
+                    suggestion="Consider breaking into smaller functions",
+                )
+            )
 
     return findings
 
@@ -412,8 +423,8 @@ def _count_complexity(node, branch_types: set, func_types: set) -> int:
 
 # ─── Check: Too Many Arguments ────────────────────────────────────────────
 
-def check_too_many_args(tree, source_bytes: bytes, config: LanguageConfig,
-                        filepath: str) -> list[Finding]:
+
+def check_too_many_args(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Flag functions with more than 7 parameters."""
     if not config.function_node_types:
         return []
@@ -432,24 +443,26 @@ def check_too_many_args(tree, source_bytes: bytes, config: LanguageConfig,
         real_params = [(n, l) for n, l in params if n not in ("self", "cls")]
 
         if len(real_params) > 7:
-            findings.append(Finding(
-                file=filepath,
-                line=_node_line(node),
-                severity=Severity.INFO,
-                category=Category.STYLE,
-                source=Source.AST,
-                rule="too-many-args",
-                message=f"Function '{func_name}' has {len(real_params)} arguments",
-                suggestion="Consider using a dataclass or config object to group parameters",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=_node_line(node),
+                    severity=Severity.INFO,
+                    category=Category.STYLE,
+                    source=Source.AST,
+                    rule="too-many-args",
+                    message=f"Function '{func_name}' has {len(real_params)} arguments",
+                    suggestion="Consider using a dataclass or config object to group parameters",
+                )
+            )
 
     return findings
 
 
 # ─── Check: Mutable Default Arguments ─────────────────────────────────────
 
-def check_mutable_defaults(tree, source_bytes: bytes, config: LanguageConfig,
-                           filepath: str) -> list[Finding]:
+
+def check_mutable_defaults(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Detect mutable default parameter values (list/dict/set literals)."""
     if not config.default_value_node_types or not config.function_node_types:
         return []
@@ -464,24 +477,25 @@ def check_mutable_defaults(tree, source_bytes: bytes, config: LanguageConfig,
 
         func_name = _get_function_name(node, source_bytes)
         if _has_mutable_default(node, mutable_types, config):
-            findings.append(Finding(
-                file=filepath,
-                line=_node_line(node),
-                severity=Severity.WARNING,
-                category=Category.BUG,
-                source=Source.AST,
-                rule="mutable-default",
-                message=f"Mutable default argument in '{func_name}' — shared across all calls",
-                suggestion="Use None as default and create inside function body",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=_node_line(node),
+                    severity=Severity.WARNING,
+                    category=Category.BUG,
+                    source=Source.AST,
+                    rule="mutable-default",
+                    message=f"Mutable default argument in '{func_name}' — shared across all calls",
+                    suggestion="Use None as default and create inside function body",
+                )
+            )
 
     return findings
 
 
-def _has_mutable_default(func_node, mutable_types: set,
-                         config: LanguageConfig) -> bool:
+def _has_mutable_default(func_node, mutable_types: set, config: LanguageConfig) -> bool:
     """Check if any parameter of a function has a mutable default value."""
-    param_types = set(config.parameter_node_types)
+    _param_types = set(config.parameter_node_types)
 
     for child in _walk_tree(func_node):
         # Look for default_parameter / typed_default_parameter nodes
@@ -500,6 +514,7 @@ def _has_mutable_default(func_node, mutable_types: set,
 
 # ─── Helpers ──────────────────────────────────────────────────────────────
 
+
 def _get_function_name(node, source_bytes: bytes) -> str:
     """Extract function name from a function node."""
     name_node = node.child_by_field_name("name")
@@ -513,8 +528,7 @@ def _get_function_name(node, source_bytes: bytes) -> str:
     return "<anonymous>"
 
 
-def _get_parameter_names(node, source_bytes: bytes,
-                         config: LanguageConfig) -> list[tuple[str, int]]:
+def _get_parameter_names(node, source_bytes: bytes, config: LanguageConfig) -> list[tuple[str, int]]:
     """Extract (param_name, line_number) pairs from a function's parameter list."""
     params = []
     param_list_types = set(config.parameter_node_types)
@@ -529,19 +543,25 @@ def _get_parameter_names(node, source_bytes: bytes,
             if param.type == "identifier":
                 parent_type = param.parent.type if param.parent else ""
                 if parent_type in (
-                    "parameters", "formal_parameters", "parameter_list",
-                    "typed_parameter", "default_parameter",
-                    "typed_default_parameter", "parameter",
-                    "formal_parameter", "required_parameter",
+                    "parameters",
+                    "formal_parameters",
+                    "parameter_list",
+                    "typed_parameter",
+                    "default_parameter",
+                    "typed_default_parameter",
+                    "parameter",
+                    "formal_parameter",
+                    "required_parameter",
                     # Also handle the case where identifier is the name field
                 ):
                     name = _get_node_text(param, source_bytes)
                     # Avoid grabbing type annotations as parameter names
-                    if param.parent and param.parent.type in ("typed_parameter", "typed_default_parameter"):
-                        name_field = param.parent.child_by_field_name("name")
-                        if name_field and param.id == name_field.id:
-                            params.append((name, _node_line(param)))
-                    elif param.parent and param.parent.type in ("parameter", "formal_parameter", "required_parameter"):
+                    if (
+                        param.parent
+                        and param.parent.type in ("typed_parameter", "typed_default_parameter")
+                        or param.parent
+                        and param.parent.type in ("parameter", "formal_parameter", "required_parameter")
+                    ):
                         name_field = param.parent.child_by_field_name("name")
                         if name_field and param.id == name_field.id:
                             params.append((name, _node_line(param)))
@@ -569,8 +589,7 @@ ALL_CHECKS = [
 ]
 
 
-def run_tree_sitter_checks(content: str, filepath: str,
-                           language: str) -> list[Finding]:
+def run_tree_sitter_checks(content: str, filepath: str, language: str) -> list[Finding]:
     """Run all tree-sitter AST checks. Returns [] if tree-sitter not installed."""
     config = get_config(language)
     if config is None:

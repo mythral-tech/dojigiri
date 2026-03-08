@@ -13,15 +13,14 @@ import stat
 import sys
 from pathlib import Path
 
-from .bundling import is_bundled, get_exe_path
-
+from .bundling import get_exe_path, is_bundled
 
 HOOK_MARKER = "# doji-managed-hook"
 
 # Shell metacharacters that must never appear unquoted in a hook script.
 # Even with quoting, some characters (backtick, $, !) can break out of
 # single quotes in certain shells, so we reject paths containing them.
-_SHELL_UNSAFE_RE = re.compile(r'[`$!\\]')
+_SHELL_UNSAFE_RE = re.compile(r"[`$!\\]")
 
 
 def _shell_quote(s: str) -> str:
@@ -138,8 +137,7 @@ def install_hook(root: Path, force: bool = False) -> str:
             return f"Updated doji pre-commit hook at {hook}"
         elif not force:
             raise FileExistsError(
-                f"Pre-commit hook already exists at {hook} (not managed by dojigiri). "
-                "Use --force to overwrite."
+                f"Pre-commit hook already exists at {hook} (not managed by dojigiri). Use --force to overwrite."
             )
         # force=True: overwrite foreign hook
 
@@ -173,8 +171,7 @@ def uninstall_hook(root: Path) -> str:
 
     if not _is_doji_hook(hook):
         raise PermissionError(
-            "Pre-commit hook exists but was not installed by dojigiri. "
-            "Refusing to remove a foreign hook."
+            "Pre-commit hook exists but was not installed by dojigiri. Refusing to remove a foreign hook."
         )
 
     hook.unlink()

@@ -14,11 +14,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from .semantic.explain import ExplainSection, FileExplanation
     from .types import (
-        ScanReport, Finding, FixReport,
-        ProjectAnalysis, CrossFileFinding,
+        CrossFileFinding,
+        Finding,
+        FixReport,
+        ProjectAnalysis,
+        ScanReport,
     )
-    from .semantic.explain import FileExplanation, ExplainSection
 
 from .types import Severity
 
@@ -34,9 +37,10 @@ _SEVERITY_DISPLAY = [Severity.CRITICAL, Severity.WARNING, Severity.INFO]
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 
+
 def _finding_line(f: Finding) -> str:
     """Format a single finding as one concise line."""
-    src = f.source.value if hasattr(f, 'source') else "static"
+    src = f.source.value if hasattr(f, "source") else "static"
     line = f"  {f.file}:{f.line} [{src}] [{f.rule}] {f.message}"
     if f.suggestion:
         line += f"\n    -> {f.suggestion}"
@@ -73,6 +77,7 @@ def _normalize_graph_nodes(nodes_raw: dict | list) -> list[dict]:
 
 
 # ─── Scan report ──────────────────────────────────────────────────────
+
 
 def format_scan_report(report: ScanReport, max_findings: int = _MAX_FINDINGS) -> str:
     """Format a ScanReport into concise AI-readable text."""
@@ -112,8 +117,12 @@ def format_scan_report(report: ScanReport, max_findings: int = _MAX_FINDINGS) ->
 
 # ─── Single file findings ────────────────────────────────────────────
 
+
 def format_file_findings(
-    filepath: str, language: str, lines: int, findings: list[Finding],
+    filepath: str,
+    language: str,
+    lines: int,
+    findings: list[Finding],
 ) -> str:
     """Format findings for a single file scan."""
     parts: list[str] = []
@@ -139,6 +148,7 @@ def format_file_findings(
 
 
 # ─── Fix report ──────────────────────────────────────────────────────
+
 
 def format_fix_report(report: FixReport) -> str:
     """Format a FixReport showing before/after for each fix."""
@@ -172,6 +182,7 @@ def format_fix_report(report: FixReport) -> str:
 
 # ─── Explanation ─────────────────────────────────────────────────────
 
+
 def format_explanation(explanation: FileExplanation) -> str:
     """Format a FileExplanation into concise text."""
     parts: list[str] = []
@@ -197,6 +208,7 @@ def format_explanation(explanation: FileExplanation) -> str:
 
 
 # ─── Project analysis ────────────────────────────────────────────────
+
 
 def format_project_analysis(analysis: ProjectAnalysis) -> str:
     """Format a ProjectAnalysis into concise text."""

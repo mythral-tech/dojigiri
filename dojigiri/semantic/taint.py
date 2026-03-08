@@ -18,12 +18,12 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from ..types import Finding, Severity, Category, Source
-from .lang_config import LanguageConfig
+from ..types import Category, Finding, Severity, Source
 from .core import FileSemantics
-
+from .lang_config import LanguageConfig
 
 # ─── Data structures ─────────────────────────────────────────────────
+
 
 @dataclass
 class TaintSource:
@@ -49,6 +49,7 @@ class TaintPath:
 
 # ─── Analysis ────────────────────────────────────────────────────────
 
+
 def _matches_pattern(text: str, pattern: str) -> bool:
     """Check if text contains the taint pattern (simple substring match)."""
     return pattern in text
@@ -72,11 +73,13 @@ def _find_taint_sources(
         rhs = asgn.value_text
         for pattern, kind in config.taint_source_patterns:
             if _matches_pattern(rhs, pattern):
-                sources.append(TaintSource(
-                    variable=asgn.name,
-                    line=asgn.line,
-                    kind=kind,
-                ))
+                sources.append(
+                    TaintSource(
+                        variable=asgn.name,
+                        line=asgn.line,
+                        kind=kind,
+                    )
+                )
                 break
 
     return sources
@@ -92,9 +95,7 @@ def _propagate_taint(
 
     Returns: {tainted_var: [(source_var, line), ...]} chain.
     """
-    tainted: dict[str, list[tuple[str, int]]] = {
-        name: [] for name in initial_tainted
-    }
+    tainted: dict[str, list[tuple[str, int]]] = {name: [] for name in initial_tainted}
 
     # Propagation with sanitization: if RHS contains a tainted variable, LHS
     # becomes tainted — UNLESS the RHS passes through a sanitizer, in which
@@ -103,8 +104,7 @@ def _propagate_taint(
     # be in source order in the semantics list).
     # Iterate until fixed-point.
     scoped_assignments = sorted(
-        [a for a in semantics.assignments
-         if a.scope_id in func_scope_ids and not a.is_parameter],
+        [a for a in semantics.assignments if a.scope_id in func_scope_ids and not a.is_parameter],
         key=lambda a: a.line,
     )
     changed = True
@@ -119,10 +119,7 @@ def _propagate_taint(
             rhs = asgn.value_text
 
             # Check if RHS passes through a sanitizer
-            is_sanitized = any(
-                sanitizer in rhs
-                for sanitizer in config.taint_sanitizer_patterns
-            )
+            is_sanitized = any(sanitizer in rhs for sanitizer in config.taint_sanitizer_patterns)
 
             if is_sanitized:
                 # Sanitizer clears taint — remove from tainted set
@@ -137,7 +134,7 @@ def _propagate_taint(
 
             for tainted_name in list(tainted.keys()):
                 # Check if tainted name appears in RHS
-                if re.search(r'\b' + re.escape(tainted_name) + r'\b', rhs):
+                if re.search(r"\b" + re.escape(tainted_name) + r"\b", rhs):
                     tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
                     changed = True
                     break
@@ -171,13 +168,15 @@ def _find_taint_sinks(
                 if 0 <= line_idx < len(lines):
                     line_text = lines[line_idx]
                     for tvar in tainted_vars:
-                        if re.search(r'\b' + re.escape(tvar) + r'\b', line_text):
-                            sinks.append(TaintSink(
-                                variable=tvar,
-                                line=call.line,
-                                kind=kind,
-                                function_name=call_text,
-                            ))
+                        if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
+                            sinks.append(
+                                TaintSink(
+                                    variable=tvar,
+                                    line=call.line,
+                                    kind=kind,
+                                    function_name=call_text,
+                                )
+                            )
                             break
                 break
 
@@ -215,8 +214,11 @@ def _is_sanitized(
 
 
 def _process_assignment_taint(
-    asgn, config: LanguageConfig, current_taint: set[str],
-    source_vars: set[str] | None = None, source_lines: dict[str, int] | None = None,
+    asgn,
+    config: LanguageConfig,
+    current_taint: set[str],
+    source_vars: set[str] | None = None,
+    source_lines: dict[str, int] | None = None,
 ) -> None:
     """Process a single assignment for taint propagation/sanitization."""
     rhs = asgn.value_text
@@ -231,7 +233,7 @@ def _process_assignment_taint(
             break
     else:
         for tvar in list(current_taint):
-            if re.search(r'\b' + re.escape(tvar) + r'\b', rhs):
+            if re.search(r"\b" + re.escape(tvar) + r"\b", rhs):
                 current_taint.add(asgn.name)
                 break
 
@@ -242,8 +244,11 @@ def _process_assignment_taint(
 
 
 def _process_call_taint(
-    call, config: LanguageConfig, current_taint: set[str],
-    line_idx: int, lines: list[str],
+    call,
+    config: LanguageConfig,
+    current_taint: set[str],
+    line_idx: int,
+    lines: list[str],
 ) -> None:
     """Process a single call for sanitizer detection."""
     call_text = call.name
@@ -254,14 +259,18 @@ def _process_call_taint(
             if 0 <= line_idx < len(lines):
                 line_text = lines[line_idx]
                 for tvar in list(current_taint):
-                    if re.search(r'\b' + re.escape(tvar) + r'\b', line_text):
+                    if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
                         current_taint.discard(tvar)
 
 
 def _update_stmt_taint(
-    stmt, semantics: FileSemantics, config: LanguageConfig,
-    current_taint: set[str], lines: list[str],
-    source_vars: set[str] | None = None, source_lines: dict[str, int] | None = None,
+    stmt,
+    semantics: FileSemantics,
+    config: LanguageConfig,
+    current_taint: set[str],
+    lines: list[str],
+    source_vars: set[str] | None = None,
+    source_lines: dict[str, int] | None = None,
 ) -> None:
     """Update current_taint in-place for a single CFG statement.
 
@@ -271,7 +280,7 @@ def _update_stmt_taint(
     asgn_idxs = []
     if stmt.assignment_idx is not None:
         asgn_idxs.append(stmt.assignment_idx)
-    asgn_idxs.extend(getattr(stmt, 'extra_assignment_idxs', []))
+    asgn_idxs.extend(getattr(stmt, "extra_assignment_idxs", []))
 
     for aidx in asgn_idxs:
         asgn = semantics.assignments[aidx]
@@ -281,7 +290,7 @@ def _update_stmt_taint(
     call_idxs = []
     if stmt.call_idx is not None:
         call_idxs.append(stmt.call_idx)
-    call_idxs.extend(getattr(stmt, 'extra_call_idxs', []))
+    call_idxs.extend(getattr(stmt, "extra_call_idxs", []))
 
     line_idx = stmt.line - 1
     for cidx in call_idxs:
@@ -308,6 +317,7 @@ def _get_all_children(sid: int, scope_children: dict[int, set[int]]) -> set[int]
 
 
 # ─── Entry point ─────────────────────────────────────────────────────
+
 
 def analyze_taint(
     semantics: FileSemantics,
@@ -386,28 +396,31 @@ def analyze_taint(
                 chain_names = [c[0] for c in chain]
                 chain_desc = f" (through: {' → '.join(chain_names)})"
 
-            findings.append(Finding(
-                file=filepath,
-                line=sink.line,
-                severity=Severity.WARNING,
-                category=Category.SECURITY,
-                source=Source.AST,
-                rule="taint-flow",
-                message=(
-                    f"Tainted data from '{source.variable}' ({source.kind}, line {source.line}) "
-                    f"reaches sink '{sink.function_name}' ({sink.kind}){chain_desc} — "
-                    "verify sanitization"
-                ),
-                suggestion=(
-                    f"Sanitize '{sink.variable}' before passing to '{sink.function_name}', "
-                    "or use parameterized queries/safe APIs"
-                ),
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=sink.line,
+                    severity=Severity.WARNING,
+                    category=Category.SECURITY,
+                    source=Source.AST,
+                    rule="taint-flow",
+                    message=(
+                        f"Tainted data from '{source.variable}' ({source.kind}, line {source.line}) "
+                        f"reaches sink '{sink.function_name}' ({sink.kind}){chain_desc} — "
+                        "verify sanitization"
+                    ),
+                    suggestion=(
+                        f"Sanitize '{sink.variable}' before passing to '{sink.function_name}', "
+                        "or use parameterized queries/safe APIs"
+                    ),
+                )
+            )
 
     return findings
 
 
 # ─── Path-sensitive taint analysis (v0.9.0) ──────────────────────────
+
 
 def analyze_taint_pathsensitive(
     semantics: FileSemantics,
@@ -480,8 +493,13 @@ def analyze_taint_pathsensitive(
 
                 for stmt in block.statements:
                     _update_stmt_taint(
-                        stmt, semantics, config, current_taint, lines,
-                        source_vars=source_vars, source_lines=source_lines,
+                        stmt,
+                        semantics,
+                        config,
+                        current_taint,
+                        lines,
+                        source_vars=source_vars,
+                        source_lines=source_lines,
                     )
 
                 old_out = block_taint_out[block_id]
@@ -516,7 +534,7 @@ def analyze_taint_pathsensitive(
                 sink_call_idxs = []
                 if stmt.call_idx is not None:
                     sink_call_idxs.append(stmt.call_idx)
-                sink_call_idxs.extend(getattr(stmt, 'extra_call_idxs', []))
+                sink_call_idxs.extend(getattr(stmt, "extra_call_idxs", []))
 
                 for _cidx in sink_call_idxs:
                     call = semantics.function_calls[_cidx]
@@ -529,7 +547,7 @@ def analyze_taint_pathsensitive(
                             if 0 <= line_idx < len(lines):
                                 line_text = lines[line_idx]
                                 for tvar in current_taint:
-                                    if re.search(r'\b' + re.escape(tvar) + r'\b', line_text):
+                                    if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
                                         src_line = source_lines.get(tvar, 0)
                                         key = (src_line, stmt.line)
                                         if key not in seen:
@@ -547,25 +565,27 @@ def analyze_taint_pathsensitive(
                                             src_kind = source_info.kind if source_info else "unknown"
                                             src_var = source_info.variable if source_info else tvar
 
-                                            findings.append(Finding(
-                                                file=filepath,
-                                                line=stmt.line,
-                                                severity=Severity.WARNING,
-                                                category=Category.SECURITY,
-                                                source=Source.AST,
-                                                rule="taint-flow",
-                                                message=(
-                                                    f"Tainted data from '{src_var}' "
-                                                    f"({src_kind}, line {src_line}) "
-                                                    f"reaches sink '{call_text}' ({sink_kind}) "
-                                                    "— path-sensitive analysis"
-                                                ),
-                                                suggestion=(
-                                                    f"Sanitize '{tvar}' before passing to "
-                                                    f"'{call_text}', or use parameterized "
-                                                    "queries/safe APIs"
-                                                ),
-                                            ))
+                                            findings.append(
+                                                Finding(
+                                                    file=filepath,
+                                                    line=stmt.line,
+                                                    severity=Severity.WARNING,
+                                                    category=Category.SECURITY,
+                                                    source=Source.AST,
+                                                    rule="taint-flow",
+                                                    message=(
+                                                        f"Tainted data from '{src_var}' "
+                                                        f"({src_kind}, line {src_line}) "
+                                                        f"reaches sink '{call_text}' ({sink_kind}) "
+                                                        "— path-sensitive analysis"
+                                                    ),
+                                                    suggestion=(
+                                                        f"Sanitize '{tvar}' before passing to "
+                                                        f"'{call_text}', or use parameterized "
+                                                        "queries/safe APIs"
+                                                    ),
+                                                )
+                                            )
                                         break
                             break
 

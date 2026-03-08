@@ -14,11 +14,11 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 
-from ..types import Finding, Severity, Category, Source
+from ..types import Category, Finding, Severity, Source
 from .core import FileSemantics, FunctionDef
 
-
 # ─── Check: God Class ────────────────────────────────────────────────
+
 
 def check_god_class(
     semantics: FileSemantics,
@@ -37,21 +37,24 @@ def check_god_class(
             reasons.append(f"{len(cdef.attribute_names)} attributes (>{attribute_threshold})")
 
         if reasons:
-            findings.append(Finding(
-                file=filepath,
-                line=cdef.line,
-                severity=Severity.INFO,
-                category=Category.STYLE,
-                source=Source.AST,
-                rule="god-class",
-                message=f"Class '{cdef.name}' is overly large: {', '.join(reasons)}",
-                suggestion=f"Consider splitting '{cdef.name}' into smaller, focused classes",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=cdef.line,
+                    severity=Severity.INFO,
+                    category=Category.STYLE,
+                    source=Source.AST,
+                    rule="god-class",
+                    message=f"Class '{cdef.name}' is overly large: {', '.join(reasons)}",
+                    suggestion=f"Consider splitting '{cdef.name}' into smaller, focused classes",
+                )
+            )
 
     return findings
 
 
 # ─── Check: Feature Envy ─────────────────────────────────────────────
+
 
 def check_feature_envy(
     semantics: FileSemantics,
@@ -99,29 +102,31 @@ def check_feature_envy(
                 else:
                     external_refs += 1
 
-        if (external_refs > internal_refs * external_ratio
-                and external_refs >= min_external):
-            findings.append(Finding(
-                file=filepath,
-                line=fdef.line,
-                severity=Severity.INFO,
-                category=Category.STYLE,
-                source=Source.AST,
-                rule="feature-envy",
-                message=(
-                    f"Method '{fdef.name}' in '{fdef.parent_class}' accesses "
-                    f"{external_refs} external vs {internal_refs} internal attributes"
-                ),
-                suggestion=(
-                    f"Consider moving '{fdef.name}' to the class it references most, "
-                    "or extract the external access into a helper"
-                ),
-            ))
+        if external_refs > internal_refs * external_ratio and external_refs >= min_external:
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=fdef.line,
+                    severity=Severity.INFO,
+                    category=Category.STYLE,
+                    source=Source.AST,
+                    rule="feature-envy",
+                    message=(
+                        f"Method '{fdef.name}' in '{fdef.parent_class}' accesses "
+                        f"{external_refs} external vs {internal_refs} internal attributes"
+                    ),
+                    suggestion=(
+                        f"Consider moving '{fdef.name}' to the class it references most, "
+                        "or extract the external access into a helper"
+                    ),
+                )
+            )
 
     return findings
 
 
 # ─── Check: Long Method ──────────────────────────────────────────────
+
 
 def check_long_method(
     semantics: FileSemantics,
@@ -136,21 +141,24 @@ def check_long_method(
         if length > threshold:
             label = "Method" if fdef.parent_class else "Function"
             name = fdef.qualified_name.split(":")[-1] if ":" in fdef.qualified_name else fdef.qualified_name
-            findings.append(Finding(
-                file=filepath,
-                line=fdef.line,
-                severity=Severity.INFO,
-                category=Category.STYLE,
-                source=Source.AST,
-                rule="long-method",
-                message=f"{label} '{name}' is {length} lines long (>{threshold})",
-                suggestion=f"Consider extracting parts of '{fdef.name}' into smaller functions",
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=fdef.line,
+                    severity=Severity.INFO,
+                    category=Category.STYLE,
+                    source=Source.AST,
+                    rule="long-method",
+                    message=f"{label} '{name}' is {length} lines long (>{threshold})",
+                    suggestion=f"Consider extracting parts of '{fdef.name}' into smaller functions",
+                )
+            )
 
     return findings
 
 
 # ─── Check: Near-Duplicate Functions ─────────────────────────────────
+
 
 def _structural_hash(fdef: FunctionDef, semantics: FileSemantics) -> tuple | None:
     """Compute a structural signature for a function.
@@ -160,15 +168,9 @@ def _structural_hash(fdef: FunctionDef, semantics: FileSemantics) -> tuple | Non
     """
     # Count statements (rough: assignments + calls in this function's scope)
     assignments_in_func = [
-        a for a in semantics.assignments
-        if a.scope_id == fdef.scope_id or (
-            fdef.line <= a.line <= fdef.end_line
-        )
+        a for a in semantics.assignments if a.scope_id == fdef.scope_id or (fdef.line <= a.line <= fdef.end_line)
     ]
-    calls_in_func = [
-        c for c in semantics.function_calls
-        if fdef.line <= c.line <= fdef.end_line
-    ]
+    calls_in_func = [c for c in semantics.function_calls if fdef.line <= c.line <= fdef.end_line]
 
     stmt_count = len(assignments_in_func) + len(calls_in_func)
     if stmt_count < 10:
@@ -219,36 +221,44 @@ def check_near_duplicate_functions(
                 if file_a == file_b and func_a.line == func_b.line:
                     continue
 
-                pair_key = tuple(sorted([
-                    (file_a, func_a.line),
-                    (file_b, func_b.line),
-                ]))
+                pair_key = tuple(
+                    sorted(
+                        [
+                            (file_a, func_a.line),
+                            (file_b, func_b.line),
+                        ]
+                    )
+                )
                 if pair_key in seen_pairs:
                     continue
                 seen_pairs.add(pair_key)
 
-                findings.append(Finding(
-                    file=file_a,
-                    line=func_a.line,
-                    severity=Severity.INFO,
-                    category=Category.STYLE,
-                    source=Source.AST,
-                    rule="near-duplicate",
-                    message=(
-                        f"Function '{func_a.name}' is structurally similar to "
-                        f"'{func_b.name}' in {file_b}:{func_b.line}"
-                    ),
-                    suggestion="Consider extracting shared logic into a common function",
-                ))
+                findings.append(
+                    Finding(
+                        file=file_a,
+                        line=func_a.line,
+                        severity=Severity.INFO,
+                        category=Category.STYLE,
+                        source=Source.AST,
+                        rule="near-duplicate",
+                        message=(
+                            f"Function '{func_a.name}' is structurally similar to "
+                            f"'{func_b.name}' in {file_b}:{func_b.line}"
+                        ),
+                        suggestion="Consider extracting shared logic into a common function",
+                    )
+                )
 
     return findings
 
 
 # ─── Semantic Similarity (v1.0.0) ───────────────────────────────────
 
+
 @dataclass
 class SemanticSignature:
     """Normalized function signature — variable names stripped away."""
+
     param_count: int
     call_sequence: tuple[str, ...]  # sorted call names (with multiplicity)
     assignment_count: int
@@ -267,8 +277,7 @@ class SemanticSignature:
         if self.param_count == other.param_count:
             score += 0.1
         elif max(self.param_count, other.param_count) > 0:
-            score += 0.1 * (1.0 - abs(self.param_count - other.param_count) /
-                            max(self.param_count, other.param_count))
+            score += 0.1 * (1.0 - abs(self.param_count - other.param_count) / max(self.param_count, other.param_count))
 
         # Call sequence multiset Jaccard (weight: 0.4) — preserves multiplicity
         c1 = Counter(self.call_sequence)
@@ -312,13 +321,9 @@ def build_semantic_signature(
     """
     # Collect statements in this function
     assignments_in_func = [
-        a for a in semantics.assignments
-        if fdef.line <= a.line <= fdef.end_line and not a.is_parameter
+        a for a in semantics.assignments if fdef.line <= a.line <= fdef.end_line and not a.is_parameter
     ]
-    calls_in_func = [
-        c for c in semantics.function_calls
-        if fdef.line <= c.line <= fdef.end_line
-    ]
+    calls_in_func = [c for c in semantics.function_calls if fdef.line <= c.line <= fdef.end_line]
 
     stmt_count = len(assignments_in_func) + len(calls_in_func)
     if stmt_count < 5:
@@ -329,9 +334,9 @@ def build_semantic_signature(
 
     # Count block scopes within this function
     scope_count = sum(
-        1 for scope in semantics.scopes
-        if scope.start_line >= fdef.line and scope.end_line <= fdef.end_line
-        and scope.kind in ("block",)
+        1
+        for scope in semantics.scopes
+        if scope.start_line >= fdef.line and scope.end_line <= fdef.end_line and scope.kind in ("block",)
     )
 
     # Data flow hash: hash of (assignment_value_types, call_names)
@@ -350,6 +355,7 @@ def build_semantic_signature(
 @dataclass
 class ClonePair:
     """Structured result from semantic clone detection."""
+
     file_a: str
     func_a_name: str
     func_a_line: int
@@ -388,19 +394,29 @@ def find_semantic_clone_pairs(
 
             sim = sig_a.similarity(sig_b)
             if sim >= similarity_threshold:
-                pair_key = tuple(sorted([
-                    (file_a, func_a.line),
-                    (file_b, func_b.line),
-                ]))
+                pair_key = tuple(
+                    sorted(
+                        [
+                            (file_a, func_a.line),
+                            (file_b, func_b.line),
+                        ]
+                    )
+                )
                 if pair_key in seen:
                     continue
                 seen.add(pair_key)
 
-                pairs.append(ClonePair(
-                    file_a=file_a, func_a_name=func_a.name, func_a_line=func_a.line,
-                    file_b=file_b, func_b_name=func_b.name, func_b_line=func_b.line,
-                    similarity=sim,
-                ))
+                pairs.append(
+                    ClonePair(
+                        file_a=file_a,
+                        func_a_name=func_a.name,
+                        func_a_line=func_a.line,
+                        file_b=file_b,
+                        func_b_name=func_b.name,
+                        func_b_line=func_b.line,
+                        similarity=sim,
+                    )
+                )
 
     return pairs
 

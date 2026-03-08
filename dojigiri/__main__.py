@@ -11,26 +11,33 @@ Calls into: config.py, analyzer.py, detector.py, storage.py, report.py,
 Data in -> Data out: CLI args -> console output + saved reports
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys
 import time
 from pathlib import Path
+
 from . import __version__
 
 logger = logging.getLogger(__name__)
-from .types import Severity, Confidence
-from .bundling import is_bundled, get_exe_path
-from .config import (
-    get_api_key, get_llm_config, LANGUAGE_EXTENSIONS,
-    CLASSIFICATION_LEVELS, PROFILES,
-    load_project_config, compile_custom_rules,
-)
-from .analyzer import scan_quick, scan_deep, scan_diff, cost_estimate, filter_report, diff_reports
-from .discovery import detect_language
-from .detector import analyze_file_static
-from .storage import load_latest_report, load_baseline_report, list_reports
 from . import report as rpt
+from .analyzer import cost_estimate, diff_reports, filter_report, scan_deep, scan_diff, scan_quick
+from .bundling import get_exe_path, is_bundled
+from .config import (
+    CLASSIFICATION_LEVELS,
+    LANGUAGE_EXTENSIONS,
+    PROFILES,
+    compile_custom_rules,
+    get_api_key,
+    get_llm_config,
+    load_project_config,
+)
+from .detector import analyze_file_static
+from .discovery import detect_language
+from .storage import list_reports, load_baseline_report, load_latest_report
+from .types import Confidence, Severity
 
 SEVERITY_MAP = {"critical": Severity.CRITICAL, "warning": Severity.WARNING, "info": Severity.INFO}
 CONFIDENCE_MAP = {"high": Confidence.HIGH, "medium": Confidence.MEDIUM, "low": Confidence.LOW}
@@ -45,9 +52,11 @@ def _confirm_llm_usage(args) -> bool:
     """
     # Offline mode blocks all network LLM calls
     if getattr(args, "offline", False):
-        print("Error: --offline mode blocks all LLM/network calls. "
-              "Use --backend ollama for local models, or remove --offline.",
-              file=sys.stderr)
+        print(
+            "Error: --offline mode blocks all LLM/network calls. "
+            "Use --backend ollama for local models, or remove --offline.",
+            file=sys.stderr,
+        )
         return False
 
     # Local backends don't need confirmation — check by locality, not by name.
@@ -58,6 +67,7 @@ def _confirm_llm_usage(args) -> bool:
         return True
     if backend_type.lower() in ("openai", "openai-compatible") and base_url:
         from urllib.parse import urlparse
+
         parsed = urlparse(base_url)
         if parsed.hostname in ("localhost", "127.0.0.1", "::1"):
             return True
@@ -65,17 +75,19 @@ def _confirm_llm_usage(args) -> bool:
     if getattr(args, "accept_remote", False):
         return True
     if not sys.stdin.isatty():
-        print("Error: LLM features send code to an API. "
-              "Use --accept-remote to allow this in non-interactive mode.",
-              file=sys.stderr)
+        print(
+            "Error: LLM features send code to an API. Use --accept-remote to allow this in non-interactive mode.",
+            file=sys.stderr,
+        )
         return False
     print("Warning: This command will send code snippets to an LLM API for analysis.")
     try:
         response = input("Continue? [y/N] ").strip().lower()
     except (EOFError, KeyboardInterrupt):
-        print("\nError: No input available. "
-              "Use --accept-remote to allow LLM usage in non-interactive mode.",
-              file=sys.stderr)
+        print(
+            "\nError: No input available. Use --accept-remote to allow LLM usage in non-interactive mode.",
+            file=sys.stderr,
+        )
         return False
     return response in ("y", "yes")
 
@@ -87,8 +99,7 @@ def _apply_profile(args: argparse.Namespace) -> None:
         return
     profile = PROFILES.get(profile_name)
     if not profile:
-        print(f"Warning: unknown profile '{profile_name}'. Available: {', '.join(PROFILES.keys())}",
-              file=sys.stderr)
+        print(f"Warning: unknown profile '{profile_name}'. Available: {', '.join(PROFILES.keys())}", file=sys.stderr)
         return
 
     # Apply defaults only when CLI arg not explicitly set
@@ -137,7 +148,8 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 def cmd_scan(args: argparse.Namespace) -> int:
     """Run a code scan (quick or deep)."""
-    from .metrics import start_session, end_session, save_session
+    from .metrics import end_session, save_session, start_session
+
     session = start_session()
 
     _apply_profile(args)
@@ -163,18 +175,29 @@ def cmd_scan(args: argparse.Namespace) -> int:
         custom_rules = compile_custom_rules(project_config)
         # Warn if config suppresses security-relevant rules
         _SECURITY_RULES = {
-            "eval-usage", "exec-usage", "hardcoded-secret", "sql-injection",
-            "os-system", "shell-true", "pickle-unsafe", "yaml-unsafe",
-            "command-injection", "path-traversal", "insecure-crypto",
-            "insecure-deserialization", "insecure-http", "xss",
+            "eval-usage",
+            "exec-usage",
+            "hardcoded-secret",
+            "sql-injection",
+            "os-system",
+            "shell-true",
+            "pickle-unsafe",
+            "yaml-unsafe",
+            "command-injection",
+            "path-traversal",
+            "insecure-crypto",
+            "insecure-deserialization",
+            "insecure-http",
+            "xss",
         }
         suppressed = _SECURITY_RULES & set(project_config.get("ignore_rules", []))
         if suppressed:
-            print(f"Warning: .doji.toml is suppressing {len(suppressed)} security rule(s): "
-                  f"{', '.join(sorted(suppressed))}",
-                  file=sys.stderr)
-            print("  Use --no-config to override when scanning untrusted code.",
-                  file=sys.stderr)
+            print(
+                f"Warning: .doji.toml is suppressing {len(suppressed)} security rule(s): "
+                f"{', '.join(sorted(suppressed))}",
+                file=sys.stderr,
+            )
+            print("  Use --no-config to override when scanning untrusted code.", file=sys.stderr)
 
     use_cache = not args.no_cache
     output_format = getattr(args, "output", "text")
@@ -194,8 +217,10 @@ def cmd_scan(args: argparse.Namespace) -> int:
             # Diff mode: only scan changed lines vs git ref
             try:
                 report_obj, resolved_ref = scan_diff(
-                    root, base_ref=diff_base if diff_base != "" else None,
-                    language_filter=lang, custom_rules=custom_rules,
+                    root,
+                    base_ref=diff_base if diff_base != "" else None,
+                    language_filter=lang,
+                    custom_rules=custom_rules,
                 )
             except ValueError as e:
                 print(f"Error: {e}", file=sys.stderr)
@@ -210,9 +235,14 @@ def cmd_scan(args: argparse.Namespace) -> int:
                 workers = project_config.get("workers", 4)
             max_cost = getattr(args, "max_cost", None)
             try:
-                report_obj = scan_deep(root, language_filter=lang, use_cache=use_cache,
-                                       max_workers=workers, custom_rules=custom_rules,
-                                       max_cost=max_cost)
+                report_obj = scan_deep(
+                    root,
+                    language_filter=lang,
+                    use_cache=use_cache,
+                    max_workers=workers,
+                    custom_rules=custom_rules,
+                    max_cost=max_cost,
+                )
             except Exception as e:  # CLI boundary: catch-all for user-facing error
                 print(f"Error: {e}", file=sys.stderr)
                 return 1
@@ -223,8 +253,9 @@ def cmd_scan(args: argparse.Namespace) -> int:
             workers = getattr(args, "workers", None)
             if workers is None:
                 workers = project_config.get("workers", 4)
-            report_obj = scan_quick(root, language_filter=lang, use_cache=use_cache,
-                                    max_workers=workers, custom_rules=custom_rules)
+            report_obj = scan_quick(
+                root, language_filter=lang, use_cache=use_cache, max_workers=workers, custom_rules=custom_rules
+            )
     except KeyboardInterrupt:
         print("\n\nScan interrupted by user.", file=sys.stderr)
         print("Partial results may have been saved.", file=sys.stderr)
@@ -240,12 +271,12 @@ def cmd_scan(args: argparse.Namespace) -> int:
             report_obj = diff_reports(report_obj, baseline_dict)
         else:
             print(f"Warning: baseline '{baseline_arg}' not found, showing all findings", file=sys.stderr)
-    
+
     # Apply post-scan filters (CLI args override config file)
     ignore_rules = set(args.ignore.split(",")) if getattr(args, "ignore", None) else None
     if not ignore_rules and "ignore_rules" in project_config:
         ignore_rules = set(project_config["ignore_rules"])
-    
+
     min_severity = SEVERITY_MAP.get(getattr(args, "min_severity", None))  # type: ignore[arg-type]  # getattr returns str | None; dict.get accepts both
     if not min_severity and "min_severity" in project_config:
         min_severity = SEVERITY_MAP.get(project_config["min_severity"])
@@ -273,6 +304,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
         rpt.print_sarif(report_obj)
     elif output_format == "html":
         from .report_html import render_html
+
         html_content = render_html(
             report_obj,
             classification=classification,
@@ -286,6 +318,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
             print(html_content)
     elif output_format == "pdf":
         from .report_html import render_pdf
+
         output_file = getattr(args, "output_file", None) or "dojigiri-report.pdf"
         try:
             render_pdf(
@@ -372,9 +405,12 @@ def _run_llm_subcommand(
 
     try:
         from . import llm as _llm
+
         llm_func = getattr(_llm, llm_func_name)
         llm_result, tracker = llm_func(
-            content, str(filepath), lang,
+            content,
+            str(filepath),
+            lang,
             static_findings=static_findings,
             context_files=context_files,
             **extra_llm_kwargs,
@@ -420,7 +456,8 @@ def cmd_optimize(args: argparse.Namespace) -> int:
 
 def cmd_fix(args: argparse.Namespace) -> int:
     """Fix detected issues in code (deterministic + optional LLM)."""
-    from .metrics import start_session, end_session, save_session
+    from .metrics import end_session, save_session, start_session
+
     session = start_session()
 
     root = Path(args.path).resolve()
@@ -473,11 +510,11 @@ def cmd_fix(args: argparse.Namespace) -> int:
         if not _confirm_llm_usage(args):
             return 1
 
+    # Collect files to fix
+    from .discovery import collect_files_with_lang
     from .fixer import fix_file as fixer_fix_file
     from .types import FixReport
 
-    # Collect files to fix
-    from .discovery import collect_files_with_lang
     files_to_fix = collect_files_with_lang(root, language_filter=lang)
 
     if not files_to_fix:
@@ -495,6 +532,7 @@ def cmd_fix(args: argparse.Namespace) -> int:
     cost_tracker = None
     if use_llm:
         from .llm import CostTracker
+
         cost_tracker = CostTracker()
 
     all_fixes = []
@@ -524,12 +562,19 @@ def cmd_fix(args: argparse.Namespace) -> int:
             continue
 
         report = fixer_fix_file(
-            str(filepath), content, file_lang, findings,
-            use_llm=use_llm, dry_run=dry_run,
-            create_backup=create_backup, rules=rules,
+            str(filepath),
+            content,
+            file_lang,
+            findings,
+            use_llm=use_llm,
+            dry_run=dry_run,
+            create_backup=create_backup,
+            rules=rules,
             cost_tracker=cost_tracker,
-            verify=verify, custom_rules=custom_rules,
-            semantics=file_semantics, type_map=file_type_map,
+            verify=verify,
+            custom_rules=custom_rules,
+            semantics=file_semantics,
+            type_map=file_type_map,
         )
 
         all_fixes.extend(report.fixes)
@@ -603,6 +648,7 @@ def cmd_analyze(args: argparse.Namespace) -> int:
 
     try:
         from .graph.project import analyze_project
+
         analysis = analyze_project(
             str(root),
             language_filter=lang,
@@ -736,8 +782,11 @@ def cmd_explain(args: argparse.Namespace) -> int:
 
     # Generate explanation
     from .semantic.explain import explain_file
+
     explanation = explain_file(
-        content, str(filepath), lang,
+        content,
+        str(filepath),
+        lang,
         semantics=result.semantics,
         findings=result.findings,
         type_map=result.type_map,
@@ -755,10 +804,13 @@ def cmd_explain(args: argparse.Namespace) -> int:
             if not api_key:
                 print("\n  --deep requires ANTHROPIC_API_KEY. Showing offline analysis only.", file=sys.stderr)
             else:
-                from .llm import explain_file_llm, CostTracker
+                from .llm import CostTracker, explain_file_llm
+
                 tracker = CostTracker()
                 llm_result, tracker = explain_file_llm(
-                    content, str(filepath), lang,
+                    content,
+                    str(filepath),
+                    lang,
                     static_findings=result.findings,
                     cost_tracker=tracker,
                 )
@@ -811,6 +863,7 @@ def cmd_setup(args: argparse.Namespace) -> int:
     anthropic_installed = False
     try:
         import anthropic  # noqa: F401  # doji:ignore(unused-import)
+
         anthropic_installed = True
     except ImportError as e:
         logger.debug("Failed to import anthropic: %s", e)
@@ -939,15 +992,13 @@ def cmd_privacy(args: argparse.Namespace) -> int:
 def cmd_rules(args: argparse.Namespace) -> int:
     """List all available rules."""
     import json
+
     from .languages import list_all_rules
 
     rules = list_all_rules()
     if args.lang:
         lang_filter = args.lang.lower()
-        rules = [
-            r for r in rules
-            if "all" in r["languages"] or lang_filter in r["languages"]
-        ]
+        rules = [r for r in rules if "all" in r["languages"] or lang_filter in r["languages"]]
 
     if args.output == "json":
         print(json.dumps(rules, indent=2))
@@ -976,6 +1027,7 @@ def cmd_rules(args: argparse.Namespace) -> int:
 
     # Summary
     from collections import Counter
+
     sev_counts = Counter(r["severity"] for r in rules)
     sev_order = {"critical": 0, "warning": 1, "info": 2}
     parts = [f"{count} {sev}" for sev, count in sorted(sev_counts.items(), key=lambda x: sev_order.get(x[0], 9))]
@@ -985,7 +1037,7 @@ def cmd_rules(args: argparse.Namespace) -> int:
 
 def cmd_stats(args) -> int:
     """Show metrics history and trend analysis."""
-    from .metrics import load_history, format_history_summary
+    from .metrics import format_history_summary, load_history
 
     days = getattr(args, "days", 30)
     limit = getattr(args, "limit", 10)
@@ -1000,8 +1052,9 @@ def main() -> None:
         description="Dojigiri — static analysis engine",
     )
     parser.add_argument("--version", action="version", version=f"dojigiri {__version__}")
-    parser.add_argument("--offline", action="store_true",
-                        help="Offline mode — block all network/LLM calls (static analysis only)")
+    parser.add_argument(
+        "--offline", action="store_true", help="Offline mode — block all network/LLM calls (static analysis only)"
+    )
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # init
@@ -1012,130 +1065,148 @@ def main() -> None:
     p_scan = subparsers.add_parser("scan", help="Scan code for issues")
     p_scan.add_argument("path", help="File or directory to scan")
     p_scan.add_argument("--deep", action="store_true", help="Deep scan with Claude API (paid)")
-    p_scan.add_argument("--diff", nargs="?", const="", default=None, metavar="REF",
-                         help="Only scan lines changed vs git ref (default: main/master)")
+    p_scan.add_argument(
+        "--diff",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="REF",
+        help="Only scan lines changed vs git ref (default: main/master)",
+    )
     p_scan.add_argument("--lang", help="Filter by language (e.g., python, javascript)")
     p_scan.add_argument("--no-cache", action="store_true", help="Skip file hash cache (rescan all files)")
-    p_scan.add_argument("--no-config", action="store_true", help="Ignore .doji.toml project config (use when scanning untrusted code)")
+    p_scan.add_argument(
+        "--no-config", action="store_true", help="Ignore .doji.toml project config (use when scanning untrusted code)"
+    )
     p_scan.add_argument("--ignore", help="Comma-separated rule names to suppress (e.g., todo-marker,long-line)")
-    p_scan.add_argument("--min-severity", choices=["critical", "warning", "info"],
-                         help="Minimum severity to display (filters lower)")
-    p_scan.add_argument("--min-confidence", choices=["high", "medium", "low"],
-                         default=None,
-                         help="Minimum LLM confidence to display (default: show all)")
-    p_scan.add_argument("--output", choices=["text", "json", "sarif", "html", "pdf"], default="text",
-                         help="Output format: text, json, sarif, html, pdf")
-    p_scan.add_argument("--output-file", metavar="PATH",
-                         help="Write HTML/PDF output to file instead of stdout")
-    p_scan.add_argument("--project-name", metavar="NAME",
-                         help="Project name for HTML/PDF reports")
-    p_scan.add_argument("--classification", choices=CLASSIFICATION_LEVELS, default=None,
-                         help="Classification marking for reports (e.g., CUI, SECRET)")
-    p_scan.add_argument("--profile", choices=list(PROFILES.keys()), default=None,
-                         help="Compliance profile preset (owasp, dod, ci)")
-    p_scan.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None,
-                         help="LLM backend for deep scans")
+    p_scan.add_argument(
+        "--min-severity", choices=["critical", "warning", "info"], help="Minimum severity to display (filters lower)"
+    )
+    p_scan.add_argument(
+        "--min-confidence",
+        choices=["high", "medium", "low"],
+        default=None,
+        help="Minimum LLM confidence to display (default: show all)",
+    )
+    p_scan.add_argument(
+        "--output",
+        choices=["text", "json", "sarif", "html", "pdf"],
+        default="text",
+        help="Output format: text, json, sarif, html, pdf",
+    )
+    p_scan.add_argument("--output-file", metavar="PATH", help="Write HTML/PDF output to file instead of stdout")
+    p_scan.add_argument("--project-name", metavar="NAME", help="Project name for HTML/PDF reports")
+    p_scan.add_argument(
+        "--classification",
+        choices=CLASSIFICATION_LEVELS,
+        default=None,
+        help="Classification marking for reports (e.g., CUI, SECRET)",
+    )
+    p_scan.add_argument(
+        "--profile", choices=list(PROFILES.keys()), default=None, help="Compliance profile preset (owasp, dod, ci)"
+    )
+    p_scan.add_argument(
+        "--backend", choices=["anthropic", "ollama", "openai"], default=None, help="LLM backend for deep scans"
+    )
     p_scan.add_argument("--model", default=None, help="LLM model name")
     p_scan.add_argument("--base-url", default=None, help="LLM API base URL (for openai-compatible)")
     p_scan.add_argument("--baseline", help="Compare against baseline (use 'latest' or report path)")
-    p_scan.add_argument("--workers", type=int, default=None, metavar="N",
-                         help="Number of parallel workers for quick scan (default: 4 or from .doji.toml, use 1 for sequential)")
-    p_scan.add_argument("--max-cost", type=float, default=None, metavar="USD",
-                         help="Maximum LLM cost in USD before pausing (deep scan only)")
-    p_scan.add_argument("--accept-remote", action="store_true",
-                         help="Skip LLM data-sharing confirmation (for CI/CD)")
+    p_scan.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Number of parallel workers for quick scan (default: 4 or from .doji.toml, use 1 for sequential)",
+    )
+    p_scan.add_argument(
+        "--max-cost",
+        type=float,
+        default=None,
+        metavar="USD",
+        help="Maximum LLM cost in USD before pausing (deep scan only)",
+    )
+    p_scan.add_argument("--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_scan.set_defaults(func=cmd_scan)
 
     # debug
     p_debug = subparsers.add_parser("debug", help="Debug a specific file (uses Claude API)")
     p_debug.add_argument("file", help="File to debug")
     p_debug.add_argument("--error", "-e", help="Error message or traceback for context")
-    p_debug.add_argument("--context", "-c",
-                         help="Related files for multi-file debugging: comma-separated paths or 'auto' (Python only)")
-    p_debug.add_argument("--output", choices=["text", "json"], default="text",
-                         help="Output format (default: text)")
-    p_debug.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None,
-                         help="LLM backend")
+    p_debug.add_argument(
+        "--context", "-c", help="Related files for multi-file debugging: comma-separated paths or 'auto' (Python only)"
+    )
+    p_debug.add_argument("--output", choices=["text", "json"], default="text", help="Output format (default: text)")
+    p_debug.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None, help="LLM backend")
     p_debug.add_argument("--model", default=None, help="LLM model name")
     p_debug.add_argument("--base-url", default=None, help="LLM API base URL")
-    p_debug.add_argument("--accept-remote", action="store_true",
-                         help="Skip LLM data-sharing confirmation (for CI/CD)")
+    p_debug.add_argument("--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_debug.set_defaults(func=cmd_debug)
 
     # optimize
     p_opt = subparsers.add_parser("optimize", help="Get optimization suggestions (uses Claude API)")
     p_opt.add_argument("file", help="File to optimize")
-    p_opt.add_argument("--context", "-c",
-                       help="Related files for context: comma-separated paths or 'auto'")
-    p_opt.add_argument("--output", choices=["text", "json"], default="text",
-                       help="Output format (default: text)")
-    p_opt.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None,
-                       help="LLM backend")
+    p_opt.add_argument("--context", "-c", help="Related files for context: comma-separated paths or 'auto'")
+    p_opt.add_argument("--output", choices=["text", "json"], default="text", help="Output format (default: text)")
+    p_opt.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None, help="LLM backend")
     p_opt.add_argument("--model", default=None, help="LLM model name")
     p_opt.add_argument("--base-url", default=None, help="LLM API base URL")
-    p_opt.add_argument("--accept-remote", action="store_true",
-                       help="Skip LLM data-sharing confirmation (for CI/CD)")
+    p_opt.add_argument("--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_opt.set_defaults(func=cmd_optimize)
 
     # fix
     p_fix = subparsers.add_parser("fix", help="Auto-fix detected issues")
     p_fix.add_argument("path", help="File or directory to fix")
-    p_fix.add_argument("--apply", action="store_true",
-                        help="Actually apply fixes (default is dry-run)")
-    p_fix.add_argument("--llm", action="store_true",
-                        help="Include LLM-generated fixes (costs money)")
-    p_fix.add_argument("--accept-llm-fixes", action="store_true",
-                        help="Apply LLM-generated fixes without extra confirmation (use with --apply --llm)")
-    p_fix.add_argument("--no-backup", action="store_true",
-                        help="Skip creating .doji.bak backup files (backups accumulate and are not auto-cleaned)")
-    p_fix.add_argument("--no-verify", action="store_true",
-                        help="Skip re-scanning file after applying fixes")
-    p_fix.add_argument("--rules",
-                        help="Only fix specific rules (comma-separated, e.g., bare-except,var-usage)")
+    p_fix.add_argument("--apply", action="store_true", help="Actually apply fixes (default is dry-run)")
+    p_fix.add_argument("--llm", action="store_true", help="Include LLM-generated fixes (costs money)")
+    p_fix.add_argument(
+        "--accept-llm-fixes",
+        action="store_true",
+        help="Apply LLM-generated fixes without extra confirmation (use with --apply --llm)",
+    )
+    p_fix.add_argument(
+        "--no-backup",
+        action="store_true",
+        help="Skip creating .doji.bak backup files (backups accumulate and are not auto-cleaned)",
+    )
+    p_fix.add_argument("--no-verify", action="store_true", help="Skip re-scanning file after applying fixes")
+    p_fix.add_argument("--rules", help="Only fix specific rules (comma-separated, e.g., bare-except,var-usage)")
     p_fix.add_argument("--lang", help="Filter by language (e.g., python, javascript)")
-    p_fix.add_argument("--min-severity", choices=["critical", "warning", "info"],
-                        help="Only fix issues at this severity or above")
-    p_fix.add_argument("--output", choices=["text", "json"], default="text",
-                        help="Output format (default: text)")
-    p_fix.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None,
-                        help="LLM backend")
+    p_fix.add_argument(
+        "--min-severity", choices=["critical", "warning", "info"], help="Only fix issues at this severity or above"
+    )
+    p_fix.add_argument("--output", choices=["text", "json"], default="text", help="Output format (default: text)")
+    p_fix.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None, help="LLM backend")
     p_fix.add_argument("--model", default=None, help="LLM model name")
     p_fix.add_argument("--base-url", default=None, help="LLM API base URL")
-    p_fix.add_argument("--accept-remote", action="store_true",
-                        help="Skip LLM data-sharing confirmation (for CI/CD)")
+    p_fix.add_argument("--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)")
     p_fix.set_defaults(func=cmd_fix)
 
     # analyze
     p_analyze = subparsers.add_parser("analyze", help="Analyze project for cross-file issues")
     p_analyze.add_argument("path", help="Project directory to analyze")
-    p_analyze.add_argument("--depth", type=int, default=2, metavar="N",
-                           help="Dependency traversal depth (default: 2)")
-    p_analyze.add_argument("--output", choices=["text", "json"], default="text",
-                           help="Output format (default: text)")
-    p_analyze.add_argument("--no-llm", action="store_true",
-                           help="Graph + metrics only, no API key needed (free)")
+    p_analyze.add_argument("--depth", type=int, default=2, metavar="N", help="Dependency traversal depth (default: 2)")
+    p_analyze.add_argument("--output", choices=["text", "json"], default="text", help="Output format (default: text)")
+    p_analyze.add_argument("--no-llm", action="store_true", help="Graph + metrics only, no API key needed (free)")
     p_analyze.add_argument("--lang", help="Filter by language (e.g., python)")
-    p_analyze.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None,
-                           help="LLM backend")
+    p_analyze.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None, help="LLM backend")
     p_analyze.add_argument("--model", default=None, help="LLM model name")
     p_analyze.add_argument("--base-url", default=None, help="LLM API base URL")
-    p_analyze.add_argument("--accept-remote", action="store_true",
-                           help="Skip LLM data-sharing confirmation (for CI/CD)")
+    p_analyze.add_argument(
+        "--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)"
+    )
     p_analyze.set_defaults(func=cmd_analyze)
 
     # explain
     p_explain = subparsers.add_parser("explain", help="Explain a code file (beginner-friendly tutorial)")
     p_explain.add_argument("file", help="File to explain")
-    p_explain.add_argument("--deep", action="store_true",
-                           help="Use LLM for richer explanations (costs money)")
-    p_explain.add_argument("--output", choices=["text", "json"], default="text",
-                           help="Output format (default: text)")
-    p_explain.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None,
-                           help="LLM backend")
+    p_explain.add_argument("--deep", action="store_true", help="Use LLM for richer explanations (costs money)")
+    p_explain.add_argument("--output", choices=["text", "json"], default="text", help="Output format (default: text)")
+    p_explain.add_argument("--backend", choices=["anthropic", "ollama", "openai"], default=None, help="LLM backend")
     p_explain.add_argument("--model", default=None, help="LLM model name")
     p_explain.add_argument("--base-url", default=None, help="LLM API base URL")
-    p_explain.add_argument("--accept-remote", action="store_true",
-                           help="Skip LLM data-sharing confirmation (for CI/CD)")
+    p_explain.add_argument(
+        "--accept-remote", action="store_true", help="Skip LLM data-sharing confirmation (for CI/CD)"
+    )
     p_explain.set_defaults(func=cmd_explain)
 
     # report
@@ -1150,10 +1221,10 @@ def main() -> None:
 
     # hook
     p_hook = subparsers.add_parser("hook", help="Manage pre-commit hook")
-    p_hook.add_argument("hook_action", choices=["install", "uninstall"],
-                         help="Install or uninstall doji pre-commit hook")
-    p_hook.add_argument("--force", action="store_true",
-                         help="Overwrite existing non-doji hooks")
+    p_hook.add_argument(
+        "hook_action", choices=["install", "uninstall"], help="Install or uninstall doji pre-commit hook"
+    )
+    p_hook.add_argument("--force", action="store_true", help="Overwrite existing non-doji hooks")
     p_hook.set_defaults(func=cmd_hook)
 
     # setup
@@ -1173,13 +1244,11 @@ def main() -> None:
     # rules
     p_rules = subparsers.add_parser("rules", help="List all available rules")
     p_rules.add_argument("--lang", help="Filter by language (e.g., python, javascript)")
-    p_rules.add_argument("--output", choices=["text", "json"], default="text",
-                          help="Output format (default: text)")
+    p_rules.add_argument("--output", choices=["text", "json"], default="text", help="Output format (default: text)")
     p_rules.set_defaults(func=cmd_rules)
 
     # setup-claude
-    p_setup_claude = subparsers.add_parser("setup-claude",
-                                            help="Print MCP config for Claude Code")
+    p_setup_claude = subparsers.add_parser("setup-claude", help="Print MCP config for Claude Code")
     p_setup_claude.set_defaults(func=cmd_setup_claude)
 
     # clean

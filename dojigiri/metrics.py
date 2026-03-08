@@ -11,10 +11,9 @@ Data in -> Data out: scan events (timing, counts) -> SessionMetrics dataclass
 import json
 import logging
 import threading
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from .config import STORAGE_DIR
 
@@ -84,7 +83,7 @@ class SessionMetrics:
 _session_lock = threading.Lock()
 
 # Module-level current session — set by start_session(), used by instrument hooks
-_current_session: Optional[SessionMetrics] = None
+_current_session: SessionMetrics | None = None
 
 
 def start_session() -> SessionMetrics:
@@ -95,13 +94,13 @@ def start_session() -> SessionMetrics:
         return _current_session
 
 
-def get_session() -> Optional[SessionMetrics]:
+def get_session() -> SessionMetrics | None:
     """Get the current session metrics, or None if no session is active."""
     with _session_lock:
         return _current_session
 
 
-def end_session() -> Optional[SessionMetrics]:
+def end_session() -> SessionMetrics | None:
     """End the current session and return its metrics."""
     global _current_session  # doji:ignore(global-keyword)
     with _session_lock:

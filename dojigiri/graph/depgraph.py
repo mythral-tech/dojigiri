@@ -9,6 +9,8 @@ Calls into: config.py (LANGUAGE_EXTENSIONS)
 Data in -> Data out: source directory -> DepGraph, CallGraph, GraphMetrics
 """
 
+from __future__ import annotations
+
 import ast as ast_mod
 import logging
 import re
@@ -17,7 +19,6 @@ from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 from pathlib import Path
-from typing import Optional
 
 from ..config import LANGUAGE_EXTENSIONS
 
@@ -25,10 +26,11 @@ from ..config import LANGUAGE_EXTENSIONS
 @dataclass
 class FileNode:
     """A single file in the dependency graph."""
+
     path: str
     language: str
-    imports: set[str] = field(default_factory=set)      # files this imports
-    imported_by: set[str] = field(default_factory=set)   # files that import this
+    imports: set[str] = field(default_factory=set)  # files this imports
+    imported_by: set[str] = field(default_factory=set)  # files that import this
 
     @property
     def fan_out(self) -> int:
@@ -57,6 +59,7 @@ class FileNode:
 @dataclass
 class DepGraph:
     """Directed dependency graph over project files."""
+
     root: str
     nodes: dict[str, FileNode] = field(default_factory=dict)
     circular_deps: list[tuple[str, ...]] = field(default_factory=list)
@@ -154,6 +157,7 @@ class DepGraph:
 @dataclass
 class GraphMetrics:
     """Summary metrics for a dependency graph."""
+
     total_files: int = 0
     total_edges: int = 0
     avg_fan_in: float = 0.0
@@ -185,9 +189,21 @@ class GraphMetrics:
 # ─── Entry point detection ──────────────────────────────────────────
 
 _ENTRY_POINT_PATTERNS = {
-    "__main__.py", "__init__.py", "main.py", "app.py", "server.py",
-    "index.js", "index.ts", "index.tsx", "main.js", "main.ts",
-    "setup.py", "conftest.py", "manage.py", "wsgi.py", "asgi.py",
+    "__main__.py",
+    "__init__.py",
+    "main.py",
+    "app.py",
+    "server.py",
+    "index.js",
+    "index.ts",
+    "index.tsx",
+    "main.js",
+    "main.ts",
+    "setup.py",
+    "conftest.py",
+    "manage.py",
+    "wsgi.py",
+    "asgi.py",
 }
 
 _ENTRY_POINT_PREFIXES = ("test_", "tests/", "test/")
@@ -210,7 +226,8 @@ def _is_entry_point(path: str) -> bool:
 
 # ─── Import resolution ───────────────────────────────────────────────
 
-def _detect_language(filepath: str) -> Optional[str]:
+
+def _detect_language(filepath: str) -> str | None:
     """Detect language from file extension."""
     suffix = Path(filepath).suffix.lower()
     return LANGUAGE_EXTENSIONS.get(suffix)
@@ -263,8 +280,7 @@ def _resolve_python_imports(filepath: str, content: str, project_root: str) -> s
     return normalized
 
 
-def _try_resolve_dotted(parts: list[str], root: Path, result: set[str],
-                         base: Optional[Path] = None) -> None:
+def _try_resolve_dotted(parts: list[str], root: Path, result: set[str], base: Path | None = None) -> None:
     """Try to resolve a dotted import path to a file on disk."""
     if base is None:
         base = root
@@ -338,10 +354,11 @@ def _resolve_js_ts_imports(filepath: str, content: str, project_root: str) -> se
 
 # ─── Graph construction ──────────────────────────────────────────────
 
+
 def build_dependency_graph(
     files: list[str],
     project_root: str,
-    lang_filter: Optional[str] = None,
+    lang_filter: str | None = None,
 ) -> DepGraph:
     """Build a dependency graph from a list of file paths.
 
@@ -450,25 +467,27 @@ def _detect_cycles(graph: DepGraph) -> list[tuple[str, ...]]:
     return cycles
 
 
-
 # ─── Call graph data structures (v0.8.0) ──────────────────────────────
+
 
 @dataclass
 class FunctionNode:
     """A function in the call graph."""
+
     name: str
     qualified_name: str
     file: str
     line: int
     params: list[str]
     has_varargs: bool = False
-    callers: set[str] = field(default_factory=set)   # qualified names
-    callees: set[str] = field(default_factory=set)    # qualified names
+    callers: set[str] = field(default_factory=set)  # qualified names
+    callees: set[str] = field(default_factory=set)  # qualified names
 
 
 @dataclass
 class CallGraph:
     """Function-level dependency graph."""
+
     functions: dict[str, FunctionNode] = field(default_factory=dict)  # qualified_name -> node
     unresolved_calls: list[tuple[str, str, int]] = field(default_factory=list)  # (caller, call_name, line)
 
@@ -526,10 +545,7 @@ def build_call_graph(
             resolved = False
 
             # Same-file resolution
-            same_file_candidates = [
-                qn for qn in name_to_qnames.get(call_name, [])
-                if qn.startswith(f"{rel_path}:")
-            ]
+            same_file_candidates = [qn for qn in name_to_qnames.get(call_name, []) if qn.startswith(f"{rel_path}:")]
             if same_file_candidates:
                 for target_qname in same_file_candidates:
                     if caller_qname in cg.functions:
@@ -544,8 +560,7 @@ def build_call_graph(
                 if deps:
                     for imp_file in deps.imports:
                         cross_candidates = [
-                            qn for qn in name_to_qnames.get(call_name, [])
-                            if qn.startswith(f"{imp_file}:")
+                            qn for qn in name_to_qnames.get(call_name, []) if qn.startswith(f"{imp_file}:")
                         ]
                         for target_qname in cross_candidates:
                             if caller_qname in cg.functions:

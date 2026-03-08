@@ -79,15 +79,40 @@ warn_unused_ignores = true
 module = ["tree_sitter.*", "tree_sitter_language_pack.*", "anthropic.*", "tomllib.*", "tomli.*"]
 ignore_missing_imports = true
 
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = [
+    "E402",    # module-import-not-at-top — conditional imports
+    "E501",    # line too long
+    "SIM102",  # collapsible-if — style preference
+    "SIM108",  # if-else-block — style preference
+    "SIM103",  # needless-bool — style preference
+    "SIM110",  # reimplemented-builtin — style preference
+    "SIM114",  # if-with-same-arms — needs manual review
+    "B007",    # unused-loop-control-variable — common in AST walking
+    "B023",    # function-uses-loop-variable — needs case-by-case
+    "B905",    # zip-without-explicit-strict — Python 3.10+
+    "E741",    # ambiguous-variable-name — too strict for math-heavy code
+]
+
+[tool.ruff.lint.per-file-ignores]
+"dojigiri/fixer/__init__.py" = ["F401"]
+
 [tool.coverage.run]
 source = ["dojigiri"]
 omit = ["tests/*"]
 
 [tool.coverage.report]
+fail_under = 65
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
     "raise AssertionError",
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
 ]

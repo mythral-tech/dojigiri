@@ -8,13 +8,13 @@ Calls into: config.py, compliance.py
 Data in -> Data out: ScanReport -> HTML string
 """
 
+from __future__ import annotations
+
 import html
 from datetime import datetime
-from typing import Optional
 
-from .types import ScanReport
 from .compliance import get_cwe, get_nist
-
+from .types import ScanReport
 
 _SEVERITY_COLOR = {
     "critical": "#dc2626",
@@ -31,8 +31,8 @@ _SEVERITY_BG = {
 
 def render_html(
     report: ScanReport,
-    classification: Optional[str] = None,
-    project_name: Optional[str] = None,
+    classification: str | None = None,
+    project_name: str | None = None,
 ) -> str:
     """Render a self-contained HTML report with inline CSS.
 
@@ -59,7 +59,7 @@ def render_html(
             snippet = html.escape(f.snippet or "")
             suggestion = html.escape(f.suggestion or "")
 
-            source_label = html.escape(f.source.value if hasattr(f, 'source') else "static")
+            source_label = html.escape(f.source.value if hasattr(f, "source") else "static")
             conf_badge = ""
             if source_label == "llm" and f.confidence:
                 conf_badge = f' <span class="confidence-badge">{html.escape(f.confidence.value)}</span>'
@@ -92,16 +92,16 @@ def render_html(
             file_findings.append(
                 f'<div class="finding" style="border-left:3px solid {color};padding-left:8px;margin:6px 0">'
                 f'<strong style="color:{color}">{html.escape(sev.upper())}</strong> '
-                f'line {f.line} &mdash; <code>{html.escape(f.rule)}</code>{cwe_tag}<br>'
-                f'{html.escape(f.message)}'
-                f'{"<br><em>" + html.escape(f.suggestion) + "</em>" if f.suggestion else ""}'
-                '</div>'
+                f"line {f.line} &mdash; <code>{html.escape(f.rule)}</code>{cwe_tag}<br>"
+                f"{html.escape(f.message)}"
+                f"{'<br><em>' + html.escape(f.suggestion) + '</em>' if f.suggestion else ''}"
+                "</div>"
             )
         file_sections.append(
             '<div class="file-section">'
             f'<h3>{html.escape(fa.path)} <span class="dim">({fa.language}, {fa.lines} lines)</span></h3>'
-            f'{"".join(file_findings)}'
-            '</div>'
+            f"{''.join(file_findings)}"
+            "</div>"
         )
 
     files_html = "\n".join(file_sections) if file_sections else "<p>No files with findings.</p>"
@@ -203,8 +203,8 @@ def render_html(
 def render_pdf(
     report: ScanReport,
     output_path: str,
-    classification: Optional[str] = None,
-    project_name: Optional[str] = None,
+    classification: str | None = None,
+    project_name: str | None = None,
 ) -> None:
     """Render report as PDF via weasyprint (optional dependency).
 
@@ -212,10 +212,8 @@ def render_pdf(
     """
     try:
         from weasyprint import HTML  # type: ignore[import-untyped]
-    except ImportError:
-        raise ImportError(
-            "PDF output requires weasyprint. Install with: pip install dojigiri[pdf]"
-        )
+    except ImportError as err:
+        raise ImportError("PDF output requires weasyprint. Install with: pip install dojigiri[pdf]") from err
 
     html_content = render_html(report, classification=classification, project_name=project_name)
     HTML(string=html_content).write_pdf(output_path)

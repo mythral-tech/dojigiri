@@ -8,6 +8,8 @@ Calls into: config.py (report paths only).
 Data in → Data out: ScanReport / file paths in → JSON files + SHA-256 cache out.
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
@@ -19,11 +21,10 @@ import sys
 logger = logging.getLogger(__name__)
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
-from .types import ScanReport
-from .config import STORAGE_DIR, REPORTS_DIR, CACHE_FILE
 from . import __version__
+from .config import CACHE_FILE, REPORTS_DIR, STORAGE_DIR
+from .types import ScanReport
 
 
 def ensure_dirs() -> None:
@@ -41,19 +42,27 @@ def ensure_dirs() -> None:
         # unintended principals full control over scan report directories.
         try:
             username = os.environ.get("USERNAME", "")
-            if username and re.match(r'^[a-zA-Z0-9._\- ]+$', username) and len(username) <= 104:
+            if username and re.match(r"^[a-zA-Z0-9._\- ]+$", username) and len(username) <= 104:
                 # Reject well-known group names that would widen access
                 _DANGEROUS_PRINCIPALS = {
-                    "everyone", "users", "authenticated users", "guests",
-                    "domain users", "network", "interactive", "system",
-                    "local service", "network service", "anonymous logon",
+                    "everyone",
+                    "users",
+                    "authenticated users",
+                    "guests",
+                    "domain users",
+                    "network",
+                    "interactive",
+                    "system",
+                    "local service",
+                    "network service",
+                    "anonymous logon",
                 }
                 if username.lower().strip() not in _DANGEROUS_PRINCIPALS:
                     for d in (STORAGE_DIR, REPORTS_DIR):
                         subprocess.run(
-                            ["icacls", str(d), "/inheritance:r",
-                             "/grant:r", f"{username}:(OI)(CI)F"],
-                            capture_output=True, timeout=5,
+                            ["icacls", str(d), "/inheritance:r", "/grant:r", f"{username}:(OI)(CI)F"],
+                            capture_output=True,
+                            timeout=5,
                         )
                 else:
                     logger.warning(
@@ -126,7 +135,7 @@ def _prune_reports(max_keep: int = 50) -> None:
             logger.debug("Failed to delete old report: %s", e)
 
 
-def load_latest_report() -> Optional[dict]:
+def load_latest_report() -> dict | None:
     """Load the most recent scan report."""
     latest = REPORTS_DIR / "latest.json"
     if latest.exists():
@@ -137,7 +146,7 @@ def load_latest_report() -> Optional[dict]:
     return None
 
 
-def load_baseline_report(baseline: str) -> Optional[dict]:
+def load_baseline_report(baseline: str) -> dict | None:
     """Load a baseline report for comparison.
 
     Args:
@@ -159,7 +168,9 @@ def load_baseline_report(baseline: str) -> Optional[dict]:
     if not (baseline_path.is_relative_to(reports_dir) or baseline_path.is_relative_to(cwd)):
         logger.warning(
             "Rejecting baseline path '%s' — must be under reports dir (%s) or cwd (%s)",
-            baseline, reports_dir, cwd,
+            baseline,
+            reports_dir,
+            cwd,
         )
         return None
 

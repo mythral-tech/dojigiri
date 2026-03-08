@@ -15,13 +15,13 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from ..types import Finding, Severity, Category, Source
-from .lang_config import LanguageConfig
-from .core import FileSemantics, FunctionDef
+from ..types import Category, Finding, Severity, Source
 from .cfg import FunctionCFG
-
+from .core import FileSemantics, FunctionDef
+from .lang_config import LanguageConfig
 
 # ─── Data structures ─────────────────────────────────────────────────
+
 
 @dataclass
 class ResourceState:
@@ -34,6 +34,7 @@ class ResourceState:
 
 
 # ─── Analysis ────────────────────────────────────────────────────────
+
 
 def _find_context_managed_lines(source_bytes: bytes, language: str) -> set[int]:
     """Find lines inside 'with' blocks (Python) or 'using' blocks (C#).
@@ -109,7 +110,7 @@ def _find_finally_closed_vars(
                 for open_pat, close_pat, _, _ in config.resource_patterns:
                     if close_pat in stripped:
                         # Extract variable name: var.close() or close(var)
-                        m = re.search(r'(\w+)\.' + re.escape(close_pat), stripped)
+                        m = re.search(r"(\w+)\." + re.escape(close_pat), stripped)
                         if m:
                             closed_vars.add(m.group(1))
 
@@ -173,11 +174,8 @@ def check_resource_leaks(
                 # Use word-boundary matching to avoid false positives:
                 # e.g. "open" should match "open(" but not "open_session()"
                 # or variable names containing "open" as a substring
-                if re.search(r'\b' + re.escape(open_pat) + r'\s*\(', rhs):
-                    is_ctx = (
-                        (has_ctx_mgr and asgn.line in context_managed_lines)
-                        or asgn.name in finally_closed
-                    )
+                if re.search(r"\b" + re.escape(open_pat) + r"\s*\(", rhs):
+                    is_ctx = (has_ctx_mgr and asgn.line in context_managed_lines) or asgn.name in finally_closed
                     resources[asgn.name] = ResourceState(
                         variable=asgn.name,
                         open_line=asgn.line,
@@ -210,7 +208,7 @@ def check_resource_leaks(
                         if 0 <= line_idx < len(lines):
                             line_text = lines[line_idx]
                             for rname, rstate in resources.items():
-                                if re.search(r'\b' + re.escape(rname) + r'\b', line_text):
+                                if re.search(r"\b" + re.escape(rname) + r"\b", line_text):
                                     rstate.closed = True
                                     rstate.close_line = call.line
 
@@ -219,20 +217,19 @@ def check_resource_leaks(
             if rstate.closed or rstate.is_context_managed:
                 continue
 
-            findings.append(Finding(
-                file=filepath,
-                line=rstate.open_line,
-                severity=Severity.WARNING,
-                category=Category.BUG,
-                source=Source.AST,
-                rule="resource-leak",
-                message=(
-                    f"Resource '{rstate.variable}' ({rstate.kind}) opened but never closed"
-                ),
-                suggestion=(
-                    f"Close '{rstate.variable}' explicitly or use a context manager "
-                    "(e.g., 'with' statement)"
-                ),
-            ))
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=rstate.open_line,
+                    severity=Severity.WARNING,
+                    category=Category.BUG,
+                    source=Source.AST,
+                    rule="resource-leak",
+                    message=(f"Resource '{rstate.variable}' ({rstate.kind}) opened but never closed"),
+                    suggestion=(
+                        f"Close '{rstate.variable}' explicitly or use a context manager (e.g., 'with' statement)"
+                    ),
+                )
+            )
 
     return findings

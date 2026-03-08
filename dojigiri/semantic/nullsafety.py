@@ -17,11 +17,10 @@ from __future__ import annotations
 
 import re
 
-from ..types import Finding, Severity, Category, Source
-from .lang_config import LanguageConfig
+from ..types import Category, Finding, Severity, Source
 from .core import FileSemantics
-from .types import FileTypeMap, TypeInfo, InferredType
-
+from .lang_config import LanguageConfig
+from .types import FileTypeMap, InferredType, TypeInfo
 
 # ─── Narrowing detection ─────────────────────────────────────────────
 
@@ -29,56 +28,63 @@ from .types import FileTypeMap, TypeInfo, InferredType
 # Built programmatically from (template, description) tuples.
 # Each template uses {var} for the captured variable name.
 
+
 def _build_patterns(templates: list[str]) -> list[re.Pattern]:
     """Build compiled regex patterns from templates with {var} placeholder."""
-    VAR = r'(\w+)'
-    SELF_VAR = r'self\.(\w+)'
+    VAR = r"(\w+)"
+    SELF_VAR = r"self\.(\w+)"
     result = []
     for tmpl in templates:
         # Expand {self_var} and {var} placeholders
-        pattern = tmpl.replace('{self_var}', SELF_VAR).replace('{var}', VAR)
+        pattern = tmpl.replace("{self_var}", SELF_VAR).replace("{var}", VAR)
         result.append(re.compile(pattern))
     return result
 
 
 # Guard patterns: `if x is not None:` / `if (x !== null)` — block body is guarded
-_GUARD_PATTERNS = _build_patterns([
-    r'if\s+{self_var}\s+is\s+not\s+None\b',      # Python: if self.x is not None
-    r'if\s+{var}\s+is\s+not\s+None\s*:',          # Python: if x is not None:
-    r'if\s+{var}\s+is\s+not\s+None\b',            # Python: if x is not None and ...
-    r'if\s+{var}\s*!=\s*None\s*:',                 # Python: if x != None:
-    r'if\s+{self_var}\s*:',                        # Python: if self.x:
-    r'if\s+{var}\s*:',                             # Python: if x:
-    r'if\s*\(\s*{var}\s*!==?\s*null\s*\)',         # JS/TS/Java/C#: if (x !== null)
-    r'if\s*\(\s*{var}\s*!=\s*null\s*\)',           # JS/TS/Java/C#: if (x != null)
-    r'if\s*\(\s*{var}\s*\)',                       # JS/TS: if (x)
-])
+_GUARD_PATTERNS = _build_patterns(
+    [
+        r"if\s+{self_var}\s+is\s+not\s+None\b",  # Python: if self.x is not None
+        r"if\s+{var}\s+is\s+not\s+None\s*:",  # Python: if x is not None:
+        r"if\s+{var}\s+is\s+not\s+None\b",  # Python: if x is not None and ...
+        r"if\s+{var}\s*!=\s*None\s*:",  # Python: if x != None:
+        r"if\s+{self_var}\s*:",  # Python: if self.x:
+        r"if\s+{var}\s*:",  # Python: if x:
+        r"if\s*\(\s*{var}\s*!==?\s*null\s*\)",  # JS/TS/Java/C#: if (x !== null)
+        r"if\s*\(\s*{var}\s*!=\s*null\s*\)",  # JS/TS/Java/C#: if (x != null)
+        r"if\s*\(\s*{var}\s*\)",  # JS/TS: if (x)
+    ]
+)
 
 # Early-exit patterns: `if x is None: raise/return` — continuation is guarded
-_EARLY_EXIT_PATTERNS = _build_patterns([
-    r'if\s+{self_var}\s+is\s+None\s*:',           # Python: if self.x is None:
-    r'if\s+{var}\s+is\s+None\s*:',                # Python: if x is None:
-    r'if\s+not\s+{self_var}\s*:',                  # Python: if not self.x:
-    r'if\s+not\s+{var}\s*:',                       # Python: if not x:
-    r'if\s*\(\s*{var}\s*===?\s*null\s*\)',         # JS/TS: if (x === null)
-    r'if\s*\(\s*!\s*{var}\s*\)',                   # JS/TS: if (!x)
-])
+_EARLY_EXIT_PATTERNS = _build_patterns(
+    [
+        r"if\s+{self_var}\s+is\s+None\s*:",  # Python: if self.x is None:
+        r"if\s+{var}\s+is\s+None\s*:",  # Python: if x is None:
+        r"if\s+not\s+{self_var}\s*:",  # Python: if not self.x:
+        r"if\s+not\s+{var}\s*:",  # Python: if not x:
+        r"if\s*\(\s*{var}\s*===?\s*null\s*\)",  # JS/TS: if (x === null)
+        r"if\s*\(\s*!\s*{var}\s*\)",  # JS/TS: if (!x)
+    ]
+)
 
 # Assert patterns: `assert x is not None` — everything after is guarded
-_ASSERT_PATTERNS = _build_patterns([
-    r'assert\s+{self_var}\s+is\s+not\s+None',
-    r'assert\s+{var}\s+is\s+not\s+None',
-    r'assert\s+isinstance\s*\(\s*{self_var}\s*,',
-    r'assert\s+isinstance\s*\(\s*{var}\s*,',
-    r'assert\s+{self_var}\b',
-    r'assert\s+{var}\b',
-])
+_ASSERT_PATTERNS = _build_patterns(
+    [
+        r"assert\s+{self_var}\s+is\s+not\s+None",
+        r"assert\s+{var}\s+is\s+not\s+None",
+        r"assert\s+isinstance\s*\(\s*{self_var}\s*,",
+        r"assert\s+isinstance\s*\(\s*{var}\s*,",
+        r"assert\s+{self_var}\b",
+        r"assert\s+{var}\b",
+    ]
+)
 
 # Inline guard patterns: short-circuit and ternary on same line
 _INLINE_GUARD_RE = [
-    re.compile(r'\bself\.(\w+)\s+and\s+self\.\1\.'),   # self.x and self.x.attr
-    re.compile(r'\b(\w+)\s+and\s+\1\.'),                # x and x.attr
-    re.compile(r'\b(\w+)\b.*\bif\s+\1\b.*\belse\b'),   # x if x else default
+    re.compile(r"\bself\.(\w+)\s+and\s+self\.\1\."),  # self.x and self.x.attr
+    re.compile(r"\b(\w+)\s+and\s+\1\."),  # x and x.attr
+    re.compile(r"\b(\w+)\b.*\bif\s+\1\b.*\belse\b"),  # x if x else default
 ]
 
 
@@ -117,7 +123,8 @@ def _find_guarded_lines(
 
         # Close any guards that have ended (dedent)
         active_guards = [
-            (var, gi, sl) for var, gi, sl in active_guards
+            (var, gi, sl)
+            for var, gi, sl in active_guards
             if indent > gi or not stripped  # blank lines don't end blocks
         ]
 
@@ -131,9 +138,7 @@ def _find_guarded_lines(
                     assert_guarded_from.setdefault(var, lineno)
             else:
                 # Still inside the block — check if this line has an exit
-                if not has_exit and stripped.startswith(
-                    ("raise", "return", "continue", "break", "throw")
-                ):
+                if not has_exit and stripped.startswith(("raise", "return", "continue", "break", "throw")):
                     has_exit = True
                 new_early_exits.append((var, gi, sl, has_exit))
         early_exit_guards = new_early_exits
@@ -180,8 +185,7 @@ def _find_guarded_lines(
                         assert_guarded_from.setdefault(var_name, lineno + 1)
                         # Remove from early_exit_guards since it's handled
                         early_exit_guards = [
-                            (v, g, s, h) for v, g, s, h in early_exit_guards
-                            if not (v == var_name and s == lineno)
+                            (v, g, s, h) for v, g, s, h in early_exit_guards if not (v == var_name and s == lineno)
                         ]
                 break
 
@@ -225,6 +229,7 @@ def _resolve_nullable_in_scope(
 
 # ─── Null safety check ───────────────────────────────────────────────
 
+
 def check_null_safety(
     semantics: FileSemantics,
     type_map: FileTypeMap,
@@ -258,9 +263,9 @@ def check_null_safety(
 
     # We need source bytes for narrowing detection — reconstruct from file
     try:
-        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+        with open(filepath, encoding="utf-8", errors="replace") as f:
             source_bytes = f.read().encode("utf-8")
-    except (OSError, IOError):
+    except OSError:
         return []
 
     # Find guarded lines
@@ -293,21 +298,20 @@ def check_null_safety(
         elif tinfo.source == "annotation":
             source_desc = " (typed as Optional)"
 
-        findings.append(Finding(
-            file=filepath,
-            line=ref.line,
-            severity=Severity.WARNING,
-            category=Category.BUG,
-            source=Source.AST,
-            rule="null-dereference",
-            message=(
-                f"Attribute access on '{ref.name}' which may be None{source_desc}"
-            ),
-            suggestion=(
-                f"Add a None check before accessing attributes on '{ref.name}' "
-                f"(e.g., 'if {ref.name} is not None:')"
-            ),
-        ))
+        findings.append(
+            Finding(
+                file=filepath,
+                line=ref.line,
+                severity=Severity.WARNING,
+                category=Category.BUG,
+                source=Source.AST,
+                rule="null-dereference",
+                message=(f"Attribute access on '{ref.name}' which may be None{source_desc}"),
+                suggestion=(
+                    f"Add a None check before accessing attributes on '{ref.name}' (e.g., 'if {ref.name} is not None:')"
+                ),
+            )
+        )
 
     # Also check function calls on nullable variables
     for call in semantics.function_calls:
@@ -327,20 +331,20 @@ def check_null_safety(
             continue
         seen.add(dedup_key)
 
-        findings.append(Finding(
-            file=filepath,
-            line=call.line,
-            severity=Severity.WARNING,
-            category=Category.BUG,
-            source=Source.AST,
-            rule="null-dereference",
-            message=(
-                f"Method '{call.name}' called on '{call.receiver}' which may be None"
-            ),
-            suggestion=(
-                f"Add a None check before calling methods on '{call.receiver}' "
-                f"(e.g., 'if {call.receiver} is not None:')"
-            ),
-        ))
+        findings.append(
+            Finding(
+                file=filepath,
+                line=call.line,
+                severity=Severity.WARNING,
+                category=Category.BUG,
+                source=Source.AST,
+                rule="null-dereference",
+                message=(f"Method '{call.name}' called on '{call.receiver}' which may be None"),
+                suggestion=(
+                    f"Add a None check before calling methods on '{call.receiver}' "
+                    f"(e.g., 'if {call.receiver} is not None:')"
+                ),
+            )
+        )
 
     return findings

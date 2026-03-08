@@ -12,7 +12,6 @@ Data in -> Data out: list[Finding] + code -> list[MicroQuery]
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .types import Finding
 
@@ -24,19 +23,22 @@ def _get_sanitizer():
     global _sanitize_for_prompt
     if _sanitize_for_prompt is None:
         from .llm import _sanitize_for_prompt as _sfp
+
         _sanitize_for_prompt = _sfp
     return _sanitize_for_prompt
 
 
 # ─── Micro-queries (v1.0.0) ─────────────────────────────────────────
 
+
 @dataclass
 class MicroQuery:
     """A targeted code snippet + question for LLM analysis."""
-    snippet: str            # 5-10 lines of code
-    question: str           # specific question about this snippet
+
+    snippet: str  # 5-10 lines of code
+    question: str  # specific question about this snippet
     finding_rules: list[str]
-    priority: int           # 1 = highest
+    priority: int  # 1 = highest
     estimated_tokens: int
     line_start: int = 0
     line_end: int = 0
@@ -118,15 +120,17 @@ def build_micro_queries(
 
         est_tokens = len(snippet) // 4 + len(question) // 4 + 200  # overhead
 
-        queries.append(MicroQuery(
-            snippet=snippet,
-            question=question,
-            finding_rules=rules,
-            priority=priority,
-            estimated_tokens=est_tokens,
-            line_start=start + 1,
-            line_end=end,
-        ))
+        queries.append(
+            MicroQuery(
+                snippet=snippet,
+                question=question,
+                finding_rules=rules,
+                priority=priority,
+                estimated_tokens=est_tokens,
+                line_start=start + 1,
+                line_end=end,
+            )
+        )
 
     queries.sort(key=lambda q: q.priority)
     return queries[:max_queries]

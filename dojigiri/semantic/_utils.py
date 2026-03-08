@@ -13,7 +13,7 @@ from __future__ import annotations
 
 
 def _get_text(node, source_bytes: bytes) -> str:
-    return source_bytes[node.start_byte:node.end_byte].decode("utf-8", errors="replace")
+    return source_bytes[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
 
 def _line(node) -> int:

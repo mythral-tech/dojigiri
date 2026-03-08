@@ -9,16 +9,18 @@ Calls into: compliance.py (lazy import in Finding.to_dict only)
 Data in → Data out: no I/O; provides shared types.
 """
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
 # ─── Enums ────────────────────────────────────────────────────────────
+
 
 class Severity(Enum):
     CRITICAL = "critical"
@@ -59,7 +61,7 @@ class FixStatus(Enum):
 
 class FixSource(Enum):
     DETERMINISTIC = "deterministic"  # rule-based, guaranteed correct
-    LLM = "llm"                     # AI-generated, needs review
+    LLM = "llm"  # AI-generated, needs review
 
 
 # ─── Constants tied to types ──────────────────────────────────────────
@@ -68,6 +70,7 @@ REDACT_SNIPPET_RULES = {"hardcoded-secret", "aws-credentials"}
 
 
 # ─── Dataclasses ──────────────────────────────────────────────────────
+
 
 @dataclass
 class Finding:
@@ -78,12 +81,13 @@ class Finding:
     source: Source
     rule: str
     message: str
-    suggestion: Optional[str] = None
-    snippet: Optional[str] = None
-    confidence: Optional[Confidence] = None  # LLM findings only
+    suggestion: str | None = None
+    snippet: str | None = None
+    confidence: Confidence | None = None  # LLM findings only
 
     def to_dict(self) -> dict:
         from .compliance import get_cwe, get_nist
+
         snippet = "[REDACTED]" if self.rule in REDACT_SNIPPET_RULES else self.snippet
         d = {
             "file": self.file,
@@ -113,8 +117,8 @@ class FileAnalysis:
     language: str
     lines: int
     findings: list[Finding] = field(default_factory=list)
-    file_hash: Optional[str] = None
-    semantics: Optional[object] = None  # semantic.core.FileSemantics (not serialized)
+    file_hash: str | None = None
+    semantics: object | None = None  # semantic.core.FileSemantics (not serialized)
 
     @property
     def critical_count(self) -> int:
@@ -136,15 +140,14 @@ class ScanReport:
     files_scanned: int
     files_skipped: int
     file_analyses: list[FileAnalysis] = field(default_factory=list)
-    cross_file_findings: list["CrossFileFinding"] = field(default_factory=list)
+    cross_file_findings: list[CrossFileFinding] = field(default_factory=list)
     llm_cost_usd: float = 0.0
     llm_models_used: list[str] = field(default_factory=list)
     timestamp: str = ""
 
     @property
     def total_findings(self) -> int:
-        return (sum(len(fa.findings) for fa in self.file_analyses)
-                + len(self.cross_file_findings))
+        return sum(len(fa.findings) for fa in self.file_analyses) + len(self.cross_file_findings)
 
     @property
     def critical(self) -> int:
@@ -156,9 +159,9 @@ class ScanReport:
 
     @property
     def info(self) -> int:
-        return (sum(fa.info_count for fa in self.file_analyses)
-                + sum(1 for cf in self.cross_file_findings
-                      if cf.severity == Severity.INFO))
+        return sum(fa.info_count for fa in self.file_analyses) + sum(
+            1 for cf in self.cross_file_findings if cf.severity == Severity.INFO
+        )
 
     def to_dict(self) -> dict:
         d = {
@@ -191,16 +194,17 @@ class ScanReport:
 @dataclass
 class CrossFileFinding:
     """A finding that spans two files — only visible with cross-file context."""
+
     source_file: str
     target_file: str
     line: int
-    target_line: Optional[int] = None
+    target_line: int | None = None
     severity: Severity = Severity.WARNING
     category: Category = Category.BUG
     rule: str = ""
     message: str = ""
-    suggestion: Optional[str] = None
-    confidence: Optional[Confidence] = None
+    suggestion: str | None = None
+    confidence: Confidence | None = None
 
     def to_dict(self) -> dict:
         d = {
@@ -224,13 +228,14 @@ class CrossFileFinding:
 @dataclass
 class ProjectAnalysis:
     """Complete project-level analysis result."""
+
     root: str
     files_analyzed: int
     graph_metrics: dict
     dependency_graph: dict
     per_file_findings: list[FileAnalysis] = field(default_factory=list)
     cross_file_findings: list[CrossFileFinding] = field(default_factory=list)
-    synthesis: Optional[dict] = None
+    synthesis: dict | None = None
     llm_cost_usd: float = 0.0
     timestamp: str = ""
 
@@ -263,10 +268,11 @@ class ProjectAnalysis:
 @dataclass
 class FixContext:
     """Context passed to all fixers — provides semantic data when available."""
+
     content: str
-    finding: "Finding"
-    semantics: Optional[object] = None  # semantic.core.FileSemantics
-    type_map: Optional[object] = None   # semantic.types.FileTypeMap
+    finding: Finding
+    semantics: object | None = None  # semantic.core.FileSemantics
+    type_map: object | None = None  # semantic.types.FileTypeMap
     language: str = "python"
 
 
@@ -275,13 +281,13 @@ class Fix:
     file: str
     line: int
     rule: str
-    original_code: str       # exact line(s) to replace
-    fixed_code: str          # replacement
-    explanation: str          # what changed and why
+    original_code: str  # exact line(s) to replace
+    fixed_code: str  # replacement
+    explanation: str  # what changed and why
     source: FixSource
-    end_line: Optional[int] = None  # last line of range (inclusive), None = single line
+    end_line: int | None = None  # last line of range (inclusive), None = single line
     status: FixStatus = FixStatus.PENDING
-    fail_reason: Optional[str] = None  # why the fix failed (for user diagnostics)
+    fail_reason: str | None = None  # why the fix failed (for user diagnostics)
 
     def to_dict(self) -> dict:
         d = {
@@ -312,7 +318,7 @@ class FixReport:
     fixes: list[Fix] = field(default_factory=list)
     llm_cost_usd: float = 0.0
     timestamp: str = ""
-    verification: Optional[dict] = None
+    verification: dict | None = None
 
     def __post_init__(self):
         if not self.timestamp:
@@ -337,10 +343,11 @@ class FixReport:
 
 # ─── Analysis result ─────────────────────────────────────────────────
 
+
 @dataclass
 class StaticAnalysisResult:
     """Return type of analyze_file_static — always carries findings + optional semantics."""
-    findings: list[Finding]
-    semantics: Optional[object] = None   # semantic.core.FileSemantics
-    type_map: Optional[object] = None    # semantic.types.FileTypeMap
 
+    findings: list[Finding]
+    semantics: object | None = None  # semantic.core.FileSemantics
+    type_map: object | None = None  # semantic.types.FileTypeMap
