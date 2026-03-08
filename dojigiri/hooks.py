@@ -8,6 +8,7 @@ Calls into: config.py (is_bundled, get_exe_path)
 Data in -> Data out: git repo path -> hook file written/removed on disk
 """
 
+import re
 import stat
 import sys
 from pathlib import Path
@@ -17,18 +18,53 @@ from .bundling import is_bundled, get_exe_path
 
 HOOK_MARKER = "# doji-managed-hook"
 
+# Shell metacharacters that must never appear unquoted in a hook script.
+# Even with quoting, some characters (backtick, $, !) can break out of
+# single quotes in certain shells, so we reject paths containing them.
+_SHELL_UNSAFE_RE = re.compile(r'[`$!\\]')
+
+
+def _shell_quote(s: str) -> str:
+    """Shell-quote a string using single quotes (POSIX-safe).
+
+    Handles embedded single quotes by ending the quoted segment,
+    inserting an escaped single quote, and re-opening.
+    Example: /it's/path -> '/it'"'"'s/path'
+    """
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
 
 def _doji_command() -> str:
-    """Return the shell command to invoke doji, depending on install mode."""
+    """Return the shell command to invoke doji, depending on install mode.
+
+    SECURITY: In bundled mode, the exe path is shell-quoted to prevent
+    injection via directory names containing spaces or metacharacters.
+    Paths with truly dangerous characters ($, `, !, \\) are rejected
+    outright since they can break out of quoting in some shells.
+    """
     if is_bundled():
-        return str(get_exe_path())
+        raw_path = str(get_exe_path())
+        if _SHELL_UNSAFE_RE.search(raw_path):
+            raise ValueError(
+                f"Refusing to install hook — exe path contains shell metacharacters: {raw_path!r}. "
+                "Move the binary to a path without $, `, !, or \\ characters."
+            )
+        return _shell_quote(raw_path)
     return "python -m dojigiri"
 
 
 def _make_hook_script() -> str:
-    """Generate the hook script with the correct doji invocation."""
+    """Generate the hook script with the correct doji invocation.
+
+    SECURITY: The command is shell-quoted by _doji_command() to prevent
+    injection via paths with spaces or special characters. Paths with
+    truly dangerous metacharacters are rejected before reaching here.
+    """
     cmd = _doji_command()
-    uninstall_hint = f"{cmd} hook uninstall"
+    # For the uninstall hint shown in comments, strip quotes for readability
+    # (comments are not executed, so no injection risk)
+    cmd_display = cmd.strip("'")
+    uninstall_hint = f"{cmd_display} hook uninstall"
     return f"""\
 #!/bin/sh
 # doji-managed-hook
