@@ -477,20 +477,8 @@ def cmd_fix(args: argparse.Namespace) -> int:
     from .types import FixReport
 
     # Collect files to fix
-    if root.is_file():
-        file_lang = detect_language(root)
-        if not file_lang:
-            print(f"Error: unsupported file type '{root.suffix}'", file=sys.stderr)
-            return 1
-        files_to_fix = [(root, file_lang)]
-    else:
-        from .discovery import collect_files
-        collected, _ = collect_files(root, language_filter=lang)
-        files_to_fix = []
-        for fp in collected:
-            fl = detect_language(fp)
-            if fl:
-                files_to_fix.append((fp, fl))
+    from .discovery import collect_files_with_lang
+    files_to_fix = collect_files_with_lang(root, language_filter=lang)
 
     if not files_to_fix:
         print("No fixable files found.", file=sys.stderr)

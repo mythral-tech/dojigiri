@@ -137,19 +137,8 @@ def _read_file(path: str) -> tuple[str, str, str]:
 
 def _collect_files_with_lang(root: Path) -> list[tuple[Path, str]]:
     """Collect analyzable files under root, each paired with its detected language."""
-    from .discovery import detect_language, collect_files
-
-    if root.is_file():
-        lang = detect_language(root)
-        return [(root, lang)] if lang else []
-
-    collected, _ = collect_files(root)
-    result = []
-    for fp in collected:
-        lang = detect_language(fp)
-        if lang:
-            result.append((fp, lang))
-    return result
+    from .discovery import collect_files_with_lang
+    return collect_files_with_lang(root)
 
 
 def _filter_findings_by_severity(findings: list, min_severity: Severity) -> list:

@@ -43,9 +43,8 @@ def should_skip_file(filepath: Path) -> bool:
     if filepath.suffix.lower() not in LANGUAGE_EXTENSIONS:
         return True
     try:
-        if filepath.stat().st_size > MAX_FILE_SIZE:
-            return True
-        if filepath.stat().st_size == 0:
+        size = filepath.stat().st_size
+        if size > MAX_FILE_SIZE or size == 0:
             return True
     except OSError:
         return True
@@ -113,3 +112,27 @@ def collect_files(
         files.append(item)
 
     return files, skipped
+
+
+def collect_files_with_lang(
+    root: Path,
+    language_filter: Optional[str] = None,
+) -> list[tuple[Path, str]]:
+    """Collect analyzable files under root, each paired with its detected language.
+
+    Convenience wrapper around collect_files + detect_language — shared by
+    __main__.py (cmd_fix) and mcp_server.py (doji_fix).
+    """
+    if root.is_file():
+        lang = detect_language(root)
+        if lang and (language_filter is None or lang == language_filter):
+            return [(root, lang)]
+        return []
+
+    collected, _ = collect_files(root, language_filter=language_filter)
+    result = []
+    for fp in collected:
+        lang = detect_language(fp)
+        if lang:
+            result.append((fp, lang))
+    return result

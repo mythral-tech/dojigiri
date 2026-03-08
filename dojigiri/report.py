@@ -58,6 +58,10 @@ SOURCE_LABEL = {
     Source.LLM: "llm",
 }
 
+# Severity string -> ANSI color name (used by dict-based renderers that work with
+# raw severity strings rather than Severity enum values).
+_SEVERITY_COLOR_NAME = {"critical": "red", "warning": "yellow", "info": "blue"}
+
 
 def _c(color: str, text: str) -> str:
     """Wrap text in ANSI color."""
@@ -182,7 +186,7 @@ CONFIDENCE_BADGE = {
 def _print_debug_finding(f: dict, index: int) -> None:
     """Render a single structured debug/optimize finding."""
     severity = f.get("severity", "info")
-    sev_color = {"critical": "red", "warning": "yellow", "info": "blue"}.get(severity, "blue")
+    sev_color = _SEVERITY_COLOR_NAME.get(severity, "blue")
     sev_label = severity.upper().ljust(8)
 
     confidence = f.get("confidence", "medium")
@@ -213,71 +217,38 @@ def _print_debug_finding(f: dict, index: int) -> None:
     print()
 
 
-def print_debug_result(filepath: str, static_findings: list[Finding],
-                       llm_result: "Optional[dict]" = None) -> None:
-    """Print debug command output.
+def _print_llm_analysis_result(
+    filepath: str,
+    static_findings: list[Finding],
+    llm_result: "Optional[dict]",
+    *,
+    title: str,
+    static_label: str,
+    static_filter: "Optional[tuple]" = None,
+    summary_label: str = "Summary:",
+    findings_label_fmt: str = "Claude found {n} issue(s):",
+    empty_msg: str = "No additional issues found by Claude.",
+) -> None:
+    """Shared renderer for LLM subcommand output (debug, optimize).
 
-    llm_result can be:
-    - dict with 'findings' key → structured output
-    - dict with 'raw_markdown' key → raw LLM output (fallback)
-    - None → static findings only
+    Args:
+        title: Header prefix (e.g. "Debug", "Optimize").
+        static_label: Label for the static findings section.
+        static_filter: If set, only show static findings whose category is in this tuple.
+        summary_label: Label for the LLM summary line.
+        findings_label_fmt: Format string for the findings header ({n} = count).
+        empty_msg: Message when LLM returns no findings or quick wins.
     """
-    print(f"\n{_c('bold', f'Debug: {filepath}')}")
+    print(f"\n{_c('bold', f'{title}: {filepath}')}")
     print("═" * 70)
 
     if static_findings:
-        print(f"\n{_c('bold', 'Static analysis findings:')}")
-        for f in static_findings:
-            print_finding(f, show_file=False)
-
-    if llm_result is None:
-        print()
-        return
-
-    if "raw_markdown" in llm_result:
-        print(f"\n{_c('bold', 'Claude analysis:')}")
-        print(llm_result["raw_markdown"])
-        print()
-        return
-
-    # Structured output
-    summary = llm_result.get("summary", "")
-    findings = llm_result.get("findings", [])
-    quick_wins = llm_result.get("quick_wins", [])
-
-    if summary:
-        print(f"\n{_c('bold', 'Summary:')} {summary}")
-
-    if findings:
-        print(f"\n{_c('bold', f'Claude found {len(findings)} issue(s):')}")
-        for i, f in enumerate(findings, 1):
-            _print_debug_finding(f, i)
-
-    if quick_wins:
-        print(f"{_c('bold', 'Quick wins:')}")
-        for qw in quick_wins:
-            print(f"  {_c('green', '→')} {qw}")
-
-    if not findings and not quick_wins:
-        print(f"\n  {_c('green', 'No additional issues found by Claude.')}")
-    print()
-
-
-def print_optimize_result(filepath: str, static_findings: list[Finding],
-                          llm_result: "Optional[dict]" = None) -> None:
-    """Print optimize command output.
-
-    Same structured/raw_markdown/None handling as debug.
-    """
-    print(f"\n{_c('bold', f'Optimize: {filepath}')}")
-    print("═" * 70)
-
-    if static_findings:
-        perf_findings = [f for f in static_findings
-                         if f.category in (Category.PERFORMANCE, Category.STYLE)]
-        if perf_findings:
-            print(f"\n{_c('bold', 'Static analysis (perf-relevant):')}")
-            for f in perf_findings:
+        filtered = static_findings
+        if static_filter:
+            filtered = [f for f in static_findings if f.category in static_filter]
+        if filtered:
+            print(f"\n{_c('bold', static_label)}")
+            for f in filtered:
                 print_finding(f, show_file=False)
 
     if llm_result is None:
@@ -296,10 +267,10 @@ def print_optimize_result(filepath: str, static_findings: list[Finding],
     quick_wins = llm_result.get("quick_wins", [])
 
     if summary:
-        print(f"\n{_c('bold', 'Assessment:')} {summary}")
+        print(f"\n{_c('bold', summary_label)} {summary}")
 
     if findings:
-        print(f"\n{_c('bold', f'Found {len(findings)} optimization(s):')}")
+        print(f"\n{_c('bold', findings_label_fmt.format(n=len(findings)))}")
         for i, f in enumerate(findings, 1):
             _print_debug_finding(f, i)
 
@@ -309,8 +280,35 @@ def print_optimize_result(filepath: str, static_findings: list[Finding],
             print(f"  {_c('green', '→')} {qw}")
 
     if not findings and not quick_wins:
-        print(f"\n  {_c('green', 'Code is well-optimized.')}")
+        print(f"\n  {_c('green', empty_msg)}")
     print()
+
+
+def print_debug_result(filepath: str, static_findings: list[Finding],
+                       llm_result: "Optional[dict]" = None) -> None:
+    """Print debug command output."""
+    _print_llm_analysis_result(
+        filepath, static_findings, llm_result,
+        title="Debug",
+        static_label="Static analysis findings:",
+        summary_label="Summary:",
+        findings_label_fmt="Claude found {n} issue(s):",
+        empty_msg="No additional issues found by Claude.",
+    )
+
+
+def print_optimize_result(filepath: str, static_findings: list[Finding],
+                          llm_result: "Optional[dict]" = None) -> None:
+    """Print optimize command output."""
+    _print_llm_analysis_result(
+        filepath, static_findings, llm_result,
+        title="Optimize",
+        static_label="Static analysis (perf-relevant):",
+        static_filter=(Category.PERFORMANCE, Category.STYLE),
+        summary_label="Assessment:",
+        findings_label_fmt="Found {n} optimization(s):",
+        empty_msg="Code is well-optimized.",
+    )
 
 
 def print_analysis_json(filepath: str, static_findings: list[Finding],
@@ -442,7 +440,7 @@ def print_graph_summary(graph_dict: dict, metrics_dict: dict) -> None:
 def print_cross_file_finding(cf: dict) -> None:
     """Print a single cross-file finding: source_file:line -> target_file:line."""
     sev = cf.get("severity", "warning")
-    sev_color = {"critical": "red", "warning": "yellow", "info": "blue"}.get(sev, "yellow")
+    sev_color = _SEVERITY_COLOR_NAME.get(sev, "yellow")
     sev_label = sev.upper().ljust(8)
 
     source = cf.get("source_file", "?")
@@ -503,7 +501,7 @@ def print_project_analysis(analysis: ProjectAnalysis) -> None:
             print(f"  {_c('bold', 'Architectural issues:')}")
             for issue in issues:
                 sev = issue.get("severity", "warning")
-                sev_color = {"critical": "red", "warning": "yellow", "info": "blue"}.get(sev, "yellow")
+                sev_color = _SEVERITY_COLOR_NAME.get(sev, "yellow")
                 print(f"    {_c(sev_color, sev.upper())}  {issue.get('title', '')}")
                 print(f"            {issue.get('description', '')}")
                 affected = issue.get("affected_files", [])
