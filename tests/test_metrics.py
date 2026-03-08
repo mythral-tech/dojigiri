@@ -9,7 +9,6 @@ import pytest
 
 from dojigiri.metrics import (
     SessionMetrics,
-    FixRuleMetrics,
     start_session,
     end_session,
     get_session,
@@ -18,24 +17,6 @@ from dojigiri.metrics import (
     format_summary,
     format_history_summary,
 )
-
-
-class TestFixRuleMetrics:
-    def test_avg_duration_no_attempts(self):
-        m = FixRuleMetrics()
-        assert m.avg_duration_ms == 0
-
-    def test_avg_duration(self):
-        m = FixRuleMetrics(attempted=3, total_duration_ms=150.0)
-        assert m.avg_duration_ms == 50.0
-
-    def test_success_rate_no_attempts(self):
-        m = FixRuleMetrics()
-        assert m.success_rate == 0
-
-    def test_success_rate(self):
-        m = FixRuleMetrics(attempted=10, succeeded=8)
-        assert m.success_rate == 0.8
 
 
 class TestSessionMetrics:

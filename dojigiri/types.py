@@ -13,7 +13,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional, TypeAlias
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -342,7 +342,3 @@ class StaticAnalysisResult:
     semantics: Optional[object] = None   # semantic.core.FileSemantics
     type_map: Optional[object] = None    # semantic.types.FileTypeMap
 
-
-# ─── Type aliases ────────────────────────────────────────────────────
-Findings: TypeAlias = list[Finding]
-SourceBytes: TypeAlias = bytes

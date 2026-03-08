@@ -24,22 +24,6 @@ METRICS_DIR = STORAGE_DIR / "metrics"
 
 
 @dataclass
-class FixRuleMetrics:
-    attempted: int = 0
-    succeeded: int = 0
-    failed: int = 0
-    total_duration_ms: float = 0
-
-    @property
-    def avg_duration_ms(self) -> float:
-        return self.total_duration_ms / self.attempted if self.attempted else 0
-
-    @property
-    def success_rate(self) -> float:
-        return self.succeeded / self.attempted if self.attempted else 0
-
-
-@dataclass
 class SessionMetrics:
     started_at: str = ""
     files_scanned: int = 0

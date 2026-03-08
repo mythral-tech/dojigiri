@@ -294,8 +294,6 @@ def analyze_project(
 
     # 6. LLM analysis
     from ..llm import CostTracker, LLMError, analyze_file_with_context, synthesize_project
-    from ..llm_focus import build_focus_areas
-
     cost_tracker = CostTracker()
 
     # Get topo order (dependencies analyzed first)
@@ -328,13 +326,6 @@ def analyze_project(
 
         # Select context files
         context = _select_context_for_file(rel_path, graph, file_contents, depth=depth)
-
-        # Build focus areas for smarter LLM prompting
-        file_taint = [f for f in static_findings if f.rule == "taint-flow"]
-        file_dead = [f for f in static_findings if f.rule == "dead-function"]
-        file_scope = [f for f in static_findings if f.rule in ("unused-variable", "possibly-uninitialized", "variable-shadowing")]
-        file_smells = [f for f in static_findings if f.rule in ("god-class", "feature-envy", "long-method", "near-duplicate")]
-        focus_areas = build_focus_areas(static_findings, file_taint, file_dead, file_scope, file_smells)
 
         # LLM cross-file analysis
         try:
