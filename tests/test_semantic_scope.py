@@ -181,6 +181,61 @@ def f():
         # callback is used as a function call target
         assert not any("'callback'" in m for m in unused_names)
 
+    def test_public_module_level_not_flagged(self):
+        """Public module-level names should not be flagged as unused."""
+        from dojigiri.semantic.scope import check_unused_variables
+        code = """\
+session = LocalProxy(partial(_get_app_ctx, "session"))
+basestring = str
+"""
+        sem = _semantics(code)
+        findings = check_unused_variables(sem, "test.py")
+        unused_names = [f.message for f in findings]
+        assert not any("'session'" in m for m in unused_names)
+        assert not any("'basestring'" in m for m in unused_names)
+
+    def test_private_module_level_still_flagged(self):
+        """Private (underscore-prefixed) module-level names ARE excluded by _IGNORE_PREFIXES."""
+        from dojigiri.semantic.scope import check_unused_variables
+        code = """\
+_internal = 42
+"""
+        sem = _semantics(code)
+        findings = check_unused_variables(sem, "test.py")
+        # _internal starts with _ so excluded by _IGNORE_PREFIXES
+        assert len(findings) == 0
+
+    def test_init_file_names_not_flagged(self):
+        """All module-level names in __init__.py should not be flagged (re-exports)."""
+        from dojigiri.semantic.scope import check_unused_variables
+        code = """\
+from .core import Engine
+from .session import Session
+"""
+        sem = _semantics(code, filepath="pkg/__init__.py")
+        findings = check_unused_variables(sem, "pkg/__init__.py")
+        unused_names = [f.message for f in findings]
+        assert not any("'Engine'" in m for m in unused_names)
+        assert not any("'Session'" in m for m in unused_names)
+
+    def test_function_level_unused_still_flagged(self):
+        """Unused variables inside functions should still be flagged even with module-level exemption."""
+        from dojigiri.semantic.scope import check_unused_variables
+        code = """\
+public_api = "exported"
+
+def f():
+    unused_local = 42
+    return None
+"""
+        sem = _semantics(code)
+        findings = check_unused_variables(sem, "test.py")
+        unused_names = [f.message for f in findings]
+        # public_api should NOT be flagged (public module-level)
+        assert not any("'public_api'" in m for m in unused_names)
+        # unused_local SHOULD be flagged (inside function)
+        assert any("'unused_local'" in m for m in unused_names)
+
 
 # ───────────────────────────────────────────────────────────────────────────
 # VARIABLE SHADOWING
@@ -190,8 +245,8 @@ def f():
 class TestVariableShadowing:
     """Tests for check_variable_shadowing."""
 
-    def test_inner_function_shadows_outer(self):
-        """Variable in inner function shadowing outer should produce INFO finding."""
+    def test_common_name_inner_function_not_flagged(self):
+        """Common name like 'x' in inner function shadowing outer is NOT flagged (FP filter)."""
         from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def outer():
@@ -203,13 +258,29 @@ def outer():
 """
         sem = _semantics(code)
         findings = check_variable_shadowing(sem, "test.py")
-        assert len(findings) >= 1
-        shadow_finding = [f for f in findings if "'x'" in f.message]
-        assert len(shadow_finding) >= 1
-        assert shadow_finding[0].severity == Severity.INFO
-        assert shadow_finding[0].category == Category.BUG
-        assert shadow_finding[0].source == Source.AST
-        assert shadow_finding[0].rule == "variable-shadowing"
+        shadow_x = [f for f in findings if "'x'" in f.message]
+        # 'x' is a common name — should not be flagged
+        assert len(shadow_x) == 0
+
+    def test_nontrivial_inner_function_shadows_outer(self):
+        """Non-trivial name in inner function shadowing outer SHOULD produce INFO finding."""
+        from dojigiri.semantic.scope import check_variable_shadowing
+        code = """\
+def outer():
+    connection = make_conn()
+    def inner():
+        connection = other_conn()
+        return connection
+    return inner
+"""
+        sem = _semantics(code)
+        findings = check_variable_shadowing(sem, "test.py")
+        shadow = [f for f in findings if "'connection'" in f.message]
+        assert len(shadow) >= 1
+        assert shadow[0].severity == Severity.INFO
+        assert shadow[0].category == Category.BUG
+        assert shadow[0].source == Source.AST
+        assert shadow[0].rule == "variable-shadowing"
 
     def test_no_shadowing(self):
         """No shadowing should produce no findings."""
@@ -256,8 +327,8 @@ def f():
         # Both assignments are in the same scope, not shadowing
         assert len(findings) == 0
 
-    def test_parameter_shadows_outer_variable(self):
-        """Parameter in inner function shadowing an outer variable should be flagged."""
+    def test_common_name_parameter_not_flagged(self):
+        """Common name like 'data' used as parameter shadowing outer var is NOT flagged (FP filter)."""
         from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 def outer():
@@ -269,8 +340,24 @@ def outer():
         sem = _semantics(code)
         findings = check_variable_shadowing(sem, "test.py")
         shadow_data = [f for f in findings if "'data'" in f.message]
-        assert len(shadow_data) >= 1
-        assert shadow_data[0].rule == "variable-shadowing"
+        # 'data' is a common name — should not be flagged
+        assert len(shadow_data) == 0
+
+    def test_nontrivial_parameter_shadows_outer_variable(self):
+        """Non-trivial parameter name shadowing outer variable SHOULD be flagged."""
+        from dojigiri.semantic.scope import check_variable_shadowing
+        code = """\
+def outer():
+    connection = make_conn()
+    def inner(connection):
+        return use(connection)
+    return inner(connection)
+"""
+        sem = _semantics(code)
+        findings = check_variable_shadowing(sem, "test.py")
+        shadow = [f for f in findings if "'connection'" in f.message]
+        assert len(shadow) >= 1
+        assert shadow[0].rule == "variable-shadowing"
 
     def test_multiple_levels_of_shadowing(self):
         """Multiple nesting levels with shadowing should produce findings for each."""
@@ -292,8 +379,8 @@ def level_one():
         # level_two's val shadows level_one's, level_three's val shadows both
         assert len(shadow_val) >= 2
 
-    def test_class_scope_vs_function_scope(self):
-        """Variable in a method that shadows a class-level name should be flagged."""
+    def test_class_scope_vs_function_scope_not_flagged(self):
+        """Variable in a method that shadows a class-level name should NOT be flagged (FP filter)."""
         from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 class MyClass:
@@ -305,10 +392,11 @@ class MyClass:
         sem = _semantics(code)
         findings = check_variable_shadowing(sem, "test.py")
         shadow_count = [f for f in findings if "'count'" in f.message]
-        assert len(shadow_count) >= 1
+        # Class attribute vs function local — not a real shadowing bug
+        assert len(shadow_count) == 0
 
-    def test_module_level_shadowed_by_function(self):
-        """Module-level variable shadowed by a function-level variable should be flagged."""
+    def test_common_module_level_name_not_flagged(self):
+        """Common name like 'result' at module level shadowed by function local is NOT flagged."""
         from dojigiri.semantic.scope import check_variable_shadowing
         code = """\
 result = None
@@ -320,9 +408,73 @@ def compute():
         sem = _semantics(code)
         findings = check_variable_shadowing(sem, "test.py")
         shadow_result = [f for f in findings if "'result'" in f.message]
-        assert len(shadow_result) >= 1
-        assert shadow_result[0].rule == "variable-shadowing"
-        assert "shadows" in shadow_result[0].message
+        # 'result' is a common name — should not be flagged
+        assert len(shadow_result) == 0
+
+    def test_later_definition_not_shadowed(self):
+        """Variable can't shadow a name defined AFTER it — line order matters."""
+        from dojigiri.semantic.scope import check_variable_shadowing
+        code = """\
+def outer():
+    def inner():
+        request = build_request()
+        return request
+    request = get_request()
+    return inner()
+"""
+        sem = _semantics(code)
+        findings = check_variable_shadowing(sem, "test.py")
+        shadow = [f for f in findings if "'request'" in f.message]
+        # inner's 'request' appears before outer's — can't be shadowing
+        assert len(shadow) == 0
+
+    def test_param_shadowing_class_attr_not_flagged(self):
+        """Method parameter shadowing a class attribute is NOT a bug."""
+        from dojigiri.semantic.scope import check_variable_shadowing
+        code = """\
+class Config:
+    timeout = 30
+    def set_timeout(self, timeout):
+        self.timeout = timeout
+"""
+        sem = _semantics(code)
+        findings = check_variable_shadowing(sem, "test.py")
+        shadow = [f for f in findings if "'timeout'" in f.message]
+        # Class attr vs method param — not a real shadowing bug
+        assert len(shadow) == 0
+
+    def test_loop_var_shadowing_class_attr_not_flagged(self):
+        """Loop variable in method shadowing class attribute is NOT a bug."""
+        from dojigiri.semantic.scope import check_variable_shadowing
+        code = """\
+class Registry:
+    handler = None
+    def process(self):
+        for handler in self.handlers:
+            handler.run()
+"""
+        sem = _semantics(code)
+        findings = check_variable_shadowing(sem, "test.py")
+        shadow = [f for f in findings if "'handler'" in f.message]
+        # Class attr vs loop var in method — not a real shadowing bug
+        assert len(shadow) == 0
+
+    def test_nontrivial_module_level_shadowed_by_function(self):
+        """Non-trivial module-level variable shadowed by function local SHOULD be flagged."""
+        from dojigiri.semantic.scope import check_variable_shadowing
+        code = """\
+database = connect()
+
+def compute():
+    database = mock_db()
+    return database
+"""
+        sem = _semantics(code)
+        findings = check_variable_shadowing(sem, "test.py")
+        shadow = [f for f in findings if "'database'" in f.message]
+        assert len(shadow) >= 1
+        assert shadow[0].rule == "variable-shadowing"
+        assert "shadows" in shadow[0].message
 
 
 # ───────────────────────────────────────────────────────────────────────────

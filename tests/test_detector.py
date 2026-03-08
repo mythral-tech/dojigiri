@@ -141,6 +141,85 @@ except ValueError:
     assert len(swallowed) == 1
 
 
+def test_python_ast_exception_swallowed_with_inline_comment():
+    """Exception swallowed with an inline comment should downgrade to INFO."""
+    code = '''
+try:
+    value = int(raw)
+except ValueError:
+    pass  # Keep the value as a string if loading failed
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.INFO
+    assert "comment explains intent" in swallowed[0].message
+
+
+def test_python_ast_exception_swallowed_with_comment_line():
+    """Exception swallowed with a comment on a separate line should downgrade to INFO."""
+    code = '''
+try:
+    import chardet
+except ImportError:
+    # chardet not available, try cchardet
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.INFO
+
+
+def test_python_ast_exception_swallowed_with_string_comment():
+    """Exception swallowed with a string expression as comment should downgrade to INFO."""
+    code = '''
+try:
+    import optional_module
+except ImportError:
+    "optional_module is not required"
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.INFO
+
+
+def test_python_ast_exception_swallowed_no_comment_stays_warning():
+    """Exception swallowed WITHOUT a comment should remain WARNING."""
+    code = '''
+try:
+    risky()
+except Exception:
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.WARNING
+
+
+def test_python_ast_exception_swallowed_continue_with_comment():
+    """Exception swallowed via continue with comment should downgrade to INFO."""
+    code = '''
+for item in items:
+    try:
+        process(item)
+    except ValueError:
+        continue  # skip bad items
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.INFO
+
+
 def test_python_ast_shadowed_builtin():
     """Test detection of shadowed builtins."""
     code = '''

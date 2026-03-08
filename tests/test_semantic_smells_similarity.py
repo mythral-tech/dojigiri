@@ -253,8 +253,12 @@ class TestCloneDetection:
 
         assert len(findings) == 0
 
-    def test_multiple_clones_multiple_findings(self):
-        """Three similar functions across files produce multiple findings."""
+    def test_multiple_clones_transitive_reduction(self):
+        """Three similar functions produce 2 findings (spanning tree, not all pairs).
+
+        Transitive reduction: if A~B and B~C, we don't also report A~C.
+        This turns N*(N-1)/2 pairs into N-1 spanning edges.
+        """
         from dojigiri.semantic.smells import check_semantic_clones
         calls = ["fetch", "decode", "validate", "transform", "persist"]
         code_a = _make_function("proc_a", calls)
@@ -269,8 +273,8 @@ class TestCloneDetection:
             "a.py": sem_a, "b.py": sem_b, "c.py": sem_c,
         })
 
-        # 3 functions -> 3 unique pairs: (a,b), (a,c), (b,c)
-        assert len(findings) == 3
+        # 3 functions -> 2 spanning edges (not 3 all-pairs)
+        assert len(findings) == 2
         for f in findings:
             assert f.rule == "semantic-clone"
             assert f.severity == Severity.INFO

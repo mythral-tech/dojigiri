@@ -41,6 +41,7 @@ class NameReference:
     line: int
     scope_id: int
     context: str  # "read", "call", "attribute_access"
+    receiver: str | None = None  # object in obj.attr (e.g. "self" for self.foo)
 
 
 @dataclass
@@ -94,6 +95,8 @@ class FileSemantics:
     function_calls: list[FunctionCall] = field(default_factory=list)
     class_defs: list[ClassDef] = field(default_factory=list)
     scopes: list[ScopeInfo] = field(default_factory=list)
+    # Source lines (1-indexed: source_lines[0] is line 1) for effective-line counting
+    source_lines: list[str] = field(default_factory=list, repr=False)
     # Cached tree-sitter root node (v0.9.0) — avoids double parsing for CFG
     _tree_root: object = field(default=None, repr=False)
 
@@ -231,6 +234,21 @@ class _Extractor:
             has_varargs=has_varargs,
         )
         self.result.function_defs.append(fdef)
+
+        # Record function name as an assignment in the *enclosing* scope
+        # (a `def foo():` statement binds `foo` in the scope where it appears)
+        if name != "<anonymous>":
+            self.result.assignments.append(
+                Assignment(
+                    name=name,
+                    line=_line(node),
+                    scope_id=self._current_scope,
+                    value_node_type="function_def",
+                    value_text="",
+                    is_parameter=False,
+                    is_augmented=False,
+                )
+            )
 
         # Push function scope and record params as assignments
         self._push_scope("function", node, name=qualified)
@@ -610,6 +628,12 @@ class _Extractor:
         if parent_type in param_parents:
             return
 
+        # Skip keyword argument names (e.g. `foo(value=x)` — 'value' is not a variable read)
+        if parent_type == "keyword_argument":
+            name_field = parent.child_by_field_name("name")
+            if name_field and name_field.id == node.id:
+                return
+
         # Skip variable declarator name fields
         if parent_type == "variable_declarator":
             name_field = parent.child_by_field_name("name")
@@ -634,12 +658,22 @@ class _Extractor:
 
         # Determine context
         context = "read"
+        receiver: str | None = None
         if parent_type in self._call_types:
             func = parent.child_by_field_name("function")
             if func and func.id == node.id:
                 context = "call"
         if parent_type in self._attr_types:
-            context = "attribute_access"
+            # Check if this identifier is the attribute (not the object) in obj.attr
+            attr_node = parent.child_by_field_name("attribute")
+            if attr_node and attr_node.id == node.id:
+                context = "attribute_access"
+                obj_node = parent.child_by_field_name("object")
+                if obj_node and obj_node.type == "identifier":
+                    receiver = _get_text(obj_node, self.src)
+            else:
+                # This is the object side (e.g. "self" in self.foo) — record as read
+                context = "read"
 
         self.result.references.append(
             NameReference(
@@ -647,6 +681,7 @@ class _Extractor:
                 line=_line(node),
                 scope_id=self._current_scope,
                 context=context,
+                receiver=receiver,
             )
         )
 
@@ -659,6 +694,16 @@ class _Extractor:
                 break
         return params
 
+    # Compound parameter node types where the first identifier child is the name
+    _COMPOUND_PARAM_TYPES = frozenset((
+        "typed_parameter",
+        "default_parameter",
+        "typed_default_parameter",
+        "parameter",
+        "formal_parameter",
+        "required_parameter",
+    ))
+
     def _collect_param_names(self, param_list: Any, params: list[str]) -> None:
         """Recursively collect parameter names."""
         for child in param_list.children:
@@ -667,22 +712,22 @@ class _Extractor:
                 # Check this is the name, not a type annotation
                 if parent_type in ("parameters", "formal_parameters", "parameter_list"):
                     params.append(_get_text(child, self.src))
-                elif parent_type in (
-                    "typed_parameter",
-                    "default_parameter",
-                    "typed_default_parameter",
-                ) or parent_type in ("parameter", "formal_parameter", "required_parameter"):
+                elif parent_type in self._COMPOUND_PARAM_TYPES:
+                    # Try named field first; fall back to first-identifier heuristic
+                    # (tree-sitter Python doesn't tag the name field for typed_parameter)
                     name_field = child.parent.child_by_field_name("name")
-                    if name_field and name_field.id == child.id:
-                        params.append(_get_text(child, self.src))
-            elif child.type in (
-                "typed_parameter",
-                "default_parameter",
-                "typed_default_parameter",
-                "parameter",
-                "formal_parameter",
-                "required_parameter",
-            ):
+                    if name_field is not None:
+                        if name_field.id == child.id:
+                            params.append(_get_text(child, self.src))
+                    else:
+                        # First identifier that is NOT inside a 'type' node is the name
+                        first_id = next(
+                            (c for c in child.parent.children if c.type == "identifier"),
+                            None,
+                        )
+                        if first_id is not None and first_id.id == child.id:
+                            params.append(_get_text(child, self.src))
+            elif child.type in self._COMPOUND_PARAM_TYPES:
                 self._collect_param_names(child, params)
             elif child.type == "list_splat_pattern" or child.type == "dictionary_splat_pattern":
                 # *args, **kwargs in Python
@@ -763,6 +808,8 @@ def extract_semantics(content: str, filepath: str, language: str) -> FileSemanti
 
     extractor = _Extractor(source_bytes, config, filepath, language)
     extractor.extract(tree.root_node)
+    # Store source lines (1-indexed via dummy at [0]) for effective-line counting
+    extractor.result.source_lines = [""] + content.splitlines()
     # Cache tree root to avoid double parsing in CFG construction
     extractor.result._tree_root = tree.root_node
     return extractor.result

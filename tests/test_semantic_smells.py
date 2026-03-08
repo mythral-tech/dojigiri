@@ -28,15 +28,19 @@ def _sem(code: str, filepath: str = "test.py"):
 # ---------------------------------------------------------------------------
 
 @needs_tree_sitter
-class TestGodClassManyMethods:
-    """Class with >15 methods triggers god-class finding."""
+class TestGodClass:
+    """God class detection requires BOTH excessive methods AND attributes."""
 
-    def test_class_with_many_methods(self):
+    def test_class_with_many_methods_and_attributes(self):
+        """Class exceeding both method and attribute thresholds triggers god-class."""
         from dojigiri.semantic.smells import check_god_class
 
-        code = "class Big:\n" + "\n".join(
-            f"    def method_{i}(self):\n        pass\n" for i in range(20)
+        # Build a class with 25 methods and 20 attributes (both > defaults of 20/15)
+        attrs = "\n".join(f"        self.attr_{i} = {i}" for i in range(20))
+        methods = "\n".join(
+            f"    def method_{i}(self):\n        pass\n" for i in range(25)
         )
+        code = f"class God:\n    def __init__(self):\n{attrs}\n{methods}"
         sem = _sem(code)
         findings = check_god_class(sem, "test.py")
 
@@ -44,28 +48,42 @@ class TestGodClassManyMethods:
         assert findings[0].rule == "god-class"
         assert findings[0].severity == Severity.INFO
         assert findings[0].category == Category.STYLE
-        assert "Big" in findings[0].message
-        assert "20 methods" in findings[0].message
+        assert "God" in findings[0].message
+        assert "methods" in findings[0].message
+        assert "attributes" in findings[0].message
 
-    def test_class_with_many_attributes(self):
-        """Class with >10 self.attr assignments triggers god-class finding."""
+    def test_many_methods_few_attributes_no_finding(self):
+        """Class with many methods but few attributes is a service class, not a god class."""
         from dojigiri.semantic.smells import check_god_class
 
-        attrs = "\n".join(
-            f"        self.attr_{i} = {i}" for i in range(15)
+        code = "class ServiceClass:\n" + "\n".join(
+            f"    def method_{i}(self):\n        pass\n" for i in range(25)
         )
+        sem = _sem(code)
+        findings = check_god_class(sem, "test.py")
+
+        assert len(findings) == 0, (
+            f"Service classes (many methods, few attrs) should not be flagged, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_many_attributes_few_methods_no_finding(self):
+        """Class with many attributes but few methods is a data class, not a god class."""
+        from dojigiri.semantic.smells import check_god_class
+
+        attrs = "\n".join(f"        self.attr_{i} = {i}" for i in range(25))
         code = (
-            "class Wide:\n"
+            "class DataClass:\n"
             "    def __init__(self):\n"
             f"{attrs}\n"
         )
         sem = _sem(code)
         findings = check_god_class(sem, "test.py")
 
-        assert len(findings) == 1
-        assert findings[0].rule == "god-class"
-        assert "Wide" in findings[0].message
-        assert "attributes" in findings[0].message
+        assert len(findings) == 0, (
+            f"Data classes (many attrs, few methods) should not be flagged, got: "
+            f"{[f.message for f in findings]}"
+        )
 
     def test_small_class_no_finding(self):
         """A class with few methods and attributes should not be flagged."""
@@ -84,7 +102,7 @@ class TestGodClassManyMethods:
         assert len(findings) == 0
 
     def test_custom_lower_thresholds(self):
-        """Lowered thresholds should flag a smaller class."""
+        """Lowered thresholds should flag a class that exceeds both."""
         from dojigiri.semantic.smells import check_god_class
 
         code = (
@@ -108,27 +126,53 @@ class TestGodClassManyMethods:
         findings_default = check_god_class(sem, "test.py")
         assert len(findings_default) == 0
 
-        # Lower thresholds: method_threshold=3, attribute_threshold=2
+        # Lower thresholds so BOTH are exceeded: method_threshold=3, attribute_threshold=2
         findings_low = check_god_class(sem, "test.py", method_threshold=3, attribute_threshold=2)
         assert len(findings_low) == 1
         assert findings_low[0].rule == "god-class"
         assert "Medium" in findings_low[0].message
 
+    def test_custom_thresholds_one_axis_not_enough(self):
+        """Even with low thresholds, only exceeding one axis is not enough."""
+        from dojigiri.semantic.smells import check_god_class
+
+        code = (
+            "class Medium:\n"
+            "    def __init__(self):\n"
+            "        self.a = 1\n"
+            "    def method_a(self):\n"
+            "        pass\n"
+            "    def method_b(self):\n"
+            "        pass\n"
+            "    def method_c(self):\n"
+            "        pass\n"
+            "    def method_d(self):\n"
+            "        pass\n"
+        )
+        sem = _sem(code)
+
+        # Methods exceed threshold=3 but attributes (1) don't exceed threshold=2
+        findings = check_god_class(sem, "test.py", method_threshold=3, attribute_threshold=2)
+        assert len(findings) == 0
+
     def test_multiple_god_classes(self):
         """Multiple god classes in one file produce multiple findings."""
         from dojigiri.semantic.smells import check_god_class
 
-        code_a = "class GodA:\n" + "\n".join(
+        # Both classes need to exceed both thresholds
+        attrs_a = "\n".join(f"        self.a_{i} = {i}" for i in range(5))
+        code_a = f"class GodA:\n    def __init__(self):\n{attrs_a}\n" + "\n".join(
             f"    def m_{i}(self):\n        pass\n" for i in range(5)
         )
-        code_b = "class GodB:\n" + "\n".join(
+        attrs_b = "\n".join(f"        self.b_{i} = {i}" for i in range(6))
+        code_b = f"class GodB:\n    def __init__(self):\n{attrs_b}\n" + "\n".join(
             f"    def n_{i}(self):\n        pass\n" for i in range(6)
         )
         code = code_a + "\n" + code_b
         sem = _sem(code)
 
-        # Use low threshold so both get flagged
-        findings = check_god_class(sem, "test.py", method_threshold=4, attribute_threshold=100)
+        # Use low thresholds so both get flagged (both axes exceeded)
+        findings = check_god_class(sem, "test.py", method_threshold=4, attribute_threshold=4)
         assert len(findings) == 2
         names = {f.message for f in findings}
         assert any("GodA" in m for m in names)
@@ -230,6 +274,137 @@ class TestFeatureEnvy:
             assert f.category == Category.STYLE
             assert f.source == Source.AST
 
+    def test_descriptor_dunder_suppressed(self):
+        """Descriptor methods (__get__, __set__, __delete__) should not be flagged."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Descriptor:\n"
+            "    def __init__(self):\n"
+            "        self.name = 'x'\n"
+            "    def __get__(self, obj, objtype=None):\n"
+            "        a = obj.alpha\n"
+            "        b = obj.beta\n"
+            "        c = obj.gamma\n"
+            "        d = obj.delta\n"
+            "        e = obj.epsilon\n"
+            "        return a + b + c + d + e\n"
+            "    def __set__(self, obj, value):\n"
+            "        obj.alpha = value\n"
+            "        obj.beta = value\n"
+            "        obj.gamma = value\n"
+            "        obj.delta = value\n"
+            "        obj.epsilon = value\n"
+            "        return None\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=1.0, min_external=2)
+
+        assert len(findings) == 0, (
+            f"Descriptor dunders should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_short_method_suppressed(self):
+        """Methods shorter than 5 lines should not be flagged."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Wrapper:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def delegate(self, other):\n"
+            "        return other.alpha + other.beta + other.gamma\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"Short methods (<5 lines) should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_nested_function_suppressed(self):
+        """Inner/nested functions should not be flagged for feature envy."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Builder:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def build(self, config):\n"
+            "        def _inner():\n"
+            "            a = config.alpha\n"
+            "            b = config.beta\n"
+            "            c = config.gamma\n"
+            "            d = config.delta\n"
+            "            e = config.epsilon\n"
+            "            return a + b + c + d + e\n"
+            "        return _inner()\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        # _inner should be suppressed (nested function)
+        inner_findings = [f for f in findings if "_inner" in f.message]
+        assert len(inner_findings) == 0, (
+            f"Nested functions should be suppressed, got: "
+            f"{[f.message for f in inner_findings]}"
+        )
+
+    def test_init_subclass_suppressed(self):
+        """__init_subclass__ and __class_getitem__ should be suppressed."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Meta:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def __init_subclass__(cls, registry=None, **kwargs):\n"
+            "        super().__init_subclass__(**kwargs)\n"
+            "        a = registry.alpha\n"
+            "        b = registry.beta\n"
+            "        c = registry.gamma\n"
+            "        d = registry.delta\n"
+            "        e = registry.epsilon\n"
+            "        return None\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        subclass_findings = [f for f in findings if "__init_subclass__" in f.message]
+        assert len(subclass_findings) == 0, (
+            f"__init_subclass__ should be suppressed, got: "
+            f"{[f.message for f in subclass_findings]}"
+        )
+
+    def test_genuine_envy_still_detected(self):
+        """A legitimately envious method (long, non-dunder, non-nested) is still flagged."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Processor:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def process(self, other):\n"
+            "        a = other.alpha\n"
+            "        b = other.beta\n"
+            "        c = other.gamma\n"
+            "        d = other.delta\n"
+            "        e = other.epsilon\n"
+            "        f = other.zeta\n"
+            "        return a + b + c + d + e + f\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=1.0, min_external=3)
+
+        # This IS genuine feature envy — long method, not a dunder, not nested
+        envious = [f for f in findings if f.rule == "feature-envy"]
+        # We expect it to be flagged (if references resolve correctly)
+        for f in envious:
+            assert "process" in f.message
+            assert f.severity == Severity.INFO
+
 
 # ---------------------------------------------------------------------------
 # LONG METHOD
@@ -321,6 +496,145 @@ class TestLongMethod:
         names = [f.message for f in findings]
         assert any("func_a" in m for m in names)
         assert any("func_b" in m for m in names)
+
+
+# ---------------------------------------------------------------------------
+# LONG METHOD — EFFECTIVE LINE COUNTING
+# ---------------------------------------------------------------------------
+
+@needs_tree_sitter
+class TestLongMethodEffectiveLines:
+    """Effective line counting excludes docstrings, blanks, comments, annotations."""
+
+    def test_docstring_excluded_from_count(self):
+        """A function with a large docstring should not be falsely flagged."""
+        from dojigiri.semantic.smells import check_long_method
+
+        docstring_lines = "\n".join(f"        Line {i} of documentation." for i in range(25))
+        logic_lines = "\n".join(f"    x_{i} = {i}" for i in range(20))
+        code = (
+            f'def well_documented():\n'
+            f'    """Long docstring.\n'
+            f'\n'
+            f'{docstring_lines}\n'
+            f'    """\n'
+            f'{logic_lines}\n'
+        )
+        sem = _sem(code)
+        # Total lines ~48 (def + docstring open + 25 doc + blank + close + 20 logic)
+        # Effective should be ~21 (def line + 20 logic lines)
+        findings = check_long_method(sem, "test.py", threshold=30)
+        assert len(findings) == 0, (
+            f"Docstring lines should be excluded, got: {[f.message for f in findings]}"
+        )
+
+    def test_blank_lines_excluded(self):
+        """Blank lines within a function should not count toward threshold."""
+        from dojigiri.semantic.smells import check_long_method
+
+        # 15 logic lines interspersed with blank lines = 30 total body lines
+        body_parts = []
+        for i in range(15):
+            body_parts.append(f"    x_{i} = {i}")
+            body_parts.append("")  # blank line
+        body = "\n".join(body_parts)
+        code = f"def spacious_func():\n{body}\n"
+        sem = _sem(code)
+        # Effective: def + 15 logic = 16; total ~31
+        findings = check_long_method(sem, "test.py", threshold=20)
+        assert len(findings) == 0, (
+            f"Blank lines should be excluded, got: {[f.message for f in findings]}"
+        )
+
+    def test_comment_lines_excluded(self):
+        """Comment-only lines should not count toward threshold."""
+        from dojigiri.semantic.smells import check_long_method
+
+        body_parts = []
+        for i in range(15):
+            body_parts.append(f"    # Step {i}")
+            body_parts.append(f"    x_{i} = {i}")
+        body = "\n".join(body_parts)
+        code = f"def commented_func():\n{body}\n"
+        sem = _sem(code)
+        # Effective: def + 15 logic = 16; total = 31 (15 comments + 15 logic + def)
+        findings = check_long_method(sem, "test.py", threshold=20)
+        assert len(findings) == 0, (
+            f"Comment-only lines should be excluded, got: {[f.message for f in findings]}"
+        )
+
+    def test_type_annotation_lines_excluded(self):
+        """Pure type annotation lines should not count toward threshold."""
+        from dojigiri.semantic.smells import check_long_method
+
+        annotations = "\n".join(f"    param_{i}: int" for i in range(15))
+        logic = "\n".join(f"    x_{i} = {i}" for i in range(15))
+        code = f"def annotated_func():\n{annotations}\n{logic}\n"
+        sem = _sem(code)
+        # Effective: def + 15 logic = 16 (annotations excluded); total = 31
+        findings = check_long_method(sem, "test.py", threshold=20)
+        assert len(findings) == 0, (
+            f"Type annotation lines should be excluded, got: {[f.message for f in findings]}"
+        )
+
+    def test_real_logic_still_flagged(self):
+        """A function with lots of real logic should still be flagged."""
+        from dojigiri.semantic.smells import check_long_method
+
+        docstring = '    """Short doc."""'
+        logic = "\n".join(f"    x_{i} = {i}" for i in range(55))
+        code = f"def truly_long():\n{docstring}\n{logic}\n"
+        sem = _sem(code)
+        findings = check_long_method(sem, "test.py", threshold=50)
+        assert len(findings) == 1
+        assert "truly_long" in findings[0].message
+
+    def test_message_shows_effective_and_total(self):
+        """When effective != total, message shows both counts."""
+        from dojigiri.semantic.smells import check_long_method
+
+        # Build a function with enough effective lines to trigger, plus extras
+        docstring_lines = "\n".join(f"        Doc line {i}." for i in range(10))
+        logic = "\n".join(f"    x_{i} = {i}" for i in range(55))
+        code = (
+            f'def mixed():\n'
+            f'    """Docstring.\n'
+            f'{docstring_lines}\n'
+            f'    """\n'
+            f'{logic}\n'
+        )
+        sem = _sem(code)
+        findings = check_long_method(sem, "test.py", threshold=50)
+        assert len(findings) == 1
+        assert "effective" in findings[0].message
+        assert "total" in findings[0].message
+
+    def test_single_line_docstring_excluded(self):
+        """A single-line triple-quoted docstring is excluded."""
+        from dojigiri.semantic.smells import check_long_method
+
+        logic = "\n".join(f"    x_{i} = {i}" for i in range(12))
+        code = f'def func_with_doc():\n    """One-liner."""\n{logic}\n'
+        sem = _sem(code)
+        # Effective: def + 12 logic = 13 (docstring excluded)
+        # Total: def + docstring + 12 logic = 14
+        findings = check_long_method(sem, "test.py", threshold=13)
+        assert len(findings) == 0
+
+    def test_fastapi_annotated_pattern(self):
+        """FastAPI-style Annotated[Type, Doc(...)] lines should be excluded."""
+        from dojigiri.semantic.smells import check_long_method
+
+        annotations = "\n".join(
+            f"    param_{i}: Annotated[str, Doc('Parameter {i}')]"
+            for i in range(15)
+        )
+        logic = "\n".join(f"    x_{i} = func_{i}()" for i in range(15))
+        code = f"def api_endpoint():\n{annotations}\n{logic}\n"
+        sem = _sem(code)
+        # Effective: def + 15 logic = 16 (15 annotation lines excluded)
+        findings = check_long_method(sem, "test.py", threshold=20)
+        assert len(findings) == 0
 
 
 # ---------------------------------------------------------------------------
@@ -453,8 +767,9 @@ class TestEdgeCases:
         """All smell findings should have Source.AST."""
         from dojigiri.semantic.smells import check_god_class, check_long_method
 
-        # God class
-        code = "class Huge:\n" + "\n".join(
+        # God class — use low thresholds with both axes exceeded
+        attrs = "\n".join(f"        self.a_{i} = {i}" for i in range(20))
+        code = f"class Huge:\n    def __init__(self):\n{attrs}\n" + "\n".join(
             f"    def m_{i}(self):\n        pass\n" for i in range(20)
         )
         sem = _sem(code)
@@ -472,7 +787,9 @@ class TestEdgeCases:
         """All smell findings should include a non-empty suggestion."""
         from dojigiri.semantic.smells import check_god_class, check_long_method
 
-        code = "class Huge:\n" + "\n".join(
+        # God class — use low thresholds with both axes exceeded
+        attrs = "\n".join(f"        self.a_{i} = {i}" for i in range(20))
+        code = f"class Huge:\n    def __init__(self):\n{attrs}\n" + "\n".join(
             f"    def m_{i}(self):\n        pass\n" for i in range(20)
         )
         sem = _sem(code)

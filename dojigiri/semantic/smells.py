@@ -23,20 +23,47 @@ from .core import FileSemantics, FunctionDef
 def check_god_class(
     semantics: FileSemantics,
     filepath: str,
-    method_threshold: int = 15,
-    attribute_threshold: int = 10,
+    method_threshold: int = 20,
+    attribute_threshold: int = 15,
 ) -> list[Finding]:
-    """Flag classes with too many methods or attributes."""
+    """Flag classes with too many methods AND attributes.
+
+    A true god class has excessive responsibility on *both* axes: it manages
+    too much state (attributes) AND exposes too many behaviors (methods).
+
+    Classes that exceed only one threshold are typically not god classes:
+    - Many methods + few attributes → service/facade class (intentional API surface)
+    - Many attributes + few methods → data/config class (intentional data carrier)
+
+    Previous heuristic (OR logic, low thresholds) produced heavy false positives
+    on framework base classes (Flask App, FastAPI router), data models, and
+    config objects.
+    """
     findings = []
 
-    for cdef in semantics.class_defs:
-        reasons = []
-        if cdef.method_count > method_threshold:
-            reasons.append(f"{cdef.method_count} methods (>{method_threshold})")
-        if len(cdef.attribute_names) > attribute_threshold:
-            reasons.append(f"{len(cdef.attribute_names)} attributes (>{attribute_threshold})")
+    # Collect method names per class so we can exclude them from attribute counts.
+    # The extractor counts `def method_name` at class scope as an assignment,
+    # which inflates attribute_names with method names.
+    class_method_names: dict[str, set[str]] = {}
+    for fdef in semantics.function_defs:
+        if fdef.parent_class:
+            class_method_names.setdefault(fdef.parent_class, set()).add(fdef.name)
 
-        if reasons:
+    for cdef in semantics.class_defs:
+        # True attributes = attribute_names minus method names
+        method_names = class_method_names.get(cdef.name, set())
+        true_attrs = [a for a in cdef.attribute_names if a not in method_names]
+
+        methods_over = cdef.method_count > method_threshold
+        attrs_over = len(true_attrs) > attribute_threshold
+
+        # Require BOTH thresholds exceeded — a class that's large on only
+        # one axis is a service class or data class, not a god class.
+        if methods_over and attrs_over:
+            reasons = [
+                f"{cdef.method_count} methods (>{method_threshold})",
+                f"{len(true_attrs)} attributes (>{attribute_threshold})",
+            ]
             findings.append(
                 Finding(
                     file=filepath,
@@ -55,17 +82,64 @@ def check_god_class(
 
 # ─── Check: Feature Envy ─────────────────────────────────────────────
 
+# Dunder methods that by definition operate on external objects, not self.
+# Descriptors (__get__, __set__, __delete__), metaclass hooks, etc.
+_DUNDER_SKIP = frozenset({
+    "__init__",
+    "__get__", "__set__", "__delete__", "__set_name__",
+    "__init_subclass__", "__class_getitem__",
+    "__enter__", "__exit__", "__aenter__", "__aexit__",
+    "__getattr__", "__getattribute__", "__setattr__", "__delattr__",
+    "__instancecheck__", "__subclasscheck__",
+})
+
+# Minimum method body size (lines) to meaningfully assess feature envy.
+_MIN_METHOD_LINES = 5
+
+
+def _is_nested_function(fdef: FunctionDef, all_funcs: list[FunctionDef]) -> bool:
+    """Return True if fdef is defined inside another function's body."""
+    for other in all_funcs:
+        if other is fdef:
+            continue
+        # fdef is nested if its line range is fully contained within another function
+        if other.line < fdef.line and fdef.end_line <= other.end_line:
+            return True
+    return False
+
+
+def _has_decorator_wiring(fdef: FunctionDef, semantics: FileSemantics) -> bool:
+    """Return True if the method has decorator-style call patterns.
+
+    Detects methods decorated with framework registration patterns like
+    @app.route, @blueprint.route — these do cross-object wiring by design.
+    We check if there are function calls on the line(s) immediately before
+    the def statement (where decorators live).
+    """
+    # Decorators appear on lines just before the function definition
+    for call in semantics.function_calls:
+        if fdef.line - 3 <= call.line < fdef.line and call.receiver is not None:
+            # A call with a receiver right before the def = decorator like @app.route(...)
+            return True
+    return False
+
 
 def check_feature_envy(
     semantics: FileSemantics,
     filepath: str,
-    external_ratio: float = 2.0,
-    min_external: int = 3,
+    external_ratio: float = 3.0,
+    min_external: int = 5,
 ) -> list[Finding]:
     """Flag methods that use more external state than internal state.
 
     A method has feature envy when it accesses another object's attributes
     more than its own class's attributes.
+
+    Suppressed for:
+    - Dunder/protocol methods (descriptors, context managers, metaclass hooks)
+    - Methods shorter than 5 lines (too small to meaningfully assess)
+    - Inner/nested functions (cross-scope access is intentional)
+    - Methods with framework decorator patterns (@app.route, etc.)
     """
     findings = []
 
@@ -84,22 +158,43 @@ def check_feature_envy(
         if not fdef.parent_class:
             continue
 
-        internal_attrs = class_attrs.get(fdef.parent_class, set())
-        if not internal_attrs:
+        # --- Suppression: dunder/protocol methods ---
+        if fdef.name in _DUNDER_SKIP:
             continue
 
-        # Count internal vs external attribute references in this function
+        # --- Suppression: short methods (< 5 lines) ---
+        method_lines = fdef.end_line - fdef.line + 1
+        if method_lines < _MIN_METHOD_LINES:
+            continue
+
+        # --- Suppression: nested/inner functions ---
+        if _is_nested_function(fdef, semantics.function_defs):
+            continue
+
+        # --- Suppression: decorator wiring patterns ---
+        if _has_decorator_wiring(fdef, semantics):
+            continue
+
+        # Determine the self/this keyword for this method (first parameter)
+        self_kw = fdef.params[0] if fdef.params else "self"
+
+        # Count internal vs external attribute references in this function.
+        # Internal = any attribute access on self/cls (self.xxx is the object's own state).
+        # External = attribute access on any other receiver (other.xxx).
         internal_refs = 0
         external_refs = 0
 
         for ref in semantics.references:
-            if ref.scope_id != fdef.scope_id:
-                # Check if ref is in a child scope of this function
+            # Match refs by line range — scope_id of a function def is the
+            # *parent* scope (class body), while body refs are in a child scope.
+            if not (fdef.line <= ref.line <= fdef.end_line):
                 continue
             if ref.context == "attribute_access":
-                if ref.name in internal_attrs:
+                if ref.receiver == self_kw:
+                    # self.xxx — always internal, whether defined in class body or not
                     internal_refs += 1
-                else:
+                elif ref.receiver is not None:
+                    # other_obj.xxx — external
                     external_refs += 1
 
         if external_refs > internal_refs * external_ratio and external_refs >= min_external:
@@ -128,19 +223,122 @@ def check_feature_envy(
 # ─── Check: Long Method ──────────────────────────────────────────────
 
 
+def _count_effective_lines(
+    semantics: FileSemantics,
+    fdef: FunctionDef,
+) -> int:
+    """Count effective lines of logic in a function body.
+
+    Subtracts from total line count:
+    - The def line itself (signature, not logic)
+    - Blank lines
+    - Comment-only lines (# ...)
+    - Docstring lines (first expression statement if it's a string literal)
+    - Pure type-annotation lines (e.g. ``param: Annotated[...]``)
+
+    Falls back to raw line count if source_lines are unavailable.
+    """
+    total = fdef.end_line - fdef.line + 1
+    source = semantics.source_lines
+    if not source:
+        return total
+
+    # Body starts after the def line
+    body_start = fdef.line + 1
+    body_end = min(fdef.end_line, len(source) - 1)
+
+    non_logic = 0
+    in_docstring = False
+    docstring_done = False
+    first_content_seen = False
+
+    for lineno in range(body_start, body_end + 1):
+        line = source[lineno] if lineno < len(source) else ""
+        stripped = line.strip()
+
+        # Blank line
+        if not stripped:
+            non_logic += 1
+            continue
+
+        # Comment-only line
+        if stripped.startswith("#"):
+            non_logic += 1
+            continue
+
+        # Docstring detection: first non-blank, non-comment content in body
+        if not first_content_seen:
+            first_content_seen = True
+            # Triple-quoted docstring (single or double quotes)
+            for quote in ('"""', "'''"):
+                if stripped.startswith(quote):
+                    # Check if docstring opens and closes on same line
+                    if stripped.count(quote) >= 2 and stripped.endswith(quote):
+                        non_logic += 1
+                        docstring_done = True
+                        break
+                    else:
+                        in_docstring = True
+                        non_logic += 1
+                        docstring_done = False
+                        break
+                    break
+            if in_docstring or docstring_done:
+                continue
+            # Single-line string literal as docstring (rare but valid)
+            if stripped.startswith(("'", '"')) and not stripped.startswith(("'''", '"""')):
+                non_logic += 1
+                docstring_done = True
+                continue
+
+        # Inside a multi-line docstring
+        if in_docstring:
+            non_logic += 1
+            for quote in ('"""', "'''"):
+                if quote in stripped:
+                    in_docstring = False
+                    docstring_done = True
+                    break
+            continue
+
+        # Pure type annotation line: "name: Type" or "name: Annotated[...]"
+        # Must not contain "=" (that's an assignment) and must have a colon
+        if ":" in stripped and "=" not in stripped:
+            # Split on first colon — left side should be a simple name
+            left = stripped.split(":", 1)[0].strip()
+            if left.isidentifier():
+                non_logic += 1
+                continue
+
+    effective = total - non_logic
+    # Never return less than 1
+    return max(effective, 1)
+
+
 def check_long_method(
     semantics: FileSemantics,
     filepath: str,
     threshold: int = 50,
 ) -> list[Finding]:
-    """Flag functions longer than threshold lines."""
+    """Flag functions longer than threshold effective lines.
+
+    Effective lines exclude docstrings, blank lines, comment-only lines,
+    and pure type annotation lines — preventing false positives on
+    well-documented functions with reasonable logic.
+    """
     findings = []
 
     for fdef in semantics.function_defs:
-        length = fdef.end_line - fdef.line + 1
-        if length > threshold:
+        effective = _count_effective_lines(semantics, fdef)
+        if effective > threshold:
+            total = fdef.end_line - fdef.line + 1
             label = "Method" if fdef.parent_class else "Function"
             name = fdef.qualified_name.split(":")[-1] if ":" in fdef.qualified_name else fdef.qualified_name
+            # Show both effective and total when they differ
+            if effective < total:
+                size_desc = f"{effective} effective lines ({total} total)"
+            else:
+                size_desc = f"{effective} lines"
             findings.append(
                 Finding(
                     file=filepath,
@@ -149,7 +347,7 @@ def check_long_method(
                     category=Category.STYLE,
                     source=Source.AST,
                     rule="long-method",
-                    message=f"{label} '{name}' is {length} lines long (>{threshold})",
+                    message=f"{label} '{name}' is {size_desc} (>{threshold})",
                     suggestion=f"Consider extracting parts of '{fdef.name}' into smaller functions",
                 )
             )
@@ -313,12 +511,22 @@ class SemanticSignature:
 def build_semantic_signature(
     fdef: FunctionDef,
     semantics: FileSemantics,
+    *,
+    min_statements: int = 8,
 ) -> SemanticSignature | None:
     """Build a normalized semantic signature for a function.
 
     Variable names are stripped — only structural patterns matter.
-    Only computed for functions with >5 statements.
+    Only computed for functions with >= min_statements statements (default 8).
+    Functions with many parameters (>= 10) are skipped — they're typically
+    API surface methods (route handlers, CLI wrappers) that are intentionally
+    similar.
     """
+    # Skip high-parameter functions — API surface methods that are
+    # intentionally similar (e.g., FastAPI route handlers, Click commands).
+    if len(fdef.params) >= 10:
+        return None
+
     # Collect statements in this function
     assignments_in_func = [
         a for a in semantics.assignments if fdef.line <= a.line <= fdef.end_line and not a.is_parameter
@@ -326,7 +534,7 @@ def build_semantic_signature(
     calls_in_func = [c for c in semantics.function_calls if fdef.line <= c.line <= fdef.end_line]
 
     stmt_count = len(assignments_in_func) + len(calls_in_func)
-    if stmt_count < 5:
+    if stmt_count < min_statements:
         return None
 
     # Call sequence (sorted, normalized)
@@ -365,6 +573,56 @@ class ClonePair:
     similarity: float
 
 
+def _transitive_reduce(pairs: list[ClonePair]) -> list[ClonePair]:
+    """Remove redundant transitive edges from clone pairs.
+
+    If A~B and B~C are reported, A~C is redundant — the developer can
+    already see the cluster via the chain.  We keep the minimum spanning
+    edges: for each connected component, build an MST (max-similarity
+    spanning tree) and drop all other edges.
+
+    This turns C(N,2) pairs for an N-function clone group into N-1 pairs.
+    """
+    if len(pairs) <= 1:
+        return pairs
+
+    # Collect all unique function nodes
+    nodes: set[tuple[str, int]] = set()
+    for p in pairs:
+        nodes.add((p.file_a, p.func_a_line))
+        nodes.add((p.file_b, p.func_b_line))
+
+    if len(nodes) <= 2:
+        return pairs
+
+    # Union-Find for Kruskal's MST (max-similarity = sort descending)
+    parent: dict[tuple[str, int], tuple[str, int]] = {n: n for n in nodes}
+
+    def find(x: tuple[str, int]) -> tuple[str, int]:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: tuple[str, int], b: tuple[str, int]) -> bool:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return False
+        parent[ra] = rb
+        return True
+
+    # Sort by similarity descending — keep highest-similarity edges first
+    sorted_pairs = sorted(pairs, key=lambda p: p.similarity, reverse=True)
+    kept: list[ClonePair] = []
+    for p in sorted_pairs:
+        node_a = (p.file_a, p.func_a_line)
+        node_b = (p.file_b, p.func_b_line)
+        if union(node_a, node_b):
+            kept.append(p)
+
+    return kept
+
+
 def find_semantic_clone_pairs(
     semantics_by_file: dict[str, FileSemantics],
     similarity_threshold: float = 0.85,
@@ -373,6 +631,9 @@ def find_semantic_clone_pairs(
 
     Returns structured ClonePair objects — callers decide how to present them
     (as Finding, CrossFileFinding, etc). No string parsing needed.
+
+    Applies transitive reduction: if functions A, B, C are all similar,
+    only the spanning-tree edges are reported (N-1 pairs instead of N*(N-1)/2).
     """
     pairs: list[ClonePair] = []
     sigs: list[tuple[str, FunctionDef, SemanticSignature]] = []
@@ -418,7 +679,8 @@ def find_semantic_clone_pairs(
                     )
                 )
 
-    return pairs
+    # Transitive reduction: collapse N*(N-1)/2 pairs into N-1 spanning edges
+    return _transitive_reduce(pairs)
 
 
 def check_semantic_clones(

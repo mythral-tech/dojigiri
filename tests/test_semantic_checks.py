@@ -141,6 +141,85 @@ class TestUnusedImports:
         findings = check_unused_imports(tree, src, config, "test.py")
         assert len(findings) == 0
 
+    def test_python_reexport_from_import_as_same_name(self):
+        """from X import Y as Y is a PEP 484 explicit re-export — not unused."""
+        code = "from .module import MyClass as MyClass\nfrom .other import helper as helper\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "__init__.py")
+        assert len(findings) == 0
+
+    def test_python_reexport_import_as_same_name(self):
+        """import X as X is a PEP 484 explicit re-export — not unused."""
+        code = "import os as os\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "__init__.py")
+        assert len(findings) == 0
+
+    def test_python_aliased_import_different_name_still_flagged(self):
+        """import X as Y (different alias) should still be flagged if unused."""
+        code = "from os import path as p\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "test.py")
+        names = [f.message for f in findings]
+        assert any("p" in m for m in names)
+
+    def test_python_reexport_mixed_with_unused(self):
+        """In __init__.py, ALL imports are suppressed (they're re-exports)."""
+        code = "from .module import MyClass as MyClass\nimport sys\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "__init__.py")
+        assert len(findings) == 0  # __init__.py → all imports suppressed
+
+    def test_python_unused_import_flagged_in_regular_file(self):
+        """In regular files, genuinely unused imports should still be flagged."""
+        code = "from .module import MyClass as MyClass\nimport sys\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "regular.py")
+        assert len(findings) == 1
+        assert "sys" in findings[0].message
+
+    def test_python_noqa_suppresses_unused_import(self):
+        """Imports with # noqa comments should not be flagged."""
+        code = "import socket  # noqa: F401\nimport sys\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "test.py")
+        names = [f.message for f in findings]
+        assert not any("socket" in m for m in names)
+        assert any("sys" in m for m in names)
+
+    def test_python_noqa_multiline_import(self):
+        """Multi-line imports with # noqa on the first line should be suppressed."""
+        code = "from .models import (  # noqa: F401\n    Request,\n    Response,\n)\nimport sys\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "test.py")
+        names = [f.message for f in findings]
+        assert not any("Request" in m for m in names)
+        assert not any("Response" in m for m in names)
+        assert any("sys" in m for m in names)
+
+    def test_python_type_comment_suppresses_unused_import(self):
+        """Imports with # type: comments should not be flagged."""
+        code = "import os  # type: ignore\nimport sys\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "test.py")
+        names = [f.message for f in findings]
+        assert not any("'os'" in m for m in names)
+        assert any("sys" in m for m in names)
+
+    def test_python_init_py_suppresses_all_imports(self):
+        """All imports in __init__.py files should be suppressed."""
+        code = "import os\nimport sys\nfrom pathlib import Path\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "__init__.py")
+        assert len(findings) == 0
+
+    def test_python_init_py_with_path(self):
+        """__init__.py detection works with full paths."""
+        code = "import os\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_unused_imports(tree, src, config, "/some/package/__init__.py")
+        assert len(findings) == 0
+
 
 # ───────────────────────────────────────────────────────────────────────────
 # UNREACHABLE CODE

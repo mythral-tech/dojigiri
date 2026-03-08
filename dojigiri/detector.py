@@ -382,9 +382,9 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
         return findings
 
     # Run focused checks
-    _check_imports(tree, filepath, findings)
+    _check_imports(tree, filepath, findings, content)
     _check_functions(tree, filepath, findings)
-    _check_exception_handling(tree, filepath, findings)
+    _check_exception_handling(tree, filepath, findings, content)
     _check_shadowed_builtins(tree, filepath, findings)
     _check_type_comparisons(tree, filepath, findings)
     _check_global_usage(tree, filepath, findings)
@@ -400,14 +400,24 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
     return findings
 
 
-def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding], content: str = ""):
     """Check for unused imports.
 
     Skips:
     - `from __future__ import ...` (directives, not symbol imports)
     - `import X as X` / `from Y import X as X` (explicit re-export pattern, PEP 484)
     - Imports inside `if TYPE_CHECKING:` blocks
+    - All imports in `__init__.py` files (public API re-exports)
+    - Imports with `# noqa` or `# type:` comments on the same line
     """
+    import os
+
+    # __init__.py files: all imports are typically public API re-exports
+    if os.path.basename(filepath) == "__init__.py":
+        return
+
+    source_lines = content.splitlines() if content else []
+
     imported_names = {}  # name -> line number
     re_exported_names = set()  # names explicitly re-exported via `as X` identity alias
     used_names = set()
@@ -415,9 +425,23 @@ def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
     # Detect TYPE_CHECKING-guarded import lines
     type_checking_lines = _find_type_checking_lines(tree)
 
+    def _import_has_noqa(node: ast.AST) -> bool:
+        """Check if any line of this import node has a # noqa or # type: comment."""
+        start = getattr(node, "lineno", 0)
+        end = getattr(node, "end_lineno", start) or start
+        for ln in range(start, end + 1):
+            if 0 < ln <= len(source_lines):
+                line_text = source_lines[ln - 1]
+                if "# noqa" in line_text or "# type:" in line_text:
+                    return True
+        return False
+
     for node in ast.walk(tree):
         # Track imports
         if isinstance(node, ast.Import):
+            # Skip imports with # noqa or # type: comments
+            if _import_has_noqa(node):
+                continue
             for alias in node.names:
                 # Explicit re-export: `import X as X`
                 if alias.asname and alias.asname == alias.name:
@@ -431,6 +455,9 @@ def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding]):
                 continue
             # Skip TYPE_CHECKING-guarded imports
             if node.lineno in type_checking_lines:
+                continue
+            # Skip imports with # noqa or # type: comments
+            if _import_has_noqa(node):
                 continue
             for alias in node.names:
                 if alias.name == "*":
@@ -504,36 +531,137 @@ def _check_functions(tree: ast.AST, filepath: str, findings: list[Finding]):
             _check_function(node, filepath, findings)  # type: ignore[arg-type]  # FunctionDef | AsyncFunctionDef both valid
 
 
-def _check_exception_handling(tree: ast.AST, filepath: str, findings: list[Finding]):
-    """Check for swallowed exceptions (except: pass/continue)."""
+def _is_empty_except(node: ast.ExceptHandler, terminal_type: type) -> bool:
+    """Check if an except handler body is effectively empty.
+
+    Matches bodies that are just ``[Pass]``, ``[Continue]``, or
+    ``[Expr(string_constant), Pass]`` / ``[Expr(string_constant), Continue]``
+    (a string "comment" followed by the terminal statement).
+    """
+    body = node.body
+    if len(body) == 1 and isinstance(body[0], terminal_type):
+        return True
+    if len(body) == 2 and isinstance(body[1], terminal_type):
+        first = body[0]
+        if isinstance(first, ast.Expr) and isinstance(
+            first.value, ast.Constant
+        ):
+            return True
+    return False
+
+
+def _has_explanatory_comment(
+    node: ast.ExceptHandler, source_lines: list[str]
+) -> bool:
+    """Check if an except handler body has an explanatory comment.
+
+    Returns True when the except block contains:
+    - A comment on the ``pass`` / ``continue`` line (e.g. ``pass  # intentional``)
+    - A comment on a line between the except clause and the pass/continue
+    - A string-expression "comment" (``"reason string"``) preceding ``pass``
+    """
+    # String expression used as a comment (e.g. ``"keep value as string"``)
+    if len(node.body) >= 1:
+        first = node.body[0]
+        if (
+            isinstance(first, ast.Expr)
+            and isinstance(first.value, ast.Constant)
+        ):
+            return True
+
+    # Check source lines for inline ``#`` comments in the except body range
+    if source_lines:
+        body_node = node.body[-1]  # pass or continue
+        # Lines from except clause through the pass/continue (1-indexed → 0-indexed)
+        start = node.lineno - 1
+        end = body_node.lineno  # inclusive, already 1-indexed so slice to end
+        for line in source_lines[start:end]:
+            stripped = line.lstrip()
+            # Pure comment line
+            if stripped.startswith("#"):
+                return True
+            # Inline comment after code (e.g. ``pass  # reason``)
+            if "#" in stripped:
+                # Rough but sufficient: split on # outside strings
+                code_part, _, comment_part = stripped.partition("#")
+                if comment_part.strip():
+                    return True
+    return False
+
+
+def _check_exception_handling(
+    tree: ast.AST, filepath: str, findings: list[Finding], content: str = ""
+):
+    """Check for swallowed exceptions (except: pass/continue).
+
+    When the except body contains an explanatory comment (inline ``#`` comment
+    or a string-expression "docstring"), the finding is downgraded to INFO
+    severity instead of WARNING — the developer explicitly acknowledged the
+    swallowed exception.
+    """
+    source_lines = content.splitlines() if content else []
+
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler):
-            if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
-                findings.append(
-                    Finding(
-                        file=filepath,
-                        line=node.lineno,
-                        severity=Severity.WARNING,
-                        category=Category.BUG,
-                        source=Source.AST,
-                        rule="exception-swallowed",
-                        message="Exception caught and silently ignored (except: pass)",
-                        suggestion="Log the exception or handle it explicitly",
+            is_empty_pass = _is_empty_except(node, ast.Pass)
+            is_empty_continue = (not is_empty_pass) and _is_empty_except(node, ast.Continue)
+
+            if is_empty_pass:
+                has_comment = _has_explanatory_comment(node, source_lines)
+                if has_comment:
+                    findings.append(
+                        Finding(
+                            file=filepath,
+                            line=node.lineno,
+                            severity=Severity.INFO,
+                            category=Category.BUG,
+                            source=Source.AST,
+                            rule="exception-swallowed",
+                            message="Exception caught and silently ignored (except: pass) — comment explains intent",
+                            suggestion="Acknowledged via comment; consider logging for observability",
+                        )
                     )
-                )
-            elif len(node.body) == 1 and isinstance(node.body[0], ast.Continue):
-                findings.append(
-                    Finding(
-                        file=filepath,
-                        line=node.lineno,
-                        severity=Severity.WARNING,
-                        category=Category.BUG,
-                        source=Source.AST,
-                        rule="exception-swallowed-continue",
-                        message="Exception caught and silently continued (except: continue)",
-                        suggestion="Log the exception before continuing, or handle it explicitly",
+                else:
+                    findings.append(
+                        Finding(
+                            file=filepath,
+                            line=node.lineno,
+                            severity=Severity.WARNING,
+                            category=Category.BUG,
+                            source=Source.AST,
+                            rule="exception-swallowed",
+                            message="Exception caught and silently ignored (except: pass)",
+                            suggestion="Log the exception or handle it explicitly",
+                        )
                     )
-                )
+            elif is_empty_continue:
+                has_comment = _has_explanatory_comment(node, source_lines)
+                if has_comment:
+                    findings.append(
+                        Finding(
+                            file=filepath,
+                            line=node.lineno,
+                            severity=Severity.INFO,
+                            category=Category.BUG,
+                            source=Source.AST,
+                            rule="exception-swallowed-continue",
+                            message="Exception caught and silently continued (except: continue) — comment explains intent",
+                            suggestion="Acknowledged via comment; consider logging for observability",
+                        )
+                    )
+                else:
+                    findings.append(
+                        Finding(
+                            file=filepath,
+                            line=node.lineno,
+                            severity=Severity.WARNING,
+                            category=Category.BUG,
+                            source=Source.AST,
+                            rule="exception-swallowed-continue",
+                            message="Exception caught and silently continued (except: continue)",
+                            suggestion="Log the exception before continuing, or handle it explicitly",
+                        )
+                    )
 
 
 # Builtins that should not be shadowed by variables or parameters
@@ -1170,7 +1298,7 @@ def analyze_file_static(filepath: str, content: str, language: str, custom_rules
             check_unused_variables,
             check_variable_shadowing,
         )
-        from .semantic.smells import check_feature_envy, check_god_class, check_long_method, check_semantic_clones
+        from .semantic.smells import check_feature_envy, check_god_class, check_long_method
         from .semantic.taint import analyze_taint
 
         findings.extend(check_unused_variables(semantics, filepath))
@@ -1213,7 +1341,8 @@ def analyze_file_static(filepath: str, content: str, language: str, custom_rules
         findings.extend(check_god_class(semantics, filepath))
         findings.extend(check_feature_envy(semantics, filepath))
         findings.extend(check_long_method(semantics, filepath))
-        findings.extend(check_semantic_clones({filepath: semantics}))
+        # Note: semantic clone detection is handled project-wide in analyzer.py
+        # to avoid duplicate intra-file findings.
 
     # v0.11.0: AST-based taint analysis with variable indirection tracking
     # Catches patterns tree-sitter taint misses: f-string interpolation,

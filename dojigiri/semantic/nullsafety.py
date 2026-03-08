@@ -6,6 +6,7 @@ Uses type inference results to find cases where:
 2. A method is called on a nullable return value without guarding
 
 Supports conditional narrowing: suppresses inside `if x is not None:` bodies.
+Also tracks variable reassignment to non-None values (e.g., `x = x or default`).
 Returns [] when type info is unavailable.
 
 Called by: detector.py
@@ -87,6 +88,22 @@ _INLINE_GUARD_RE = [
     re.compile(r"\b(\w+)\b.*\bif\s+\1\b.*\belse\b"),  # x if x else default
 ]
 
+# Reassignment patterns: variable reassigned to a non-None value, clearing nullability
+# These detect `x = x or default`, `x = something`, etc.
+_REASSIGN_PATTERNS = [
+    re.compile(r"self\.(\w+)\s*=\s*self\.\1\s+or\s+\S"),  # self.x = self.x or default
+    re.compile(r"(\w+)\s*=\s*\1\s+or\s+\S"),  # x = x or default
+    re.compile(r"self\.(\w+)\s*=\s*(?!None\b)\S"),  # self.x = <non-None>
+    re.compile(r"(\w+)\s*=\s*(?!None\b|.*\.get\(|.*\.find\(|.*re\.match\(|.*re\.search\()\S"),  # x = <non-None, non-nullable-pattern>
+]
+
+# Assignment LHS patterns: detect `self.x = ...` to suppress false positives
+# on the attribute name appearing as attribute_access context
+_ASSIGNMENT_LHS_PATTERNS = [
+    re.compile(r"self\.(\w+)\s*="),  # self.x = ...
+    re.compile(r"(\w+)\s*=(?!=)"),  # x = ... (but not x == ...)
+]
+
 
 def _find_guarded_lines(
     source_bytes: bytes,
@@ -98,13 +115,17 @@ def _find_guarded_lines(
 
     Detects patterns:
     1. Block guards: `if x is not None:` / `if (x !== null)` / `if x:` —
-       all indented lines inside the block are guarded.
+       the guard line itself AND all indented lines inside the block are guarded.
     2. Early-exit guards: `if x is None: raise/return` — all lines AFTER
        the block are guarded (None eliminated on continuation path).
     3. Assert guards: `assert x is not None` / `assert isinstance(x, T)` —
        all lines after the assert are guarded.
     4. Inline guards: `x and x.attr` (short-circuit), `x if x else d` (ternary)
        — suppress findings on the same line.
+    5. Reassignment: `x = x or default` or `x = <non-None value>` — all lines
+       after the reassignment are guarded.
+    6. Assignment LHS: `self.x = ...` — the guard line suppresses the attribute
+       name on the left-hand side.
     """
     lines = source_bytes.decode("utf-8", errors="replace").splitlines()
     guarded: dict[str, set[int]] = {}
@@ -159,6 +180,25 @@ def _find_guarded_lines(
                 var_name = m.group(1)
                 guarded.setdefault(var_name, set()).add(lineno)
 
+        # Detect assignment LHS: `self.x = ...` — suppress the attr name
+        # on the assignment line (it's not a dereference)
+        for pattern in _ASSIGNMENT_LHS_PATTERNS:
+            m = pattern.search(stripped)
+            if m:
+                var_name = m.group(1)
+                guarded.setdefault(var_name, set()).add(lineno)
+
+        # Detect reassignment to non-None values: `x = x or default`
+        for pattern in _REASSIGN_PATTERNS:
+            m = pattern.match(stripped)
+            if m:
+                var_name = m.group(1)
+                # All lines from this point forward are guarded (nullability cleared)
+                assert_guarded_from.setdefault(var_name, lineno)
+                # Also guard the reassignment line itself
+                guarded.setdefault(var_name, set()).add(lineno)
+                break
+
         # Detect assert guards
         if stripped.startswith("assert "):
             for pattern in _ASSERT_PATTERNS:
@@ -195,6 +235,9 @@ def _find_guarded_lines(
             if m:
                 var_name = m.group(1)
                 active_guards.append((var_name, indent, lineno))
+                # Also guard the if-line itself — accessing x in `if x is not None:`
+                # is a comparison, not a dereference
+                guarded.setdefault(var_name, set()).add(lineno)
                 break
 
     return guarded

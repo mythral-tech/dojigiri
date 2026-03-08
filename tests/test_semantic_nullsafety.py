@@ -274,6 +274,116 @@ def g():
         assert len(null_findings) >= 1
 
 
+# ─── Guarded Access: Guard Line Suppression ──────────────────────────────────
+
+@needs_tree_sitter
+class TestGuardLineSuppression:
+    """The guard line itself (if x is not None:) should not flag x."""
+
+    def test_self_attr_guard_line_not_flagged(self):
+        """if self._max is not None: should not flag _max on the guard line."""
+        code = '''\
+class Foo:
+    _max = None
+
+    def check(self):
+        if self._max is not None:
+            return self._max.bit_length()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_self_attr_truthiness_guard_not_flagged(self):
+        """if self._static_folder: should not flag _static_folder."""
+        code = '''\
+class Scaffold:
+    def __init__(self):
+        self._static_folder = None
+
+    def static_folder(self):
+        if self._static_folder:
+            return self._static_folder.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_flask_wrappers_pattern(self):
+        """Flask wrappers.py: guarded self.attr inside if block."""
+        code = '''\
+class Request:
+    _max_content_length = None
+
+    def max_content_length(self):
+        if self._max_content_length is not None:
+            return self._max_content_length
+        return 0
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+
+# ─── Guarded Access: Reassignment Patterns ───────────────────────────────────
+
+@needs_tree_sitter
+class TestReassignmentGuard:
+    """Variable reassigned to non-None should clear nullability."""
+
+    def test_or_default_reassignment(self):
+        """x = x or 'default' should clear nullability for subsequent access."""
+        code = '''\
+def f():
+    x = d.get("key")
+    x = x or "default"
+    x.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_or_dict_reassignment(self):
+        """hooks = hooks or {} should clear nullability (requests hooks.py pattern)."""
+        code = '''\
+def f():
+    hooks = d.get("hooks")
+    hooks = hooks or {}
+    hooks.update(extra)
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_reassignment_does_not_suppress_before(self):
+        """Access before reassignment should still be flagged."""
+        code = '''\
+def f():
+    x = d.get("key")
+    x.strip()
+    x = x or "default"
+    x.upper()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        # x.strip() on line 3 is before reassignment — should still be flagged
+        assert len(null_findings) >= 1
+        assert any(f.line == 3 for f in null_findings)
+        # x.upper() on line 5 is after reassignment — should NOT be flagged
+        assert not any(f.line == 5 for f in null_findings)
+
+    def test_self_attr_assignment_lhs_not_flagged(self):
+        """self._max = None should not flag _max (it's an assignment, not a dereference)."""
+        code = '''\
+class Foo:
+    def __init__(self):
+        self._max = None
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+
 # ─── Annotation-Based Nullability ────────────────────────────────────────────
 
 @needs_tree_sitter

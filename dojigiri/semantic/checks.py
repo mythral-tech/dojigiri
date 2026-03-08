@@ -41,9 +41,41 @@ def _node_line(node) -> int:
 # ─── Check: Unused Imports ─────────────────────────────────────────────────
 
 
+def _is_init_py(filepath: str) -> bool:
+    """Return True if *filepath* points to an ``__init__.py`` file."""
+    import os
+    return os.path.basename(filepath) == "__init__.py"
+
+
+def _line_has_noqa(source_bytes: bytes, node) -> bool:
+    """Return True if the import statement's line(s) contain a ``# noqa`` or ``# type:`` comment."""
+    # Grab the full text of all lines that this node spans
+    lines = source_bytes[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
+    # Also check text *after* the node on the same line (comment may follow the statement)
+    end_line_start = node.end_byte
+    end_line_end = source_bytes.find(b"\n", end_line_start)
+    if end_line_end == -1:
+        end_line_end = len(source_bytes)
+    trailing = source_bytes[end_line_start:end_line_end].decode("utf-8", errors="replace")
+    # For multi-line imports (e.g. ``from .models import (  # noqa: F401``),
+    # also check the first line which may hold the comment
+    first_line_start = source_bytes.rfind(b"\n", 0, node.start_byte)
+    first_line_start = first_line_start + 1 if first_line_start != -1 else 0
+    first_line_end = source_bytes.find(b"\n", node.start_byte)
+    if first_line_end == -1:
+        first_line_end = len(source_bytes)
+    first_line = source_bytes[first_line_start:first_line_end].decode("utf-8", errors="replace")
+    combined = lines + " " + trailing + " " + first_line
+    return "# noqa" in combined or "# type:" in combined
+
+
 def check_unused_imports(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
     """Detect imports where the imported name never appears elsewhere in the file."""
     if not config.import_node_types:
+        return []
+
+    # __init__.py files: all imports are typically public API re-exports — skip entirely
+    if _is_init_py(filepath):
         return []
 
     findings = []
@@ -51,6 +83,10 @@ def check_unused_imports(tree, source_bytes: bytes, config: LanguageConfig, file
 
     for node in _walk_tree(root):
         if node.type not in config.import_node_types:
+            continue
+
+        # Skip imports annotated with # noqa or # type: comments
+        if _line_has_noqa(source_bytes, node):
             continue
 
         _import_text = _get_node_text(node, source_bytes)
@@ -103,12 +139,18 @@ def _extract_import_names(node, source_bytes: bytes, config: LanguageConfig) -> 
                     names.append(text.split(".")[0])
                 elif child.type == "aliased_import":
                     alias = child.child_by_field_name("alias")
-                    if alias:
+                    name_node = child.child_by_field_name("name")
+                    if alias and name_node:
+                        alias_text = _get_node_text(alias, source_bytes)
+                        name_text = _get_node_text(name_node, source_bytes)
+                        # `import X as X` is an explicit re-export (PEP 484) — skip
+                        if alias_text == name_text:
+                            continue
+                        names.append(alias_text)
+                    elif alias:
                         names.append(_get_node_text(alias, source_bytes))
-                    else:
-                        name_node = child.child_by_field_name("name")
-                        if name_node:
-                            names.append(_get_node_text(name_node, source_bytes).split(".")[0])
+                    elif name_node:
+                        names.append(_get_node_text(name_node, source_bytes).split(".")[0])
         elif node.type == "import_from_statement":
             # `from M import X, Y` / `from M import X as Z`
             module_node = node.child_by_field_name("module_name")
@@ -128,12 +170,18 @@ def _extract_import_names(node, source_bytes: bytes, config: LanguageConfig) -> 
                         names.append(text)
                 elif child.type == "aliased_import":
                     alias = child.child_by_field_name("alias")
-                    if alias:
+                    name_node = child.child_by_field_name("name")
+                    if alias and name_node:
+                        alias_text = _get_node_text(alias, source_bytes)
+                        name_text = _get_node_text(name_node, source_bytes)
+                        # `from X import Y as Y` is an explicit re-export (PEP 484) — skip
+                        if alias_text == name_text:
+                            continue
+                        names.append(alias_text)
+                    elif alias:
                         names.append(_get_node_text(alias, source_bytes))
-                    else:
-                        name_node = child.child_by_field_name("name")
-                        if name_node:
-                            names.append(_get_node_text(name_node, source_bytes))
+                    elif name_node:
+                        names.append(_get_node_text(name_node, source_bytes))
 
     elif lang in ("javascript", "typescript"):
         # import { X, Y } from "module"  or  import X from "module"

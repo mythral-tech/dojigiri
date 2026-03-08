@@ -127,6 +127,26 @@ _PYTHON_BUILTINS = {
 }
 
 
+def _is_init_file(filepath: str) -> bool:
+    """Return True if *filepath* is an ``__init__.py`` file."""
+    import os
+    return os.path.basename(filepath) == "__init__.py"
+
+
+def _extract_all_names(semantics: FileSemantics) -> set[str]:
+    """Extract names from ``__all__ = [...]`` if present at module scope."""
+    module_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "module"}
+    names: set[str] = set()
+    for asgn in semantics.assignments:
+        if asgn.name == "__all__" and asgn.scope_id in module_scope_ids and asgn.value_text:
+            # Parse simple list/tuple of string literals from value_text
+            # e.g. ``["foo", "bar", 'baz']`` or ``("a", "b")``
+            import re
+            for m in re.finditer(r"""['"]([^'"]+)['"]""", asgn.value_text):
+                names.add(m.group(1))
+    return names
+
+
 # ─── Check: Unused Variables ─────────────────────────────────────────
 
 # Module-scope call patterns that define type system or framework objects
@@ -159,6 +179,9 @@ def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Find
     # Build set of module scope IDs
     module_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "module"}
 
+    # Extract names from __all__ for public API check
+    all_names = _extract_all_names(semantics)
+
     for asgn in semantics.assignments:
         # Skip parameters (handled differently), augmented, and _ prefixed
         if asgn.is_parameter:
@@ -179,6 +202,17 @@ def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Find
         if asgn.scope_id in module_scope_ids and asgn.value_text:
             if any(asgn.value_text.startswith(p) for p in _TYPE_DEFINITION_CALLS):
                 continue
+
+        # Skip public module-level names — these are likely public API intended
+        # for import by consumers (e.g. flask.session, requests.compat.basestring).
+        if asgn.scope_id in module_scope_ids and not asgn.name.startswith("_"):
+            continue
+        # Skip all module-level names in __init__.py (almost always re-exports)
+        if asgn.scope_id in module_scope_ids and _is_init_file(filepath):
+            continue
+        # Skip names listed in __all__ (explicit public API declaration)
+        if asgn.scope_id in module_scope_ids and asgn.name in all_names:
+            continue
 
         # Check if name is referenced in this scope or any child scope
         visible_scopes = _scope_and_children(semantics.scopes, asgn.scope_id)
@@ -215,15 +249,24 @@ def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Find
 
 # ─── Check: Variable Shadowing ───────────────────────────────────────
 
+# Common short names that collide everywhere — not worth flagging
+_SHADOW_IGNORE_NAMES = frozenset({
+    "key", "value", "name", "data", "path", "type", "id", "item", "result",
+    "args", "kwargs", "self", "cls", "i", "j", "n", "x", "y", "tag", "gen",
+})
+
 
 def check_variable_shadowing(semantics: FileSemantics, filepath: str) -> list[Finding]:
     """Find variables in inner scopes that shadow names from outer scopes.
 
-    Only checks assignments (not parameters — those have their own check).
+    Filters out common false positives:
+    - Parameters or locals shadowing class attributes (different scope by design)
+    - Names where the "shadowed" definition appears AFTER the shadowing one
+    - Very common/short names that collide everywhere (key, value, name, etc.)
     """
     findings = []
 
-    # Build a map: scope_id -> set of assigned names
+    # Build a map: scope_id -> set of assigned names (with line numbers)
     scope_names: dict[int, dict[str, int]] = {}  # scope_id -> {name: line}
     for asgn in semantics.assignments:
         if asgn.name.startswith("_"):
@@ -237,6 +280,9 @@ def check_variable_shadowing(semantics: FileSemantics, filepath: str) -> list[Fi
 
     # For each non-module scope, check if any assigned name exists in an ancestor
     scope_map = {s.scope_id: s for s in semantics.scopes}
+
+    # Identify class scope IDs for FP filtering
+    class_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "class"}
 
     for scope in semantics.scopes:
         if scope.kind == "module":
@@ -256,6 +302,22 @@ def check_variable_shadowing(semantics: FileSemantics, filepath: str) -> list[Fi
         for name, line in names_in_scope.items():
             if name in ancestor_names:
                 outer_scope_id, outer_line = ancestor_names[name]
+
+                # --- FP filter 1: skip common/short names ---
+                if name in _SHADOW_IGNORE_NAMES:
+                    continue
+
+                # --- FP filter 2: shadowed name must appear BEFORE shadowing ---
+                # A variable can't shadow something defined later.
+                if outer_line >= line:
+                    continue
+
+                # --- FP filter 3: skip class-attr vs function scope ---
+                # Parameters and locals in methods naturally reuse class
+                # attribute names (name, key, value, etc.). Not a bug.
+                if outer_scope_id in class_scope_ids:
+                    continue
+
                 outer_scope = scope_map.get(outer_scope_id)
                 outer_kind = outer_scope.kind if outer_scope else "outer"
                 findings.append(
