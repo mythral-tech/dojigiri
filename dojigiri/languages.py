@@ -75,9 +75,10 @@ UNIVERSAL_RULES: list[Rule] = _compile(
             "Line exceeds 200 characters",
             "Break into multiple lines for readability",
         ),
-        # Insecure HTTP
+        # Insecure HTTP — skip namespace URIs (xmlns, W3C, schemas, purl),
+        # data: URIs, and XML namespace declarations
         (
-            r"""['"]http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0)""",
+            r"""(?!.*(?:xmlns\s*=|data:))['"]http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0|www\.w3\.org/|schemas\.|purl\.org/|xml\.org/|relaxng\.org/|docbook\.org/|openid\.net/|ogp\.me/)""",
             Severity.WARNING,
             Category.SECURITY,
             "insecure-http",
@@ -887,8 +888,9 @@ SECURITY_RULES: list[Rule] = _compile(
             "Always pass timeout= to requests calls",
         ),
         # SSRF — URL constructed from user input passed to HTTP clients
+        # Skip url_for() (framework-generated URLs) and fetch('/...' (relative paths)
         (
-            r"""(?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|fetch\s*\(|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()""",
+            r"""(?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|fetch\s*\(\s*(?!['"]/)(?!url_for)|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()(?!.*url_for\s*\()""",
             Severity.WARNING,
             Category.SECURITY,
             "ssrf-risk",

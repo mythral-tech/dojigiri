@@ -42,13 +42,21 @@ _SKIP_IN_TEST_FILES = {
     "hardcoded-ip",          # test fixtures use literal IPs
     "hardcoded-secret",      # test credentials are intentional
     "subprocess-audit",      # test harness subprocess calls
+    "resource-leak",         # test client responses, fixtures handle cleanup
 }
-_SKIP_IN_EXAMPLE_FILES = {"console-log"}
+_SKIP_IN_EXAMPLE_FILES = {
+    "console-log",
+    "assert-statement",      # tutorial code uses assert for illustration
+    "hardcoded-secret",      # example credentials are intentional
+    "hardcoded-ip",          # example IPs are illustrative
+    "subprocess-audit",      # example shell commands are instructional
+    "unused-variable",       # snippets often declare without using
+}
 
 # Path segments identifying test and example files
 _TEST_PATH_SEGMENTS = ("/test/", "/tests/", "test_", "_test.", "/spec/", "/specs/")
 _TEST_FILENAMES = ("conftest.py",)  # exact filenames that are always test infra
-_EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/")
+_EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/", "/docs_src/", "/doc/")
 
 # Inline comment patterns per language family
 _INLINE_COMMENT_RE = {
@@ -613,6 +621,29 @@ def _has_explanatory_comment(
     return False
 
 
+def _is_broad_exception(node: ast.ExceptHandler) -> bool:
+    """Check if an except handler catches all or very broad exceptions.
+
+    Returns True for bare ``except:``, ``except Exception:``, and
+    ``except BaseException:``.  Returns False for specific exception types
+    like ``except ValueError:`` or ``except (KeyError, TypeError):``.
+    """
+    if node.type is None:
+        # bare ``except:``
+        return True
+    exc = node.type
+    # Single name
+    if isinstance(exc, ast.Name) and exc.id in ("Exception", "BaseException"):
+        return True
+    # ``except (Exception,):`` edge case — tuple with broad type
+    if isinstance(exc, ast.Tuple):
+        return any(
+            isinstance(elt, ast.Name) and elt.id in ("Exception", "BaseException")
+            for elt in exc.elts
+        )
+    return False
+
+
 def _check_exception_handling(
     tree: ast.AST, filepath: str, findings: list[Finding], content: str = ""
 ):
@@ -622,6 +653,11 @@ def _check_exception_handling(
     or a string-expression "docstring"), the finding is downgraded to INFO
     severity instead of WARNING — the developer explicitly acknowledged the
     swallowed exception.
+
+    For ``continue`` specifically: catching a **specific** exception (not bare
+    ``except:`` or ``except Exception:``) with ``continue`` is a common
+    dispatcher/fallback pattern (e.g., trying multiple template loaders).
+    These are downgraded to INFO even without a comment.
     """
     source_lines = content.splitlines() if content else []
 
@@ -660,7 +696,15 @@ def _check_exception_handling(
                     )
             elif is_empty_continue:
                 has_comment = _has_explanatory_comment(node, source_lines)
-                if has_comment:
+                is_specific = not _is_broad_exception(node)
+                if has_comment or is_specific:
+                    msg_suffix = ""
+                    if has_comment and is_specific:
+                        msg_suffix = " — specific exception with comment"
+                    elif has_comment:
+                        msg_suffix = " — comment explains intent"
+                    elif is_specific:
+                        msg_suffix = " — specific exception in fallback pattern"
                     findings.append(
                         Finding(
                             file=filepath,
@@ -669,8 +713,8 @@ def _check_exception_handling(
                             category=Category.BUG,
                             source=Source.AST,
                             rule="exception-swallowed-continue",
-                            message="Exception caught and silently continued (except: continue) — comment explains intent",
-                            suggestion="Acknowledged via comment; consider logging for observability",
+                            message=f"Exception caught and silently continued (except: continue){msg_suffix}",
+                            suggestion="Acknowledged; consider logging for observability",
                         )
                     )
                 else:

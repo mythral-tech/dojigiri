@@ -96,6 +96,17 @@ _DUNDER_SKIP = frozenset({
 # Minimum method body size (lines) to meaningfully assess feature envy.
 _MIN_METHOD_LINES = 5
 
+# Builder/mapper/factory prefixes — these methods deliberately access external
+# objects because constructing/transforming is their entire purpose.
+_BUILDER_PREFIXES = (
+    "build_", "create_", "make_", "from_", "to_",
+    "_encode_", "_decode_", "_convert_", "_transform_",
+    "_serialize_", "_deserialize_",
+)
+
+# Maximum effective body lines for delegation suppression.
+_MAX_DELEGATION_LINES = 3
+
 
 def _is_nested_function(fdef: FunctionDef, all_funcs: list[FunctionDef]) -> bool:
     """Return True if fdef is defined inside another function's body."""
@@ -173,6 +184,37 @@ def check_feature_envy(
 
         # --- Suppression: decorator wiring patterns ---
         if _has_decorator_wiring(fdef, semantics):
+            continue
+
+        # --- Suppression: static/class methods (no home object) ---
+        # If the method has no self/cls parameter it's a staticmethod —
+        # feature envy is meaningless because there's no "home" object.
+        if not fdef.params or fdef.params[0] not in ("self", "cls"):
+            continue
+
+        # --- Suppression: builder/mapper/factory patterns ---
+        # These methods deliberately reach into external objects to
+        # construct, encode, or transform data — that's their purpose.
+        if any(fdef.name.startswith(prefix) for prefix in _BUILDER_PREFIXES):
+            continue
+
+        # --- Suppression: single-line delegation ---
+        # If the effective body is ≤ 3 lines it's trivial delegation
+        # (e.g. return super().method(...) or return self.other.method(...)).
+        method_effective_lines = method_lines
+        if semantics.source_lines:
+            body_start = _find_body_start(
+                semantics.source_lines, fdef.line, fdef.end_line
+            )
+            body_end = min(fdef.end_line, len(semantics.source_lines) - 1)
+            effective = 0
+            for ln in range(body_start, body_end + 1):
+                line = semantics.source_lines[ln] if ln < len(semantics.source_lines) else ""
+                stripped = line.strip()
+                if stripped and not stripped.startswith("#"):
+                    effective += 1
+            method_effective_lines = effective
+        if method_effective_lines <= _MAX_DELEGATION_LINES:
             continue
 
         # Determine the self/this keyword for this method (first parameter)
@@ -280,6 +322,7 @@ def _count_effective_lines(
 
     non_logic = 0
     in_docstring = False
+    docstring_delimiter = ""  # track which quote style opened the docstring
     docstring_done = False
     first_content_seen = False
 
@@ -297,22 +340,32 @@ def _count_effective_lines(
             non_logic += 1
             continue
 
+        # Inside a multi-line docstring — check BEFORE first_content_seen
+        # so continuation lines are always caught regardless of flag state
+        if in_docstring:
+            non_logic += 1
+            # Only close on the SAME delimiter that opened the docstring
+            if docstring_delimiter in stripped:
+                in_docstring = False
+                docstring_done = True
+            continue
+
         # Docstring detection: first non-blank, non-comment content in body
         if not first_content_seen:
             first_content_seen = True
             # Triple-quoted docstring (single or double quotes)
             for quote in ('"""', "'''"):
                 if stripped.startswith(quote):
-                    # Check if docstring opens and closes on same line
-                    if stripped.count(quote) >= 2 and stripped.endswith(quote):
+                    # Check if docstring opens and closes on same line:
+                    # the closing delimiter must appear AFTER the opening one
+                    rest = stripped[3:]
+                    if quote in rest:
                         non_logic += 1
                         docstring_done = True
-                        break
                     else:
                         in_docstring = True
+                        docstring_delimiter = quote
                         non_logic += 1
-                        docstring_done = False
-                        break
                     break
             if in_docstring or docstring_done:
                 continue
@@ -321,16 +374,6 @@ def _count_effective_lines(
                 non_logic += 1
                 docstring_done = True
                 continue
-
-        # Inside a multi-line docstring
-        if in_docstring:
-            non_logic += 1
-            for quote in ('"""', "'''"):
-                if quote in stripped:
-                    in_docstring = False
-                    docstring_done = True
-                    break
-            continue
 
         # Pure type annotation line: "name: Type" or "name: Annotated[...]"
         # Must not contain "=" (that's an assignment) and must have a colon
@@ -714,12 +757,10 @@ def find_semantic_clone_pairs(
             if file_a == file_b and func_a.line == func_b.line:
                 continue
 
-            # Suppress clone detection between two test files
-            if (
-                file_a != file_b
-                and _is_test_path_for_clones(file_a)
-                and _is_test_path_for_clones(file_b)
-            ):
+            # Suppress clone detection within / between test files.
+            # Test functions are intentionally repetitive (same setup,
+            # similar assertions with different inputs).
+            if _is_test_path_for_clones(file_a) and _is_test_path_for_clones(file_b):
                 continue
 
             sim = sig_a.similarity(sig_b)

@@ -407,6 +407,253 @@ class TestFeatureEnvy:
 
 
 # ---------------------------------------------------------------------------
+# FEATURE ENVY — FALSE-POSITIVE SUPPRESSION
+# ---------------------------------------------------------------------------
+
+@needs_tree_sitter
+class TestFeatureEnvyFalsePositives:
+    """Suppress feature-envy for static methods, builders, and delegation."""
+
+    def test_staticmethod_suppressed(self):
+        """A static method has no 'self' — feature envy is meaningless."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Utils:\n"
+            "    @staticmethod\n"
+            "    def encode_files(files, data):\n"
+            "        a = files.name\n"
+            "        b = files.content\n"
+            "        c = files.mimetype\n"
+            "        d = data.boundary\n"
+            "        e = data.encoding\n"
+            "        return a + b + c + d + e\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"Static methods should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_classmethod_suppressed(self):
+        """A classmethod with 'cls' first param — no instance envy possible."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Builder:\n"
+            "    @classmethod\n"
+            "    def from_config(cls, config):\n"
+            "        a = config.host\n"
+            "        b = config.port\n"
+            "        c = config.timeout\n"
+            "        d = config.retries\n"
+            "        e = config.protocol\n"
+            "        return cls(a, b, c, d, e)\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        # cls-first methods are suppressed (no home *instance*)
+        assert len(findings) == 0, (
+            f"Classmethods should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_no_params_suppressed(self):
+        """A method with no parameters at all (weird but possible) is suppressed."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Odd:\n"
+            "    def no_params():\n"
+            "        import something\n"
+            "        a = something.alpha\n"
+            "        b = something.beta\n"
+            "        c = something.gamma\n"
+            "        d = something.delta\n"
+            "        e = something.epsilon\n"
+            "        return a + b + c + d + e\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"Methods with no params should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_builder_prefix_suppressed(self):
+        """Methods named build_* are cross-object by design."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class ResponseBuilder:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def build_response(self, raw):\n"
+            "        a = raw.status\n"
+            "        b = raw.headers\n"
+            "        c = raw.body\n"
+            "        d = raw.encoding\n"
+            "        e = raw.cookies\n"
+            "        return a + b + c + d + e\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"Builder methods should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_encode_prefix_suppressed(self):
+        """Methods named _encode_* are cross-object by design."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Encoder:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def _encode_files(self, files):\n"
+            "        a = files.name\n"
+            "        b = files.content\n"
+            "        c = files.mimetype\n"
+            "        d = files.boundary\n"
+            "        e = files.encoding\n"
+            "        return a + b + c + d + e\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"_encode_* methods should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_from_prefix_suppressed(self):
+        """Methods named from_* are factory methods — cross-object by design."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Config:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def from_dict(self, d):\n"
+            "        a = d.host\n"
+            "        b = d.port\n"
+            "        c = d.timeout\n"
+            "        d2 = d.retries\n"
+            "        e = d.protocol\n"
+            "        return a + b + c + d2 + e\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"from_* methods should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_to_prefix_suppressed(self):
+        """Methods named to_* are converter methods — cross-object by design."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Converter:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def to_json(self, obj):\n"
+            "        a = obj.name\n"
+            "        b = obj.value\n"
+            "        c = obj.kind\n"
+            "        d = obj.meta\n"
+            "        e = obj.tags\n"
+            "        return a + b + c + d + e\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"to_* methods should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_short_delegation_suppressed(self):
+        """A method whose body is just `return super().method(...)` is delegation."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Child:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def dispatch(self, request):\n"
+            "        a = request.method\n"
+            "        b = request.path\n"
+            "        return super().dispatch(a, b)\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"Short delegation methods (<=3 effective lines) should be suppressed, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_genuine_envy_not_suppressed_by_new_rules(self):
+        """A regular method with heavy external access is still flagged."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Processor:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def analyze(self, other):\n"
+            "        a = other.alpha\n"
+            "        b = other.beta\n"
+            "        c = other.gamma\n"
+            "        d = other.delta\n"
+            "        e = other.epsilon\n"
+            "        f = other.zeta\n"
+            "        g = other.eta\n"
+            "        return a + b + c + d + e + f + g\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=1.0, min_external=3)
+
+        envious = [f for f in findings if f.rule == "feature-envy"]
+        for f in envious:
+            assert "analyze" in f.message
+
+    def test_normal_prefix_not_suppressed(self):
+        """A method without a builder prefix is not suppressed by prefix rule."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Worker:\n"
+            "    def __init__(self):\n"
+            "        self.x = 1\n"
+            "    def process_data(self, other):\n"
+            "        a = other.alpha\n"
+            "        b = other.beta\n"
+            "        c = other.gamma\n"
+            "        d = other.delta\n"
+            "        e = other.epsilon\n"
+            "        f = other.zeta\n"
+            "        g = other.eta\n"
+            "        return a + b + c + d + e + f + g\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=1.0, min_external=3)
+
+        # process_data does NOT match any builder prefix — should still be flagged
+        envious = [f for f in findings if f.rule == "feature-envy"]
+        for f in envious:
+            assert "process_data" in f.message
+
+
+# ---------------------------------------------------------------------------
 # LONG METHOD
 # ---------------------------------------------------------------------------
 

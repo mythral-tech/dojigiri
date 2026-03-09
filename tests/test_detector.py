@@ -220,6 +220,93 @@ for item in items:
     assert swallowed[0].severity == Severity.INFO
 
 
+def test_python_ast_exception_swallowed_continue_specific_exception_no_comment():
+    """Specific exception with continue (no comment) is a fallback pattern — downgrade to INFO."""
+    code = '''
+for loader in loaders:
+    try:
+        template = loader.load(name)
+    except TemplateNotFound:
+        continue
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.INFO
+    assert "fallback pattern" in swallowed[0].message
+
+
+def test_python_ast_exception_swallowed_continue_broad_exception_stays_warning():
+    """Bare except / except Exception with continue (no comment) stays WARNING."""
+    code = '''
+for item in items:
+    try:
+        process(item)
+    except Exception:
+        continue
+
+for item in items:
+    try:
+        process(item)
+    except:
+        continue
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
+    assert len(swallowed) == 2
+    assert all(f.severity == Severity.WARNING for f in swallowed)
+
+
+def test_python_ast_exception_swallowed_continue_broad_with_comment_downgrades():
+    """Broad except with continue BUT with comment should still downgrade to INFO."""
+    code = '''
+for item in items:
+    try:
+        process(item)
+    except Exception:
+        continue  # best-effort processing
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.INFO
+
+
+def test_python_ast_exception_swallowed_continue_tuple_specific():
+    """Tuple of specific exceptions with continue should downgrade to INFO."""
+    code = '''
+for item in items:
+    try:
+        process(item)
+    except (KeyError, ValueError):
+        continue
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.INFO
+
+
+def test_python_ast_exception_swallowed_continue_tuple_with_broad():
+    """Tuple containing Exception with continue stays WARNING (broad catch)."""
+    code = '''
+for item in items:
+    try:
+        process(item)
+    except (ValueError, Exception):
+        continue
+'''
+    findings = run_python_ast_checks(code, "test.py")
+
+    swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.WARNING
+
+
 def test_python_ast_shadowed_builtin():
     """Test detection of shadowed builtins."""
     code = '''
