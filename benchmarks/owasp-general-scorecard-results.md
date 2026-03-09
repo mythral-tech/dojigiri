@@ -28,6 +28,8 @@
 - **FPR:** 56.4%
 - **Youden Index:** +42.3%
 
+Micro-average pools all test cases regardless of category, so larger categories (e.g., SQL Injection with 504 cases) dominate the result. Macro-average weights all categories equally, giving a fairer picture of per-category performance. OWASP uses macro-average as the standard metric.
+
 ### Macro-average (average of per-category rates - OWASP standard)
 
 - **TPR:** 98.7%

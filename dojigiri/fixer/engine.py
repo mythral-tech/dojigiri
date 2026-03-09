@@ -286,8 +286,11 @@ def _strip_template_literals(content: str) -> str:
     n = len(content)
     # Stack tracks nesting: 'T' = inside template literal, 'E' = inside ${} expression
     stack: list[str] = []
+    max_depth = 100  # Safety cap against maliciously nested templates
 
     while i < n:
+        if len(stack) > max_depth:
+            break  # Bail out on maliciously nested templates
         ch = content[i]
 
         if not stack:

@@ -136,6 +136,9 @@ core.extract_semantics()  -->  FileSemantics
 |--------|------|-------|--------|
 | `llm.py` | Anthropic SDK wrapper, cost tracking | Chunk + system prompt | list[Finding] + cost |
 | `llm_backend.py` | Backend abstraction (Anthropic/OpenAI/Ollama) | messages + model config | LLMResponse |
+| `llm_prompts.py` | System prompt templates + input sanitization | language + mode | formatted prompt string |
+| `llm_schemas.py` | Tool-use schemas for structured LLM output | backend | schema dicts |
+| `llm_parsers.py` | JSON response parsing + 4-layer recovery | raw LLM text | parsed findings/fixes |
 | `llm_focus.py` | Builds targeted prompts from static findings | list[Finding] | focused prompt string |
 | `chunker.py` | Splits large files for LLM context windows | file content | list[Chunk] |
 
@@ -146,7 +149,7 @@ core.extract_semantics()  -->  FileSemantics
 | `report.py` | ANSI console output with colors | ScanReport | stdout |
 | `report_html.py` | Self-contained HTML report | ScanReport | HTML string |
 | `mcp_format.py` | AI-friendly plain text (no ANSI) | ScanReport | text string |
-| `mcp_server.py` | FastMCP server (5 tools for AI agents) | scan requests | mcp_format output |
+| `mcp_server.py` | FastMCP server (6 tools, 4 resources, 2 prompts) | scan requests | mcp_format output |
 | `compliance.py` | CWE and NIST SP 800-53 rule mappings | rule name | CWE ID, NIST controls |
 | `metrics.py` | Session observability (scan stats, costs) | scan events | SessionMetrics |
 
@@ -216,7 +219,7 @@ All defined in `types.py`:
 
 ## File Count & Size
 
-- **53 Python modules** across 5 packages (`dojigiri/`, `semantic/`, `graph/`, `fixer/`, `sca/`)
-- **~25,000 lines** production code + **~33,000 lines** tests (44 test files)
-- Largest files: `__main__.py` (~1300 lines, CLI), `languages.py` (regex rules), `detector.py` (analysis engine)
+- **57 Python modules** across 5 packages (`dojigiri/`, `semantic/`, `graph/`, `fixer/`, `sca/`)
+- **~26,000 lines** production code + **~33,000 lines** tests (80 test files)
+- Largest files: `__main__.py` (~1450 lines, CLI), `languages.py` (regex rules), `ast_checks.py` (Python AST checks)
 - Compiled to standalone `.exe` via Nuitka (Python → C → native binary)

@@ -137,12 +137,13 @@ def _collect_branch_siblings(tree_root) -> list[list[_BranchRange]]:
 
 
 def _collect_conditional_bodies(tree_root) -> list[_ConditionalBody]:
-    """Walk the AST and collect ALL conditional bodies: if-branches, loop bodies.
+    """Walk the AST and collect ALL conditional bodies: if-branches, loop bodies, try bodies.
 
     Any code region where execution is not guaranteed gets a _ConditionalBody
     entry. This includes:
     - if/elif consequence blocks (may not execute if condition is false)
     - for/while loop bodies (may execute 0 times)
+    - try block bodies (a line may throw before a subsequent line executes)
 
     Used to determine if a sanitizer is in a conditional context that a sink
     is outside of — meaning the sanitizer may not have executed.
@@ -193,6 +194,18 @@ def _collect_conditional_bodies(tree_root) -> list[_ConditionalBody]:
                     start_line=body.start_point[0] + 1,
                     end_line=body.end_point[0] + 1,
                     kind="loop",
+                ))
+
+        elif node.type == "try_statement":
+            # Try body: a sanitizer in a try block might throw before completing,
+            # and control transfers to the except handler. Treat the try body as
+            # conditional — the sanitizer line may not have fully executed.
+            body = node.child_by_field_name("body")
+            if body:
+                bodies.append(_ConditionalBody(
+                    start_line=body.start_point[0] + 1,
+                    end_line=body.end_point[0] + 1,
+                    kind="try",
                 ))
 
         for child in node.children:
@@ -265,6 +278,35 @@ def _is_in_conditional_body_not_containing(
     return False
 
 
+def _is_in_conditional_body_not_containing_any(
+    sanitizer_line: int,
+    other_lines: set[int],
+    conditional_bodies: list[_ConditionalBody],
+) -> bool:
+    """Check if sanitizer_line is in a conditional body that excludes ALL other_lines.
+
+    Returns True if the sanitizer is in at least one conditional body where
+    NONE of the other_lines are contained — meaning the sanitizer's execution
+    is not guaranteed from the perspective of any sink.
+
+    If other_lines is empty, falls back to checking if the sanitizer is in
+    any conditional body at all (conservative).
+    """
+    if not other_lines:
+        # No sink info available — conservative: any conditional body blocks clearance
+        for body in conditional_bodies:
+            if body.start_line <= sanitizer_line <= body.end_line:
+                return True
+        return False
+
+    for body in conditional_bodies:
+        if body.start_line <= sanitizer_line <= body.end_line:
+            # Check if ANY sink line is outside this body
+            if any(not (body.start_line <= ol <= body.end_line) for ol in other_lines):
+                return True
+    return False
+
+
 # ─── Analysis ────────────────────────────────────────────────────────
 
 
@@ -310,6 +352,7 @@ def _propagate_taint(
     config: LanguageConfig,
     branch_groups: list[list[_BranchRange]] | None = None,
     conditional_bodies: list[_ConditionalBody] | None = None,
+    sink_lines: set[int] | None = None,
 ) -> dict[str, list[tuple[str, int]]]:
     """Propagate taint through assignments within function scope.
 
@@ -317,7 +360,12 @@ def _propagate_taint(
 
     Branch-aware (v0.10): sanitizers inside a conditional branch do NOT
     clear taint globally — they might not execute on all paths.  A sanitizer
-    only clears taint if it is NOT inside any branch or loop body.
+    only clears taint if it is NOT inside any conditional body that excludes
+    all sink lines (i.e., the sanitizer is guaranteed to run before the sink).
+
+    If the sanitizer is in a conditional body and ALL known sinks for that
+    variable are in the SAME conditional body, the sanitizer IS guaranteed
+    to run before the sink on that path, so taint is cleared.
     """
     tainted: dict[str, list[tuple[str, int]]] = {name: [] for name in initial_tainted}
 
@@ -346,30 +394,30 @@ def _propagate_taint(
             is_sanitized = any(sanitizer in rhs for sanitizer in config.taint_sanitizer_patterns)
 
             if is_sanitized:
-                # Branch/loop-aware: only clear taint if the sanitizer is NOT
-                # inside any conditional body (branch or loop).  A sanitizer
-                # inside an if/else/for/while body might not execute on all paths.
-                in_conditional = False
+                # Branch/loop-aware: only refuse to clear taint if the sanitizer
+                # is in a conditional body that does NOT contain the sink.
+                # If the sanitizer and sink are in the SAME conditional body,
+                # the sanitizer IS guaranteed to run before the sink on that path.
+                in_conditional_excluding_sinks = False
                 if conditional_bodies:
-                    for body in conditional_bodies:
-                        if body.start_line <= asgn.line <= body.end_line:
-                            in_conditional = True
-                            break
-                # Fallback to legacy branch_groups check
-                if not in_conditional and branch_groups:
+                    in_conditional_excluding_sinks = _is_in_conditional_body_not_containing_any(
+                        asgn.line, sink_lines or set(), conditional_bodies,
+                    )
+                # Fallback to legacy branch_groups check (only if not already flagged)
+                if not in_conditional_excluding_sinks and not conditional_bodies and branch_groups:
                     for group in branch_groups:
                         for br in group:
                             if br.start_line <= asgn.line <= br.end_line:
-                                in_conditional = True
+                                in_conditional_excluding_sinks = True
                                 break
-                        if in_conditional:
+                        if in_conditional_excluding_sinks:
                             break
-                if not in_conditional:
-                    # Sanitizer at top level of function — clears taint
+                if not in_conditional_excluding_sinks:
+                    # Sanitizer guaranteed to run before sinks — clears taint
                     if asgn.name in tainted:
                         del tainted[asgn.name]
                         changed = True
-                # If sanitizer is in a conditional body, don't clear taint globally.
+                # If sanitizer is in a conditional body excluding sinks, don't clear taint globally.
                 continue
 
             # Skip already-tainted vars for propagation (no new info)
@@ -674,6 +722,19 @@ def analyze_taint(
         if not sources:
             continue
 
+        # Collect potential sink lines in this function scope
+        potential_sink_lines: set[int] = set()
+        for call in semantics.function_calls:
+            if call.scope_id not in func_scope_ids:
+                continue
+            call_text = call.name
+            if call.receiver:
+                call_text = f"{call.receiver}.{call.name}"
+            for pattern, _kind in config.taint_sink_patterns:
+                if _matches_pattern(call_text, pattern):
+                    potential_sink_lines.add(call.line)
+                    break
+
         # 2. Propagate taint (branch-aware: sanitizers in conditional branches
         #    don't clear taint globally)
         initial_tainted = {s.variable for s in sources}
@@ -681,6 +742,7 @@ def analyze_taint(
             semantics, initial_tainted, func_scope_ids, config,
             branch_groups=branch_groups,
             conditional_bodies=conditional_bodies,
+            sink_lines=potential_sink_lines,
         )
         tainted_vars = set(taint_chains.keys())
 

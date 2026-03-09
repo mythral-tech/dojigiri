@@ -30,10 +30,9 @@ from .llm import (
     LLMError,
     _api_call_with_retry,
     _get_backend,
-    _sanitize_code,
-    _sanitize_for_prompt,
 )
 from .llm_backend import TIER_DEEP
+from .llm_prompts import _sanitize_code, _sanitize_for_prompt
 from .types import (
     SEVERITY_ORDER,
     Finding,
@@ -149,6 +148,10 @@ def _assess_risk(file_reviews: list[FileReview]) -> str:
 
 def _get_pr_diff(pr_number: int, cwd: str) -> str:
     """Fetch the diff for a GitHub PR via `gh` CLI."""
+    pr_number = int(pr_number)
+    cwd = str(Path(cwd).resolve())
+    if not Path(cwd).is_dir():
+        raise ValueError(f"Not a directory: {cwd}")
     result = subprocess.run(
         ["gh", "pr", "diff", str(pr_number)],
         capture_output=True,
@@ -164,6 +167,10 @@ def _get_pr_diff(pr_number: int, cwd: str) -> str:
 
 def _get_pr_changed_files(pr_number: int, cwd: str) -> list[str]:
     """Get list of changed files in a PR via `gh` CLI."""
+    pr_number = int(pr_number)
+    cwd = str(Path(cwd).resolve())
+    if not Path(cwd).is_dir():
+        return []
     result = subprocess.run(
         ["gh", "pr", "view", str(pr_number), "--json", "files", "--jq", ".files[].path"],
         capture_output=True,

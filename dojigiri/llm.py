@@ -1047,6 +1047,11 @@ def _check_fix_introduces_danger(original: str, fixed: str) -> str | None:
 
     Defense-in-depth against prompt injection: even if the LLM is tricked into
     generating malicious fixes, this layer catches them before application.
+
+    Note: fixer/engine.py has a separate ``modules_needed`` whitelist that may
+    preserve imports (like ``subprocess``) required by the fix context.  That
+    whitelist operates at the file level after this per-fix safety gate, so
+    both layers must agree for a dangerous import to survive.
     """
     if not fixed:
         return None  # Deletions are always safe
@@ -1126,9 +1131,10 @@ def fix_file(
     # Build findings with focused snippets
     findings_parts = []
     for f in findings:
-        entry = f"  Line {f['line']}: [{f['rule']}] {f['message']}"
+        msg = _sanitize_for_prompt(f['message'])
+        entry = f"  Line {f['line']}: [{f['rule']}] {msg}"
         if f.get("suggestion"):
-            entry += f" (suggestion: {f['suggestion']})"
+            entry += f" (suggestion: {_sanitize_for_prompt(f['suggestion'])})"
         snippet = _build_finding_snippet(content, f["line"])
         entry += f"\n  Context:\n{snippet}"
         findings_parts.append(entry)

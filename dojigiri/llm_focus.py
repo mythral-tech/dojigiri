@@ -13,18 +13,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .llm_prompts import _sanitize_for_prompt
 from .types import Finding
-
-# Import sanitizer from llm module (lazy to avoid circular import)
-_sanitize_for_prompt = None
 
 
 def _get_sanitizer():
-    global _sanitize_for_prompt
-    if _sanitize_for_prompt is None:
-        from .llm import _sanitize_for_prompt as _sfp
-
-        _sanitize_for_prompt = _sfp
     return _sanitize_for_prompt
 
 
