@@ -19,7 +19,13 @@ from .config import LANGUAGE_DEBUG_HINTS, LANGUAGE_OPTIMIZE_HINTS
 # These live here because prompts are the primary consumer — they sanitize
 # user-controlled text before embedding it into LLM system/user messages.
 
-_CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+_CONTROL_CHAR_RE = re.compile(
+    r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]"          # ASCII control chars
+    r"|[\u200b\u200c\u200d\ufeff]"                   # zero-width chars (ZWSP, ZWNJ, ZWJ, BOM)
+    r"|[\u202a-\u202e]"                              # bidi overrides (LRE, RLE, PDF, LRO, RLO)
+    r"|[\u2066-\u2069]"                              # bidi isolates (LRI, RLI, FSI, PDI)
+    r"|[\U000e0001-\U000e007f]"                      # deprecated tag characters
+)
 
 
 def _sanitize_for_prompt(text: str, max_length: int = 2000) -> str:
