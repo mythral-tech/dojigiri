@@ -491,7 +491,7 @@ PYTHON_RULES: list[Rule] = _compile(
         ),
         # User-controlled regex — ReDoS risk
         (
-            r"\bre\.(?:compile|search|match|findall|sub|split)\s*\(\s*(?!r?['\"])\w+",
+            r"\bre\.(?:compile|search|match|findall|sub|split)\s*\(\s*(?![bruf]*['\"])\w+",
             Severity.INFO,
             Category.SECURITY,
             "regex-injection",
@@ -581,7 +581,7 @@ PYTHON_RULES: list[Rule] = _compile(
         ),
         # importlib.import_module — dynamic module loading
         (
-            r"\bimportlib\.import_module\s*\(",
+            r"\bimportlib\.import_module\s*\(\s*(?![bruf]*['\"])\w+",
             Severity.INFO,
             Category.SECURITY,
             "dynamic-import",

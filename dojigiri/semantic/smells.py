@@ -223,14 +223,42 @@ def check_feature_envy(
 # ─── Check: Long Method ──────────────────────────────────────────────
 
 
+def _find_body_start(source: list[str], fdef_line: int, fdef_end: int) -> int:
+    """Find the first line of the function body (after the signature colon).
+
+    Scans from the ``def`` line forward to find where the signature ends
+    (the line whose stripped form ends with ``:``), then returns the next
+    line number.  This correctly skips multi-line parameter lists —
+    including ``Annotated[Type, Doc(...)]`` patterns — so they are never
+    counted as body lines.
+
+    Falls back to ``fdef_line + 1`` if the colon cannot be located (e.g.
+    source is truncated).
+    """
+    end = min(fdef_end, len(source) - 1)
+    for lineno in range(fdef_line, end + 1):
+        line = source[lineno] if lineno < len(source) else ""
+        stripped = line.rstrip()
+        # The signature ends on the first line that ends with ":"
+        # (ignoring trailing comments).  Strip inline comments first.
+        code_part = stripped.split("#")[0].rstrip() if "#" in stripped else stripped
+        if code_part.endswith(":"):
+            return lineno + 1
+    # Fallback: assume single-line signature
+    return fdef_line + 1
+
+
 def _count_effective_lines(
     semantics: FileSemantics,
     fdef: FunctionDef,
 ) -> int:
     """Count effective lines of logic in a function body.
 
-    Subtracts from total line count:
-    - The def line itself (signature, not logic)
+    Only counts lines in the function **body** (after the signature colon).
+    The entire signature — including multi-line parameter lists with
+    ``Annotated[Type, Doc(...)]`` patterns — is excluded.
+
+    Additionally subtracts from the body:
     - Blank lines
     - Comment-only lines (# ...)
     - Docstring lines (first expression statement if it's a string literal)
@@ -243,9 +271,12 @@ def _count_effective_lines(
     if not source:
         return total
 
-    # Body starts after the def line
-    body_start = fdef.line + 1
+    # Body starts after the full signature (may span multiple lines)
+    body_start = _find_body_start(source, fdef.line, fdef.end_line)
     body_end = min(fdef.end_line, len(source) - 1)
+
+    # Signature lines (def ... params ... :) are all non-logic
+    signature_lines = body_start - fdef.line  # includes the def line
 
     non_logic = 0
     in_docstring = False
@@ -310,7 +341,7 @@ def _count_effective_lines(
                 non_logic += 1
                 continue
 
-    effective = total - non_logic
+    effective = total - signature_lines - non_logic
     # Never return less than 1
     return max(effective, 1)
 

@@ -636,6 +636,57 @@ class TestLongMethodEffectiveLines:
         findings = check_long_method(sem, "test.py", threshold=20)
         assert len(findings) == 0
 
+    def test_multiline_signature_annotated_params_excluded(self):
+        """Multi-line function signatures with Annotated params should not inflate count.
+
+        This is the core FastAPI false-positive case: functions like Cookie()
+        whose signatures span 50+ lines of Annotated[Type, Doc("...")] params
+        but whose bodies are short.
+        """
+        from dojigiri.semantic.smells import check_long_method
+
+        # Build a FastAPI-style function with a long multi-line signature
+        params = ",\n".join(
+            f"    param_{i}: Annotated[str, Doc('Parameter {i} description')] = 'default'"
+            for i in range(40)
+        )
+        body_logic = "\n".join(f"    x_{i} = process({i})" for i in range(10))
+        code = (
+            f"def cookie(\n"
+            f"{params}\n"
+            f"):\n"
+            f'    """Handle cookie parameters."""\n'
+            f"{body_logic}\n"
+        )
+        sem = _sem(code)
+        # The signature spans ~42 lines (def + 40 params + closing paren/colon)
+        # Body is 1 docstring + 10 logic = 10 effective lines
+        # Should NOT be flagged at threshold=50
+        findings = check_long_method(sem, "test.py", threshold=50)
+        assert len(findings) == 0, (
+            f"Multi-line signature params should not inflate effective lines, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_multiline_signature_with_long_body_still_flagged(self):
+        """A function with a long signature AND a long body should still be flagged."""
+        from dojigiri.semantic.smells import check_long_method
+
+        params = ",\n".join(
+            f"    p_{i}: str = 'default'" for i in range(20)
+        )
+        body_logic = "\n".join(f"    x_{i} = process({i})" for i in range(55))
+        code = (
+            f"def big_func(\n"
+            f"{params}\n"
+            f"):\n"
+            f"{body_logic}\n"
+        )
+        sem = _sem(code)
+        findings = check_long_method(sem, "test.py", threshold=50)
+        assert len(findings) == 1
+        assert "big_func" in findings[0].message
+
 
 # ---------------------------------------------------------------------------
 # NEAR DUPLICATES
