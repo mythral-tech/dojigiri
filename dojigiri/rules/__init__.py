@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 def _load_rules() -> (
-    tuple[list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule]]
+    tuple[
+        list[Rule], list[Rule], list[Rule], list[Rule], list[Rule],
+        list[Rule], list[Rule], list[Rule], list[Rule], list[Rule],
+    ]
 ):
     """Load rules from YAML, falling back to Python modules if YAML unavailable."""
     try:
@@ -25,6 +28,7 @@ def _load_rules() -> (
             universal = yaml_rules.get("universal", [])
             python = yaml_rules.get("python", [])
             javascript = yaml_rules.get("javascript", [])
+            typescript = yaml_rules.get("typescript", [])
             go = yaml_rules.get("go", [])
             rust = yaml_rules.get("rust", [])
             java = yaml_rules.get("java", [])
@@ -35,10 +39,11 @@ def _load_rules() -> (
             if universal or python or javascript or security:
                 logger.debug(
                     "Loaded rules from YAML: %d universal, %d python, %d javascript, "
-                    "%d go, %d rust, %d java, %d csharp, %d php, %d security",
+                    "%d typescript, %d go, %d rust, %d java, %d csharp, %d php, %d security",
                     len(universal),
                     len(python),
                     len(javascript),
+                    len(typescript),
                     len(go),
                     len(rust),
                     len(java),
@@ -46,7 +51,7 @@ def _load_rules() -> (
                     len(php),
                     len(security),
                 )
-                return universal, python, javascript, go, rust, java, security, csharp, php
+                return universal, python, javascript, typescript, go, rust, java, security, csharp, php
     except Exception as exc:
         logger.debug("YAML rule loading failed, falling back to Python: %s", exc)
 
@@ -59,13 +64,14 @@ def _load_rules() -> (
     from .security import SECURITY_RULES
     from .universal import UNIVERSAL_RULES
 
-    return UNIVERSAL_RULES, PYTHON_RULES, JAVASCRIPT_RULES, GO_RULES, RUST_RULES, JAVA_RULES, SECURITY_RULES, [], []
+    return UNIVERSAL_RULES, PYTHON_RULES, JAVASCRIPT_RULES, [], GO_RULES, RUST_RULES, JAVA_RULES, SECURITY_RULES, [], []
 
 
 (
     UNIVERSAL_RULES,
     PYTHON_RULES,
     JAVASCRIPT_RULES,
+    TYPESCRIPT_RULES,
     GO_RULES,
     RUST_RULES,
     JAVA_RULES,
@@ -83,6 +89,7 @@ __all__ = [
     "PYTHON_RULES",
     "RUST_RULES",
     "SECURITY_RULES",
+    "TYPESCRIPT_RULES",
     "UNIVERSAL_RULES",
     "Rule",
     "_compile",

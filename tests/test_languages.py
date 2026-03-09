@@ -32,11 +32,14 @@ def test_get_rules_for_language_javascript():
 
 
 def test_get_rules_for_language_typescript():
-    """Test that TypeScript shares JavaScript rules."""
+    """Test that TypeScript gets JavaScript rules plus TS-specific rules."""
+    from dojigiri.rules import TYPESCRIPT_RULES
+
     rules_ts = get_rules_for_language("typescript")
     rules_js = get_rules_for_language("javascript")
-    
-    assert len(rules_ts) == len(rules_js)
+
+    assert len(rules_ts) == len(rules_js) + len(TYPESCRIPT_RULES)
+    assert len(TYPESCRIPT_RULES) > 0
 
 
 def test_get_rules_for_language_go():

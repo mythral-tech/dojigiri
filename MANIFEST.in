@@ -1,7 +1,7 @@
 include LICENSE
 include README.md
 include pyproject.toml
-recursive-include dojigiri *.py py.typed
+recursive-include dojigiri *.py *.yaml py.typed
 prune tests
 prune benchmarks
 prune .github

@@ -19,6 +19,7 @@ from .rules import (
     PYTHON_RULES,
     RUST_RULES,
     SECURITY_RULES,
+    TYPESCRIPT_RULES,
     UNIVERSAL_RULES,
     Rule,
 )
@@ -29,7 +30,7 @@ from .types import SEVERITY_ORDER
 LANGUAGE_RULES: dict[str, list[Rule]] = {
     "python": PYTHON_RULES,
     "javascript": JAVASCRIPT_RULES,
-    "typescript": JAVASCRIPT_RULES,  # TS shares JS patterns
+    "typescript": JAVASCRIPT_RULES + TYPESCRIPT_RULES,  # TS gets JS patterns + TS-specific
     "go": GO_RULES,
     "rust": RUST_RULES,
     "java": JAVA_RULES,

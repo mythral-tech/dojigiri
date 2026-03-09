@@ -30,6 +30,7 @@ classifiers = [
 dependencies = [
     "tree-sitter>=0.24",
     "tree-sitter-language-pack>=0.10",
+    "pyyaml>=6.0",
     "tomli>=1.0; python_version < '3.11'",
 ]
 
@@ -50,14 +51,16 @@ doji = "dojigiri.__main__:main"
 [project.urls]
 Homepage = "https://github.com/Inklling/dojigiri"
 Repository = "https://github.com/Inklling/dojigiri"
+Documentation = "https://dojigiri.dev"
 Issues = "https://github.com/Inklling/dojigiri/issues"
+Changelog = "https://github.com/Inklling/dojigiri/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["dojigiri*"]
 exclude = ["tests*", "benchmarks*"]
 
 [tool.setuptools.package-data]
-dojigiri = ["py.typed"]
+dojigiri = ["py.typed", "rules/yaml/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
