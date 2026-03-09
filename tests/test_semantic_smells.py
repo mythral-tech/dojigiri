@@ -652,6 +652,99 @@ class TestFeatureEnvyFalsePositives:
         for f in envious:
             assert "process_data" in f.message
 
+    def test_super_delegation_not_flagged(self):
+        """A 2-line method calling super().method() is trivial delegation."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Child(Parent):\n"
+            "    def group(self, *args, **kwargs):\n"
+            "        return super().group(*args, **kwargs)\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"super() delegation should not be flagged, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_super_delegation_with_docstring_not_flagged(self):
+        """A super() delegation with a docstring should still be suppressed."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class AppGroup:\n"
+            "    def group(self, *args, **kwargs):\n"
+            '        """Decorate and register a group of commands.\n'
+            "\n"
+            "        This creates a new AppGroup with the given name.\n"
+            '        """\n'
+            "        return super().group(*args, **kwargs)\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"super() delegation with docstring should not be flagged, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_import_receiver_not_counted_as_external(self):
+        """Attribute access on an imported module is not feature envy."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Flask:\n"
+            "    def __init__(self):\n"
+            "        self.name = 'app'\n"
+            "    def async_to_sync(self, func):\n"
+            '        """Ensure sync."""\n'
+            "        import asyncio\n"
+            "        a = asyncio.ensure_future\n"
+            "        b = asyncio.get_event_loop\n"
+            "        c = asyncio.new_event_loop\n"
+            "        d = asyncio.set_event_loop\n"
+            "        e = asyncio.run\n"
+            "        return a(func)\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=0.5, min_external=1)
+
+        assert len(findings) == 0, (
+            f"Import-derived attribute access should not be flagged, got: "
+            f"{[f.message for f in findings]}"
+        )
+
+    def test_local_var_receiver_not_counted_as_external(self):
+        """Accessing attrs on a local variable derived from self is not envy."""
+        from dojigiri.semantic.smells import check_feature_envy
+
+        code = (
+            "class Request:\n"
+            "    def __init__(self):\n"
+            "        self.url = 'http://example.com'\n"
+            "    @property\n"
+            "    def path_url(self):\n"
+            '        """Build the path URL."""\n'
+            "        url = urlsplit(self.url)\n"
+            "        path = url.path\n"
+            "        query = url.query\n"
+            "        fragment = url.fragment\n"
+            "        scheme = url.scheme\n"
+            "        netloc = url.netloc\n"
+            "        if query:\n"
+            "            return path + '?' + query\n"
+            "        return path\n"
+        )
+        sem = _sem(code)
+        findings = check_feature_envy(sem, "test.py", external_ratio=1.0, min_external=3)
+
+        assert len(findings) == 0, (
+            f"Local variable attribute access should not be flagged, got: "
+            f"{[f.message for f in findings]}"
+        )
+
 
 # ---------------------------------------------------------------------------
 # LONG METHOD
@@ -1101,3 +1194,105 @@ class TestEdgeCases:
         for f in check_long_method(sem2, "test.py"):
             assert f.suggestion is not None
             assert len(f.suggestion) > 0
+
+
+# ---------------------------------------------------------------------------
+# _find_body_start — colon detection with string/paren awareness
+# ---------------------------------------------------------------------------
+
+class TestFindBodyStart:
+    """Unit tests for _find_body_start — no tree-sitter needed (pure string logic)."""
+
+    def test_simple_def(self):
+        """Simple single-line def should return the next line."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = ["def foo():", "    pass"]
+        assert _find_body_start(source, 0, 1) == 1
+
+    def test_multiline_signature(self):
+        """Multi-line signature without strings — colon on last line."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = [
+            "def foo(",
+            "    x: int,",
+            "    y: int,",
+            ") -> None:",
+            "    pass",
+        ]
+        assert _find_body_start(source, 0, 4) == 4
+
+    def test_annotated_doc_with_colon(self):
+        """Colons inside Doc() strings must NOT end the signature early."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = [
+            'def method(',
+            '    self,',
+            '    param: Annotated[str, Doc("It will be used for:")],',
+            '    other: int = 5,',
+            ') -> None:',
+            '    do_something()',
+        ]
+        # Body should start at line 5 (do_something), not line 2 (Doc string)
+        assert _find_body_start(source, 0, 5) == 5
+
+    def test_triple_quoted_doc_with_colon(self):
+        """Colons inside triple-quoted Doc() strings must be skipped."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = [
+            'def method(',
+            '    self,',
+            '    param: Annotated[str, Doc("""',
+            '        It will be used for:',
+            '        - thing one',
+            '    """)],',
+            ') -> None:',
+            '    do_something()',
+        ]
+        assert _find_body_start(source, 0, 7) == 7
+
+    def test_single_quoted_string_with_colon(self):
+        """Colons inside single-quoted strings must be skipped."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = [
+            "def method(",
+            "    self,",
+            "    param: Annotated[str, Doc('used for:')],",
+            ") -> None:",
+            "    pass",
+        ]
+        assert _find_body_start(source, 0, 4) == 4
+
+    def test_comment_after_colon(self):
+        """Signature colon followed by a comment should still be detected."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = ["def foo():  # a comment", "    pass"]
+        assert _find_body_start(source, 0, 1) == 1
+
+    def test_nested_parens_and_brackets(self):
+        """Deeply nested parens/brackets with colons inside dict literals."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = [
+            "def foo(",
+            "    x: dict[str, int] = {'key': 1},",
+            ") -> None:",
+            "    pass",
+        ]
+        assert _find_body_start(source, 0, 3) == 3
+
+    def test_escaped_quote_in_string(self):
+        """Escaped quotes inside strings should not break string tracking."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = [
+            'def method(',
+            '    self,',
+            '    param: Annotated[str, Doc("value\\"with:colon")],',
+            ') -> None:',
+            '    pass',
+        ]
+        assert _find_body_start(source, 0, 4) == 4
+
+    def test_fallback_when_no_colon(self):
+        """When no signature colon is found, fall back to fdef_line + 1."""
+        from dojigiri.semantic.smells import _find_body_start
+        source = ["def foo("]
+        assert _find_body_start(source, 0, 0) == 1

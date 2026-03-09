@@ -135,6 +135,73 @@ def _has_decorator_wiring(fdef: FunctionDef, semantics: FileSemantics) -> bool:
     return False
 
 
+def _excluded_receivers(semantics: FileSemantics, fdef: FunctionDef) -> frozenset[str]:
+    """Build the set of receiver names to exclude from external ref counting.
+
+    Excludes:
+    - Import names (``import foo`` / ``from bar import foo`` → ``foo.x`` is
+      a module access, not feature envy)
+    - Local variable names assigned within the method body (``url = urlsplit(self.x)``
+      → ``url.path`` is derived from self, not a foreign object)
+    - Parameter names (already the method's own inputs, accessing their attrs
+      is the method's job)
+    """
+    excluded: set[str] = set()
+
+    # 1. Import names visible at module level
+    #    The extractor skips import identifiers from references but records
+    #    them as assignments.  We collect all assignment names with
+    #    value_node_type that looks like an import or module alias.
+    #    Simpler approach: scan source lines in the method for ``import`` stmts.
+    if semantics.source_lines:
+        for ln in range(fdef.line, min(fdef.end_line + 1, len(semantics.source_lines))):
+            line = semantics.source_lines[ln] if ln < len(semantics.source_lines) else ""
+            stripped = line.strip()
+            if stripped.startswith("import "):
+                # ``import foo`` or ``import foo as bar``
+                parts = stripped.split()
+                # Handle ``import foo, bar`` and ``import foo as bar``
+                i = 1
+                while i < len(parts):
+                    name = parts[i]
+                    if i + 1 < len(parts) and parts[i + 1] == "as":
+                        # ``import foo as bar`` → exclude "bar"
+                        if i + 2 < len(parts):
+                            excluded.add(parts[i + 2].rstrip(","))
+                            i += 3
+                        else:
+                            i += 2
+                    else:
+                        excluded.add(name.rstrip(",").split(".")[0])
+                        i += 1
+            elif stripped.startswith("from ") and " import " in stripped:
+                # ``from foo import bar, baz`` or ``from foo import bar as qux``
+                after_import = stripped.split(" import ", 1)[1]
+                tokens = after_import.replace(",", " ").split()
+                i = 0
+                while i < len(tokens):
+                    if i + 1 < len(tokens) and tokens[i + 1] == "as":
+                        if i + 2 < len(tokens):
+                            excluded.add(tokens[i + 2])
+                            i += 3
+                        else:
+                            i += 2
+                    else:
+                        excluded.add(tokens[i])
+                        i += 1
+
+    # 2. Local variable names assigned within the method
+    for asgn in semantics.assignments:
+        if fdef.line <= asgn.line <= fdef.end_line and not asgn.is_parameter:
+            excluded.add(asgn.name)
+
+    # Note: we do NOT exclude parameter names — a method that heavily
+    # accesses a parameter's attributes IS feature envy.  The parameter
+    # is a foreign object; the method should probably live on that class.
+
+    return frozenset(excluded)
+
+
 def check_feature_envy(
     semantics: FileSemantics,
     filepath: str,
@@ -201,24 +268,20 @@ def check_feature_envy(
         # --- Suppression: single-line delegation ---
         # If the effective body is ≤ 3 lines it's trivial delegation
         # (e.g. return super().method(...) or return self.other.method(...)).
-        method_effective_lines = method_lines
-        if semantics.source_lines:
-            body_start = _find_body_start(
-                semantics.source_lines, fdef.line, fdef.end_line
-            )
-            body_end = min(fdef.end_line, len(semantics.source_lines) - 1)
-            effective = 0
-            for ln in range(body_start, body_end + 1):
-                line = semantics.source_lines[ln] if ln < len(semantics.source_lines) else ""
-                stripped = line.strip()
-                if stripped and not stripped.startswith("#"):
-                    effective += 1
-            method_effective_lines = effective
+        # Uses _count_effective_lines which properly skips docstrings,
+        # blank lines, comments, and type annotations.
+        method_effective_lines = _count_effective_lines(semantics, fdef)
         if method_effective_lines <= _MAX_DELEGATION_LINES:
             continue
 
         # Determine the self/this keyword for this method (first parameter)
         self_kw = fdef.params[0] if fdef.params else "self"
+
+        # Collect names that should NOT count as external receivers:
+        # 1. Import names (import foo → foo.bar is a module access, not envy)
+        # 2. Local variable names assigned within this method
+        #    (url = urlsplit(self.x) → url.path is derived from self)
+        excluded_receivers = _excluded_receivers(semantics, fdef)
 
         # Count internal vs external attribute references in this function.
         # Internal = any attribute access on self/cls (self.xxx is the object's own state).
@@ -235,8 +298,8 @@ def check_feature_envy(
                 if ref.receiver == self_kw:
                     # self.xxx — always internal, whether defined in class body or not
                     internal_refs += 1
-                elif ref.receiver is not None:
-                    # other_obj.xxx — external
+                elif ref.receiver is not None and ref.receiver not in excluded_receivers:
+                    # other_obj.xxx — external (but not imports or local vars)
                     external_refs += 1
 
         if external_refs > internal_refs * external_ratio and external_refs >= min_external:
@@ -269,23 +332,64 @@ def _find_body_start(source: list[str], fdef_line: int, fdef_end: int) -> int:
     """Find the first line of the function body (after the signature colon).
 
     Scans from the ``def`` line forward to find where the signature ends
-    (the line whose stripped form ends with ``:``), then returns the next
-    line number.  This correctly skips multi-line parameter lists —
-    including ``Annotated[Type, Doc(...)]`` patterns — so they are never
-    counted as body lines.
+    (the line where paren depth returns to 0 and ends with ``:``), then
+    returns the next line number.  This correctly skips multi-line
+    parameter lists — including ``Annotated[Type, Doc(...)]`` patterns
+    with colons inside string literals — so they are never counted as
+    body lines.
 
     Falls back to ``fdef_line + 1`` if the colon cannot be located (e.g.
     source is truncated).
     """
+    depth = 0  # paren/bracket nesting
+    in_triple_quote = None  # Track """ or '''
     end = min(fdef_end, len(source) - 1)
+
     for lineno in range(fdef_line, end + 1):
         line = source[lineno] if lineno < len(source) else ""
-        stripped = line.rstrip()
-        # The signature ends on the first line that ends with ":"
-        # (ignoring trailing comments).  Strip inline comments first.
-        code_part = stripped.split("#")[0].rstrip() if "#" in stripped else stripped
-        if code_part.endswith(":"):
-            return lineno + 1
+        # Process character by character, tracking strings and depth
+        i = 0
+        while i < len(line):
+            if in_triple_quote:
+                # Look for closing triple quote
+                if line[i:i + 3] == in_triple_quote:
+                    in_triple_quote = None
+                    i += 3
+                    continue
+                i += 1
+                continue
+
+            ch = line[i]
+            # Check for triple quotes first (before single-quote check)
+            if ch in ('"', "'") and line[i:i + 3] in ('"""', "'''"):
+                in_triple_quote = line[i:i + 3]
+                i += 3
+                continue
+            # Skip single-quoted strings
+            if ch in ('"', "'"):
+                closer = ch
+                i += 1
+                while i < len(line) and line[i] != closer:
+                    if line[i] == '\\':
+                        i += 1
+                    i += 1
+                i += 1  # skip closing quote
+                continue
+            # Track depth
+            if ch in ('(', '[', '{'):
+                depth += 1
+            elif ch in (')', ']', '}'):
+                depth -= 1
+            # Check for signature colon at depth 0
+            elif ch == ':' and depth == 0:
+                # The signature colon should be at/near the end of the line
+                rest = line[i + 1:].strip()
+                if not rest or rest.startswith('#'):
+                    return lineno + 1
+            elif ch == '#':
+                break  # rest is comment
+            i += 1
+
     # Fallback: assume single-line signature
     return fdef_line + 1
 

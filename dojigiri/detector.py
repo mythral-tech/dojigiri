@@ -43,6 +43,16 @@ _SKIP_IN_TEST_FILES = {
     "hardcoded-secret",      # test credentials are intentional
     "subprocess-audit",      # test harness subprocess calls
     "resource-leak",         # test client responses, fixtures handle cleanup
+    "null-dereference",      # TestClient.get() never returns None
+    "pickle-unsafe",         # test roundtrip serialization is safe
+    "dynamic-import",        # test fixtures use importlib with hardcoded values
+    "weak-random",           # tests using random for sample data
+    "toctou-file-check",     # test file operations aren't security-sensitive
+    "sys-path-modify",       # test setup modifying paths
+    "exception-swallowed",   # tests intentionally catch and ignore
+    "exception-swallowed-continue",  # same pattern with continue
+    "debug-enabled",         # tests intentionally enable debug mode
+    "weak-hash",             # test cryptographic operations
 }
 _SKIP_IN_EXAMPLE_FILES = {
     "console-log",
@@ -56,7 +66,7 @@ _SKIP_IN_EXAMPLE_FILES = {
 # Path segments identifying test and example files
 _TEST_PATH_SEGMENTS = ("/test/", "/tests/", "test_", "_test.", "/spec/", "/specs/")
 _TEST_FILENAMES = ("conftest.py",)  # exact filenames that are always test infra
-_EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/", "/docs_src/", "/doc/")
+_EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/", "/docs_src/", "/doc/", "/scripts/")
 
 # Inline comment patterns per language family
 _INLINE_COMMENT_RE = {
@@ -644,6 +654,66 @@ def _is_broad_exception(node: ast.ExceptHandler) -> bool:
     return False
 
 
+def _is_optional_import_pattern(handler: ast.ExceptHandler) -> bool:
+    """Detect ``try: import X / except ImportError: pass`` — optional dependency pattern.
+
+    Returns True when the handler catches ImportError specifically and the body
+    is effectively empty (pass).  Also matches common companions:
+
+    - ``except (ImportError, ModuleNotFoundError): pass``
+    - ``except (ImportError, AttributeError): pass``  — optional import with
+      attribute fallback (e.g. ``from mod import attr`` where attr may not exist).
+
+    The tuple form requires *every* element to be in the allowed set and at
+    least one must be ``ImportError`` (so ``except AttributeError: pass`` alone
+    is not suppressed by this function).
+    """
+    _IMPORT_ALLOWED = {"ImportError", "ModuleNotFoundError", "AttributeError"}
+
+    if handler.type is None:
+        return False
+    exc = handler.type
+    if isinstance(exc, ast.Name):
+        if exc.id != "ImportError":
+            return False
+    elif isinstance(exc, ast.Tuple):
+        names = {
+            elt.id for elt in exc.elts if isinstance(elt, ast.Name)
+        }
+        if len(names) != len(exc.elts):
+            return False  # non-Name element in tuple
+        if not (names <= _IMPORT_ALLOWED and "ImportError" in names):
+            return False
+    else:
+        return False
+
+    # Body must be empty (pass, or string comment + pass)
+    if not _is_empty_except(handler, ast.Pass):
+        return False
+
+    return True
+
+
+def _is_stop_iteration_pattern(handler: ast.ExceptHandler) -> bool:
+    """Detect ``except StopIteration: pass`` — standard iterator consumption.
+
+    Returns True when the handler catches ``StopIteration`` specifically and
+    the body is effectively empty (pass).
+    """
+    if handler.type is None:
+        return False
+    exc = handler.type
+    if isinstance(exc, ast.Name) and exc.id == "StopIteration":
+        return _is_empty_except(handler, ast.Pass)
+    if isinstance(exc, ast.Tuple):
+        names = {elt.id for elt in exc.elts if isinstance(elt, ast.Name)}
+        if len(names) != len(exc.elts):
+            return False
+        if names == {"StopIteration"}:
+            return _is_empty_except(handler, ast.Pass)
+    return False
+
+
 def _check_exception_handling(
     tree: ast.AST, filepath: str, findings: list[Finding], content: str = ""
 ):
@@ -663,6 +733,13 @@ def _check_exception_handling(
 
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler):
+            # Skip idiomatic patterns that are universally accepted:
+            # - except ImportError: pass  (optional imports)
+            # - except (ImportError, AttributeError): pass  (optional import + fallback)
+            # - except StopIteration: pass  (iterator consumption)
+            if _is_optional_import_pattern(node) or _is_stop_iteration_pattern(node):
+                continue
+
             is_empty_pass = _is_empty_except(node, ast.Pass)
             is_empty_continue = (not is_empty_pass) and _is_empty_except(node, ast.Continue)
 

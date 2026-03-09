@@ -158,7 +158,7 @@ except ValueError:
 
 
 def test_python_ast_exception_swallowed_with_comment_line():
-    """Exception swallowed with a comment on a separate line should downgrade to INFO."""
+    """Optional import pattern (except ImportError: pass) should be suppressed entirely."""
     code = '''
 try:
     import chardet
@@ -169,12 +169,11 @@ except ImportError:
     findings = run_python_ast_checks(code, "test.py")
 
     swallowed = [f for f in findings if f.rule == "exception-swallowed"]
-    assert len(swallowed) == 1
-    assert swallowed[0].severity == Severity.INFO
+    assert len(swallowed) == 0  # optional import pattern — not a bug
 
 
 def test_python_ast_exception_swallowed_with_string_comment():
-    """Exception swallowed with a string expression as comment should downgrade to INFO."""
+    """Optional import pattern with string comment should be suppressed entirely."""
     code = '''
 try:
     import optional_module
@@ -185,8 +184,7 @@ except ImportError:
     findings = run_python_ast_checks(code, "test.py")
 
     swallowed = [f for f in findings if f.rule == "exception-swallowed"]
-    assert len(swallowed) == 1
-    assert swallowed[0].severity == Severity.INFO
+    assert len(swallowed) == 0  # optional import pattern — not a bug
 
 
 def test_python_ast_exception_swallowed_no_comment_stays_warning():
@@ -305,6 +303,126 @@ for item in items:
     swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
     assert len(swallowed) == 1
     assert swallowed[0].severity == Severity.WARNING
+
+
+def test_except_import_error_pass_suppressed():
+    """except ImportError: pass is idiomatic for optional imports — no finding."""
+    code = '''
+try:
+    import ujson
+except ImportError:
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 0
+
+
+def test_except_import_error_pass_with_comment_suppressed():
+    """except ImportError: pass with comment — still suppressed entirely."""
+    code = '''
+try:
+    import ujson
+except ImportError:
+    pass  # ujson is optional, fall back to json
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 0
+
+
+def test_except_import_error_attribute_error_pass_suppressed():
+    """except (ImportError, AttributeError): pass — optional import with fallback."""
+    code = '''
+try:
+    from fast_module import optimized_func
+except (ImportError, AttributeError):
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 0
+
+
+def test_except_import_error_module_not_found_pass_suppressed():
+    """except (ImportError, ModuleNotFoundError): pass — also suppressed."""
+    code = '''
+try:
+    import optional_dep
+except (ImportError, ModuleNotFoundError):
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 0
+
+
+def test_except_attribute_error_alone_not_suppressed():
+    """except AttributeError: pass alone is NOT suppressed (not import-related)."""
+    code = '''
+try:
+    x.foo()
+except AttributeError:
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 1
+
+
+def test_except_stop_iteration_pass_suppressed():
+    """except StopIteration: pass — standard iterator consumption, no finding."""
+    code = '''
+try:
+    val = next(iterator)
+except StopIteration:
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 0
+
+
+def test_except_stop_iteration_pass_with_comment_suppressed():
+    """except StopIteration: pass with comment — still suppressed."""
+    code = '''
+try:
+    val = next(it)
+except StopIteration:
+    pass  # iterator exhausted
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 0
+
+
+def test_except_value_error_pass_not_suppressed():
+    """except ValueError: pass is NOT idiomatic — should still emit finding."""
+    code = '''
+try:
+    int(x)
+except ValueError:
+    pass
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 1
+    assert swallowed[0].severity == Severity.WARNING
+
+
+def test_except_import_error_with_body_not_suppressed():
+    """except ImportError with actual body (not just pass) is NOT suppressed."""
+    code = '''
+try:
+    import ujson
+except ImportError:
+    x = 1
+'''
+    findings = run_python_ast_checks(code, "test.py")
+    # This has a real body, not pass — should not be suppressed (but also not
+    # flagged as exception-swallowed since it's not empty).
+    swallowed = [f for f in findings if f.rule == "exception-swallowed"]
+    assert len(swallowed) == 0  # not empty, so not flagged at all
 
 
 def test_python_ast_shadowed_builtin():
