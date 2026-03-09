@@ -88,10 +88,6 @@ def should_redact_snippet(rule: str) -> bool:
     return any(pattern in rule for pattern in _REDACT_PATTERNS)
 
 
-# Backward-compat alias — prefer should_redact_snippet() for new code
-REDACT_SNIPPET_RULES = _REDACT_RULES_EXPLICIT
-
-
 # ─── Dataclasses ──────────────────────────────────────────────────────
 
 

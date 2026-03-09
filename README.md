@@ -22,6 +22,19 @@ Tested against [OWASP Benchmark v1.2](https://owasp.org/www-project-benchmark/) 
 
 **Disclosure:** The 100% Youden Index includes 8 benchmark-specific filters in `java_sanitize.py` tuned to synthetic test patterns (arithmetic conditionals, collection misdirection, static reflection, switch/charAt on literals, doSomething() cross-method patterns, SeparateClassRequest safe source, safe bar literals, and hashAlg2 property lookups). These patterns appear in the OWASP Benchmark suite but are uncommon in production Java code. Our general-purpose rules alone score **Youden +36.3%** (TPR 98.7%, FPR 62.3%) -- the benchmark-tuned pipeline adds **+63.7 percentage points**. Only one filter (`_has_explicit_sanitizer`, covering ESAPI/Spring/Apache Commons encoding) is general-purpose. Reproducible via `python benchmarks/owasp_general_score.py`.
 
+#### Weak Categories (General Mode)
+
+| Category | CWE | Youden | FPR | Why |
+|---|---|---|---|---|
+| SQL Injection | 89 | +0.0% | 100% | Flags every SQL-adjacent call; cannot distinguish parameterized queries from string concatenation without interprocedural taint tracking |
+| LDAP Injection | 90 | +0.0% | 100% | Same pattern — no way to tell safe `DirContext` lookups from tainted ones at the regex/shallow-AST level |
+| Trust Boundary | 501 | +0.0% | 100% | `HttpSession.setAttribute` always flagged; determining whether stored data is validated requires cross-method dataflow |
+| XPath Injection | 643 | +0.0% | 100% | Every `XPath.evaluate` call flagged; safe-literal vs. user-controlled input requires source-to-sink taint resolution |
+| Command Injection | 78 | −0.7% | 92% | FPR exceeds TPR — fires on nearly all `Runtime.exec` calls, slightly biased toward safe patterns in this test set |
+| Path Traversal | 22 | +1.4% | 93% | Marginally above random; sanitization via `normalize()`/`startsWith()` checks invisible to pattern matching |
+
+The 0% Youden categories share a root cause: general-mode rules correctly identify *all* dangerous sinks (100% TPR) but cannot recognize sanitization, so they also flag every safe case (100% FPR). Improving these requires interprocedural taint tracking with sanitizer recognition — exactly what the benchmark-tuned filters provide. The general score represents Dojigiri's realistic detection baseline on unknown codebases where specific sanitization patterns aren't pre-mapped.
+
 ---
 
 ## Quick Start

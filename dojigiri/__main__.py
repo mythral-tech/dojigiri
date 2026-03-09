@@ -439,7 +439,7 @@ def cmd_debug(args: argparse.Namespace) -> int:
         llm_func_name="debug_file",
         status_msg="Analyzing {} with Claude ...\n",
         print_text=rpt.print_debug_result,
-        print_json=rpt.print_debug_json,
+        print_json=rpt.print_analysis_json,
         error_msg=args.error,
     )
 
@@ -451,7 +451,7 @@ def cmd_optimize(args: argparse.Namespace) -> int:
         llm_func_name="optimize_file",
         status_msg="Analyzing {} for optimization with Claude ...\n",
         print_text=rpt.print_optimize_result,
-        print_json=rpt.print_optimize_json,
+        print_json=rpt.print_analysis_json,
     )
 
 

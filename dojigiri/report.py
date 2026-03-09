@@ -354,11 +354,6 @@ def print_analysis_json(
     print(json.dumps(output, indent=2))
 
 
-# Keep aliases for backward compatibility
-print_debug_json = print_analysis_json
-print_optimize_json = print_analysis_json
-
-
 def print_cost_estimate(total_lines: int, total_files: int, est_tokens: int, est_cost: float) -> None:
     """Print cost estimate for deep scan."""
     print(f"\n{_c('bold', 'Cost Estimate — Deep Scan')}")

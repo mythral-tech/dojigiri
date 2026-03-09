@@ -264,7 +264,7 @@ def _format_static_findings_for_llm(findings: list[Finding]) -> str:
     confirm, refine, or dismiss those issues and focus on what
     static analysis cannot find.
     """
-    from .types import REDACT_SNIPPET_RULES
+    from .types import should_redact_snippet
 
     if not findings:
         return ""
@@ -274,7 +274,7 @@ def _format_static_findings_for_llm(findings: list[Finding]) -> str:
         "Focus on issues static analysis CANNOT find.\n"
     ]
     for f in findings:
-        if f.rule in REDACT_SNIPPET_RULES:
+        if should_redact_snippet(f.rule):
             parts.append(f"  [{f.severity.value.upper()}] [{f.source.value}] line {f.line}: [REDACTED] {f.rule} detected")
             continue
         severity = f.severity.value.upper()

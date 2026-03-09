@@ -58,6 +58,14 @@ class _BranchRange:
     end_line: int
 
 
+@dataclass
+class _ConditionalBody:
+    """Any conditional body (if-branch, loop body) where execution is not guaranteed."""
+    start_line: int
+    end_line: int
+    kind: str  # "branch" or "loop"
+
+
 def _collect_branch_siblings(tree_root) -> list[list[_BranchRange]]:
     """Walk the AST and collect groups of sibling branch ranges.
 
@@ -128,6 +136,93 @@ def _collect_branch_siblings(tree_root) -> list[list[_BranchRange]]:
     return groups
 
 
+def _collect_conditional_bodies(tree_root) -> list[_ConditionalBody]:
+    """Walk the AST and collect ALL conditional bodies: if-branches, loop bodies.
+
+    Any code region where execution is not guaranteed gets a _ConditionalBody
+    entry. This includes:
+    - if/elif consequence blocks (may not execute if condition is false)
+    - for/while loop bodies (may execute 0 times)
+
+    Used to determine if a sanitizer is in a conditional context that a sink
+    is outside of — meaning the sanitizer may not have executed.
+    """
+    if tree_root is None:
+        return []
+
+    bodies: list[_ConditionalBody] = []
+
+    def _walk(node):
+        if node.type == "if_statement":
+            # Collect the consequence (then-body) as conditional
+            consequence = node.child_by_field_name("consequence")
+            if consequence:
+                bodies.append(_ConditionalBody(
+                    start_line=consequence.start_point[0] + 1,
+                    end_line=consequence.end_point[0] + 1,
+                    kind="branch",
+                ))
+            # Collect elif bodies
+            alternative = node.child_by_field_name("alternative")
+            if alternative and alternative.type == "elif_clause":
+                _walk_elif(alternative)
+            elif alternative and alternative.type in ("else_clause", "else"):
+                # else body is also conditional (only runs if all prior conditions false)
+                body = alternative.child_by_field_name("body") or alternative.child_by_field_name("consequence")
+                if body:
+                    bodies.append(_ConditionalBody(
+                        start_line=body.start_point[0] + 1,
+                        end_line=body.end_point[0] + 1,
+                        kind="branch",
+                    ))
+                else:
+                    for child in alternative.children:
+                        if child.type in ("block", "statement_block"):
+                            bodies.append(_ConditionalBody(
+                                start_line=child.start_point[0] + 1,
+                                end_line=child.end_point[0] + 1,
+                                kind="branch",
+                            ))
+                            break
+
+        elif node.type in ("for_statement", "while_statement"):
+            # Loop bodies may execute 0 times
+            body = node.child_by_field_name("body")
+            if body:
+                bodies.append(_ConditionalBody(
+                    start_line=body.start_point[0] + 1,
+                    end_line=body.end_point[0] + 1,
+                    kind="loop",
+                ))
+
+        for child in node.children:
+            _walk(child)
+
+    def _walk_elif(node):
+        """Process elif clause bodies."""
+        consequence = node.child_by_field_name("consequence")
+        if consequence:
+            bodies.append(_ConditionalBody(
+                start_line=consequence.start_point[0] + 1,
+                end_line=consequence.end_point[0] + 1,
+                kind="branch",
+            ))
+        alternative = node.child_by_field_name("alternative")
+        if alternative and alternative.type == "elif_clause":
+            _walk_elif(alternative)
+        elif alternative and alternative.type in ("else_clause", "else"):
+            body = alternative.child_by_field_name("body") or alternative.child_by_field_name("consequence")
+            if body:
+                bodies.append(_ConditionalBody(
+                    start_line=body.start_point[0] + 1,
+                    end_line=body.end_point[0] + 1,
+                    kind="branch",
+                ))
+
+    _walk(tree_root)
+    return bodies
+
+
 def _are_in_sibling_branches(
     line_a: int,
     line_b: int,
@@ -144,6 +239,29 @@ def _are_in_sibling_branches(
                 branch_of_b = i
         if branch_of_a is not None and branch_of_b is not None and branch_of_a != branch_of_b:
             return True
+    return False
+
+
+def _is_in_conditional_body_not_containing(
+    sanitizer_line: int,
+    other_line: int,
+    conditional_bodies: list[_ConditionalBody],
+) -> bool:
+    """Check if sanitizer_line is inside a conditional body that does NOT contain other_line.
+
+    This handles:
+    - Sanitizer in a loop body, sink outside the loop → sanitizer may not execute
+    - Sanitizer in a nested if (if A: if B: sanitize), sink outside → sanitizer may not execute
+    - Arbitrary nesting depth: checks ALL conditional bodies containing the sanitizer
+
+    Returns True if the sanitizer is in at least one conditional body that the
+    sink/other_line is NOT in — meaning the sanitizer's execution is not guaranteed
+    from the perspective of the sink.
+    """
+    for body in conditional_bodies:
+        if body.start_line <= sanitizer_line <= body.end_line:
+            if not (body.start_line <= other_line <= body.end_line):
+                return True
     return False
 
 
@@ -191,6 +309,7 @@ def _propagate_taint(
     func_scope_ids: set[int],
     config: LanguageConfig,
     branch_groups: list[list[_BranchRange]] | None = None,
+    conditional_bodies: list[_ConditionalBody] | None = None,
 ) -> dict[str, list[tuple[str, int]]]:
     """Propagate taint through assignments within function scope.
 
@@ -198,7 +317,7 @@ def _propagate_taint(
 
     Branch-aware (v0.10): sanitizers inside a conditional branch do NOT
     clear taint globally — they might not execute on all paths.  A sanitizer
-    only clears taint if it is NOT inside any branch body.
+    only clears taint if it is NOT inside any branch or loop body.
     """
     tainted: dict[str, list[tuple[str, int]]] = {name: [] for name in initial_tainted}
 
@@ -227,24 +346,30 @@ def _propagate_taint(
             is_sanitized = any(sanitizer in rhs for sanitizer in config.taint_sanitizer_patterns)
 
             if is_sanitized:
-                # Branch-aware: only clear taint if the sanitizer is NOT inside
-                # a conditional branch body.  A sanitizer inside an if/else
-                # branch might not execute on all paths.
-                in_branch = False
-                if branch_groups:
+                # Branch/loop-aware: only clear taint if the sanitizer is NOT
+                # inside any conditional body (branch or loop).  A sanitizer
+                # inside an if/else/for/while body might not execute on all paths.
+                in_conditional = False
+                if conditional_bodies:
+                    for body in conditional_bodies:
+                        if body.start_line <= asgn.line <= body.end_line:
+                            in_conditional = True
+                            break
+                # Fallback to legacy branch_groups check
+                if not in_conditional and branch_groups:
                     for group in branch_groups:
                         for br in group:
                             if br.start_line <= asgn.line <= br.end_line:
-                                in_branch = True
+                                in_conditional = True
                                 break
-                        if in_branch:
+                        if in_conditional:
                             break
-                if not in_branch:
+                if not in_conditional:
                     # Sanitizer at top level of function — clears taint
                     if asgn.name in tainted:
                         del tainted[asgn.name]
                         changed = True
-                # If sanitizer is in a branch, don't clear taint globally.
+                # If sanitizer is in a conditional body, don't clear taint globally.
                 continue
 
             # Skip already-tainted vars for propagation (no new info)
@@ -338,6 +463,7 @@ def _is_sanitized(
     sink_scope_id: int | None = None,
     scope_map: dict[int, ScopeInfo] | None = None,
     branch_groups: list[list[_BranchRange]] | None = None,
+    conditional_bodies: list[_ConditionalBody] | None = None,
 ) -> bool:
     """Check if a tainted variable passes through a sanitizer before *sink_line*.
 
@@ -348,6 +474,12 @@ def _is_sanitized(
     NOT suppress the finding.  Uses both scope dominance (for block-scoped
     languages) and AST branch ranges (for Python and others without block
     scoping).
+
+    Loop/nesting-aware (v0.11): a sanitizer inside any conditional body
+    (branch or loop) that the sink is NOT in is treated as conditional —
+    it may not have executed.  This handles:
+    - Sanitizers inside for/while loops (0 iterations possible)
+    - Sanitizers in nested branches (if A: if B: sanitize)
     """
     for asgn in semantics.assignments:
         if asgn.scope_id not in func_scope_ids:
@@ -363,6 +495,11 @@ def _is_sanitized(
         # Branch sibling check (all languages, especially Python)
         if branch_groups and sink_line:
             if _are_in_sibling_branches(asgn.line, sink_line, branch_groups):
+                continue
+        # Conditional body check: sanitizer in a branch/loop body that the
+        # sink is NOT in → sanitizer may not have executed
+        if conditional_bodies and sink_line:
+            if _is_in_conditional_body_not_containing(asgn.line, sink_line, conditional_bodies):
                 continue
         for sanitizer in config.taint_sanitizer_patterns:
             if sanitizer in asgn.value_text:
@@ -381,6 +518,10 @@ def _is_sanitized(
         # Branch sibling check for call-based sanitizers
         if branch_groups and sink_line:
             if _are_in_sibling_branches(call.line, sink_line, branch_groups):
+                continue
+        # Conditional body check for call-based sanitizers
+        if conditional_bodies and sink_line:
+            if _is_in_conditional_body_not_containing(call.line, sink_line, conditional_bodies):
                 continue
         call_text = call.name
         if call.receiver:
@@ -521,7 +662,9 @@ def analyze_taint(
     scope_map = _build_scope_map(semantics)
 
     # Build branch sibling ranges from the AST for scope-aware sanitization
-    branch_groups = _collect_branch_siblings(getattr(semantics, "_tree_root", None))
+    tree_root = getattr(semantics, "_tree_root", None)
+    branch_groups = _collect_branch_siblings(tree_root)
+    conditional_bodies = _collect_conditional_bodies(tree_root)
 
     for func_scope in func_scopes:
         func_scope_ids = _get_all_children(func_scope.scope_id, scope_children)
@@ -537,6 +680,7 @@ def analyze_taint(
         taint_chains = _propagate_taint(
             semantics, initial_tainted, func_scope_ids, config,
             branch_groups=branch_groups,
+            conditional_bodies=conditional_bodies,
         )
         tainted_vars = set(taint_chains.keys())
 
@@ -553,6 +697,7 @@ def analyze_taint(
                 semantics, config, sink.variable, func_scope_ids,
                 sink_line=sink.line, sink_scope_id=sink.scope_id,
                 scope_map=scope_map, branch_groups=branch_groups,
+                conditional_bodies=conditional_bodies,
             ):
                 continue
 

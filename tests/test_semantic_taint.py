@@ -613,3 +613,134 @@ def process():
         assert len(findings) == 0, (
             "Sanitizer in same scope as sink should suppress finding"
         )
+
+
+# ─── Loop Body Modeling Tests ─────────────────────────────────────────────────
+
+@needs_tree_sitter
+class TestLoopBodyModeling:
+    """Verify that sanitizers inside loop bodies don't guarantee taint clearance."""
+
+    def test_sanitizer_in_for_loop_does_not_clear_taint(self):
+        """Sanitizer inside for loop doesn't guarantee taint is cleared (0 iterations possible)."""
+        code = '''
+def process():
+    user_input = input()
+    for item in some_list:
+        user_input = html.escape(user_input)
+    eval(user_input)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) >= 1, (
+            "Sanitizer in for-loop body should not suppress finding — loop may not execute"
+        )
+
+    def test_sanitizer_in_while_loop_does_not_clear_taint(self):
+        """Sanitizer inside while loop doesn't guarantee taint is cleared."""
+        code = '''
+def process():
+    user_input = input()
+    while condition:
+        user_input = html.escape(user_input)
+    eval(user_input)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) >= 1, (
+            "Sanitizer in while-loop body should not suppress finding — loop may not execute"
+        )
+
+    def test_sanitizer_before_loop_clears_taint(self):
+        """Sanitizer BEFORE loop still works normally."""
+        code = '''
+def process():
+    user_input = input()
+    user_input = html.escape(user_input)
+    for item in some_list:
+        eval(user_input)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) == 0, (
+            "Sanitizer before loop should suppress finding"
+        )
+
+    def test_sink_inside_loop_with_sanitizer_before_loop(self):
+        """Sink inside loop, sanitizer before loop — should be safe."""
+        code = '''
+def process():
+    cmd = input()
+    cmd = bleach.clean(cmd)
+    for x in items:
+        os.system(cmd)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) == 0, (
+            "Sanitizer before loop should suppress finding for sink inside loop"
+        )
+
+
+# ─── Nested Branch Handling Tests ─────────────────────────────────────────────
+
+@needs_tree_sitter
+class TestNestedBranchHandling:
+    """Verify that sanitizers in nested branches don't guarantee taint clearance."""
+
+    def test_sanitizer_in_nested_if_does_not_clear_taint(self):
+        """Sanitizer nested two levels deep in if/if doesn't clear taint."""
+        code = '''
+def process():
+    user_input = input()
+    if condition_a:
+        if condition_b:
+            user_input = html.escape(user_input)
+    eval(user_input)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) >= 1, (
+            "Sanitizer in nested if should not suppress finding — both conditions must be true"
+        )
+
+    def test_sanitizer_in_deeply_nested_branch(self):
+        """Three levels of nesting."""
+        code = '''
+def process():
+    user_input = input()
+    if a:
+        if b:
+            if c:
+                user_input = html.escape(user_input)
+    eval(user_input)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) >= 1, (
+            "Sanitizer in 3-level nested if should not suppress finding"
+        )
+
+    def test_sanitizer_in_loop_inside_if(self):
+        """Sanitizer in a loop inside an if — doubly conditional."""
+        code = '''
+def process():
+    data = input()
+    if flag:
+        for item in items:
+            data = bleach.clean(data)
+    eval(data)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) >= 1, (
+            "Sanitizer in loop-inside-if should not suppress finding"
+        )
+
+    def test_sanitizer_in_if_inside_loop(self):
+        """Sanitizer in an if inside a loop — doubly conditional."""
+        code = '''
+def process():
+    data = input()
+    for item in items:
+        if condition:
+            data = html.escape(data)
+    os.system(data)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) >= 1, (
+            "Sanitizer in if-inside-loop should not suppress finding"
+        )
