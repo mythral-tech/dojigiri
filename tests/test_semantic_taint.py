@@ -138,7 +138,7 @@ def foo():
         findings = _analyze_python(code)
         assert len(findings) == 1
         f = findings[0]
-        assert f.rule == "taint-flow"
+        assert f.rule == "eval-usage"
         assert f.severity == Severity.WARNING
         assert f.category == Category.SECURITY
         assert "eval" in f.message
@@ -386,7 +386,7 @@ def get_user():
         findings = _analyze_python(code)
         assert len(findings) >= 1
         f = findings[0]
-        assert f.rule == "taint-flow"
+        assert f.rule == "sql-injection"
         assert f.severity == Severity.WARNING
         assert f.category == Category.SECURITY
         assert f.source == Source.AST
@@ -403,7 +403,7 @@ def run():
         findings = _analyze_python(code)
         assert len(findings) >= 1
         f = findings[0]
-        assert f.rule == "taint-flow"
+        assert f.rule == "os-system"
         assert "system" in f.message.lower() or "system_cmd" in f.message
 
     def test_safe_code_no_taint_sources(self):
@@ -443,7 +443,7 @@ def vulnerable():
         findings = _analyze_python(code)
         assert len(findings) >= 2
         rules = {f.rule for f in findings}
-        assert rules == {"taint-flow"}
+        assert rules == {"os-system", "sql-injection"}
         severities = {f.severity for f in findings}
         assert severities == {Severity.WARNING}
 
@@ -465,7 +465,7 @@ function handle(req, res) {
         findings = _analyze_js(code)
         assert len(findings) >= 1
         f = findings[0]
-        assert f.rule == "taint-flow"
+        assert f.rule == "eval-usage"
         assert f.severity == Severity.WARNING
         assert f.category == Category.SECURITY
         assert "eval" in f.message

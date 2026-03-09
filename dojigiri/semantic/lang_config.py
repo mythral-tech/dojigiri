@@ -569,30 +569,116 @@ LANGUAGE_CONFIGS.update(
             comment_node_types=["line_comment", "block_comment"],
             # Semantic extraction
             assignment_node_types=["local_variable_declaration", "assignment_expression"],
-            call_node_types=["method_invocation"],
+            call_node_types=["method_invocation", "object_creation_expression"],
             class_node_types=["class_declaration"],
             scope_boundary_types=["method_declaration", "constructor_declaration", "class_declaration"],
             attribute_access_types=["field_access"],
             block_scoped=True,
             # Taint analysis
             taint_source_patterns=[
+                # HTTP request parameters (Servlet API)
                 ("request.getParameter", "user_input"),
+                ("request.getParameterValues", "user_input"),
+                ("request.getHeader", "user_input"),
+                ("request.getCookies", "user_input"),
+                ("request.getQueryString", "user_input"),
+                ("request.getRequestURI", "user_input"),
+                ("request.getPathInfo", "user_input"),
+                ("request.getInputStream", "user_input"),
+                ("request.getReader", "user_input"),
+                # Console/file input
                 ("Scanner.nextLine", "user_input"),
+                ("Scanner.next", "user_input"),
+                ("BufferedReader.readLine", "file_read"),
+                ("Files.readString", "file_read"),
+                ("Files.readAllLines", "file_read"),
+                # Environment
                 ("System.getenv", "env_var"),
+                ("System.getProperty", "env_var"),
+                # Database results (tainted data from DB)
+                ("ResultSet.getString", "db_input"),
+                ("ResultSet.getObject", "db_input"),
             ],
             taint_sink_patterns=[
-                ("Runtime.exec", "system_cmd"),
+                # SQL Injection (CWE-89)
                 ("Statement.execute", "sql_query"),
+                ("Statement.executeQuery", "sql_query"),
+                ("Statement.executeUpdate", "sql_query"),
                 ("PreparedStatement.execute", "sql_query"),
+                ("createStatement", "sql_query"),
+                ("prepareCall", "sql_query"),
+                ("prepareStatement", "sql_query"),
+                ("executeQuery", "sql_query"),
+                ("executeUpdate", "sql_query"),
+                # Command Injection (CWE-78)
+                ("Runtime.exec", "system_cmd"),
+                ("runtime.exec", "system_cmd"),
+                ("getRuntime().exec", "system_cmd"),
+                ("new ProcessBuilder(", "system_cmd"),
+                # LDAP Injection (CWE-90)
+                ("DirContext.search", "ldap_query"),
+                ("InitialDirContext.search", "ldap_query"),
+                ("ctx.search", "ldap_query"),
+                ("dirContext.search", "ldap_query"),
+                # XPath Injection (CWE-643) — variable names vary (xp, xpath, etc.)
+                ("XPath.evaluate", "xpath_query"),
+                ("XPath.compile", "xpath_query"),
+                ("XPathExpression.evaluate", "xpath_query"),
+                ("xpath.evaluate", "xpath_query"),
+                ("xpath.compile", "xpath_query"),
+                ("xp.evaluate", "xpath_query"),
+                ("xp.compile", "xpath_query"),
+                # Path Traversal (CWE-22)
+                ("new File(", "file_path"),
+                ("new FileInputStream(", "file_path"),
+                ("new FileOutputStream(", "file_path"),
+                ("new FileReader(", "file_path"),
+                ("new FileWriter(", "file_path"),
+                ("Paths.get", "file_path"),
+                ("Files.newInputStream", "file_path"),
+                # Note: XSS sinks (response.getWriter, etc.) intentionally omitted
+                # from taint — regex rules handle XSS better with lower FPR.
+                # Trust Boundary (CWE-501)
+                ("session.setAttribute", "trust_boundary"),
+                ("session.putValue", "trust_boundary"),
+                ("request.getSession().setAttribute", "trust_boundary"),
             ],
             taint_sanitizer_patterns=[
+                # Encoding/escaping
                 "StringEscapeUtils.escapeHtml",
+                "StringEscapeUtils.escapeSql",
+                "StringEscapeUtils.escapeXml",
                 "ESAPI.encoder",
                 "URLEncoder.encode",
+                "HtmlUtils.htmlEscape",
+                # Type conversion (converts string to non-injectable type)
                 "Integer.parseInt",
+                "Integer.valueOf",
                 "Long.parseLong",
+                "Long.valueOf",
+                "Double.parseDouble",
+                "Float.parseFloat",
+                "Boolean.parseBoolean",
+                # Path sanitization
                 "Paths.get",
                 "FilenameUtils.getName",
+                "FilenameUtils.normalize",
+                "Path.normalize",
+                # Prepared statement binding (parameterized queries)
+                "PreparedStatement.set",
+                "setString",
+                "setInt",
+                "setLong",
+                # Input validation
+                "Pattern.matches",
+                "String.matches",
+                "Validator.validate",
+                "StringUtils.isNumeric",
+                "StringUtils.isAlpha",
+                "StringUtils.isAlphanumeric",
+                # LDAP encoding
+                "LdapEncoder.filterEncode",
+                "LdapNameBuilder",
             ],
             # CFG control flow
             cfg_if_node_types=["if_statement"],

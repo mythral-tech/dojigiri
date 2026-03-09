@@ -86,7 +86,7 @@ def handler():
         findings = _analyze_python(code)
         assert len(findings) >= 1
         f = findings[0]
-        assert f.rule == "taint-flow"
+        assert f.rule == "eval-usage"
         assert f.severity == Severity.WARNING
         assert f.category == Category.SECURITY
         assert f.source == Source.AST
@@ -367,7 +367,7 @@ function handle(req, res) {
         # JS scope mapping may not align CFG with function scope;
         # verify correctness of any findings produced
         for f in findings:
-            assert f.rule == "taint-flow"
+            assert f.rule == "eval-usage"
             assert f.severity == Severity.WARNING
 
     def test_go_formvalue_to_exec_command(self):
@@ -389,7 +389,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         # Go semantic extraction may not capture value_text for short_var_declaration;
         # if it does produce findings, verify they are correct
         for f in findings:
-            assert f.rule == "taint-flow"
+            assert f.rule == "os-system"
 
     def test_java_getparameter_to_execute(self):
         """Java: request.getParameter flowing to Statement.execute."""
@@ -405,7 +405,7 @@ class Handler {
         # Java taint support depends on semantic extraction fidelity;
         # if findings are produced, verify correctness
         for f in findings:
-            assert f.rule == "taint-flow"
+            assert f.rule == "java-sql-injection"
 
 
 # ─── Regression / Edge Cases ────────────────────────────────────────────────

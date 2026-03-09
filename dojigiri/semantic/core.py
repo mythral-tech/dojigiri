@@ -360,6 +360,11 @@ class _Extractor:
         if left is None:
             return
 
+        # Extract the iterable expression for taint propagation
+        # Python/JS/Go: 'right' field; Java enhanced_for: 'value' field
+        iter_node = node.child_by_field_name("right") or node.child_by_field_name("value")
+        iter_text = _get_text(iter_node, self.src)[:100] if iter_node else ""
+
         # Extract identifier(s) from the loop target
         if left.type == "identifier":
             name = _get_text(left, self.src)
@@ -369,7 +374,7 @@ class _Extractor:
                     line=_line(node),
                     scope_id=self._current_scope,
                     value_node_type="loop_variable",
-                    value_text="",
+                    value_text=iter_text,
                     is_parameter=False,
                     is_augmented=False,
                 )
@@ -473,7 +478,7 @@ class _Extractor:
     def _rhs_info(self, right: Any) -> tuple[str, str]:
         """Extract type and text from an RHS node."""
         rhs_type = right.type if right else ""
-        rhs_text = _get_text(right, self.src)[:100] if right else ""
+        rhs_text = _get_text(right, self.src)[:500] if right else ""
         return rhs_type, rhs_text
 
     def _handle_python_assignment(self, node: Any, is_augmented: bool) -> None:
@@ -565,26 +570,47 @@ class _Extractor:
                     name_node = child.child_by_field_name("name")
                     value_node = child.child_by_field_name("value")
                     if name_node and name_node.type == "identifier":
-                        rhs_type = value_node.type if value_node else ""
-                        self._record_assignment(_get_text(name_node, self.src), node, rhs_type)
+                        rhs_type, rhs_text = self._rhs_info(value_node)
+                        self._record_assignment(
+                            _get_text(name_node, self.src), node, rhs_type, rhs_text,
+                        )
         elif node.type == "assignment_expression":
-            left, _ = self._extract_lhs_rhs(node)
+            left, right = self._extract_lhs_rhs(node)
             if left and left.type == "identifier":
-                self._record_assignment(_get_text(left, self.src), node, is_augmented=is_augmented)
+                rhs_type, rhs_text = self._rhs_info(right)
+                self._record_assignment(
+                    _get_text(left, self.src), node, rhs_type, rhs_text,
+                    is_augmented=is_augmented,
+                )
 
     def _handle_csharp_assignment(self, node: Any, is_augmented: bool) -> None:
         if node.type == "variable_declarator":
             name_node = node.child_by_field_name("name") or (
                 node.children[0] if node.children and node.children[0].type == "identifier" else None
             )
+            value_node = node.child_by_field_name("value") or (
+                node.children[-1] if len(node.children) > 1 else None
+            )
             if name_node and name_node.type == "identifier":
-                self._record_assignment(_get_text(name_node, self.src), node)
+                rhs_type, rhs_text = self._rhs_info(value_node) if value_node else ("", "")
+                self._record_assignment(
+                    _get_text(name_node, self.src), node, rhs_type, rhs_text,
+                )
         elif node.type == "assignment_expression":
-            left, _ = self._extract_lhs_rhs(node)
+            left, right = self._extract_lhs_rhs(node)
             if left and left.type == "identifier":
-                self._record_assignment(_get_text(left, self.src), node, is_augmented=is_augmented)
+                rhs_type, rhs_text = self._rhs_info(right)
+                self._record_assignment(
+                    _get_text(left, self.src), node, rhs_type, rhs_text,
+                    is_augmented=is_augmented,
+                )
 
     def _handle_call(self, node: Any) -> None:
+        # Handle Java/C# constructor calls: new Foo(...)
+        if node.type == "object_creation_expression":
+            self._handle_constructor_call(node)
+            return
+
         func_node = node.child_by_field_name("function")
         if func_node is None:
             # Java method_invocation uses "name" and "object" fields
@@ -632,6 +658,44 @@ class _Extractor:
                 scope_id=self._current_scope,
                 arg_count=arg_count,
                 receiver=receiver,
+            )
+        )
+
+    def _handle_constructor_call(self, node: Any) -> None:
+        """Handle Java/C# constructor calls: new Foo(...) or new pkg.Foo(...)."""
+        # Extract class name from the type child
+        type_node = node.child_by_field_name("type")
+        if type_node is None:
+            # Fallback: look for type_identifier or scoped_type_identifier
+            for child in node.children:
+                if child.type in ("type_identifier", "scoped_type_identifier",
+                                  "generic_type"):
+                    type_node = child
+                    break
+        if type_node is None:
+            return
+
+        class_name = _get_text(type_node, self.src)
+        # Strip package qualifier for matching (java.io.File → File)
+        simple_name = class_name.rsplit(".", 1)[-1] if "." in class_name else class_name
+        # Build "new ClassName(" to match taint sink patterns
+        name = f"new {simple_name}("
+
+        # Count arguments
+        args_node = node.child_by_field_name("arguments")
+        arg_count = 0
+        if args_node:
+            for child in args_node.children:
+                if child.is_named and child.type not in ("(", ")", ","):
+                    arg_count += 1
+
+        self.result.function_calls.append(
+            FunctionCall(
+                name=name,
+                line=_line(node),
+                scope_id=self._current_scope,
+                arg_count=arg_count,
+                receiver=None,
             )
         )
 

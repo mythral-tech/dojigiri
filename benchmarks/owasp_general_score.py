@@ -30,6 +30,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from dojigiri.detector import run_regex_checks
 from dojigiri.java_sanitize import filter_java_fps
+from dojigiri.semantic.core import extract_semantics
+from dojigiri.semantic.lang_config import get_config
+from dojigiri.semantic.taint import analyze_taint
 from benchmarks.owasp_scorecard import (
     CWE_TO_DOJI_RULES,
     OWASP_CATEGORY_NAMES,
@@ -41,8 +44,24 @@ from benchmarks.owasp_scorecard import (
 )
 
 
+# CWEs where regex alone has ~100% FPR (flags everything).
+# For these, taint-gating is used: regex findings only count if taint confirms
+# a real source→sink data flow.
+TAINT_GATED_CWES = {22, 78, 89, 90, 501, 643}  # Path, Cmd, SQL, LDAP, Trust, XPath
+
+# Mapping from rule names to CWEs for taint-gating decisions
+_RULE_TO_CWE: dict[str, int] = {}
+for _cwe, _rules in CWE_TO_DOJI_RULES.items():
+    for _r in _rules:
+        _RULE_TO_CWE[_r] = _cwe
+
+
 def scan_general_only(benchmark_dir: str) -> dict[str, set[str]]:
-    """Scan all OWASP Benchmark Java files with general-only filters.
+    """Scan all OWASP Benchmark Java files with general-only filters + taint gating.
+
+    For injection CWEs with ~100% regex FPR (SQL, LDAP, Trust Boundary, XPath),
+    only flags a file if taint analysis confirms a source→sink data flow.
+    Other categories use regex as-is.
 
     Returns {test_name: set_of_security_rules_fired}.
     """
@@ -52,9 +71,10 @@ def scan_general_only(benchmark_dir: str) -> dict[str, set[str]]:
         sys.exit(1)
 
     java_files = sorted(test_dir.glob("BenchmarkTest*.java"))
-    print(f"Scanning {len(java_files)} test files with general-only filters...")
+    print(f"Scanning {len(java_files)} test files with taint-gated analysis...")
 
     detections: dict[str, set[str]] = defaultdict(set)
+    taint_stats = {"files_with_taint": 0, "total_taint_findings": 0}
     t0 = time.perf_counter()
 
     for i, java_file in enumerate(java_files):
@@ -66,19 +86,49 @@ def scan_general_only(benchmark_dir: str) -> dict[str, set[str]]:
         filepath = str(java_file)
         test_name = java_file.stem  # e.g., BenchmarkTest00001
 
-        # Run regex checks (same as full scan)
-        findings = run_regex_checks(content, filepath, "java")
+        # Run regex checks
+        regex_findings = run_regex_checks(content, filepath, "java")
+        regex_findings = filter_java_fps(regex_findings, content, skip_benchmark_filters=True)
 
-        # Apply ONLY general-purpose filters (skip benchmark-specific ones)
-        findings = filter_java_fps(findings, content, skip_benchmark_filters=True)
+        # Run taint analysis
+        taint_rules: set[str] = set()
+        try:
+            semantics = extract_semantics(content, filepath, "java")
+            if semantics:
+                config = get_config("java")
+                if config:
+                    source_bytes = content.encode("utf-8")
+                    taint_findings = analyze_taint(semantics, source_bytes, config, filepath)
+                    for tf in taint_findings:
+                        if tf.category.value == "security":
+                            taint_rules.add(tf.rule)
+                    if taint_rules:
+                        taint_stats["files_with_taint"] += 1
+                        taint_stats["total_taint_findings"] += len(taint_findings)
+        except Exception:
+            pass  # Taint analysis is best-effort
 
-        # Collect security findings
-        for f in findings:
-            if f.category.value == "security":
+        # Collect findings: regex + taint-gating for high-FPR categories
+        for f in regex_findings:
+            if f.category.value != "security":
+                continue
+            rule_cwe = _RULE_TO_CWE.get(f.rule)
+            if rule_cwe in TAINT_GATED_CWES:
+                # Only include if taint also found a flow for this CWE
+                cwe_rules = set(CWE_TO_DOJI_RULES.get(rule_cwe, []))
+                if taint_rules & cwe_rules:
+                    detections[test_name].add(f.rule)
+            else:
                 detections[test_name].add(f.rule)
+
+        # Add taint-only findings (taint may catch things regex missed)
+        for tr in taint_rules:
+            detections[test_name].add(tr)
 
     elapsed = time.perf_counter() - t0
     print(f"  Done in {elapsed:.1f}s — {len(detections)} files with security findings")
+    print(f"  Taint stats: {taint_stats['files_with_taint']} files with taint findings, "
+          f"{taint_stats['total_taint_findings']} total taint findings")
     return dict(detections)
 
 

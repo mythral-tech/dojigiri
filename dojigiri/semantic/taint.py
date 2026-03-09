@@ -22,6 +22,38 @@ from ..types import Category, Finding, Severity, Source
 from .core import FileSemantics, ScopeInfo
 from .lang_config import LanguageConfig
 
+# ─── Sink kind → rule name mapping ────────────────────────────────────
+# Maps taint sink kinds to specific rule names that align with CWE categories.
+# Language-specific overrides take precedence over generic mappings.
+_GENERIC_SINK_RULES: dict[str, str] = {
+    "sql_query": "sql-injection",
+    "system_cmd": "os-system",
+    "file_path": "path-traversal",
+    "eval": "eval-usage",
+    "html_output": "xss",
+}
+_JAVA_SINK_RULES: dict[str, str] = {
+    "sql_query": "java-sql-injection",
+    "system_cmd": "java-cmdi",
+    "ldap_query": "java-ldap-injection",
+    "xpath_query": "java-xpath-injection",
+    "file_path": "java-path-traversal",
+    "http_response": "java-xss",
+    "http_redirect": "java-xss",
+    "http_header": "java-xss",
+    "http_cookie": "java-insecure-cookie",
+    "trust_boundary": "java-trust-boundary",
+}
+_LANG_SINK_RULES: dict[str, dict[str, str]] = {
+    "java": _JAVA_SINK_RULES,
+}
+
+
+def _resolve_taint_rule(sink_kind: str, language: str = "") -> str:
+    """Get the CWE-aligned rule name for a taint sink kind."""
+    lang_map = _LANG_SINK_RULES.get(language, {})
+    return lang_map.get(sink_kind) or _GENERIC_SINK_RULES.get(sink_kind, "taint-flow")
+
 # ─── Data structures ─────────────────────────────────────────────────
 
 
@@ -794,6 +826,7 @@ def analyze_taint(
                 chain_names = [c[0] for c in chain]
                 chain_desc = f" (through: {' → '.join(chain_names)})"
 
+            rule_name = _resolve_taint_rule(sink.kind, config.ts_language_name)
             findings.append(
                 Finding(
                     file=filepath,
@@ -801,7 +834,7 @@ def analyze_taint(
                     severity=Severity.WARNING,
                     category=Category.SECURITY,
                     source=Source.AST,
-                    rule="taint-flow",
+                    rule=rule_name,
                     message=(
                         f"Tainted data from '{source.variable}' ({source.kind}, line {source.line}) "
                         f"reaches sink '{sink.function_name}' ({sink.kind}){chain_desc} — "
@@ -963,6 +996,7 @@ def analyze_taint_pathsensitive(
                                             src_kind = source_info.kind if source_info else "unknown"
                                             src_var = source_info.variable if source_info else tvar
 
+                                            ps_rule = _resolve_taint_rule(sink_kind, config.ts_language_name)
                                             findings.append(
                                                 Finding(
                                                     file=filepath,
@@ -970,7 +1004,7 @@ def analyze_taint_pathsensitive(
                                                     severity=Severity.WARNING,
                                                     category=Category.SECURITY,
                                                     source=Source.AST,
-                                                    rule="taint-flow",
+                                                    rule=ps_rule,
                                                     message=(
                                                         f"Tainted data from '{src_var}' "
                                                         f"({src_kind}, line {src_line}) "
