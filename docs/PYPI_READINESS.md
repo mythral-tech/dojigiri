@@ -13,7 +13,7 @@
 | 1 | **pyproject.toml metadata** | PASS | Name, version, description, author, license, classifiers, keywords, python_requires all present and correct |
 | 2 | **Project URLs** | PASS (fixed) | Added `Documentation` and `Changelog` URLs. Homepage, Repository, Issues already present |
 | 3 | **README.md** | PASS | Comprehensive. Badges, quick start, feature list, architecture diagram, comparison table, CI examples, limitations. A developer lands on PyPI and knows what this is in 10 seconds |
-| 4 | **LICENSE (BUSL-1.1)** | PASS (with caveat) | File present and correct. **Caveat:** Licensor field reads `-PENDING LLC-` -- update before publish if the LLC is formed |
+| 4 | **LICENSE (BUSL-1.1)** | PASS (with caveat) | File present and correct. **Caveat:** Licensor field reads `Edgepoint Inc.` -- update before publish if the LLC is formed |
 | 5 | **CHANGELOG.md** | PASS | Thorough, follows Keep a Changelog format. Current for v1.1.0 |
 | 6 | **`__init__.py` exports** | PASS | `__version__` = "1.1.0" matches pyproject.toml. Clean `__all__` with all public types |
 | 7 | **`__version__` consistency** | PASS | pyproject.toml and `__init__.py` both read "1.1.0" |
@@ -51,7 +51,7 @@
 
 ## Items for Sol to Decide
 
-1. **LICENSE: `-PENDING LLC-` placeholder** -- The Licensor field in LICENSE reads `-PENDING LLC-`. If the LLC is formed before publish, update it. If not, it still works legally (copyright line names Stephane Perez) but looks unfinished.
+1. **LICENSE: `Edgepoint Inc.` placeholder** -- The Licensor field in LICENSE reads `Edgepoint Inc.`. If the LLC is formed before publish, update it. If not, it still works legally (copyright line names Stephane Perez) but looks unfinished.
 
 2. **Version 1.1.0 as first PyPI release** -- Technically fine, but some projects start at 0.x or 1.0.0 for first public release. 1.1.0 implies a prior 1.0.0 existed publicly. This is cosmetic and probably doesn't matter for the target audience.
 
@@ -65,7 +65,7 @@
 
 **READY TO PUBLISH** -- after fixing the 3 critical issues above (all applied in this audit).
 
-The package builds clean, twine validates, all rules are included, dependencies are correct, no secrets leak, the README is strong, and the entry point works. The only open item is the `-PENDING LLC-` placeholder in LICENSE, which Sol should update if the LLC exists.
+The package builds clean, twine validates, all rules are included, dependencies are correct, no secrets leak, the README is strong, and the entry point works. The only open item is the `Edgepoint Inc.` placeholder in LICENSE, which Sol should update if the LLC exists.
 
 ### Files Modified
 
