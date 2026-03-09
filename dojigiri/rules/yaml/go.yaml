@@ -1,0 +1,133 @@
+rules:
+- category: security
+  id: go-sql-sprintf
+  message: SQL query built with fmt.Sprintf — SQL injection risk
+  pattern: (?i)fmt\.Sprintf\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b
+  severity: critical
+  suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
+- category: security
+  id: go-sql-concat
+  message: SQL query built with string concatenation — SQL injection risk
+  pattern: (?i)(?:['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*['"]\s*\+)
+  severity: critical
+  suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
+- category: security
+  id: go-command-injection
+  message: exec.Command() with dynamic argument — command injection risk if user-controlled
+  pattern: exec\.Command\s*\(\s*(?!['"])
+  severity: warning
+  suggestion: Validate command and arguments; never pass unsanitized user input
+- category: security
+  id: go-command-injection-ctx
+  message: exec.CommandContext() with dynamic argument — command injection risk
+  pattern: exec\.CommandContext\s*\(\s*\w+\s*,\s*(?!['"])
+  severity: warning
+  suggestion: Validate command and arguments; never pass unsanitized user input
+- category: security
+  id: go-path-traversal
+  message: File operation with dynamic path — path traversal risk
+  pattern: (?:os\.(?:Open|OpenFile|ReadFile|Create|Remove|RemoveAll|Mkdir|MkdirAll)|ioutil\.(?:ReadFile|ReadDir|WriteFile))\s*\(\s*(?!['"])
+  severity: warning
+  suggestion: Use filepath.Clean() and validate path is within expected base directory
+- category: security
+  id: go-hardcoded-credential
+  message: Possible hardcoded credential in Go source
+  pattern: (?i)(?:password|passwd|secret|apiKey|api_key|token)\s*[:=]\s*['"][^'"]{8,}['"]
+  severity: critical
+  suggestion: Use environment variables or a secrets manager
+- category: security
+  id: go-weak-crypto-md5
+  message: MD5 is cryptographically broken — collisions are trivial
+  pattern: \bmd5\.(?:New|Sum)\b
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 for integrity; use bcrypt/scrypt/argon2 for passwords
+- category: security
+  id: go-weak-crypto-sha1
+  message: SHA1 is cryptographically weak — collision attacks demonstrated
+  pattern: \bsha1\.(?:New|Sum)\b
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 instead
+- category: security
+  id: go-weak-crypto-des
+  message: DES is broken — 56-bit keys are trivially brute-forced
+  pattern: \bdes\.NewCipher\b
+  severity: warning
+  suggestion: Use AES (aes.NewCipher) instead
+- category: security
+  id: go-insecure-tls
+  message: 'TLS certificate verification disabled (InsecureSkipVerify: true)'
+  pattern: InsecureSkipVerify\s*:\s*true
+  severity: critical
+  suggestion: Enable certificate verification; configure proper CA certificates
+- category: security
+  id: go-weak-tls-version
+  message: TLS minimum version set below 1.2 — vulnerable to known attacks
+  pattern: MinVersion\s*:\s*tls\.Version(?:TLS10|TLS11|SSL30)\b
+  severity: warning
+  suggestion: Set MinVersion to tls.VersionTLS12 or tls.VersionTLS13
+- category: security
+  id: go-unsafe-pointer
+  message: unsafe.Pointer bypasses Go type safety — memory corruption risk
+  pattern: \bunsafe\.Pointer\b
+  severity: warning
+  suggestion: Avoid unsafe unless absolutely necessary; document safety invariants
+- category: security
+  id: go-ssrf
+  message: HTTP request with dynamic URL — SSRF risk if URL is user-controlled
+  pattern: http\.(?:Get|Post|PostForm|Head)\s*\(\s*(?!['"])
+  severity: warning
+  suggestion: Validate URL against an allowlist of trusted domains/schemes
+- category: security
+  id: go-open-redirect
+  message: HTTP redirect with dynamic URL — open redirect risk
+  pattern: http\.Redirect\s*\(\s*\w+\s*,\s*\w+\s*,\s*(?!['"])
+  severity: warning
+  suggestion: Validate redirect target against an allowlist of trusted paths/domains
+- category: bug
+  id: unchecked-error
+  message: Error return value discarded with _
+  pattern: ^\s*\w+(?:,\s*_)\s*[:=]=
+  severity: warning
+  suggestion: Handle the error explicitly
+- category: style
+  id: fmt-print
+  message: fmt.Print left in code
+  pattern: \bfmt\.Print(?:ln|f)?\s*\(
+  severity: info
+  suggestion: Use structured logging instead
+- category: bug
+  id: go-defer-in-loop
+  message: defer inside loop — deferred calls accumulate until function returns
+  pattern: ^\s*for\s.*\{[\s\S]*?\bdefer\b
+  severity: warning
+  suggestion: Move deferred cleanup into a separate function called from the loop body
+- category: bug
+  id: go-goroutine-anonymous
+  message: Anonymous goroutine — verify it has a termination mechanism (channel, context, WaitGroup)
+  pattern: \bgo\s+func\s*\(
+  severity: info
+  suggestion: Ensure goroutines can be cancelled and their completion is tracked
+- category: bug
+  id: go-nil-map
+  message: Map declared with var (nil) — assignment will panic if not initialized with make()
+  pattern: var\s+\w+\s+map\[
+  severity: info
+  suggestion: Initialize with make() or a map literal before use
+- category: bug
+  id: go-panic
+  message: panic() crashes the program — inappropriate for library code and most application code
+  pattern: ^\s*panic\s*\(
+  severity: warning
+  suggestion: Return an error instead of panicking; reserve panic for truly unrecoverable states
+- category: performance
+  id: go-string-byte-copy
+  message: string([]byte(...)) creates a copy — may impact performance in hot paths
+  pattern: \bstring\(\[\]byte\(
+  severity: info
+  suggestion: Consider using unsafe.String() (Go 1.20+) in performance-critical code after benchmarking
+- category: bug
+  id: go-global-var
+  message: Package-level mutable variable — data race risk if accessed from goroutines
+  pattern: ^var\s+\w+\s+(?:map|int|string|bool|\[\])\b
+  severity: info
+  suggestion: Protect with sync.Mutex/RWMutex, use sync.Map, or channel-based access

@@ -1,0 +1,163 @@
+rules:
+- category: security
+  id: java-weak-crypto
+  message: Weak/broken cryptographic algorithm (DES, RC2, RC4, Blowfish, or 3DES)
+  pattern: (?:Cipher|KeyGenerator)\.getInstance\s*\(\s*["'](?:[^"']*(?:DES|RC2|RC4|Blowfish|DESede)[^"']*)["']
+  severity: critical
+  suggestion: Use AES/GCM/NoPadding or ChaCha20-Poly1305
+- category: security
+  id: java-weak-hash
+  message: Weak hash algorithm (MD5/SHA1) — vulnerable to collision attacks
+  pattern: MessageDigest\.getInstance\s*\(\s*["'](?:MD[245]|SHA-?1)["']
+  severity: warning
+  suggestion: Use SHA-256 or stronger (SHA-384, SHA-512)
+- category: security
+  id: java-weak-hash
+  message: Hash algorithm from variable — may resolve to weak algorithm (MD5/SHA1)
+  pattern: MessageDigest\.getInstance\s*\(\s*(?!["'])([a-z]\w*)\s*[,)]
+  severity: warning
+  suggestion: Use a hardcoded strong algorithm (SHA-256, SHA-384, SHA-512)
+- category: security
+  id: java-weak-random
+  message: java.util.Random is not cryptographically secure
+  pattern: (?<!Secure)\bRandom\s*\(|new\s+java\.util\.Random\s*\(|Math\.random\s*\(
+  severity: warning
+  suggestion: Use java.security.SecureRandom for security-sensitive random values
+- category: security
+  id: java-trust-boundary
+  message: Potential trust boundary violation — untrusted data stored in session
+  pattern: (?:session|getSession\(\))\.(?:setAttribute|putValue)\s*\(
+  severity: warning
+  suggestion: Validate and sanitize input before storing in HttpSession
+- category: security
+  id: java-insecure-cookie
+  message: Cookie Secure flag explicitly disabled — cookie sent over HTTP
+  pattern: \.setSecure\s*\(\s*false\s*\)
+  severity: warning
+  suggestion: Use cookie.setSecure(true) to restrict cookies to HTTPS
+- category: security
+  id: java-sql-injection
+  message: SQL injection — string concatenation passed to Java DB API
+  pattern: \.(?:prepareCall|prepareStatement|queryForObject|queryForList|batchUpdate)\s*\([^)]*\+
+  severity: critical
+  suggestion: Use PreparedStatement with ? placeholders and bind parameters
+- category: security
+  id: java-sql-injection
+  message: SQL injection — string concatenation in SQL execute call
+  pattern: \.(?:executeQuery|executeUpdate|execute)\s*\([^)]*\+
+  severity: critical
+  suggestion: Use PreparedStatement with ? placeholders and bind parameters
+- category: security
+  id: java-sql-injection
+  message: SQL injection — string concatenation in SQL query construction
+  pattern: (?:String\s+)?sql\s*=\s*["'][^"']*["']\s*\+\s*(?!["'])\w+
+  severity: critical
+  suggestion: Use PreparedStatement with ? placeholders and bind parameters
+- category: security
+  id: java-xss
+  message: XSS — user-controlled format string written to HTTP response
+  pattern: \.getWriter\s*\(\s*\)\s*\.(?:format|printf)\s*\(\s*(?:java\.util\.Locale\.\w+\s*,\s*)?(?!["'])(\w+)
+  severity: critical
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+- category: security
+  id: java-xss
+  message: XSS — variable written directly to HTTP response
+  pattern: \.getWriter\s*\(\s*\)\s*\.(?:write|print|println)\s*\(\s*(?!["'])(\w+)
+  severity: critical
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+- category: security
+  id: java-xss
+  message: XSS — string concatenation with variable written to HTTP response
+  pattern: \.getWriter\s*\(\s*\)\s*\.(?:write|print|println)\s*\(\s*["'][^"']*["']\s*\+\s*\w+
+  severity: critical
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+- category: security
+  id: java-xss
+  message: XSS — format string output may contain user-controlled data in arguments
+  pattern: \.getWriter\s*\(\s*\)\s*\.(?:format|printf)\s*\(\s*(?:java\.util\.Locale\.\w+\s*,\s*)?["'][^"']*%\d*\$?[sd][^"']*["']\s*,\s*\w+
+  severity: critical
+  suggestion: Escape all arguments with ESAPI.encoder().encodeForHTML() before formatting
+- category: security
+  id: java-xss
+  message: XSS — variable written to HTTP response via PrintWriter
+  pattern: (?<!System\.)(?<!System)\bout\.(?:write|print|println|printf|format)\s*\(\s*(?!["'])(\w+)
+  severity: critical
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+- category: security
+  id: java-cmdi
+  message: Command injection — string concatenation in exec()
+  pattern: \.exec\s*\([^)]*\+
+  severity: critical
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+- category: security
+  id: java-cmdi
+  message: Command injection — string concatenation in process command argument
+  pattern: (?:ProcessBuilder|\.command)\s*\(.*\.add\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])\w+
+  severity: critical
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+- category: security
+  id: java-cmdi
+  message: Command injection — string concatenation in command array
+  pattern: (?:new\s+String\s*\[\s*\]\s*|String\s*\[\s*\]\s*\w+\s*=\s*)\{[^}]*["']\s*\+\s*\w+[^}]*\}
+  severity: critical
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+- category: security
+  id: java-cmdi
+  message: Command injection — variable concatenation in command array
+  pattern: (?:new\s+String\s*\[\s*\]\s*|String\s*\[\s*\]\s*\w+\s*=\s*)\{[^}]*\b(?:cmd|command)\s*\+\s*\w+[^}]*\}
+  severity: critical
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+- category: security
+  id: java-cmdi
+  message: Command injection — variable passed to ProcessBuilder.command()
+  pattern: \.command\s*\(\s*(?!["'])([a-z]\w*)\s*\)
+  severity: critical
+  suggestion: Validate command arguments against an allowlist
+- category: security
+  id: java-cmdi
+  message: Command injection — user-controlled environment variable in process execution
+  pattern: argsEnv\s*=\s*\{\s*(?!["'])\w+
+  severity: critical
+  suggestion: Sanitize environment variables or use a fixed environment
+- category: security
+  id: java-ldap-injection
+  message: LDAP injection — string concatenation in LDAP filter
+  pattern: '["''].*(?:uid|cn|sn|mail|ou|dc)\s*=\s*["'']\s*\+\s*\w+'
+  severity: critical
+  suggestion: Use parameterized LDAP queries or escape special characters with LdapEncoder
+- category: security
+  id: java-xpath-injection
+  message: XPath injection — string concatenation in XPath expression
+  pattern: '["''].*(?:@\w+|/\w+)\s*=\s*''["'']\s*\+\s*\w+'
+  severity: critical
+  suggestion: Use XPath parameterization (XPathVariableResolver) or validate/escape input
+- category: security
+  id: java-path-traversal
+  message: Path traversal — variable input in file I/O constructor
+  pattern: new\s+(?:java\.io\.)?(?:File(?:Input|Output)?Stream|File(?:Reader|Writer)?|RandomAccessFile)\s*\(\s*(?:new\s+(?:java\.io\.)?File\s*\()?\s*[a-z]\w*\s*[,)]
+  severity: critical
+  suggestion: Validate and canonicalize file paths before use
+- category: security
+  id: java-path-traversal
+  message: Path traversal — variable input in File constructor
+  pattern: new\s+(?:java\.io\.)?File\s*\(\s*[a-z]\w*\s*[,)]
+  severity: critical
+  suggestion: Validate and canonicalize file paths before use
+- category: security
+  id: java-path-traversal
+  message: Path traversal — variable path component in File constructor
+  pattern: new\s+(?:java\.io\.)?File\s*\([^)]+,\s*[a-z]\w*\s*\)
+  severity: critical
+  suggestion: Validate and canonicalize file paths before use
+- category: security
+  id: java-path-traversal
+  message: Path traversal — variable input in nested File/stream constructor
+  pattern: new\s+(?:java\.io\.)?(?:FileInputStream|FileOutputStream|FileReader|FileWriter)\s*\(\s*new\s+(?:java\.io\.)?File\s*\(\s*[a-z]\w*\s*\)
+  severity: critical
+  suggestion: Validate and canonicalize file paths before use
+- category: security
+  id: java-path-traversal
+  message: Path traversal — variable input in Paths.get()
+  pattern: (?:java\.nio\.file\.)?Paths\.get\s*\(\s*[a-z]\w*\s*[,)]
+  severity: critical
+  suggestion: Validate and canonicalize file paths before use

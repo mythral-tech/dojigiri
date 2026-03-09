@@ -79,9 +79,9 @@ UNIVERSAL_RULES: list[Rule] = _compile(
             "Possible SQL injection — .format() on SQL string",
             "Use parameterized queries instead of string formatting",
         ),
-        # SQL injection via text() wrapping with interpolation
+        # SQL injection via SQLAlchemy text() with interpolation
         (
-            r"""(?i)\btext\s*\(\s*f['"]""",
+            r"""(?i)(?:(?:sa|sqlalchemy|db|session|engine|conn(?:ection)?)\.)?text\s*\(\s*f['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|GRANT|TRUNCATE|WITH)\b""",
             Severity.CRITICAL,
             Category.SECURITY,
             "sql-injection",

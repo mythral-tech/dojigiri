@@ -1,0 +1,211 @@
+rules:
+- category: security
+  id: eval-usage
+  message: eval() can execute arbitrary code — XSS risk
+  pattern: \beval\s*\(
+  severity: critical
+  suggestion: Avoid eval() entirely
+- category: security
+  id: function-constructor
+  message: new Function() is equivalent to eval() — code injection risk
+  pattern: \bnew\s+Function\s*\(
+  severity: critical
+  suggestion: Avoid dynamic code generation; use a lookup table or safe parser
+- category: security
+  id: innerhtml
+  message: innerHTML assignment — XSS risk if value is user-controlled
+  pattern: \.innerHTML\s*=
+  severity: warning
+  suggestion: Use textContent or sanitize HTML before inserting
+- category: security
+  id: outerhtml
+  message: outerHTML assignment — XSS risk if value is user-controlled
+  pattern: \.outerHTML\s*=
+  severity: warning
+  suggestion: Use textContent or DOM manipulation methods instead
+- category: security
+  id: insert-adjacent-html
+  message: insertAdjacentHTML() — XSS risk if value is user-controlled
+  pattern: \.insertAdjacentHTML\s*\(
+  severity: warning
+  suggestion: Sanitize HTML content before inserting
+- category: security
+  id: document-write
+  message: document.write() is a security risk and blocks rendering
+  pattern: \bdocument\.write(?:ln)?\s*\(
+  severity: warning
+  suggestion: Use DOM manipulation methods instead
+- category: security
+  id: proto-access
+  message: __proto__ access — prototype pollution vector
+  pattern: \b__proto__\b
+  severity: warning
+  suggestion: Use Object.getPrototypeOf() / Object.create() instead
+- category: security
+  id: object-assign-merge
+  message: Object.assign() with dynamic source — prototype pollution risk if source is user-controlled
+  pattern: \bObject\.assign\s*\(\s*(?:\{\}|[a-zA-Z_$])
+  severity: info
+  suggestion: Validate/sanitize input objects; strip __proto__ and constructor keys
+- category: security
+  id: open-redirect
+  message: Dynamic location assignment — open redirect risk if value is user-controlled
+  pattern: (?:window\.location|document\.location|location\.href)\s*=\s*(?!['\"](/|https?://))
+  severity: warning
+  suggestion: Validate redirect URLs against an allowlist of trusted domains
+- category: security
+  id: insecure-random
+  message: Math.random() is not cryptographically secure
+  pattern: \bMath\.random\s*\(\s*\)
+  severity: warning
+  suggestion: Use crypto.getRandomValues() or crypto.randomUUID() for security-sensitive values
+- category: security
+  id: postmessage-no-origin
+  message: postMessage listener — verify event.origin is checked before processing
+  pattern: \.addEventListener\s*\(\s*['\"]message['\"]
+  severity: info
+  suggestion: Always check event.origin against expected domains before trusting message data
+- category: security
+  id: regexp-injection
+  message: RegExp constructed with dynamic input — ReDoS and injection risk
+  pattern: new\s+RegExp\s*\([^)]*\+
+  severity: warning
+  suggestion: Escape user input with a regex-escape function before building patterns
+- category: security
+  id: insecure-cookie
+  message: Cookie set without security flags
+  pattern: document\.cookie\s*=\s*(?!.*(?:;|secure|httponly))
+  severity: warning
+  suggestion: Set Secure, HttpOnly, and SameSite flags on cookies
+- category: security
+  id: cors-wildcard
+  message: CORS Access-Control-Allow-Origin set to * — allows any origin
+  pattern: (?i)['"]Access-Control-Allow-Origin['"]\s*[:,]\s*['"]\*['"]
+  severity: warning
+  suggestion: Restrict CORS to specific trusted origins
+- category: security
+  id: jwt-alg-none
+  message: JWT algorithm set to 'none' — signature bypass
+  pattern: (?i)algorithm\s*[:=]\s*['"]none['"]
+  severity: critical
+  suggestion: Always use a strong signing algorithm (RS256 or ES256)
+- category: security
+  id: nosql-injection
+  message: MongoDB operator ($where/$regex) — NoSQL injection risk if value is user-controlled
+  pattern: \$(?:where|regex)\s*[:=]
+  severity: warning
+  suggestion: Use parameterized queries; never pass raw user input to MongoDB operators
+- category: security
+  id: js-command-injection
+  message: child_process.exec() with dynamic argument — command injection risk
+  pattern: (?:child_process\.exec|execSync)\s*\(\s*(?!['"])
+  severity: critical
+  suggestion: Use execFile() or spawn() with argument arrays instead of shell strings
+- category: security
+  id: js-command-injection-template
+  message: child_process.exec() with template literal interpolation — command injection
+  pattern: (?:child_process\.exec|execSync)\s*\(\s*['"].*?\$\{
+  severity: critical
+  suggestion: Use execFile() or spawn() with argument arrays; never interpolate into shell strings
+- category: security
+  id: js-path-traversal
+  message: fs operation with dynamic path — path traversal risk
+  pattern: (?:fs\.(?:readFile|writeFile|readdir|unlink|stat|access|mkdir|rmdir|createReadStream|createWriteStream)(?:Sync)?)\s*\(\s*(?!['"]|__dirname|__filename|path\.join\s*\(\s*__dirname)
+  severity: warning
+  suggestion: Validate and sanitize file paths; use path.resolve() and check against a base directory
+- category: security
+  id: js-hardcoded-jwt-secret
+  message: Hardcoded JWT secret in source code
+  pattern: (?:jwt\.sign|jwt\.verify)\s*\([^)]*,\s*['"][^'"]{8,}['"]
+  severity: critical
+  suggestion: Use environment variables or a secrets manager for JWT secrets
+- category: security
+  id: js-tls-reject-unauthorized
+  message: 'TLS certificate verification disabled (rejectUnauthorized: false)'
+  pattern: rejectUnauthorized\s*:\s*false
+  severity: critical
+  suggestion: Enable certificate verification; use proper CA certificates instead
+- category: security
+  id: js-tls-env-disable
+  message: NODE_TLS_REJECT_UNAUTHORIZED=0 disables all TLS verification
+  pattern: NODE_TLS_REJECT_UNAUTHORIZED.*=.*['"]?0['"]?
+  severity: critical
+  suggestion: Remove this setting; configure proper CA certificates instead
+- category: bug
+  id: loose-equality
+  message: Loose equality (==) can cause type coercion bugs
+  pattern: (?<![=!<>])={2}(?!=)
+  severity: warning
+  suggestion: Use strict equality (===) instead
+- category: style
+  id: console-log
+  message: console.log() left in code
+  pattern: \bconsole\.log\s*\(
+  severity: info
+  suggestion: Remove or replace with proper logging
+- category: bug
+  id: debugger-statement
+  message: debugger statement left in code — will pause execution in browser
+  pattern: ^\s*debugger\s*;?\s*$
+  severity: warning
+  suggestion: Remove debugger statements before committing
+- category: bug
+  id: delete-array
+  message: delete on array creates a sparse hole — does not update .length
+  pattern: \bdelete\s+\w+\s*\[\s*\w+\s*\]
+  severity: warning
+  suggestion: Use Array.splice() to remove elements properly
+- category: bug
+  id: empty-catch
+  message: Empty catch block — error is silently swallowed
+  pattern: catch\s*\(\s*\w*\s*\)\s*\{\s*\}
+  severity: warning
+  suggestion: Handle the error or add a comment explaining why it's intentionally ignored
+- category: style
+  id: alert-usage
+  message: alert() left in code
+  pattern: \balert\s*\(\s*
+  severity: info
+  suggestion: Remove alert() calls; use proper UI notifications
+- category: bug
+  id: missing-await-hint
+  message: Call to *Async() function — verify await is not missing
+  pattern: (?:^|[;=,(])\s*(?!return\b|await\b|yield\b|new\b)\w+\.\w+Async\s*\(
+  severity: info
+  suggestion: Add await if this should be awaited; rename if it's not actually async
+- category: bug
+  id: promise-no-catch
+  message: Promise .then() without .catch() — unhandled rejection risk
+  pattern: \.then\s*\([^)]*\)\s*(?!\.catch|\.finally)
+  severity: info
+  suggestion: Add .catch() handler or use async/await with try/catch
+- category: security
+  id: settimeout-string
+  message: setTimeout/setInterval with string argument — implicit eval()
+  pattern: (?:setTimeout|setInterval)\s*\(\s*['"]
+  severity: warning
+  suggestion: Pass a function reference instead of a string
+- category: bug
+  id: prototype-overwrite
+  message: Overwriting .prototype object — destroys constructor property
+  pattern: \.prototype\s*=\s*\{
+  severity: info
+  suggestion: Use Object.assign() on existing prototype or set properties individually
+- category: bug
+  id: with-statement
+  message: with statement creates ambiguous scope — deprecated in strict mode
+  pattern: ^\s*with\s*\(
+  severity: warning
+  suggestion: Use explicit object references instead of with
+- category: bug
+  id: bitwise-in-condition
+  message: Bitwise operator in boolean context — possibly intended && or ||
+  pattern: (?:if|while|&&|\|\|)\s*\(.*?[^&|]\s*[&|]\s*[^&|]
+  severity: info
+  suggestion: Use && (logical AND) or || (logical OR) for boolean logic
+- category: style
+  id: void-zero
+  message: void 0 is an archaic way to get undefined
+  pattern: \bvoid\s+0\b
+  severity: info
+  suggestion: Use undefined directly in modern JavaScript

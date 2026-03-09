@@ -1,0 +1,73 @@
+rules:
+- category: security
+  id: hardcoded-secret
+  message: Possible hardcoded secret or API key
+  pattern: (?i)(?<!\w)(?!(?:fake|mock|dummy|stub)[_-])(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]
+  severity: critical
+  suggestion: Use environment variables or a secrets manager
+- category: security
+  id: hardcoded-secret
+  message: Possible hardcoded secret in dict/config literal
+  pattern: (?i)['"](?:api[_-]?key|secret[_-]?key|password|passwd|token|auth[_-]?token|database[_-]?password|db[_-]?password|aws[_-]?secret[_-]?\w*|client[_-]?secret|private[_-]?key|encryption[_-]?key|signing[_-]?key|\w+[_-]secret[_-]?\w*key|\w+[_-]secret)['"]\s*:\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*.]{8,}['"]
+  severity: critical
+  suggestion: Use environment variables or a secrets manager
+- category: security
+  id: aws-credentials
+  message: Possible hardcoded AWS credentials
+  pattern: (?i)(?:aws[_-]?access|aws[_-]?secret)\s*[:=]\s*['"][A-Za-z0-9+/=]{16,}['"]
+  severity: critical
+  suggestion: Use IAM roles or environment variables
+- category: style
+  id: todo-marker
+  message: TODO/FIXME marker found
+  pattern: (?i)(?:^|\s)(?:#|//).*\b(?:TODO|FIXME|HACK|XXX)\b
+  severity: info
+  suggestion: null
+- category: style
+  id: long-line
+  message: Line exceeds 200 characters
+  pattern: ^.{201,}$
+  severity: info
+  suggestion: Break into multiple lines for readability
+- category: security
+  id: insecure-http
+  message: Insecure HTTP URL (not localhost)
+  pattern: (?!.*(?:xmlns\s*=|data:))['"]http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0|www\.w3\.org/|schemas\.|purl\.org/|xml\.org/|relaxng\.org/|docbook\.org/|openid\.net/|ogp\.me/)
+  severity: warning
+  suggestion: Use HTTPS instead
+- category: security
+  id: sql-injection
+  message: Possible SQL injection — string interpolation in query
+  pattern: (?i)(?:execute(?:many)?|cursor\.execute(?:many)?|query|\.execute)\s*\(\s*(?:f['"]|['"].*?%s|['"].*?\+\s*\w+|['"].*?\{)
+  severity: critical
+  suggestion: Use parameterized queries
+- category: security
+  id: sql-injection
+  message: Possible SQL injection — .format() on SQL string
+  pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b.*?['"]\.format\s*\(
+  severity: critical
+  suggestion: Use parameterized queries instead of string formatting
+- category: security
+  id: sql-injection
+  message: Possible SQL injection — f-string inside text()
+  pattern: (?i)(?:(?:sa|sqlalchemy|db|session|engine|conn(?:ection)?)\.)?text\s*\(\s*f['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|GRANT|TRUNCATE|WITH)\b
+  severity: critical
+  suggestion: Use text() with :param bindparams instead
+- category: security
+  id: sql-injection
+  message: Possible SQL injection — string concatenation on SQL query
+  pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b.*?['"]\s*\+
+  severity: critical
+  suggestion: Use parameterized queries instead of string concatenation
+- category: security
+  id: sql-injection
+  message: Possible SQL injection — % formatting on SQL query
+  pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*%s[^'"]*['"]\s*%
+  severity: critical
+  suggestion: Use parameterized queries instead of % formatting
+- category: security
+  id: sql-injection
+  message: Django .raw() with string interpolation — SQL injection
+  pattern: \.raw\s*\(\s*(?:f['"]|['"].*?\.format\s*\(|['"].*?%s)
+  severity: critical
+  suggestion: 'Use .raw() with parameterized query: Model.objects.raw(''SELECT ... WHERE id = %s'', [user_id])'

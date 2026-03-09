@@ -1,0 +1,19 @@
+rules:
+- category: bug
+  id: unwrap
+  message: .unwrap() will panic on None/Err
+  pattern: \.unwrap\(\)
+  severity: warning
+  suggestion: Use pattern matching or the ? operator
+- category: bug
+  id: expect-panic
+  message: .expect() will panic on None/Err
+  pattern: \.expect\s*\(
+  severity: warning
+  suggestion: Use pattern matching or the ? operator instead
+- category: security
+  id: unsafe-block
+  message: Unsafe block — memory safety guarantees suspended
+  pattern: \bunsafe\s*\{
+  severity: warning
+  suggestion: Minimize unsafe usage and document invariants

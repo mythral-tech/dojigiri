@@ -64,3 +64,4 @@ semgrep_benchmark.json
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+site/

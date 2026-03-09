@@ -1,5 +1,6 @@
 name: 'Dojigiri Security Scan'
-description: 'Static security analysis with CWE/NIST compliance mapping'
+description: 'Static security analysis with CWE/NIST compliance mapping — tree-sitter powered, zero config, multi-language'
+author: 'Stephane Perez'
 branding:
   icon: 'shield'
   color: 'red'

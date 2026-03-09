@@ -1,0 +1,46 @@
+site_name: Dojigiri
+site_description: LLM-augmented static analysis for security-conscious teams
+site_url: https://inklling.github.io/dojigiri
+repo_url: https://github.com/Inklling/dojigiri
+repo_name: Inklling/dojigiri
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: deep purple
+    accent: red
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - search.suggest
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - CI/CD Integration: getting-started/ci-cd.md
+  - Features:
+    - Static Analysis: features/static-analysis.md
+    - LLM Deep Scan: features/llm-scan.md
+    - SCA Scanning: features/sca.md
+    - Auto-Fix: features/auto-fix.md
+    - MCP Server: features/mcp-server.md
+  - Configuration: configuration.md
+  - Rule Catalog: rules.md
+  - Benchmarks: benchmarks.md
+  - Pricing: pricing.md
+  - Architecture: architecture.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - toc:
+      permalink: true

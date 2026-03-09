@@ -1,0 +1,109 @@
+rules:
+- category: security
+  id: path-traversal
+  message: Possible path traversal attack with ../
+  pattern: (?:open|read|write|include)\s*\([^)]*\.\./
+  severity: critical
+  suggestion: Validate and sanitize file paths
+- category: security
+  id: private-key
+  message: Private key found in source code
+  pattern: '-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
+  severity: critical
+  suggestion: Remove immediately and rotate the key
+- category: security
+  id: db-connection-string
+  message: Database connection string with embedded credentials
+  pattern: (?i)(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp|jdbc:[a-z]+)://[^:]+:[^@]+@
+  severity: critical
+  suggestion: Use environment variables for connection strings
+- category: security
+  id: logging-sensitive-data
+  message: Possibly logging sensitive data (password, secret, token)
+  pattern: (?i)(?:log(?:ger)?\.(?:info|debug|warn|error|critical|warning)|print|console\.log|puts)\s*\(.*\b(?:password|passwd|secret_key|api_key|auth_token|credential)\b
+  severity: warning
+  suggestion: Redact sensitive values before logging
+- category: security
+  id: logging-config-listen
+  message: logging.config.listen() accepts config over network — can load arbitrary handler classes (RCE)
+  pattern: logging\.config\.listen\s*\(
+  severity: critical
+  suggestion: Avoid network-based logging config; use file-based or environment-based config instead
+- category: security
+  id: insecure-crypto
+  message: DES encryption is broken — 56-bit keys are trivially brute-forced
+  pattern: \bDES\b\.new\(|\bDES\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+DES\b
+  severity: warning
+  suggestion: Use AES-256 or ChaCha20 instead
+- category: security
+  id: insecure-ecb-mode
+  message: ECB mode does not hide data patterns — insecure for most uses
+  pattern: (?i)(?:MODE_ECB|mode\s*=\s*['"]?ECB|\.ECB\b)
+  severity: warning
+  suggestion: Use CBC, GCM, or CTR mode instead
+- category: security
+  id: insecure-crypto
+  message: Blowfish has 64-bit blocks — vulnerable to birthday attacks at scale
+  pattern: \bBlowfish\b\.new\(|\bBlowfish\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+Blowfish\b
+  severity: warning
+  suggestion: Use AES-256 or ChaCha20 instead
+- category: security
+  id: insecure-crypto
+  message: RC4/ARC4 is a broken stream cipher with known biases
+  pattern: \bARC4\b\.new\(|\bARC4\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+ARC4\b|\bRC4\b
+  severity: warning
+  suggestion: Use AES-GCM or ChaCha20-Poly1305 instead
+- category: security
+  id: requests-no-timeout
+  message: HTTP request without timeout — can hang indefinitely
+  pattern: requests\.(?:get|post|put|delete|patch|head|request)\s*\([^)]*\)\s*(?!.*timeout)
+  severity: warning
+  suggestion: Always pass timeout= to requests calls
+- category: security
+  id: ssrf-risk
+  message: HTTP request — verify URL is not constructed from user input (SSRF risk)
+  pattern: (?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|fetch\s*\(\s*(?!['"]/)(?!url_for)|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()(?!.*url_for\s*\()
+  severity: warning
+  suggestion: Validate URLs against an allowlist of domains/schemes before making requests
+- category: security
+  id: url-scheme-audit
+  message: urlopen permits file:/ and custom schemes — verify URL scheme is restricted to https
+  pattern: (?:urllib\.request\.urlopen\s*\(|urllib\.request\.urlretrieve\s*\(|urlopen\s*\()
+  severity: warning
+  suggestion: Validate URL scheme against allowlist (e.g., only https://) before opening
+- category: security
+  id: ssti-risk
+  message: Template constructed from string — may allow server-side template injection
+  pattern: (?<!def )(?:Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|Jinja2\s*\(.*\bstring\b|new\s+Function\s*\()
+  severity: critical
+  suggestion: Use pre-compiled templates from files, never from user-controlled strings
+- category: security
+  id: xxe-risk
+  message: XML parsing — ensure external entities are disabled to prevent XXE attacks
+  pattern: (?:xml\.etree\.ElementTree\.(?:parse|fromstring|iterparse)\s*\(|xml\.dom\.minidom\.(?:parse|parseString)\s*\(|xml\.sax\.(?:parse|parseString)\s*\(|lxml\.etree\.(?:parse|fromstring|iterparse)\s*\(|DocumentBuilderFactory|XMLReader|SAXParser|DOMParser\s*\(\)|ET\.(?:parse|fromstring|iterparse)\s*\(|etree\.(?:parse|fromstring|iterparse)\s*\(|minidom\.(?:parse|parseString)\s*\(|sax\.(?:parse|parseString)\s*\()
+  severity: warning
+  suggestion: Use defusedxml (Python), disable DTDs/external entities in parser config
+- category: security
+  id: jwt-insecure
+  message: JWT decoded with insecure settings — disabled verification or 'none' algorithm
+  pattern: (?:jwt\.decode\s*\([^)]*(?:algorithms\s*=\s*\[['"]none['"]\]|verify\s*=\s*False|options\s*=\s*\{[^}]*'verify_\w+'\s*:\s*False)|\.decode\s*\(\s*token[^)]*algorithm\s*=\s*['"](?:none|HS256)['"])
+  severity: critical
+  suggestion: Always verify JWT signatures with a strong algorithm (RS256/ES256) and validate claims
+- category: security
+  id: hardcoded-ip
+  message: Hardcoded IP address — may break in different environments
+  pattern: (?<!\d)(?!127\.0\.0\.1|0\.0\.0\.0|255\.255\.255\.255)(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?!\d)
+  severity: info
+  suggestion: Use configuration files or environment variables for IP addresses
+- category: security
+  id: bind-all-interfaces
+  message: Binding to 0.0.0.0 exposes the service to all network interfaces
+  pattern: (?:\.bind|\.run|start_server|HTTPServer|TCPServer|UDPServer|SimpleXMLRPCServer|ThreadingTCPServer|ForkingTCPServer|BaseManager|SyncManager)\s*\([^)]*['"]0\.0\.0\.0['"]|=\s*['"]0\.0\.0\.0['"]
+  severity: warning
+  suggestion: Bind to specific interface (127.0.0.1 for local-only, or configure via env var)
+- category: security
+  id: toctou-file-check
+  message: File existence check before use — potential TOCTOU race condition
+  pattern: \bos\.path\.(?:exists|isfile|isdir)\s*\(\s*\w+\s*\)
+  severity: info
+  suggestion: Use try/except around the file operation instead of checking first

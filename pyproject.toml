@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,7 @@ name = "dojigiri"
 version = "1.1.0"
 description = "Static analysis + LLM-powered code audit tool with tree-sitter semantic analysis"
 readme = "README.md"
-license = {text = "BSL-1.1"}
+license = "BUSL-1.1"
 requires-python = ">=3.10"
 authors = [
     {name = "Stephane Perez"},
@@ -16,7 +16,6 @@ keywords = ["static-analysis", "linter", "security", "code-quality", "llm", "tre
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: Other/Proprietary License",
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Software Development :: Testing",
     "Topic :: Security",
@@ -38,7 +37,7 @@ dependencies = [
 llm = ["anthropic>=0.40.0"]
 mcp = ["mcp>=1.0.0"]
 pdf = ["weasyprint>=60.0"]
-all = ["anthropic>=0.40.0", "mcp>=1.0.0"]
+all = ["anthropic>=0.40.0", "mcp>=1.0.0", "weasyprint>=60.0"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -55,6 +54,7 @@ Issues = "https://github.com/Inklling/dojigiri/issues"
 
 [tool.setuptools.packages.find]
 include = ["dojigiri*"]
+exclude = ["tests*", "benchmarks*"]
 
 [tool.setuptools.package-data]
 dojigiri = ["py.typed"]

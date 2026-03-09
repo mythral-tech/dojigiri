@@ -1,0 +1,17 @@
+- id: doji
+  name: Dojigiri Static Analysis
+  description: Run Dojigiri static analysis on changed files
+  entry: doji scan
+  language: python
+  types_or: [python, javascript, ts, java, go, rust, c, c++, c#, ruby, php, kotlin, swift]
+  require_serial: true
+  minimum_pre_commit_version: '2.9.0'
+
+- id: doji-strict
+  name: Dojigiri Static Analysis (strict)
+  description: Run Dojigiri with minimum severity set to warning and fail on findings
+  entry: doji scan --min-severity warning --fail-on-findings
+  language: python
+  types_or: [python, javascript, ts, java, go, rust, c, c++, c#, ruby, php, kotlin, swift]
+  require_serial: true
+  minimum_pre_commit_version: '2.9.0'
