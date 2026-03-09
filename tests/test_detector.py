@@ -808,7 +808,7 @@ def test_regression_sql_injection_format():
     """Regression: .format() on SQL strings SHOULD be detected."""
     code = 'query = "SELECT * FROM users WHERE id = {}".format(user_id)\n'
     findings = run_regex_checks(code, "test.py", "python")
-    sql_findings = [f for f in findings if f.rule == "sql-injection"]
+    sql_findings = [f for f in findings if f.rule == "sql-injection-format"]
     assert len(sql_findings) == 1
 
 

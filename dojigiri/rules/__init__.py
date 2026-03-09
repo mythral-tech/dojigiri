@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def _load_rules() -> (
-    tuple[list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule]]
+    tuple[list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule], list[Rule]]
 ):
     """Load rules from YAML, falling back to Python modules if YAML unavailable."""
     try:
@@ -29,20 +29,24 @@ def _load_rules() -> (
             rust = yaml_rules.get("rust", [])
             java = yaml_rules.get("java", [])
             security = yaml_rules.get("security", [])
+            csharp = yaml_rules.get("csharp", [])
+            php = yaml_rules.get("php", [])
 
             if universal or python or javascript or security:
                 logger.debug(
                     "Loaded rules from YAML: %d universal, %d python, %d javascript, "
-                    "%d go, %d rust, %d java, %d security",
+                    "%d go, %d rust, %d java, %d csharp, %d php, %d security",
                     len(universal),
                     len(python),
                     len(javascript),
                     len(go),
                     len(rust),
                     len(java),
+                    len(csharp),
+                    len(php),
                     len(security),
                 )
-                return universal, python, javascript, go, rust, java, security
+                return universal, python, javascript, go, rust, java, security, csharp, php
     except Exception as exc:
         logger.debug("YAML rule loading failed, falling back to Python: %s", exc)
 
@@ -55,7 +59,7 @@ def _load_rules() -> (
     from .security import SECURITY_RULES
     from .universal import UNIVERSAL_RULES
 
-    return UNIVERSAL_RULES, PYTHON_RULES, JAVASCRIPT_RULES, GO_RULES, RUST_RULES, JAVA_RULES, SECURITY_RULES
+    return UNIVERSAL_RULES, PYTHON_RULES, JAVASCRIPT_RULES, GO_RULES, RUST_RULES, JAVA_RULES, SECURITY_RULES, [], []
 
 
 (
@@ -66,12 +70,16 @@ def _load_rules() -> (
     RUST_RULES,
     JAVA_RULES,
     SECURITY_RULES,
+    CSHARP_RULES,
+    PHP_RULES,
 ) = _load_rules()
 
 __all__ = [
+    "CSHARP_RULES",
     "GO_RULES",
     "JAVA_RULES",
     "JAVASCRIPT_RULES",
+    "PHP_RULES",
     "PYTHON_RULES",
     "RUST_RULES",
     "SECURITY_RULES",

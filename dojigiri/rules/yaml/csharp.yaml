@@ -1,0 +1,265 @@
+rules:
+- category: security
+  id: cs-sql-injection-concat
+  message: SqlCommand with string concatenation — SQL injection risk
+  pattern: new\s+SqlCommand\s*\(\s*(?:[\$"'].*?\+|.*?\+\s*["'])
+  severity: critical
+  suggestion: Use parameterized queries with SqlParameter or an ORM
+- category: security
+  id: cs-sql-injection-format
+  message: SqlCommand with string interpolation — SQL injection risk
+  pattern: new\s+SqlCommand\s*\(\s*\$["']
+  severity: critical
+  suggestion: Use SqlCommand with Parameters.AddWithValue() instead of interpolation
+- category: security
+  id: cs-ef-raw-sql
+  message: Entity Framework raw SQL — injection risk if query is user-controlled
+  pattern: \.(?:FromSqlRaw|ExecuteSqlRaw)\s*\(\s*(?:\$["']|.*?\+)
+  severity: critical
+  suggestion: Use FromSqlInterpolated/ExecuteSqlInterpolated or parameterized overloads
+- category: security
+  id: cs-ef-raw-sql-concat
+  message: EF raw SQL with concatenation — SQL injection
+  pattern: \.(?:FromSqlRaw|ExecuteSqlRaw|SqlQuery)\s*\(\s*["'][^"']*["']\s*\+
+  severity: critical
+  suggestion: Use parameterized queries via FromSqlInterpolated or pass parameters array
+- category: security
+  id: cs-xss-response-write
+  message: Response.Write with unencoded output — XSS risk
+  pattern: Response\.Write\s*\(
+  severity: warning
+  suggestion: Use HttpUtility.HtmlEncode() before writing to response
+- category: security
+  id: cs-xss-html-raw
+  message: Html.Raw() bypasses output encoding — XSS risk if content is user-controlled
+  pattern: Html\.Raw\s*\(
+  severity: warning
+  suggestion: Encode user content with Html.Encode() or use Razor auto-encoding
+- category: security
+  id: cs-xss-htmlstring
+  message: HtmlString bypasses Razor encoding — XSS risk with user content
+  pattern: new\s+HtmlString\s*\(
+  severity: warning
+  suggestion: Use auto-encoded Razor output or sanitize content before wrapping
+- category: security
+  id: cs-path-traversal-file
+  message: File operation with potentially user-controlled path — directory traversal risk
+  pattern: File\.(?:ReadAllText|ReadAllBytes|ReadAllLines|WriteAllText|WriteAllBytes|OpenRead|OpenWrite|Copy|Move|Delete)\s*\(\s*(?!["']|@["'])
+  severity: warning
+  suggestion: Canonicalize path with Path.GetFullPath() and verify it starts with allowed base directory
+- category: security
+  id: cs-path-traversal-directory
+  message: Directory operation with dynamic path — traversal risk
+  pattern: Directory\.(?:GetFiles|GetDirectories|Delete|CreateDirectory|EnumerateFiles)\s*\(\s*(?!["']|@["'])
+  severity: warning
+  suggestion: Validate and canonicalize path against an allowed base directory
+- category: security
+  id: cs-binary-formatter
+  message: BinaryFormatter deserialization — arbitrary code execution risk
+  pattern: \bBinaryFormatter\b
+  severity: critical
+  suggestion: BinaryFormatter is banned by Microsoft. Use System.Text.Json or protobuf instead
+- category: security
+  id: cs-javascript-serializer
+  message: JavaScriptSerializer can deserialize to arbitrary types — code execution risk
+  pattern: \bJavaScriptSerializer\b
+  severity: warning
+  suggestion: Use System.Text.Json.JsonSerializer with strict type handling
+- category: security
+  id: cs-newtonsoft-typenamehandling
+  message: Newtonsoft TypeNameHandling enables type-based attacks — RCE risk
+  pattern: TypeNameHandling\s*=\s*TypeNameHandling\.(?:All|Auto|Objects|Arrays)
+  severity: critical
+  suggestion: Use TypeNameHandling.None (default) or implement a strict SerializationBinder
+- category: security
+  id: cs-losformatter
+  message: LosFormatter/ObjectStateFormatter deserialization — RCE risk
+  pattern: \b(?:LosFormatter|ObjectStateFormatter)\b
+  severity: critical
+  suggestion: Use System.Text.Json or other safe serializers
+- category: security
+  id: cs-soapformatter
+  message: SoapFormatter/NetDataContractSerializer deserialization — RCE risk
+  pattern: \b(?:SoapFormatter|NetDataContractSerializer)\b
+  severity: critical
+  suggestion: Use System.Text.Json or protobuf instead
+- category: security
+  id: cs-weak-crypto-des
+  message: DES/TripleDES/RC2 are broken or deprecated ciphers
+  pattern: \b(?:DESCryptoServiceProvider|TripleDESCryptoServiceProvider|RC2CryptoServiceProvider|DES\.Create|TripleDES\.Create|RC2\.Create)\b
+  severity: critical
+  suggestion: Use Aes.Create() with 256-bit key (AES-256)
+- category: security
+  id: cs-weak-hash-md5
+  message: MD5 is cryptographically broken — collision attacks are practical
+  pattern: \b(?:MD5\.Create|MD5CryptoServiceProvider|new\s+MD5CryptoServiceProvider)\b
+  severity: warning
+  suggestion: Use SHA256.Create() or SHA512.Create() for integrity; Argon2/bcrypt for passwords
+- category: security
+  id: cs-weak-hash-sha1
+  message: SHA1 is cryptographically weak — collision attacks demonstrated
+  pattern: \b(?:SHA1\.Create|SHA1CryptoServiceProvider|SHA1Managed|new\s+SHA1CryptoServiceProvider)\b
+  severity: warning
+  suggestion: Use SHA256.Create() or SHA512.Create()
+- category: security
+  id: cs-ecb-mode
+  message: ECB cipher mode leaks patterns in ciphertext
+  pattern: CipherMode\.ECB
+  severity: critical
+  suggestion: Use CipherMode.CBC with random IV or CipherMode.GCM for authenticated encryption
+- category: security
+  id: cs-static-iv
+  message: Static/hardcoded IV for encryption — defeats the purpose of an IV
+  pattern: \.IV\s*=\s*(?:new\s+byte\[\]|Convert\.FromBase64String)
+  severity: warning
+  suggestion: Generate a random IV for each encryption operation using RNGCryptoServiceProvider
+- category: security
+  id: cs-weak-rng
+  message: System.Random is not cryptographically secure
+  pattern: new\s+Random\s*\(
+  severity: info
+  suggestion: Use RandomNumberGenerator.Create() or RandomNumberGenerator.GetBytes() for security
+- category: security
+  id: cs-command-injection
+  message: Process.Start with dynamic arguments — command injection risk
+  pattern: Process\.Start\s*\(\s*(?!["'])
+  severity: warning
+  suggestion: Use ProcessStartInfo with UseShellExecute=false and validate all arguments
+- category: security
+  id: cs-command-injection-shell
+  message: ProcessStartInfo with shell execution — injection risk
+  pattern: UseShellExecute\s*=\s*true
+  severity: info
+  suggestion: Set UseShellExecute=false unless shell features are explicitly needed
+- category: security
+  id: cs-command-injection-cmd
+  message: Spawning cmd.exe/powershell — injection risk if arguments are user-controlled
+  pattern: (?:FileName|ProcessStartInfo)\s*=\s*["'](?:cmd|cmd\.exe|powershell|powershell\.exe)["']
+  severity: warning
+  suggestion: Invoke the target program directly instead of through a shell
+- category: security
+  id: cs-xxe-xmldocument
+  message: XmlDocument without disabling DTD processing — XXE attack risk
+  pattern: new\s+XmlDocument\s*\(
+  severity: warning
+  suggestion: Set XmlResolver = null and DtdProcessing = DtdProcessing.Prohibit
+- category: security
+  id: cs-xxe-xmlreader
+  message: XmlReader/XmlTextReader may process DTDs — XXE risk
+  pattern: XmlReader\.Create\s*\(|new\s+XmlTextReader\s*\(
+  severity: info
+  suggestion: Use XmlReaderSettings with DtdProcessing = DtdProcessing.Prohibit
+- category: security
+  id: cs-xxe-dtd-enabled
+  message: DTD processing enabled — XXE attack vector
+  pattern: DtdProcessing\s*=\s*DtdProcessing\.Parse
+  severity: critical
+  suggestion: Set DtdProcessing = DtdProcessing.Prohibit to prevent XXE attacks
+- category: security
+  id: cs-ldap-injection
+  message: DirectorySearcher with dynamic filter — LDAP injection risk
+  pattern: \.Filter\s*=\s*(?:\$["']|.*?\+\s*["']|["'].*?\+)
+  severity: critical
+  suggestion: Escape special LDAP characters in user input or use a parameterized LDAP library
+- category: security
+  id: cs-ssrf-httpclient
+  message: HttpClient with user-controlled URL — SSRF risk
+  pattern: \.(?:GetAsync|PostAsync|PutAsync|DeleteAsync|SendAsync|GetStringAsync|GetStreamAsync)\s*\(\s*(?!\s*["'])
+  severity: info
+  suggestion: Validate URL against an allowlist of domains; block internal/private IP ranges
+- category: security
+  id: cs-ssrf-webclient
+  message: WebClient with dynamic URL — SSRF risk
+  pattern: (?:WebClient|HttpWebRequest)\s*[\.(].*?(?:DownloadString|DownloadData|DownloadFile|OpenRead|GetResponse)\s*\(
+  severity: info
+  suggestion: Validate and restrict URLs to allowed external domains
+- category: security
+  id: cs-missing-antiforgery
+  message: '[HttpPost] without [ValidateAntiForgeryToken] — CSRF vulnerability'
+  pattern: \[HttpPost\](?!\s*\n\s*\[ValidateAntiForgeryToken\])
+  severity: warning
+  suggestion: Add [ValidateAntiForgeryToken] attribute to all POST action methods
+- category: security
+  id: cs-authorize-bypass
+  message: '[AllowAnonymous] on controller — may expose sensitive endpoints'
+  pattern: \[AllowAnonymous\]
+  severity: info
+  suggestion: Verify AllowAnonymous is intentional and not on sensitive endpoints
+- category: security
+  id: cs-hardcoded-connection-string
+  message: Hardcoded connection string with credentials in source
+  pattern: (?:connectionString|ConnectionString)\s*=\s*["'].*?(?:Password|Pwd)\s*=
+  severity: critical
+  suggestion: Store connection strings in environment variables or Azure Key Vault
+- category: security
+  id: cs-hardcoded-password
+  message: Hardcoded password/secret in source code
+  pattern: (?:password|Password|secret|apiKey|ApiKey)\s*=\s*["'][A-Za-z0-9+/=_\-!@#$%^&*]{8,}["']
+  severity: critical
+  suggestion: Use environment variables, user secrets, or a secrets manager
+- category: security
+  id: cs-weak-password-hash
+  message: Custom password hashing without proper algorithm — use a KDF
+  pattern: \.ComputeHash\s*\(.*?(?:password|Password)
+  severity: warning
+  suggestion: Use BCrypt.Net, Argon2, or PBKDF2 with high iteration count for password hashing
+- category: security
+  id: cs-logging-sensitive
+  message: Potentially logging sensitive data (password/token/secret)
+  pattern: (?:_logger|Logger|Log)\.(?:Log|Info|Debug|Warning|Error|Critical)\s*\([^)]*(?:password|token|secret|creditCard|ssn)
+  severity: warning
+  suggestion: Never log sensitive data — mask or redact before logging
+- category: security
+  id: cs-cors-allow-all
+  message: CORS policy allowing any origin — credentials and data may leak
+  pattern: \.AllowAnyOrigin\s*\(\s*\)
+  severity: warning
+  suggestion: Configure specific allowed origins with WithOrigins()
+- category: security
+  id: cs-cors-allow-credentials-any
+  message: CORS with AllowCredentials and AllowAnyOrigin — browser will block but signals misconfiguration
+  pattern: \.AllowCredentials\s*\(\s*\).*?\.AllowAnyOrigin\s*\(\s*\)|\.AllowAnyOrigin\s*\(\s*\).*?\.AllowCredentials\s*\(\s*\)
+  severity: critical
+  suggestion: Specify explicit origins when using AllowCredentials
+- category: security
+  id: cs-ssl-bypass
+  message: SSL certificate validation bypassed — MITM attack risk
+  pattern: ServerCertificateValidationCallback\s*=\s*(?:\(\s*\w+\s*,\s*\w+\s*,\s*\w+\s*,\s*\w+\s*\)\s*=>\s*true|delegate\s*\{.*?return\s+true)
+  severity: critical
+  suggestion: Implement proper certificate validation or use trusted certificates
+- category: security
+  id: cs-ssl-check-revocation
+  message: Certificate revocation check disabled
+  pattern: CheckCertificateRevocationList\s*=\s*false
+  severity: warning
+  suggestion: Enable certificate revocation checks in production
+- category: security
+  id: cs-regex-injection
+  message: Regex with user input — ReDoS risk
+  pattern: new\s+Regex\s*\(\s*(?!["']|@["'])
+  severity: warning
+  suggestion: Use Regex.Escape() on user input and set RegexOptions.MatchTimeout
+- category: security
+  id: cs-unvalidated-redirect
+  message: Redirect with user-controlled URL — open redirect vulnerability
+  pattern: return\s+Redirect\s*\(\s*(?!["']|Url\.Action|nameof)
+  severity: warning
+  suggestion: Use RedirectToAction/RedirectToRoute or validate URL against allowlist
+- category: security
+  id: cs-viewbag-raw
+  message: ViewBag/ViewData rendered without encoding — XSS risk
+  pattern: '@ViewBag\.\w+|@ViewData\[["'']'
+  severity: info
+  suggestion: Razor auto-encodes by default, but verify no Html.Raw() wrapping of ViewBag values
+- category: security
+  id: cs-cookie-no-secure
+  message: Cookie without Secure flag — transmitted over HTTP
+  pattern: new\s+CookieOptions\s*\{(?![^}]*Secure\s*=\s*true)
+  severity: warning
+  suggestion: Set Secure = true to ensure cookie is only sent over HTTPS
+- category: security
+  id: cs-cookie-no-httponly
+  message: Cookie without HttpOnly — accessible to JavaScript
+  pattern: new\s+CookieOptions\s*\{(?![^}]*HttpOnly\s*=\s*true)
+  severity: warning
+  suggestion: Set HttpOnly = true to prevent XSS-based cookie theft

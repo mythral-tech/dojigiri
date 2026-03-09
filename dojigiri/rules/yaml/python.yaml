@@ -473,3 +473,387 @@ rules:
   pattern: \.run\s*\([^)]*host\s*=\s*['"]0\.0\.0\.0['"]
   severity: warning
   suggestion: Bind to 127.0.0.1 for local dev or use a reverse proxy in production
+- category: security
+  id: django-raw-fstring
+  message: Django .raw() with f-string — SQL injection via string interpolation
+  pattern: \.raw\s*\(\s*f['"]
+  severity: critical
+  suggestion: "Use .raw() with params: Model.objects.raw('SELECT ... WHERE id = %s', [user_id])"
+- category: security
+  id: django-rawsql-format
+  message: RawSQL() with .format() or f-string — SQL injection risk
+  pattern: RawSQL\s*\(\s*(?:f['"]|['"][^'"]*['"]\.format\s*\()
+  severity: critical
+  suggestion: Use RawSQL with %s placeholders and pass params as second argument
+- category: security
+  id: django-extra-fstring
+  message: QuerySet.extra() with f-string or .format() — SQL injection
+  pattern: \.extra\s*\([^)]*(?:f['"]|\.format\s*\()
+  severity: critical
+  suggestion: Use Django ORM methods (annotate, filter) instead of extra() with interpolation
+- category: security
+  id: flask-debug-production
+  message: Flask app.run(debug=True) should never reach production
+  pattern: app\.run\s*\([^)]*debug\s*=\s*True
+  severity: warning
+  suggestion: Use environment variable to control debug mode, never hardcode True
+- category: security
+  id: flask-secret-hardcoded
+  message: Flask secret_key set to a hardcoded string literal
+  pattern: app\.secret_key\s*=\s*['"][^'"]{1,}['"]
+  severity: critical
+  suggestion: Load secret_key from environment variable or secrets manager
+- category: security
+  id: fastapi-debug-docs
+  message: FastAPI docs enabled by default — may expose API surface in production
+  pattern: FastAPI\s*\([^)]*docs_url\s*=\s*(?!None)
+  severity: info
+  suggestion: Set docs_url=None and redoc_url=None in production
+- category: security
+  id: fastapi-cors-wildcard
+  message: CORSMiddleware with allow_origins=['*'] — unrestricted cross-origin access
+  pattern: CORSMiddleware[^)]*allow_origins\s*=\s*\[\s*['"]?\*['"]?\s*\]
+  severity: warning
+  suggestion: Specify explicit allowed origins instead of wildcard
+- category: security
+  id: fastapi-credentials-wildcard
+  message: CORS allow_credentials=True with wildcard origins — credential leak risk
+  pattern: CORSMiddleware[^)]*allow_credentials\s*=\s*True
+  severity: warning
+  suggestion: Never combine allow_credentials=True with allow_origins=['*']
+- category: security
+  id: sqlalchemy-execute-fstring
+  message: SQLAlchemy execute() with f-string — SQL injection
+  pattern: \.execute\s*\(\s*f['"]
+  severity: critical
+  suggestion: Use text() with bound parameters instead of f-string interpolation
+- category: security
+  id: sqlalchemy-execute-format
+  message: SQLAlchemy execute() with .format() — SQL injection
+  pattern: \.execute\s*\(\s*['"][^'"]*['"]\.format\s*\(
+  severity: critical
+  suggestion: Use text() with bound parameters instead of .format()
+- category: security
+  id: sqlalchemy-execute-concat
+  message: SQLAlchemy execute() with string concatenation — SQL injection
+  pattern: \.execute\s*\(\s*['"][^'"]*['"]\s*\+
+  severity: critical
+  suggestion: Use text() with bound parameters instead of string concatenation
+- category: security
+  id: sqlalchemy-text-format
+  message: SQLAlchemy text() with .format() — SQL injection
+  pattern: text\s*\(\s*['"][^'"]*['"]\.format\s*\(
+  severity: critical
+  suggestion: "Use text() with :param bindparams: text('SELECT ... WHERE id = :id').bindparams(id=val)"
+- category: security
+  id: crypto-static-iv
+  message: Static or hardcoded IV/nonce — defeats the purpose of initialization vectors
+  pattern: (?:iv|nonce|IV|NONCE)\s*=\s*b?['"][^'"]{1,}['"]
+  severity: warning
+  suggestion: Generate a random IV/nonce for each encryption operation using os.urandom()
+- category: security
+  id: crypto-weak-pbkdf2
+  message: PBKDF2 with low iteration count — vulnerable to brute force
+  pattern: PBKDF2\w*\s*\([^)]*iterations\s*=\s*(?:[1-9]\d{0,4}|[1-9]\d{4})\b(?!\d)
+  severity: warning
+  suggestion: Use at least 600000 iterations (OWASP 2023 recommendation for PBKDF2-SHA256)
+- category: security
+  id: crypto-md5-hmac
+  message: HMAC with MD5 — weak hash undermines message authentication
+  pattern: hmac\.new\s*\([^)]*(?:hashlib\.md5|['"]md5['"])
+  severity: warning
+  suggestion: Use hmac.new(key, msg, hashlib.sha256)
+- category: security
+  id: file-open-fstring
+  message: open() with f-string path — potential path injection if variables are user-controlled
+  pattern: \bopen\s*\(\s*f['"]
+  severity: info
+  suggestion: Validate and sanitize file paths, use os.path.realpath() to resolve symlinks
+- category: security
+  id: file-world-writable
+  message: File created with world-writable permissions (0o777 or 0o666)
+  pattern: os\.(?:chmod|open|mkdir)\s*\([^)]*0o?(?:777|666)\b
+  severity: warning
+  suggestion: Use restrictive permissions (0o600 for files, 0o700 for directories)
+- category: security
+  id: file-mkdtemp-ignore
+  message: tempfile.mkdtemp() return value ignored — temp directory never cleaned up
+  pattern: ^\s*tempfile\.mkdtemp\s*\(
+  severity: info
+  suggestion: Assign return value and clean up with shutil.rmtree() or use tempfile.TemporaryDirectory()
+- category: security
+  id: ssl-no-hostname-check
+  message: SSL context with hostname checking disabled — MITM risk
+  pattern: check_hostname\s*=\s*False
+  severity: warning
+  suggestion: Keep check_hostname=True (default) for proper SSL verification
+- category: security
+  id: ftp-no-tls
+  message: FTP login without TLS — credentials transmitted in cleartext
+  pattern: ftplib\.FTP\s*\([^)]*\).*\.login\s*\(
+  severity: warning
+  suggestion: Use ftplib.FTP_TLS and call prot_p() for encrypted data transfer
+- category: security
+  id: timing-attack-comparison
+  message: String comparison for secret/token — vulnerable to timing attacks
+  pattern: (?:password|secret|token|api_key|hmac|signature|digest)\s*(?:==|!=)\s*(?!['"]$|None|True|False)
+  severity: warning
+  suggestion: Use hmac.compare_digest() for constant-time comparison
+- category: security
+  id: hardcoded-jwt-secret
+  message: JWT encode/decode with hardcoded secret string
+  pattern: jwt\.(?:encode|decode)\s*\([^)]*['"][A-Za-z0-9+/=_\-]{8,}['"]
+  severity: critical
+  suggestion: Load JWT secret from environment variable or key management system
+- category: security
+  id: weak-bcrypt-rounds
+  message: bcrypt with low work factor — insufficient against modern GPUs
+  pattern: bcrypt\.(?:gensalt|hashpw)\s*\([^)]*rounds\s*=\s*(?:[1-9]|1[01])\b
+  severity: warning
+  suggestion: Use at least 12 rounds for bcrypt (OWASP recommendation)
+- category: security
+  id: lxml-parse-untrusted
+  message: lxml XMLParser without safe settings — potential XXE
+  pattern: lxml\.etree\.(?:XMLParser|HTMLParser)\s*\(\s*\)
+  severity: warning
+  suggestion: Use lxml.etree.XMLParser(resolve_entities=False, no_network=True)
+- category: security
+  id: elementtree-defused
+  message: xml.etree.ElementTree does not protect against entity expansion attacks
+  pattern: (?:from\s+xml\.etree\s+import\s+ElementTree|import\s+xml\.etree\.ElementTree)
+  severity: info
+  suggestion: Use defusedxml.ElementTree instead for untrusted XML input
+- category: security
+  id: subprocess-popen-concat
+  message: Popen with string concatenation — command injection risk
+  pattern: subprocess\.Popen\s*\(\s*(?:['"][^'"]*['"]\s*\+|\w+\s*\+\s*['"])
+  severity: critical
+  suggestion: Pass command as a list of arguments, never concatenate strings
+- category: security
+  id: subprocess-shell-user-input
+  message: subprocess with shell=True using request/input data — command injection
+  pattern: subprocess\.\w+\([^)]*(?:request\.|input\(|sys\.argv|args\.).*shell\s*=\s*True
+  severity: critical
+  suggestion: Never pass user input to shell commands — use a list of arguments without shell=True
+- category: security
+  id: boto3-hardcoded-key
+  message: boto3 client/resource with hardcoded AWS credentials
+  pattern: boto3\.(?:client|resource|Session)\s*\([^)]*(?:aws_access_key_id|aws_secret_access_key)\s*=\s*['"]
+  severity: critical
+  suggestion: Use IAM roles, environment variables, or AWS credential providers
+- category: security
+  id: s3-public-acl
+  message: S3 object or bucket with public ACL — data exposure risk
+  pattern: ACL\s*=\s*['"](?:public-read|public-read-write|authenticated-read)['"]
+  severity: warning
+  suggestion: Use private ACL and grant access via IAM policies or pre-signed URLs
+- category: security
+  id: lambda-env-secret
+  message: Lambda function with secrets in environment variables — visible in console and logs
+  pattern: (?i)(?:Environment|environment)\s*=\s*\{[^}]*Variables[^}]*(?:PASSWORD|SECRET|TOKEN|API_KEY)
+  severity: warning
+  suggestion: Use AWS Secrets Manager or SSM Parameter Store for Lambda secrets
+- category: security
+  id: log-credit-card
+  message: Logging potentially sensitive data — credit card, SSN
+  pattern: (?i)(?:logger|logging)\.\w+\s*\(.*\b(?:credit.?card|card.?number|cvv|ssn|social.?security)\b
+  severity: warning
+  suggestion: Redact or mask sensitive values before logging
+- category: security
+  id: log-password-interpolation
+  message: Password or credential value interpolated into log message
+  pattern: (?i)(?:logger|logging)\.\w+\s*\(\s*f['"].*\{(?:password|passwd|secret|token|api_key|credential)
+  severity: warning
+  suggestion: Never include raw credentials in log messages — log events, not secrets
+- category: security
+  id: marshal-loads-unsafe
+  message: marshal.loads() can crash interpreter or execute code — unsafe for untrusted data
+  pattern: \bmarshal\.loads?\s*\(
+  severity: critical
+  suggestion: Use json.loads() for untrusted data — marshal is only safe for trusted bytecode
+- category: security
+  id: code-interactive-console
+  message: code.InteractiveConsole/interact() allows arbitrary code execution
+  pattern: \bcode\.(?:InteractiveConsole|InteractiveInterpreter|interact)\s*\(
+  severity: critical
+  suggestion: Remove interactive consoles from production code
+- category: security
+  id: dunder-import-dynamic
+  message: __import__() with variable argument — arbitrary module loading
+  pattern: __import__\s*\(\s*(?![bruf]*['\"])\w+
+  severity: warning
+  suggestion: Validate module names against an allowlist before importing
+- category: security
+  id: globals-manipulation
+  message: globals()/locals() manipulation — can overwrite variables or bypass checks
+  pattern: (?:globals|locals)\s*\(\s*\)\s*\[
+  severity: warning
+  suggestion: Use explicit variable assignment instead of manipulating globals/locals
+- category: security
+  id: getattr-user-input
+  message: getattr() with user-controlled attribute name — attribute injection
+  pattern: getattr\s*\(\s*\w+\s*,\s*(?:request\.|input\(|sys\.argv|args\.)
+  severity: warning
+  suggestion: Validate attribute names against an allowlist
+- category: security
+  id: setattr-dynamic
+  message: setattr() with dynamic attribute name — can overwrite critical attributes
+  pattern: setattr\s*\(\s*\w+\s*,\s*(?![bruf]*['\"])\w+
+  severity: info
+  suggestion: Validate attribute names against an allowlist before setting
+- category: security
+  id: pydantic-arbitrary-types
+  message: Pydantic model with arbitrary_types_allowed — bypasses type validation
+  pattern: arbitrary_types_allowed\s*=\s*True
+  severity: info
+  suggestion: Define proper validators for custom types instead of allowing arbitrary types
+- category: security
+  id: password-in-url
+  message: Password embedded in URL string — visible in logs, browser history, referrer
+  pattern: (?i)['"]https?://[^'"]*:[^@'"]+@
+  severity: warning
+  suggestion: Pass credentials via headers, environment variables, or auth parameters
+- category: security
+  id: class-manipulation
+  message: __class__ assignment — type confusion and security check bypass
+  pattern: __class__\s*=
+  severity: warning
+  suggestion: Avoid runtime __class__ reassignment — use proper inheritance or composition
+- category: security
+  id: subprocess-env-path
+  message: subprocess call with modified PATH in env — binary hijacking risk
+  pattern: subprocess\.\w+\s*\([^)]*env\s*=\s*\{[^}]*['"]PATH['"]
+  severity: info
+  suggestion: Use absolute paths for executables instead of modifying PATH
+- category: security
+  id: xml-sax-parser
+  message: xml.sax.make_parser() without entity expansion limits — billion laughs DoS
+  pattern: xml\.sax\.make_parser\s*\(
+  severity: warning
+  suggestion: Use defusedxml.sax instead, which limits entity expansion
+- category: security
+  id: pickle-from-request
+  message: Deserializing pickle data from request — remote code execution
+  pattern: pickle\.loads?\s*\(\s*(?:request\.|flask\.request\.)
+  severity: critical
+  suggestion: Never deserialize pickle from untrusted sources — use JSON
+- category: security
+  id: unvalidated-file-upload
+  message: File upload saved without content type or extension validation
+  pattern: (?:request\.files|UploadFile)\[?[^]]*\]?\.save\s*\(
+  severity: warning
+  suggestion: Validate file extension, content type, and size before saving uploads
+- category: security
+  id: raw-html-response
+  message: Returning raw HTML string — XSS risk if content includes user input
+  pattern: (?:return|Response)\s*\(\s*f['"]<
+  severity: warning
+  suggestion: Use a template engine with auto-escaping instead of raw HTML strings
+- category: security
+  id: dns-rebinding-risk
+  message: Socket connection to user-supplied host — DNS rebinding risk
+  pattern: socket\.(?:create_connection|connect)\s*\(\s*\(\s*(?![bruf]*['\"])\w+
+  severity: info
+  suggestion: Resolve hostname once and validate IP against allowlist before connecting
+- category: security
+  id: shelve-open-unsafe
+  message: shelve.open() uses pickle internally — unsafe for untrusted data
+  pattern: \bshelve\.open\s*\(
+  severity: warning
+  suggestion: Use sqlite3 or json for persistent storage of untrusted data
+- category: security
+  id: dill-loads-unsafe
+  message: dill.loads() can execute arbitrary code like pickle
+  pattern: \bdill\.loads?\s*\(
+  severity: critical
+  suggestion: Use json or msgpack for deserializing untrusted data
+- category: security
+  id: s3-no-encryption
+  message: S3 put_object without server-side encryption specified
+  pattern: \.put_object\s*\([^)]*(?!ServerSideEncryption)
+  severity: info
+  suggestion: Add ServerSideEncryption='aws:kms' or 'AES256' to encrypt data at rest
+- category: security
+  id: crypto-ecb-aes-new
+  message: AES.new() in ECB mode — identical plaintext blocks produce identical ciphertext
+  pattern: AES\.new\s*\([^)]*AES\.MODE_ECB
+  severity: warning
+  suggestion: Use AES.MODE_GCM or AES.MODE_CBC with random IV
+- category: security
+  id: hashlib-new-weak
+  message: hashlib.new() with weak algorithm name from variable — may resolve to MD5/SHA1
+  pattern: hashlib\.new\s*\(\s*(?![bruf]*['\"])\w+
+  severity: info
+  suggestion: Validate algorithm name against allowlist of strong algorithms (sha256, sha384, sha512)
+- category: security
+  id: os-link-toctou
+  message: os.link/symlink with user-controlled path — symlink race condition
+  pattern: os\.(?:symlink|link)\s*\(\s*(?![bruf]*['\"])\w+
+  severity: info
+  suggestion: Validate source and destination paths, use os.path.realpath() to resolve links
+- category: security
+  id: tempfile-predictable-name
+  message: tempfile with predictable prefix/suffix — may enable targeted attacks
+  pattern: tempfile\.(?:NamedTemporaryFile|mkstemp|mkdtemp)\s*\([^)]*(?:prefix|suffix)\s*=\s*(?![bruf]*['\"])\w+
+  severity: info
+  suggestion: Use random or default prefix/suffix, never user-controlled values
+- category: security
+  id: python-http-server
+  message: http.server is not designed for production — no auth, no TLS, directory traversal risks
+  pattern: (?:http\.server\.HTTPServer|HTTPServer|SimpleHTTPRequestHandler|BaseHTTPRequestHandler)\s*\(
+  severity: warning
+  suggestion: Use a production WSGI/ASGI server (gunicorn, uvicorn) behind a reverse proxy
+- category: security
+  id: jwt-none-algorithm
+  message: JWT with 'none' algorithm — signature verification bypassed entirely
+  pattern: (?i)jwt\.(?:encode|decode)\s*\([^)]*algorithm[s]?\s*=\s*(?:\[?\s*['"]none['"]\s*\]?|['"]none['"])
+  severity: critical
+  suggestion: Always use a strong signing algorithm (RS256, ES256) and verify signatures
+- category: security
+  id: re-dos-quantifier
+  message: Nested quantifiers in regex — potential ReDoS (catastrophic backtracking)
+  pattern: re\.compile\s*\(\s*[bruf]*['"][^'"]*(?:\+\+|\*\*|\+\*|\*\+|\{\d+,\}\+|\{\d+,\}\*)[^'"]*['"]
+  severity: warning
+  suggestion: Simplify nested quantifiers or use atomic groups / possessive quantifiers
+- category: security
+  id: async-subprocess-shell
+  message: asyncio subprocess with shell=True — async command injection risk
+  pattern: asyncio\.create_subprocess_shell\s*\(
+  severity: warning
+  suggestion: Use asyncio.create_subprocess_exec() with argument list instead
+- category: security
+  id: signal-handler-unsafe
+  message: Signal handler calling non-reentrant function — undefined behavior risk
+  pattern: signal\.signal\s*\([^)]*(?:os\.system|subprocess|open\()
+  severity: warning
+  suggestion: Only set a flag in signal handlers, process in main loop
+- category: security
+  id: aiohttp-no-verify
+  message: aiohttp with ssl=False disables certificate verification
+  pattern: (?:aiohttp\.ClientSession|session)\.(?:get|post|put|delete|patch)\s*\([^)]*ssl\s*=\s*False
+  severity: warning
+  suggestion: Remove ssl=False to enable certificate verification
+- category: security
+  id: urllib3-no-verify
+  message: urllib3 with cert_reqs disabled — no SSL certificate verification
+  pattern: urllib3\.(?:PoolManager|HTTPSPoolManager)\s*\([^)]*cert_reqs\s*=\s*['"]?(?:CERT_NONE|NONE)
+  severity: warning
+  suggestion: Use cert_reqs='CERT_REQUIRED' for proper SSL verification
+- category: security
+  id: xml-parse-untrusted
+  message: xmlrpc client/server — XML-RPC is vulnerable to XXE and deserialization attacks
+  pattern: \bxmlrpc\.(?:client|server)\.\w+\s*\(
+  severity: info
+  suggestion: Consider using JSON-RPC or REST APIs instead of XML-RPC
+- category: security
+  id: multiprocessing-pickle
+  message: multiprocessing uses pickle for IPC — unsafe if processes handle untrusted data
+  pattern: multiprocessing\.(?:Queue|Pipe|Pool|Manager)\s*\(
+  severity: info
+  suggestion: Validate data before sending through multiprocessing channels
+- category: security
+  id: werkzeug-debugger
+  message: Werkzeug debugger pin — interactive debugger exposed in production is RCE
+  pattern: (?:werkzeug|debugger).*(?:use_debugger|use_reloader)\s*=\s*True
+  severity: critical
+  suggestion: Never enable Werkzeug debugger in production — it provides a Python shell

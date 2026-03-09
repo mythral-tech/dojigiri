@@ -10,7 +10,7 @@ from dojigiri.compliance import get_cwe, get_nist, CWE_MAP, NIST_MAP
 
 class TestGetCwe:
     def test_known_rule_returns_cwe(self):
-        assert get_cwe("sql-injection") == "CWE-89"
+        assert get_cwe("sql-injection-execute") == "CWE-89"
 
     def test_unknown_rule_returns_none(self):
         assert get_cwe("nonexistent-rule") is None
@@ -26,7 +26,7 @@ class TestGetCwe:
     def test_security_rules_have_cwe(self):
         """Critical security rules must have CWE mappings."""
         security_rules = [
-            "sql-injection", "eval-usage", "exec-usage", "hardcoded-secret",
+            "sql-injection-execute", "eval-usage", "exec-usage", "hardcoded-secret",
             "path-traversal", "pickle-unsafe", "yaml-unsafe", "innerhtml",
             "os-system", "shell-true", "private-key", "taint-flow",
         ]
@@ -35,7 +35,7 @@ class TestGetCwe:
 
     def test_injection_rules_map_to_injection_cwes(self):
         """SQL injection should map to CWE-89, command injection to CWE-78."""
-        assert get_cwe("sql-injection") == "CWE-89"
+        assert get_cwe("sql-injection-execute") == "CWE-89"
         assert get_cwe("os-system") == "CWE-78"
         assert get_cwe("shell-true") == "CWE-78"
 
@@ -56,7 +56,7 @@ class TestGetCwe:
 
 class TestGetNist:
     def test_known_rule_returns_controls(self):
-        nist = get_nist("sql-injection")
+        nist = get_nist("sql-injection-execute")
         assert isinstance(nist, list)
         assert len(nist) > 0
         assert "SI-10" in nist
@@ -83,7 +83,7 @@ class TestGetNist:
 
     def test_injection_rules_map_to_input_validation(self):
         """Injection rules should map to SI-10 (input validation)."""
-        for rule in ["sql-injection", "eval-usage", "os-system", "taint-flow"]:
+        for rule in ["sql-injection-execute", "eval-usage", "os-system", "taint-flow"]:
             nist = get_nist(rule)
             assert "SI-10" in nist, f"{rule} should map to SI-10"
 

@@ -25,7 +25,7 @@ CWE_TO_DOJI_RULES = {
     22:  ["path-traversal", "java-path-traversal"],     # pathtraver
     78:  ["java-cmdi", "os-system", "shell-true"],    # cmdi
     79:  ["java-xss", "innerhtml"],                   # xss
-    89:  ["sql-injection", "java-sql-injection"],      # sqli
+    89:  ["sql-injection-execute", "sql-injection-format", "sql-injection-fstring", "sql-injection-concat", "sql-injection-percent", "sql-injection-raw", "java-sql-injection"],  # sqli
     90:  ["java-ldap-injection"],                      # ldapi
     327: ["java-weak-crypto", "insecure-crypto"],      # crypto
     328: ["java-weak-hash", "weak-hash"],              # hash

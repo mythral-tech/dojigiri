@@ -1,4 +1,5 @@
 rules:
+# ── Security: SQL Injection ──────────────────────────────────────────────
 - category: security
   id: go-sql-sprintf
   message: SQL query built with fmt.Sprintf — SQL injection risk
@@ -12,6 +13,13 @@ rules:
   severity: critical
   suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
 - category: security
+  id: go-sql-join
+  message: SQL query built with strings.Join — SQL injection risk
+  pattern: (?i)(?:strings\.Join\s*\([^)]*(?:SELECT|INSERT|UPDATE|DELETE|DROP))
+  severity: warning
+  suggestion: Use parameterized queries; never build SQL from user-controlled slices
+# ── Security: Command Injection ──────────────────────────────────────────
+- category: security
   id: go-command-injection
   message: exec.Command() with dynamic argument — command injection risk if user-controlled
   pattern: exec\.Command\s*\(\s*(?!['"])
@@ -23,6 +31,7 @@ rules:
   pattern: exec\.CommandContext\s*\(\s*\w+\s*,\s*(?!['"])
   severity: warning
   suggestion: Validate command and arguments; never pass unsanitized user input
+# ── Security: Path Traversal / File ──────────────────────────────────────
 - category: security
   id: go-path-traversal
   message: File operation with dynamic path — path traversal risk
@@ -30,11 +39,25 @@ rules:
   severity: warning
   suggestion: Use filepath.Clean() and validate path is within expected base directory
 - category: security
+  id: go-filepath-join-dotdot
+  message: filepath.Join with user input — may resolve ../ traversals
+  pattern: filepath\.Join\s*\([^)]*(?:r\.|req\.|request\.|params\.|query\.)
+  severity: warning
+  suggestion: Validate that the resolved path starts with the expected base directory
+# ── Security: Credentials & Secrets ──────────────────────────────────────
+- category: security
   id: go-hardcoded-credential
   message: Possible hardcoded credential in Go source
   pattern: (?i)(?:password|passwd|secret|apiKey|api_key|token)\s*[:=]\s*['"][^'"]{8,}['"]
   severity: critical
   suggestion: Use environment variables or a secrets manager
+- category: security
+  id: go-hardcoded-ip
+  message: Hardcoded IP address — may break in different environments
+  pattern: '["'']\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?["'']'
+  severity: info
+  suggestion: Use configuration files or environment variables for host addresses
+# ── Security: Crypto ─────────────────────────────────────────────────────
 - category: security
   id: go-weak-crypto-md5
   message: MD5 is cryptographically broken — collisions are trivial
@@ -54,6 +77,37 @@ rules:
   severity: warning
   suggestion: Use AES (aes.NewCipher) instead
 - category: security
+  id: go-weak-crypto-rc4
+  message: RC4 is broken — biases in keystream are well-documented
+  pattern: \brc4\.NewCipher\b
+  severity: warning
+  suggestion: Use AES-GCM or ChaCha20-Poly1305 instead
+- category: security
+  id: go-ecb-mode
+  message: ECB mode leaks patterns in ciphertext — use CBC or GCM instead
+  pattern: cipher\.NewECBEncrypter|cipher\.NewECBDecrypter
+  severity: warning
+  suggestion: Use cipher.NewGCM() or cipher.NewCBCEncrypter() with random IV
+- category: security
+  id: go-static-key
+  message: Hardcoded encryption key — trivially extractable from binary
+  pattern: (?:aes\.NewCipher|cipher\.NewGCM)\s*\(\s*\[\]byte\s*\(
+  severity: critical
+  suggestion: Load encryption keys from a secrets manager or KMS at runtime
+- category: security
+  id: go-weak-random
+  message: math/rand is not cryptographically secure
+  pattern: \bmath/rand\b|(?<!\bcrypto/)rand\.(?:Int|Intn|Float|Read)\b
+  severity: warning
+  suggestion: Use crypto/rand for security-sensitive random values
+- category: security
+  id: go-bcrypt-cost-low
+  message: bcrypt cost factor below 10 is too cheap for modern hardware
+  pattern: bcrypt\.GenerateFromPassword\s*\([^,]+,\s*(?:[1-9])\s*\)
+  severity: warning
+  suggestion: Use bcrypt.DefaultCost (10) or higher
+# ── Security: TLS / Network ─────────────────────────────────────────────
+- category: security
   id: go-insecure-tls
   message: 'TLS certificate verification disabled (InsecureSkipVerify: true)'
   pattern: InsecureSkipVerify\s*:\s*true
@@ -66,11 +120,12 @@ rules:
   severity: warning
   suggestion: Set MinVersion to tls.VersionTLS12 or tls.VersionTLS13
 - category: security
-  id: go-unsafe-pointer
-  message: unsafe.Pointer bypasses Go type safety — memory corruption risk
-  pattern: \bunsafe\.Pointer\b
-  severity: warning
-  suggestion: Avoid unsafe unless absolutely necessary; document safety invariants
+  id: go-bind-all-interfaces
+  message: Listening on 0.0.0.0 exposes service to all network interfaces
+  pattern: (?:Listen|ListenAndServe|ListenAndServeTLS)\s*\(\s*['"](?:0\.0\.0\.0|:)\d
+  severity: info
+  suggestion: Bind to 127.0.0.1 for local-only services; use explicit interface for production
+# ── Security: HTTP / Web ─────────────────────────────────────────────────
 - category: security
   id: go-ssrf
   message: HTTP request with dynamic URL — SSRF risk if URL is user-controlled
@@ -83,30 +138,158 @@ rules:
   pattern: http\.Redirect\s*\(\s*\w+\s*,\s*\w+\s*,\s*(?!['"])
   severity: warning
   suggestion: Validate redirect target against an allowlist of trusted paths/domains
+- category: security
+  id: go-cors-wildcard
+  message: CORS Allow-Origin set to wildcard — any domain can make requests
+  pattern: (?i)(?:Access-Control-Allow-Origin|AllowOrigins)\s*[:=]\s*['"]\*['"]
+  severity: warning
+  suggestion: Specify exact allowed origins instead of wildcard
+- category: security
+  id: go-no-csrf
+  message: HTTP handler modifies state without CSRF protection
+  pattern: \.HandleFunc\s*\(\s*['"](?:POST|PUT|DELETE|PATCH)\b
+  severity: info
+  suggestion: Use a CSRF middleware (gorilla/csrf, nosurf) for state-changing endpoints
+- category: security
+  id: go-cookie-no-secure
+  message: Cookie set without Secure flag — transmitted over plain HTTP
+  pattern: http\.Cookie\s*\{[^}]*(?!Secure\s*:\s*true)[^}]*\}
+  severity: warning
+  suggestion: Set Secure=true and HttpOnly=true on cookies
+- category: security
+  id: go-no-timeout
+  message: http.Server without read/write timeouts — slow loris DoS risk
+  pattern: '&http\.Server\s*\{(?![\s\S]*(?:ReadTimeout|WriteTimeout))'
+  severity: warning
+  suggestion: Set ReadTimeout, WriteTimeout, and IdleTimeout on http.Server
+- category: security
+  id: go-http-default-client
+  message: http.DefaultClient has no timeout — requests may hang indefinitely
+  pattern: http\.DefaultClient\.(?:Get|Post|Do|Head)\b
+  severity: warning
+  suggestion: Create an http.Client with explicit Timeout
+# ── Security: Template Injection ─────────────────────────────────────────
+- category: security
+  id: go-template-html-unescaped
+  message: text/template used for HTML — no auto-escaping, XSS risk
+  pattern: text/template.*(?:\.Execute|\.ExecuteTemplate)\s*\(
+  severity: warning
+  suggestion: Use html/template for HTML output — it auto-escapes untrusted data
+- category: security
+  id: go-template-js-func
+  message: template.JS/template.HTML bypasses auto-escaping — XSS risk
+  pattern: template\.(?:JS|HTML|HTMLAttr|URL)\s*\(
+  severity: warning
+  suggestion: Only use template.JS/HTML with trusted, pre-sanitized data
+# ── Security: Deserialization / Encoding ─────────────────────────────────
+- category: security
+  id: go-gob-decode
+  message: gob.Decode on untrusted input can instantiate arbitrary types
+  pattern: gob\.NewDecoder\s*\([^)]*(?:r\.|req\.|request\.|body|conn)
+  severity: warning
+  suggestion: Validate and restrict types before decoding; prefer JSON for untrusted input
+- category: security
+  id: go-xml-external-entity
+  message: xml.NewDecoder may be vulnerable to XXE attacks
+  pattern: xml\.NewDecoder\s*\(
+  severity: info
+  suggestion: Go's xml package is safe by default, but verify no custom entity resolvers are used
+- category: security
+  id: go-json-number-overflow
+  message: json.Unmarshal into interface{} uses float64 — may lose precision for large integers
+  pattern: json\.Unmarshal\s*\([^,]+,\s*&?\w+\s*\)\s*.*interface\{\}
+  severity: info
+  suggestion: Use json.Number or decode into a struct with explicit numeric types
+# ── Security: LDAP / Injection ───────────────────────────────────────────
+- category: security
+  id: go-ldap-injection
+  message: LDAP filter built with string formatting — injection risk
+  pattern: (?i)fmt\.Sprintf\s*\([^)]*(?:ldap|objectClass|cn=|uid=|ou=)
+  severity: warning
+  suggestion: Use ldap.EscapeFilter() to sanitize user input in LDAP queries
+- category: security
+  id: go-regex-injection
+  message: regexp.Compile with user input — ReDoS risk
+  pattern: regexp\.(?:Compile|MustCompile)\s*\(\s*(?!['"`])
+  severity: warning
+  suggestion: Validate/sanitize regex input or use regexp.QuoteMeta() for literals
+# ── Security: Unsafe ─────────────────────────────────────────────────────
+- category: security
+  id: go-unsafe-pointer
+  message: unsafe.Pointer bypasses Go type safety — memory corruption risk
+  pattern: \bunsafe\.Pointer\b
+  severity: warning
+  suggestion: Avoid unsafe unless absolutely necessary; document safety invariants
+- category: security
+  id: go-unsafe-sizeof
+  message: unsafe.Sizeof depends on platform — portability risk
+  pattern: \bunsafe\.(?:Sizeof|Alignof|Offsetof)\b
+  severity: info
+  suggestion: Use encoding/binary.Size() or struct field tags for portable size calculations
+- category: security
+  id: go-reflect-call
+  message: reflect.Value.Call executes dynamically — verify input is trusted
+  pattern: reflect\.Value.*\.Call\s*\(
+  severity: warning
+  suggestion: Validate method names and arguments; prefer interfaces over reflection
+- category: security
+  id: go-cgo-usage
+  message: CGo introduces unsafe C code into Go binary — memory safety lost
+  pattern: '^\s*(?://\s*)?#include\s|import\s+"C"'
+  severity: info
+  suggestion: Minimize CGo usage; validate all data crossing the Go/C boundary
+# ── Security: Log Injection ──────────────────────────────────────────────
+- category: security
+  id: go-log-injection
+  message: User input logged directly — log injection/forging risk
+  pattern: (?:log\.(?:Print|Fatal|Panic)|slog\.(?:Info|Warn|Error|Debug))\w*\s*\(\s*(?:fmt\.Sprintf|.*\+)
+  severity: info
+  suggestion: Sanitize user input before logging; use structured logging with key-value pairs
+# ── Security: Zip Slip ───────────────────────────────────────────────────
+- category: security
+  id: go-zip-slip
+  message: archive extraction without path validation — zip slip vulnerability
+  pattern: (?:zip|tar)\.(?:OpenReader|NewReader)\s*\(
+  severity: info
+  suggestion: Validate extracted file paths start with target directory; reject paths with ..
+# ── Bug: Error Handling ──────────────────────────────────────────────────
 - category: bug
   id: unchecked-error
   message: Error return value discarded with _
   pattern: ^\s*\w+(?:,\s*_)\s*[:=]=
   severity: warning
   suggestion: Handle the error explicitly
-- category: style
-  id: fmt-print
-  message: fmt.Print left in code
-  pattern: \bfmt\.Print(?:ln|f)?\s*\(
-  severity: info
-  suggestion: Use structured logging instead
 - category: bug
-  id: go-defer-in-loop
-  message: defer inside loop — deferred calls accumulate until function returns
-  pattern: ^\s*for\s.*\{[\s\S]*?\bdefer\b
+  id: go-errors-new-fmt
+  message: errors.New with fmt.Sprintf — use fmt.Errorf with %w instead
+  pattern: errors\.New\s*\(\s*fmt\.Sprintf\s*\(
+  severity: info
+  suggestion: 'Use fmt.Errorf("context: %w", err) for proper error wrapping'
+- category: bug
+  id: go-error-string-compare
+  message: Comparing error by string — fragile and breaks with wrapped errors
+  pattern: (?:err\.Error\(\)\s*==|strings\.Contains\s*\(\s*err\.Error\(\))
   severity: warning
-  suggestion: Move deferred cleanup into a separate function called from the loop body
+  suggestion: Use errors.Is() or errors.As() for robust error comparison
 - category: bug
-  id: go-goroutine-anonymous
-  message: Anonymous goroutine — verify it has a termination mechanism (channel, context, WaitGroup)
-  pattern: \bgo\s+func\s*\(
+  id: go-error-type-assert
+  message: Direct type assertion on error — fails with wrapped errors
+  pattern: \w+\.\(\*?\w+Error\)
   severity: info
-  suggestion: Ensure goroutines can be cancelled and their completion is tracked
+  suggestion: Use errors.As() to unwrap and match error types
+- category: bug
+  id: go-swallowed-error
+  message: Error checked but not returned or logged — silently swallowed
+  pattern: if\s+err\s*!=\s*nil\s*\{\s*\}
+  severity: warning
+  suggestion: Return the error, log it, or document why it is intentionally ignored
+- category: bug
+  id: go-bare-return-error
+  message: Named return with bare return in error path — may return zero-value unintentionally
+  pattern: ^\s*return\s*$
+  severity: info
+  suggestion: Use explicit return values for clarity in error paths
+# ── Bug: Nil / Pointer ───────────────────────────────────────────────────
 - category: bug
   id: go-nil-map
   message: Map declared with var (nil) — assignment will panic if not initialized with make()
@@ -114,20 +297,310 @@ rules:
   severity: info
   suggestion: Initialize with make() or a map literal before use
 - category: bug
+  id: go-nil-slice-append
+  message: Append to nil slice is safe, but a nil map write panics — verify this is a slice
+  pattern: var\s+\w+\s+\[\]
+  severity: info
+  suggestion: Consider pre-allocating with make([]T, 0, expectedCap) for performance
+- category: bug
+  id: go-nil-interface-method
+  message: Method call on interface without nil check — may panic
+  pattern: \b\w+\.(?:Close|Flush|Write|Read|Seek)\s*\(\s*\)(?!\s*//\s*nil)
+  severity: info
+  suggestion: Check for nil before calling methods on interfaces
+# ── Bug: Defer / Panic ───────────────────────────────────────────────────
+- category: bug
+  id: go-defer-in-loop
+  message: defer inside loop — deferred calls accumulate until function returns
+  pattern: ^\s*for\s.*\{[\s\S]*?\bdefer\b
+  severity: warning
+  suggestion: Move deferred cleanup into a separate function called from the loop body
+- category: bug
   id: go-panic
   message: panic() crashes the program — inappropriate for library code and most application code
   pattern: ^\s*panic\s*\(
   severity: warning
   suggestion: Return an error instead of panicking; reserve panic for truly unrecoverable states
-- category: performance
-  id: go-string-byte-copy
-  message: string([]byte(...)) creates a copy — may impact performance in hot paths
-  pattern: \bstring\(\[\]byte\(
+- category: bug
+  id: go-recover-all
+  message: recover() catches all panics — may mask bugs
+  pattern: \brecover\s*\(\s*\)
   severity: info
-  suggestion: Consider using unsafe.String() (Go 1.20+) in performance-critical code after benchmarking
+  suggestion: Log recovered panics and re-panic for unexpected errors
+- category: bug
+  id: go-defer-os-exit
+  message: os.Exit() prevents deferred functions from running
+  pattern: \bos\.Exit\s*\(
+  severity: info
+  suggestion: Return from main() instead, or ensure cleanup happens before os.Exit
+# ── Bug: Goroutine / Concurrency ─────────────────────────────────────────
+- category: bug
+  id: go-goroutine-anonymous
+  message: Anonymous goroutine — verify it has a termination mechanism (channel, context, WaitGroup)
+  pattern: \bgo\s+func\s*\(
+  severity: info
+  suggestion: Ensure goroutines can be cancelled and their completion is tracked
+- category: bug
+  id: go-goroutine-loop-var
+  message: Loop variable captured by goroutine closure — data race in Go < 1.22
+  pattern: for\s+\w+\s*(?:,\s*\w+)?\s*:?=\s*range\b[\s\S]*?\bgo\s+func\s*\(
+  severity: warning
+  suggestion: Pass the loop variable as a parameter to the goroutine, or use Go 1.22+
+- category: bug
+  id: go-channel-deadlock
+  message: Unbuffered channel in same goroutine — potential deadlock
+  pattern: \w+\s*:?=\s*make\s*\(\s*chan\s+\w+\s*\)[\s\S]*?\w+\s*<-[\s\S]*?<-\s*\w+
+  severity: info
+  suggestion: Use a buffered channel or send/receive in different goroutines
+- category: bug
+  id: go-mutex-copy
+  message: sync.Mutex must not be copied after first use — use pointer instead
+  pattern: \bfunc\s+\w+\s*\(\s*\w+\s+\w*Mutex\b
+  severity: warning
+  suggestion: Pass *sync.Mutex (pointer) to functions, never by value
+- category: bug
+  id: go-waitgroup-add-inside
+  message: WaitGroup.Add inside goroutine — race between Add and Wait
+  pattern: go\s+func[\s\S]*?\.Add\s*\(\s*1\s*\)
+  severity: warning
+  suggestion: Call wg.Add(1) before launching the goroutine
 - category: bug
   id: go-global-var
   message: Package-level mutable variable — data race risk if accessed from goroutines
   pattern: ^var\s+\w+\s+(?:map|int|string|bool|\[\])\b
   severity: info
   suggestion: Protect with sync.Mutex/RWMutex, use sync.Map, or channel-based access
+- category: bug
+  id: go-once-reset
+  message: sync.Once should not be reset — it is designed for one-time initialization
+  pattern: \bsync\.Once\s*\{\s*\}
+  severity: info
+  suggestion: Create a new sync.Once variable if you need to re-initialize
+# ── Bug: Type / Conversion ───────────────────────────────────────────────
+- category: bug
+  id: go-integer-overflow
+  message: Integer conversion may overflow — int to int32/int16/int8/uint
+  pattern: (?:int32|int16|int8|uint8|uint16|uint32)\s*\(\s*\w+\s*\)
+  severity: info
+  suggestion: Check value is within target range before converting
+- category: bug
+  id: go-float-equality
+  message: Floating-point equality comparison — may fail due to precision
+  pattern: \bfloat(?:32|64)\b[\s\S]*?==
+  severity: info
+  suggestion: Use a tolerance-based comparison (math.Abs(a-b) < epsilon)
+- category: bug
+  id: go-time-equal
+  message: Time comparison with == ignores monotonic clock and timezone
+  pattern: time\.(?:Now|Time)\b[\s\S]*?==
+  severity: info
+  suggestion: Use t1.Equal(t2) for time comparison
+- category: bug
+  id: go-string-index-rune
+  message: Indexing string gives byte, not rune — breaks with multibyte UTF-8
+  pattern: \w+\[\w+\]\s*==\s*'
+  severity: info
+  suggestion: Use range over string for rune iteration, or []rune() conversion
+# ── Bug: Context ─────────────────────────────────────────────────────────
+- category: bug
+  id: go-context-background-http
+  message: context.Background() in HTTP handler — should use request context
+  pattern: context\.Background\s*\(\s*\).*(?:http\.Handler|ServeHTTP|HandleFunc)
+  severity: warning
+  suggestion: Use r.Context() to propagate cancellation from the HTTP request
+- category: bug
+  id: go-context-todo
+  message: context.TODO() left in code — indicates unfinished context propagation
+  pattern: context\.TODO\s*\(\s*\)
+  severity: info
+  suggestion: Replace with a proper context (context.Background or parent context)
+# ── Bug: Resource Leak ───────────────────────────────────────────────────
+- category: bug
+  id: go-body-not-closed
+  message: HTTP response body must be closed to avoid resource leak
+  pattern: http\.(?:Get|Post|Do|Head)\s*\([^)]*\)[\s\S]*?\.Body(?!\.Close)
+  severity: warning
+  suggestion: Always defer resp.Body.Close() after checking err
+- category: bug
+  id: go-rows-not-closed
+  message: sql.Rows must be closed to release database connection
+  pattern: \.Query(?:Row)?(?:Context)?\s*\([^)]*\)[\s\S]*?(?!\.Close|defer)
+  severity: info
+  suggestion: Always defer rows.Close() after checking err
+- category: bug
+  id: go-file-not-closed
+  message: os.Open without defer Close — file descriptor leak
+  pattern: os\.(?:Open|Create)\s*\([^)]*\)[\s\S]*?(?!defer|\.Close)
+  severity: info
+  suggestion: Always defer f.Close() after checking err
+- category: bug
+  id: go-ticker-not-stopped
+  message: time.NewTicker without Stop — goroutine and timer leak
+  pattern: time\.NewTicker\s*\([^)]*\)[\s\S]*?(?!\.Stop)
+  severity: info
+  suggestion: Always defer ticker.Stop()
+# ── Bug: Testing ─────────────────────────────────────────────────────────
+- category: bug
+  id: go-test-fatal-goroutine
+  message: t.Fatal/t.FailNow in goroutine — panics instead of failing test
+  pattern: go\s+func[\s\S]*?t\.(?:Fatal|FailNow|Skip)\b
+  severity: warning
+  suggestion: Use t.Error() in goroutines; call t.Fatal() only from the test goroutine
+- category: bug
+  id: go-test-parallel-shared
+  message: Shared variable in parallel test — data race risk
+  pattern: t\.Parallel\s*\(\s*\)[\s\S]*?\bvar\s+\w+
+  severity: info
+  suggestion: Use test-local variables or proper synchronization in parallel tests
+# ── Performance ──────────────────────────────────────────────────────────
+- category: performance
+  id: go-string-byte-copy
+  message: string([]byte(...)) creates a copy — may impact performance in hot paths
+  pattern: \bstring\(\[\]byte\(
+  severity: info
+  suggestion: Consider using unsafe.String() (Go 1.20+) in performance-critical code after benchmarking
+- category: performance
+  id: go-append-prealloc
+  message: Slice append in loop without pre-allocation — causes repeated copying
+  pattern: for\s.*\{[\s\S]*?=\s*append\s*\(\s*\w+\s*,
+  severity: info
+  suggestion: Pre-allocate with make([]T, 0, expectedLen) before the loop
+- category: performance
+  id: go-map-prealloc
+  message: Map without size hint — causes rehashing as it grows
+  pattern: make\s*\(\s*map\[\w+\]\w+\s*\)(?!\s*//\s*(?:small|few))
+  severity: info
+  suggestion: Use make(map[K]V, expectedLen) to avoid rehashing
+- category: performance
+  id: go-regexp-compile-loop
+  message: regexp.Compile inside loop — recompiles pattern on every iteration
+  pattern: for\s.*\{[\s\S]*?regexp\.(?:Compile|MustCompile)\s*\(
+  severity: warning
+  suggestion: Compile regex once outside the loop, or use a package-level var
+- category: performance
+  id: go-fmt-sprintf-concat
+  message: fmt.Sprintf for simple concatenation — strings.Builder or + is faster
+  pattern: fmt\.Sprintf\s*\(\s*['"]%s%s['"]
+  severity: info
+  suggestion: Use string concatenation (+) or strings.Builder for simple joins
+- category: performance
+  id: go-string-contains-loop
+  message: strings.Contains in loop — consider a map lookup for O(1) checks
+  pattern: for\s.*\{[\s\S]*?strings\.Contains\s*\(
+  severity: info
+  suggestion: Build a map[string]bool before the loop for O(1) lookups
+- category: performance
+  id: go-json-marshal-loop
+  message: json.Marshal/Unmarshal in loop — consider streaming with Encoder/Decoder
+  pattern: for\s.*\{[\s\S]*?json\.(?:Marshal|Unmarshal)\s*\(
+  severity: info
+  suggestion: Use json.NewEncoder/json.NewDecoder for repeated serialization
+- category: performance
+  id: go-time-now-loop
+  message: time.Now() inside tight loop — syscall overhead
+  pattern: for\s.*\{[\s\S]*?time\.Now\s*\(\s*\)
+  severity: info
+  suggestion: Capture time once before loop if sub-millisecond precision isn't needed
+- category: performance
+  id: go-select-default-spin
+  message: select with default in loop — busy-wait CPU spin
+  pattern: 'for\s*\{[\s\S]*?select\s*\{[\s\S]*?default\s*:'
+  severity: warning
+  suggestion: Use a blocking select or add time.Sleep/runtime.Gosched in default
+- category: performance
+  id: go-defer-in-hot-path
+  message: defer has small overhead — avoid in performance-critical tight loops
+  pattern: for\s.*\{[\s\S]*?\bdefer\b
+  severity: info
+  suggestion: Call cleanup directly at end of loop body if profiling shows defer overhead
+- category: performance
+  id: go-sync-pool-new
+  message: sync.Pool without New function — Get() may return nil
+  pattern: sync\.Pool\s*\{(?![\s\S]*?New\s*:)
+  severity: info
+  suggestion: Always set sync.Pool.New to allocate a fresh value
+- category: performance
+  id: go-ioutil-deprecated
+  message: ioutil package is deprecated since Go 1.16 — use io and os instead
+  pattern: \bioutil\.(?:ReadAll|ReadFile|WriteFile|ReadDir|TempDir|TempFile|NopCloser|Discard)\b
+  severity: info
+  suggestion: Use io.ReadAll, os.ReadFile, os.WriteFile, os.ReadDir, os.MkdirTemp, os.CreateTemp
+- category: performance
+  id: go-large-struct-value
+  message: Large struct passed by value — causes full copy on every call
+  pattern: func\s+\w+\s*\(\s*\w+\s+[A-Z]\w{15,}\s*\)
+  severity: info
+  suggestion: Pass large structs by pointer to avoid copying
+# ── Style ────────────────────────────────────────────────────────────────
+- category: style
+  id: fmt-print
+  message: fmt.Print left in code
+  pattern: \bfmt\.Print(?:ln|f)?\s*\(
+  severity: info
+  suggestion: Use structured logging instead
+- category: style
+  id: go-todo-fixme
+  message: TODO/FIXME comment found — track in issue tracker
+  pattern: //\s*(?:TODO|FIXME|HACK|XXX)\b
+  severity: info
+  suggestion: Create a ticket and reference it in the comment
+- category: style
+  id: go-empty-interface
+  message: interface{} loses type safety — consider a concrete type or type constraint
+  pattern: \binterface\s*\{\s*\}
+  severity: info
+  suggestion: Use any (Go 1.18+) or define a specific interface
+- category: style
+  id: go-init-function
+  message: init() functions make testing and dependency tracking harder
+  pattern: ^func\s+init\s*\(\s*\)\s*\{
+  severity: info
+  suggestion: Use explicit initialization in main() or constructors for testability
+- category: style
+  id: go-exported-no-doc
+  message: Exported function without doc comment
+  pattern: ^(?!//)\s*func\s+[A-Z]\w+\s*\(
+  severity: info
+  suggestion: Add a doc comment starting with the function name per Go conventions
+- category: style
+  id: go-magic-number
+  message: Magic number in code — use a named constant for clarity
+  pattern: (?:==|!=|<|>|<=|>=)\s*(?:[3-9]\d{2,}|[1-9]\d{3,})\b
+  severity: info
+  suggestion: Extract to a named const with a descriptive name
+- category: style
+  id: go-naked-return
+  message: Naked return in long function — harder to read
+  pattern: ^\s*return\s*$
+  severity: info
+  suggestion: Use explicit return values in functions longer than a few lines
+- category: style
+  id: go-stuttering-name
+  message: Package-stuttering name (e.g., http.HTTPClient) — avoid in Go
+  pattern: ^\s*(?:type|func|var|const)\s+[A-Z]\w*(?:HTTP|URL|API|SQL|XML|JSON|HTML)\w*\b
+  severity: info
+  suggestion: Drop the package-name prefix per Go naming conventions
+- category: style
+  id: go-getter-prefix
+  message: Go getters should not have Get prefix — use Name() not GetName()
+  pattern: func\s+\(\w+\s+\*?\w+\)\s+Get[A-Z]\w*\s*\(\s*\)
+  severity: info
+  suggestion: Remove Get prefix — use Name() instead of GetName()
+- category: style
+  id: go-bool-param
+  message: Boolean parameter makes call site unclear — consider functional options
+  pattern: func\s+\w+\s*\([^)]*\bbool\b[^)]*\bbool\b
+  severity: info
+  suggestion: Use functional options pattern or a config struct instead of multiple bools
+- category: style
+  id: go-underscore-name
+  message: Underscore in Go name — use camelCase per convention
+  pattern: (?:func|var|const|type)\s+\w+_\w+\b
+  severity: info
+  suggestion: Use camelCase for Go identifiers (myFunc not my_func)
+- category: security
+  id: go-unvalidated-redirect-url
+  message: 'URL parsed from user input without scheme validation — may allow javascript: or data: URIs'
+  pattern: url\.Parse\s*\(\s*(?!['"])
+  severity: info
+  suggestion: Validate scheme is http/https after parsing; reject unexpected schemes

@@ -30,7 +30,7 @@ rules:
   severity: critical
   suggestion: Avoid network-based logging config; use file-based or environment-based config instead
 - category: security
-  id: insecure-crypto
+  id: insecure-des
   message: DES encryption is broken — 56-bit keys are trivially brute-forced
   pattern: \bDES\b\.new\(|\bDES\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+DES\b
   severity: warning
@@ -42,13 +42,13 @@ rules:
   severity: warning
   suggestion: Use CBC, GCM, or CTR mode instead
 - category: security
-  id: insecure-crypto
+  id: insecure-blowfish
   message: Blowfish has 64-bit blocks — vulnerable to birthday attacks at scale
   pattern: \bBlowfish\b\.new\(|\bBlowfish\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+Blowfish\b
   severity: warning
   suggestion: Use AES-256 or ChaCha20 instead
 - category: security
-  id: insecure-crypto
+  id: insecure-rc4
   message: RC4/ARC4 is a broken stream cipher with known biases
   pattern: \bARC4\b\.new\(|\bARC4\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+ARC4\b|\bRC4\b
   severity: warning
@@ -107,3 +107,153 @@ rules:
   pattern: \bos\.path\.(?:exists|isfile|isdir)\s*\(\s*\w+\s*\)
   severity: info
   suggestion: Use try/except around the file operation instead of checking first
+- category: security
+  id: weak-hash-md5
+  message: MD5 is cryptographically broken — do not use for security
+  pattern: (?i)\bmd5\s*\(|\bhashlib\.md5\b|\bMD5\.(?:Create|new|digest)\b|\bDigestUtils\.md5\b|MessageDigest\.getInstance\s*\(\s*['"]MD5['"]
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 for integrity; use bcrypt/scrypt/argon2 for passwords
+- category: security
+  id: weak-hash-sha1
+  message: SHA1 is cryptographically weak — collision attacks demonstrated
+  pattern: (?i)\bsha1\s*\(|\bhashlib\.sha1\b|\bSHA1\.(?:Create|new|digest)\b|\bDigestUtils\.sha1\b|MessageDigest\.getInstance\s*\(\s*['"]SHA-?1['"]
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 instead
+- category: security
+  id: cors-wildcard
+  message: 'CORS allows all origins — any website can make authenticated requests'
+  pattern: (?i)(?:Access-Control-Allow-Origin['"]\s*[:,]\s*['"]\*|cors\s*\(\s*\)|allow_origins\s*=\s*\[['"]?\*)
+  severity: warning
+  suggestion: Restrict CORS to specific trusted origins
+- category: security
+  id: open-redirect
+  message: Redirect to user-controlled URL — open redirect risk
+  pattern: (?i)(?:redirect|location\.href|window\.location|res\.redirect)\s*(?:=|\()\s*(?:req\.|request\.|params\.|query\.)
+  severity: warning
+  suggestion: Validate redirect targets against an allowlist of trusted paths/domains
+- category: security
+  id: xss-innerhtml
+  message: innerHTML assignment — XSS risk if value contains user input
+  pattern: \.innerHTML\s*=\s*(?!['"]<)
+  severity: warning
+  suggestion: Use textContent for text, or sanitize HTML with DOMPurify
+- category: security
+  id: xss-document-write
+  message: document.write() — XSS risk and blocks page rendering
+  pattern: \bdocument\.write\s*\(
+  severity: warning
+  suggestion: Use DOM manipulation methods (createElement, textContent) instead
+- category: security
+  id: deserialization-unsafe
+  message: Unsafe deserialization — can lead to remote code execution
+  pattern: (?i)(?:pickle\.loads?\s*\(|yaml\.load\s*\([^)]*(?!Loader)|marshal\.loads?\s*\(|ObjectInputStream|unserialize\s*\(|readObject\s*\()
+  severity: critical
+  suggestion: Use safe deserialization (yaml.safe_load, JSON) or validate input
+- category: security
+  id: debug-enabled
+  message: Debug mode enabled — may expose sensitive information in production
+  pattern: (?i)(?:DEBUG\s*=\s*True|debug\s*:\s*true|\.debug\s*=\s*true|app\.run\s*\([^)]*debug\s*=\s*True)
+  severity: warning
+  suggestion: Disable debug mode in production environments
+- category: security
+  id: weak-tls-version
+  message: Weak TLS version (< 1.2) — vulnerable to known attacks
+  pattern: (?i)(?:SSLv[23]|TLSv1(?:\.0)?|TLS_1_0|TLS_1_1|PROTOCOL_TLSv1(?:_1)?)\b
+  severity: warning
+  suggestion: Use TLS 1.2 or 1.3 minimum
+- category: security
+  id: csrf-disabled
+  message: CSRF protection disabled — cross-site request forgery risk
+  pattern: (?i)(?:csrf_exempt|@csrf_exempt|WTF_CSRF_ENABLED\s*=\s*False|csrf\s*:\s*false|CSRF_COOKIE_SECURE\s*=\s*False)
+  severity: warning
+  suggestion: Enable CSRF protection for state-changing endpoints
+- category: security
+  id: session-insecure
+  message: Session cookie without secure flags — may be intercepted
+  pattern: (?i)(?:SESSION_COOKIE_SECURE\s*=\s*False|cookie_secure\s*=\s*false|secure\s*:\s*false|httponly\s*:\s*false)
+  severity: warning
+  suggestion: Set Secure, HttpOnly, and SameSite flags on session cookies
+- category: security
+  id: password-in-url
+  message: Password in URL — visible in logs, referrer headers, browser history
+  pattern: (?i)(?:https?://[^:]+:[^@]+@(?!localhost))
+  severity: critical
+  suggestion: Use authentication headers instead of embedding credentials in URLs
+- category: security
+  id: insecure-ssl-context
+  message: SSL context with no verification — MITM risk
+  pattern: (?i)(?:ssl\.create_default_context\s*\([^)]*\)\s*\n\s*.*check_hostname\s*=\s*False|ssl\._create_unverified_context|CERT_NONE|verify_mode\s*=\s*ssl\.CERT_NONE)
+  severity: critical
+  suggestion: Enable certificate verification; configure proper CA certificates
+- category: security
+  id: directory-listing
+  message: Directory listing or autoindex enabled — may expose sensitive files
+  pattern: (?i)(?:autoindex\s+on|Options\s+\+?Indexes|directory_listing\s*[:=]\s*(?:true|on|enabled))
+  severity: warning
+  suggestion: Disable directory listing in web server configuration
+- category: security
+  id: file-upload-unrestricted
+  message: File upload — verify file type, size, and name are validated
+  pattern: (?i)(?:request\.files|uploaded_file|multipart|file_field|FileField|multer|formidable|busboy)
+  severity: info
+  suggestion: Validate file type (allowlist), enforce size limits, sanitize filenames
+- category: security
+  id: race-condition-mkdir
+  message: mkdir without exist_ok — race condition between check and creation
+  pattern: \bos\.makedirs?\s*\([^)]*\)\s*(?!.*exist_ok)
+  severity: info
+  suggestion: Use os.makedirs(path, exist_ok=True) to handle concurrent creation
+- category: security
+  id: mass-assignment
+  message: Mass assignment — all request parameters passed to model/object
+  pattern: (?i)(?:\.create\s*\(\s*\*\*request\.|\.update\s*\(\s*\*\*request\.|Object\.assign\s*\(\s*\w+\s*,\s*req\.body|\.set\s*\(\s*req\.body\))
+  severity: warning
+  suggestion: Explicitly list allowed parameters instead of passing all request data
+- category: security
+  id: header-injection
+  message: HTTP header set from user input — header injection risk
+  pattern: (?i)(?:set_header|add_header|response\.headers|setHeader)\s*\([^)]*(?:request\.|req\.|params\.|query\.)
+  severity: warning
+  suggestion: Validate and sanitize header values; reject newlines
+- category: security
+  id: ldap-injection
+  message: LDAP query with string interpolation — injection risk
+  pattern: (?i)(?:ldap_search|search_s|search_ext_s)\s*\([^)]*(?:format\s*\(|\+\s*\w+|f['"])
+  severity: critical
+  suggestion: Use parameterized LDAP queries; escape special characters
+- category: security
+  id: xpath-injection
+  message: XPath query with string interpolation — injection risk
+  pattern: (?i)(?:xpath|selectNodes|evaluate)\s*\(\s*(?:f['"]|['"].*?\+|['"].*?format\s*\()
+  severity: critical
+  suggestion: Use parameterized XPath queries or sanitize input
+- category: security
+  id: shell-injection
+  message: Shell command constructed from string interpolation — injection risk
+  pattern: (?i)(?:os\.system|os\.popen|subprocess\.(?:call|run|Popen)|exec|execSync|child_process)\s*\(\s*(?:f['"]|['"].*?\+|['"].*?format\s*\(|`[^`]*\$)
+  severity: critical
+  suggestion: Use parameterized command execution (subprocess with list args, no shell=True)
+- category: security
+  id: regex-dos
+  message: Regex with nested quantifiers — potential ReDoS vulnerability
+  pattern: (?:\(\.\*\)\+|\(\.\+\)\*|\(\[.*?\]\+\)\+|\(\.\*\)\{|\(\w\+\)\+)
+  severity: warning
+  suggestion: Simplify regex to avoid catastrophic backtracking; use atomic groups or possessive quantifiers
+- category: security
+  id: insecure-cookie
+  message: Cookie set without security flags
+  pattern: (?i)(?:set_cookie|setCookie|document\.cookie)\s*(?:\(|=)(?!.*(?:secure|httponly|samesite))
+  severity: warning
+  suggestion: Set Secure, HttpOnly, and SameSite attributes on cookies
+- category: security
+  id: information-disclosure-stacktrace
+  message: Stack trace or detailed errors exposed to client
+  pattern: (?i)(?:traceback\.format_exc|traceback\.print_exc|e\.(?:getMessage|getStackTrace|printStackTrace)|Error\.stack)\s*(?:\(\)|;)
+  severity: warning
+  suggestion: Log errors server-side; return generic error messages to clients
+- category: security
+  id: crypto-ecb-java
+  message: ECB mode in Java cipher — does not hide data patterns
+  pattern: Cipher\.getInstance\s*\(\s*['"](?:AES|DES|DESede)(?:/ECB)?['"]
+  severity: warning
+  suggestion: Use AES/GCM/NoPadding or AES/CBC/PKCS5Padding with random IV

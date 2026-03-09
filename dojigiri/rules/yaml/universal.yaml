@@ -6,7 +6,7 @@ rules:
   severity: critical
   suggestion: Use environment variables or a secrets manager
 - category: security
-  id: hardcoded-secret
+  id: hardcoded-secret-dict
   message: Possible hardcoded secret in dict/config literal
   pattern: (?i)['"](?:api[_-]?key|secret[_-]?key|password|passwd|token|auth[_-]?token|database[_-]?password|db[_-]?password|aws[_-]?secret[_-]?\w*|client[_-]?secret|private[_-]?key|encryption[_-]?key|signing[_-]?key|\w+[_-]secret[_-]?\w*key|\w+[_-]secret)['"]\s*:\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*.]{8,}['"]
   severity: critical
@@ -20,7 +20,7 @@ rules:
 - category: style
   id: todo-marker
   message: TODO/FIXME marker found
-  pattern: (?i)(?:^|\s)(?:#|//).*\b(?:TODO|FIXME|HACK|XXX)\b
+  pattern: (?i)(?:^|\s)(?:#|//|/\*|\*|--|;).*\b(?:TODO|FIXME|HACK|XXX)\b
   severity: info
   suggestion: null
 - category: style
@@ -36,38 +36,152 @@ rules:
   severity: warning
   suggestion: Use HTTPS instead
 - category: security
-  id: sql-injection
+  id: sql-injection-execute
   message: Possible SQL injection — string interpolation in query
   pattern: (?i)(?:execute(?:many)?|cursor\.execute(?:many)?|query|\.execute)\s*\(\s*(?:f['"]|['"].*?%s|['"].*?\+\s*\w+|['"].*?\{)
   severity: critical
   suggestion: Use parameterized queries
 - category: security
-  id: sql-injection
+  id: sql-injection-format
   message: Possible SQL injection — .format() on SQL string
   pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b.*?['"]\.format\s*\(
   severity: critical
   suggestion: Use parameterized queries instead of string formatting
 - category: security
-  id: sql-injection
+  id: sql-injection-fstring
   message: Possible SQL injection — f-string inside text()
   pattern: (?i)(?:(?:sa|sqlalchemy|db|session|engine|conn(?:ection)?)\.)?text\s*\(\s*f['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|GRANT|TRUNCATE|WITH)\b
   severity: critical
   suggestion: Use text() with :param bindparams instead
 - category: security
-  id: sql-injection
+  id: sql-injection-concat
   message: Possible SQL injection — string concatenation on SQL query
   pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b.*?['"]\s*\+
   severity: critical
   suggestion: Use parameterized queries instead of string concatenation
 - category: security
-  id: sql-injection
+  id: sql-injection-percent
   message: Possible SQL injection — % formatting on SQL query
   pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*%s[^'"]*['"]\s*%
   severity: critical
   suggestion: Use parameterized queries instead of % formatting
 - category: security
-  id: sql-injection
+  id: sql-injection-raw
   message: Django .raw() with string interpolation — SQL injection
   pattern: \.raw\s*\(\s*(?:f['"]|['"].*?\.format\s*\(|['"].*?%s)
   severity: critical
   suggestion: 'Use .raw() with parameterized query: Model.objects.raw(''SELECT ... WHERE id = %s'', [user_id])'
+- category: security
+  id: google-api-key
+  message: Possible Google API key in source
+  pattern: AIza[0-9A-Za-z_-]{35}
+  severity: critical
+  suggestion: Use environment variables or a secrets manager; rotate the key
+- category: security
+  id: github-token
+  message: Possible GitHub token in source
+  pattern: gh[pousr]_[0-9A-Za-z]{36,}
+  severity: critical
+  suggestion: Revoke and rotate the token; use environment variables
+- category: security
+  id: slack-token
+  message: Possible Slack token in source
+  pattern: xox[baprs]-[0-9A-Za-z-]{10,}
+  severity: critical
+  suggestion: Revoke and rotate the token; use environment variables
+- category: security
+  id: generic-bearer-token
+  message: Hardcoded Bearer token in source
+  pattern: (?i)['"]Bearer\s+[A-Za-z0-9._\-]{20,}['"]
+  severity: critical
+  suggestion: Use environment variables or a secrets manager
+- category: security
+  id: stripe-key
+  message: Possible Stripe API key in source
+  pattern: (?:sk|pk)_(?:live|test)_[0-9A-Za-z]{24,}
+  severity: critical
+  suggestion: Use environment variables; rotate the key
+- category: bug
+  id: debugger-statement
+  message: debugger statement left in code
+  pattern: ^\s*debugger\s*;?\s*$
+  severity: warning
+  suggestion: Remove debugger statement before shipping
+- category: bug
+  id: commented-code-block
+  message: Large block of commented-out code
+  pattern: (?:^|\n)\s*(?://|#)\s*(?:if|for|while|def|class|function|return|import|const|let|var)\b
+  severity: info
+  suggestion: Remove dead code; use version control for history
+- category: bug
+  id: empty-catch
+  message: Empty exception/catch block — errors silently swallowed
+  pattern: (?:catch\s*\([^)]*\)\s*\{\s*\}|except[^:]*:\s*(?:pass|\.\.\.)\s*$)
+  severity: warning
+  suggestion: Log the error or re-raise; never silently swallow exceptions
+- category: security
+  id: env-file-committed
+  message: '.env file reference — ensure .env is in .gitignore'
+  pattern: (?:dotenv|load_dotenv|require\s*\(\s*['"]dotenv['"])
+  severity: info
+  suggestion: Ensure .env files are in .gitignore and never committed
+- category: style
+  id: magic-number
+  message: Magic number — consider naming as a constant
+  pattern: (?<![\w.])(?:(?:[2-9]\d{2,}|1\d{3,}))(?![\w.])(?!\s*[;:=])
+  severity: info
+  suggestion: Extract to a named constant for clarity
+- category: bug
+  id: equality-type-coercion
+  message: Loose equality (==) may cause unexpected type coercion
+  pattern: (?<!=|!)={1,2}(?!=)
+  severity: info
+  suggestion: Use strict equality (=== / !==) in JavaScript/TypeScript
+- category: security
+  id: hardcoded-jwt-secret
+  message: Hardcoded JWT secret — signing key must not be in source
+  pattern: (?i)jwt[_.]?secret\s*[:=]\s*['"][^'"]{8,}['"]
+  severity: critical
+  suggestion: Use environment variables for JWT secrets
+- category: security
+  id: base64-secret
+  message: Base64-encoded string that may be a secret
+  pattern: (?i)(?:secret|password|token|key)\s*[:=]\s*['"][A-Za-z0-9+/]{40,}={0,2}['"]
+  severity: warning
+  suggestion: Use environment variables or a secrets manager
+- category: bug
+  id: fixme-critical
+  message: FIXME marker — indicates known bug
+  pattern: (?i)\bFIXME\b.*(?:bug|crash|fail|break|corrupt|leak|overflow|underflow)
+  severity: warning
+  suggestion: Fix the known bug before shipping
+- category: security
+  id: npm-token
+  message: Possible npm token in source
+  pattern: npm_[0-9A-Za-z]{36}
+  severity: critical
+  suggestion: Revoke and rotate the token; use .npmrc with env vars
+- category: security
+  id: sendgrid-key
+  message: Possible SendGrid API key in source
+  pattern: SG\.[0-9A-Za-z._-]{22}\.[0-9A-Za-z._-]{43}
+  severity: critical
+  suggestion: Use environment variables; rotate the key
+- category: security
+  id: twilio-key
+  message: Possible Twilio API key in source
+  pattern: SK[0-9a-fA-F]{32}
+  severity: warning
+  suggestion: Use environment variables; rotate the key
+- category: bug
+  id: trailing-whitespace
+  message: Trailing whitespace
+  pattern: '[ \t]+$'
+  severity: info
+  suggestion: Remove trailing whitespace
+- category: bug
+  id: mixed-indentation
+  message: Mixed tabs and spaces in indentation
+  pattern: ^(?:\t+ +| +\t+)\S
+  severity: info
+  suggestion: Use consistent indentation (tabs or spaces, not both)

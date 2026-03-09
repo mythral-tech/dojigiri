@@ -161,3 +161,569 @@ rules:
   pattern: (?:java\.nio\.file\.)?Paths\.get\s*\(\s*[a-z]\w*\s*[,)]
   severity: critical
   suggestion: Validate and canonicalize file paths before use
+# --- Spring Security ---
+- category: security
+  id: java-spring-csrf-disabled
+  message: CSRF protection explicitly disabled in Spring Security
+  pattern: \.csrf\s*\(\s*\)\s*\.disable\s*\(\s*\)|\.csrf\s*\(\s*(?:csrf|c)\s*->\s*(?:csrf|c)\.disable\s*\(\s*\)\s*\)
+  severity: critical
+  suggestion: Enable CSRF protection or use stateless token-based auth (e.g., JWT) where CSRF is not applicable
+- category: security
+  id: java-spring-permit-all-sensitive
+  message: Spring Security permitAll on sensitive endpoint (admin, actuator, api)
+  pattern: \.(?:antMatchers|requestMatchers|mvcMatchers)\s*\(\s*["'](?:/(?:admin|actuator|api/internal|management|config))[^"']*["']\s*\)\s*\.permitAll\s*\(
+  severity: critical
+  suggestion: Restrict sensitive endpoints with .hasRole() or .authenticated()
+- category: security
+  id: java-spring-missing-preauthorize
+  message: Spring controller method modifies data without @PreAuthorize or @Secured
+  pattern: (?:@(?:Post|Put|Delete|Patch)Mapping)\s*(?:\([^)]*\))?\s*\n\s*(?!.*@(?:PreAuthorize|Secured|RolesAllowed))public\s+
+  severity: warning
+  suggestion: Add @PreAuthorize or @Secured annotation to restrict access
+- category: security
+  id: java-spring-cors-allow-all
+  message: Insecure CORS configuration — allows all origins
+  pattern: \.allowedOrigins\s*\(\s*["']\*["']\s*\)|\.addAllowedOrigin\s*\(\s*["']\*["']\s*\)|@CrossOrigin\s*(?:\(\s*\)|\(\s*origins\s*=\s*["']\*["']\s*\))
+  severity: critical
+  suggestion: Restrict CORS to specific trusted origins
+- category: security
+  id: java-spring-weak-password-encoder
+  message: Weak password encoder — NoOpPasswordEncoder stores plaintext passwords
+  pattern: NoOpPasswordEncoder\.getInstance\s*\(|new\s+(?:Md5|LdapSha|StandardPassword)PasswordEncoder\s*\(
+  severity: critical
+  suggestion: Use BCryptPasswordEncoder or Argon2PasswordEncoder
+- category: security
+  id: java-spring-security-debug
+  message: Spring Security debug mode enabled — leaks sensitive information
+  pattern: '@EnableWebSecurity\s*\(\s*debug\s*=\s*true\s*\)'
+  severity: warning
+  suggestion: Set debug=false or remove the parameter in production
+- category: security
+  id: java-spring-permit-all-wildcard
+  message: Spring Security permits all requests via wildcard matcher
+  pattern: \.(?:antMatchers|requestMatchers|mvcMatchers)\s*\(\s*["']/\*\*["']\s*\)\s*\.permitAll\s*\(
+  severity: critical
+  suggestion: Use fine-grained access rules instead of permitting all paths
+# --- Spring MVC ---
+- category: security
+  id: java-spring-open-redirect
+  message: Open redirect — user input in redirect URL
+  pattern: 'return\s+["'']redirect:\s*["'']\s*\+\s*(?!["''])(\w+)|(?:RedirectView|ModelAndView)\s*\(\s*(?!["''])(\w+)'
+  severity: critical
+  suggestion: Validate redirect URLs against an allowlist of trusted destinations
+- category: security
+  id: java-spring-missing-valid
+  message: Request body or parameter missing @Valid annotation for input validation
+  pattern: '@(?:RequestBody|ModelAttribute)\s+(?!.*@Valid)\w+\s+\w+'
+  severity: warning
+  suggestion: Add @Valid annotation to trigger bean validation on input objects
+- category: security
+  id: java-spring-unvalidated-forward
+  message: Server-side forward with user-controlled path
+  pattern: 'return\s+["'']forward:\s*["'']\s*\+\s*(?!["''])(\w+)|request\.getRequestDispatcher\s*\(\s*(?!["''])(\w+)'
+  severity: critical
+  suggestion: Validate and allowlist forward targets
+- category: security
+  id: java-spring-path-variable-traversal
+  message: Path variable used directly in file operation
+  pattern: '@PathVariable[^)]*\)\s*String\s+(\w+)(?:[\s\S]{0,200})new\s+File\s*\(\s*\1'
+  severity: critical
+  suggestion: Validate and sanitize @PathVariable before use in file operations
+# --- Deserialization ---
+- category: security
+  id: java-unsafe-deserialization
+  message: Unsafe deserialization — ObjectInputStream.readObject() on untrusted data
+  pattern: \.readObject\s*\(\s*\)|\.readUnshared\s*\(\s*\)
+  severity: critical
+  suggestion: Use ObjectInputFilter (JEP 290), or switch to safe formats like JSON
+- category: security
+  id: java-xmldecoder-deserialization
+  message: XMLDecoder deserializes arbitrary objects — remote code execution risk
+  pattern: new\s+XMLDecoder\s*\(|XMLDecoder\s*\(\s*
+  severity: critical
+  suggestion: Use a safe XML parser (JAXB with validation) instead of XMLDecoder
+- category: security
+  id: java-snakeyaml-unsafe
+  message: SnakeYAML with default constructor allows arbitrary object instantiation
+  pattern: new\s+Yaml\s*\(\s*\)\.load\s*\(|yaml\.load\s*\(\s*(?!.*SafeConstructor)
+  severity: critical
+  suggestion: Use new Yaml(new SafeConstructor()) to restrict deserialization
+- category: security
+  id: java-kryo-unsafe
+  message: Kryo deserialization without class registration required
+  pattern: kryo\.setRegistrationRequired\s*\(\s*false\s*\)
+  severity: critical
+  suggestion: Set kryo.setRegistrationRequired(true) and register allowed classes
+- category: security
+  id: java-xstream-unsafe
+  message: XStream without security configuration — arbitrary code execution risk
+  pattern: new\s+XStream\s*\(\s*\)(?![\s\S]{0,100}(?:allowTypes|setupDefaultSecurity|addPermission))
+  severity: critical
+  suggestion: Use XStream.setupDefaultSecurity() and explicitly allow types
+# --- XXE ---
+- category: security
+  id: java-xxe-documentbuilder
+  message: DocumentBuilderFactory without XXE protection — external entity injection
+  pattern: DocumentBuilderFactory\.newInstance\s*\(\s*\)(?![\s\S]{0,200}(?:setFeature|FEATURE_SECURE_PROCESSING|disallow-doctype-decl))
+  severity: critical
+  suggestion: 'Set factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)'
+- category: security
+  id: java-xxe-saxparser
+  message: SAXParserFactory without XXE protection
+  pattern: SAXParserFactory\.newInstance\s*\(\s*\)(?![\s\S]{0,200}(?:setFeature|FEATURE_SECURE_PROCESSING|disallow-doctype-decl))
+  severity: critical
+  suggestion: Disable external entities and DTDs on the SAXParserFactory
+- category: security
+  id: java-xxe-xmlreader
+  message: XMLReader or XMLInputFactory without secure configuration
+  pattern: XMLInputFactory\.newInstance\s*\(\s*\)|XMLInputFactory\.newFactory\s*\(\s*\)(?![\s\S]{0,100}(?:IS_SUPPORTING_EXTERNAL_ENTITIES|SUPPORT_DTD))
+  severity: critical
+  suggestion: Set XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES and SUPPORT_DTD to false
+- category: security
+  id: java-xxe-transformer
+  message: TransformerFactory without secure processing — XXE risk
+  pattern: TransformerFactory\.newInstance\s*\(\s*\)(?![\s\S]{0,200}(?:setAttribute|ACCESS_EXTERNAL|FEATURE_SECURE_PROCESSING))
+  severity: critical
+  suggestion: Set ACCESS_EXTERNAL_DTD and ACCESS_EXTERNAL_STYLESHEET to empty string
+# --- SSRF ---
+- category: security
+  id: java-ssrf-url
+  message: SSRF — URL constructed from user-controlled input
+  pattern: new\s+URL\s*\(\s*(?!["'])([a-z]\w*)\s*\)|new\s+URL\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
+  severity: critical
+  suggestion: Validate URLs against an allowlist of trusted hosts and schemes
+- category: security
+  id: java-ssrf-httpclient
+  message: SSRF — HttpClient/HttpURLConnection with user-controlled URL
+  pattern: (?:HttpClient|HttpURLConnection|URLConnection).*\.(?:openConnection|send|newBuilder)\s*\([^)]*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Validate and restrict URLs to trusted internal hosts
+- category: security
+  id: java-ssrf-resttemplate
+  message: SSRF — RestTemplate with user-controlled URL
+  pattern: restTemplate\.(?:getForObject|getForEntity|postForObject|postForEntity|exchange|execute)\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Validate URLs against an allowlist before passing to RestTemplate
+- category: security
+  id: java-ssrf-webclient
+  message: SSRF — WebClient with user-controlled URI
+  pattern: WebClient\.(?:create|builder).*\.(?:uri|baseUrl)\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Validate URIs against an allowlist before passing to WebClient
+# --- Cryptography ---
+- category: security
+  id: java-ecb-mode
+  message: ECB cipher mode — identical plaintext blocks produce identical ciphertext
+  pattern: Cipher\.getInstance\s*\(\s*["'][^"']*(?:/ECB/)(?:[^"']*)["']
+  severity: critical
+  suggestion: Use AES/GCM/NoPadding or AES/CBC/PKCS5Padding with random IV
+- category: security
+  id: java-static-iv
+  message: Static or hardcoded initialization vector (IV) — breaks cipher randomization
+  pattern: new\s+IvParameterSpec\s*\(\s*(?:new\s+byte\s*\[\s*\]\s*\{|["']|(?:0x))
+  severity: critical
+  suggestion: Generate a random IV with SecureRandom for each encryption operation
+- category: security
+  id: java-weak-key-size
+  message: Weak RSA/DSA key size — keys under 2048 bits are breakable
+  pattern: \.initialize\s*\(\s*(?:512|768|1024)\s*[,)]
+  severity: critical
+  suggestion: Use minimum 2048-bit keys for RSA/DSA, or 256-bit for EC
+- category: security
+  id: java-insecure-pbe
+  message: Insecure PBE (Password-Based Encryption) algorithm
+  pattern: Cipher\.getInstance\s*\(\s*["']PBEWith(?:MD5|SHA1)And(?:DES|RC2)["']
+  severity: critical
+  suggestion: Use PBKDF2WithHmacSHA256 or Argon2 for key derivation
+- category: security
+  id: java-md5-sha1-password
+  message: MD5/SHA1 used for password hashing — too fast, vulnerable to brute force
+  pattern: MessageDigest\.getInstance\s*\(\s*["'](?:MD5|SHA-?1)["']\s*\)[\s\S]{0,100}(?:password|passwd|pwd)
+  severity: critical
+  suggestion: Use bcrypt, scrypt, or Argon2 for password hashing
+- category: security
+  id: java-null-cipher
+  message: NullCipher provides no encryption — data is stored in plaintext
+  pattern: new\s+NullCipher\s*\(
+  severity: critical
+  suggestion: Use a real cipher like AES/GCM/NoPadding
+- category: security
+  id: java-static-encryption-key
+  message: Hardcoded encryption key — extractable from bytecode
+  pattern: new\s+SecretKeySpec\s*\(\s*(?:new\s+byte\s*\[\s*\]\s*\{|["'])
+  severity: critical
+  suggestion: Load encryption keys from a secure vault or key management service
+- category: security
+  id: java-weak-tls
+  message: Weak TLS/SSL protocol version (SSLv2, SSLv3, TLSv1.0, TLSv1.1)
+  pattern: SSLContext\.getInstance\s*\(\s*["'](?:SSL|SSLv[23]|TLSv?1(?:\.0|\.1)?)["']
+  severity: critical
+  suggestion: Use TLSv1.2 or TLSv1.3
+# --- File Upload ---
+- category: security
+  id: java-unrestricted-upload
+  message: File upload without type validation — arbitrary file upload risk
+  pattern: (?:MultipartFile|Part)\s+\w+[\s\S]{0,300}\.transferTo\s*\((?![\s\S]{0,200}(?:getContentType|endsWith|matches|contains))
+  severity: warning
+  suggestion: Validate file extension, content type, and magic bytes before saving
+- category: security
+  id: java-upload-original-filename
+  message: Using original filename from upload — path traversal and overwrite risk
+  pattern: \.getOriginalFilename\s*\(\s*\)(?![\s\S]{0,100}(?:replace|sanitize|normalize|FilenameUtils))
+  severity: warning
+  suggestion: Generate a random filename or sanitize with FilenameUtils.getName()
+- category: security
+  id: java-upload-no-size-limit
+  message: File upload without size validation
+  pattern: \.getInputStream\s*\(\s*\)[\s\S]{0,200}(?:Files\.copy|IOUtils\.copy|transferTo)(?![\s\S]{0,100}(?:getSize|maxFileSize|limitedInputStream))
+  severity: warning
+  suggestion: Enforce file size limits via spring.servlet.multipart.max-file-size or manual check
+# --- JNDI Injection ---
+- category: security
+  id: java-jndi-injection
+  message: JNDI lookup with user-controlled input — remote code execution risk
+  pattern: (?:InitialContext|Context)\s*(?:\(\s*\))?\.lookup\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Validate JNDI names against a strict allowlist, never use user input
+- category: security
+  id: java-jndi-lookup-concat
+  message: JNDI lookup with string concatenation — injection risk
+  pattern: \.lookup\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
+  severity: critical
+  suggestion: Validate JNDI names against a strict allowlist
+- category: security
+  id: java-jndi-ldap-rmi
+  message: JNDI lookup with LDAP or RMI scheme — remote classloading risk
+  pattern: '\.lookup\s*\(\s*["''](?:ldap|rmi|ldaps|iiop)://'
+  severity: critical
+  suggestion: "Restrict JNDI to java: namespace only, disable remote classloading"
+# --- Expression Language Injection ---
+- category: security
+  id: java-spel-injection
+  message: SpEL expression with user-controlled input — code execution risk
+  pattern: (?:SpelExpressionParser|ExpressionParser)\s*\(\s*\)\.parseExpression\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Use SimpleEvaluationContext instead of StandardEvaluationContext, never parse user input as SpEL
+- category: security
+  id: java-spel-injection-concat
+  message: SpEL expression built from string concatenation
+  pattern: \.parseExpression\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
+  severity: critical
+  suggestion: Use parameterized expressions with SimpleEvaluationContext
+- category: security
+  id: java-el-injection
+  message: EL injection — user input evaluated as Expression Language
+  pattern: (?:ELProcessor|ExpressionFactory|ValueExpression).*\.(?:eval|createValueExpression|getValue)\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Never evaluate user input as EL expressions
+- category: security
+  id: java-spel-value-annotation
+  message: SpEL in @Value using request parameters — injection risk
+  pattern: '@Value\s*\(\s*["'']#\{.*(?:request|param|header|cookie)'
+  severity: critical
+  suggestion: Use @RequestParam instead of SpEL to access request data
+# --- Logging Injection ---
+- category: security
+  id: java-log-injection
+  message: Log injection — user input written to log without sanitization
+  pattern: (?:log|logger|LOG|LOGGER)\.(?:info|warn|error|debug|trace|fatal)\s*\(\s*["'][^"']*["']\s*\+\s*(?:request\.getParameter|req\.getParameter|getHeader|getCookie)
+  severity: warning
+  suggestion: Sanitize user input (strip newlines, encode) before logging
+- category: security
+  id: java-log4j-lookup
+  message: Log4j JNDI lookup pattern in log message — Log4Shell (CVE-2021-44228)
+  pattern: '(?:log|logger|LOG|LOGGER)\.(?:info|warn|error|debug|trace|fatal)\s*\([^)]*\$\{jndi:'
+  severity: critical
+  suggestion: Upgrade Log4j to 2.17.1+, set log4j2.formatMsgNoLookups=true
+- category: security
+  id: java-log-format-string
+  message: User input in log format string position — format string injection
+  pattern: (?:log|logger|LOG|LOGGER)\.(?:info|warn|error|debug|trace|fatal)\s*\(\s*(?!["'])([a-z]\w*)\s*\)
+  severity: warning
+  suggestion: Use parameterized logging — logger.info("message {}", userInput)
+# --- Authentication ---
+- category: security
+  id: java-hardcoded-password
+  message: Hardcoded password or secret in source code
+  pattern: (?i)(?:password|passwd|pwd|secret|api_?key|token)\s*=\s*["'][^"']{4,}["']
+  severity: critical
+  suggestion: Load credentials from environment variables or a secrets manager
+- category: security
+  id: java-empty-password
+  message: Empty password string — authentication bypass or weak security
+  pattern: (?i)(?:password|passwd|pwd)\s*=\s*["']["']
+  severity: critical
+  suggestion: Require non-empty passwords and enforce minimum complexity
+- category: security
+  id: java-default-credentials
+  message: Default admin or test credentials in source code
+  pattern: (?i)["'](?:admin|root|test|guest|default|password|123456|changeme|letmein)["']\s*(?:,\s*["'](?:admin|root|test|guest|default|password|123456|changeme|letmein)["'])
+  severity: critical
+  suggestion: Remove default credentials and require secure password configuration
+- category: security
+  id: java-trust-all-certs
+  message: TrustManager that accepts all certificates — MITM attack risk
+  pattern: 'X509TrustManager[\s\S]{0,200}(?:checkClientTrusted|checkServerTrusted)[\s\S]{0,50}\{\s*\}'
+  severity: critical
+  suggestion: Use the default TrustManager with proper CA certificates
+- category: security
+  id: java-hostname-verifier-bypass
+  message: HostnameVerifier that accepts all hostnames — MITM risk
+  pattern: 'new\s+HostnameVerifier[\s\S]{0,100}verify[\s\S]{0,50}return\s+true'
+  severity: critical
+  suggestion: Use the default HostnameVerifier or implement proper hostname checks
+# --- JWT ---
+- category: security
+  id: java-jwt-none-algorithm
+  message: JWT with "none" algorithm — signature bypass
+  pattern: (?i)\.(?:algorithm|alg)\s*\(\s*["']none["']\s*\)|Algorithm\.none\s*\(|\.unsecuredJwt\s*\(
+  severity: critical
+  suggestion: Always require a strong signing algorithm (RS256, ES256)
+- category: security
+  id: java-jwt-missing-expiration
+  message: JWT built without expiration — tokens valid forever
+  pattern: (?:Jwts\.builder|JWT\.create)\s*\(\s*\)(?:[\s\S]{0,300}\.sign)(?![\s\S]{0,300}(?:setExpiration|withExpiresAt|exp))
+  severity: warning
+  suggestion: Always set token expiration with .setExpiration() or .withExpiresAt()
+- category: security
+  id: java-jwt-weak-secret
+  message: JWT signed with short or hardcoded secret key
+  pattern: \.(?:sign|signWith)\s*\(\s*(?:Algorithm\.HMAC\w+\s*\(\s*)?["'][^"']{1,31}["']
+  severity: critical
+  suggestion: Use a key of at least 256 bits from a secure key management service
+- category: security
+  id: java-jwt-no-verification
+  message: JWT parsed without signature verification
+  pattern: \.parseClaimsJwt\s*\(|\.parse\s*\([^)]*\)\.getBody\s*\(|\.decode\s*\(\s*token
+  severity: critical
+  suggestion: Use parseClaimsJws() with proper signing key verification
+# --- Hibernate / HQL ---
+- category: security
+  id: java-hql-injection
+  message: HQL injection — string concatenation in Hibernate query
+  pattern: \.createQuery\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
+  severity: critical
+  suggestion: Use parameterized queries with .setParameter()
+- category: security
+  id: java-hql-injection-var
+  message: HQL injection — variable passed directly as query string
+  pattern: \.createQuery\s*\(\s*(?!["'])([a-z]\w*)\s*\)
+  severity: critical
+  suggestion: Use Criteria API or parameterized HQL with .setParameter()
+- category: security
+  id: java-native-query-injection
+  message: SQL injection in JPA native query via string concatenation
+  pattern: \.createNativeQuery\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
+  severity: critical
+  suggestion: Use parameterized native queries with ?1 placeholders
+# --- XML ---
+- category: security
+  id: java-xstream-no-allowlist
+  message: XStream without type allowlist — deserialization RCE risk
+  pattern: xstream\.fromXML\s*\((?![\s\S]{0,200}(?:allowTypes|setupDefaultSecurity))
+  severity: critical
+  suggestion: Use XStream.setupDefaultSecurity() and allowTypes()
+- category: security
+  id: java-dom-parse-no-limits
+  message: DOM parser without entity expansion limits — billion laughs DoS
+  pattern: DocumentBuilder(?:Factory)?[\s\S]{0,100}\.parse\s*\((?![\s\S]{0,200}(?:ENTITY_EXPANSION_LIMIT|setEntityResolver))
+  severity: warning
+  suggestion: Set ENTITY_EXPANSION_LIMIT and disable external entities
+- category: security
+  id: java-jaxb-external-entity
+  message: JAXB unmarshalling without XXE protection
+  pattern: (?:JAXBContext|Unmarshaller)[\s\S]{0,200}\.unmarshal\s*\(\s*(?:new\s+)?(?:StreamSource|InputSource|StringReader)
+  severity: warning
+  suggestion: Unmarshal from a SAXSource with XXE-safe SAXParserFactory
+# --- Error Handling ---
+- category: security
+  id: java-stacktrace-exposure
+  message: Stack trace printed to response — information disclosure
+  pattern: \.printStackTrace\s*\(\s*(?:response\.getWriter|out|writer)\s*\)
+  severity: warning
+  suggestion: Log stack traces server-side, return generic error messages to clients
+- category: security
+  id: java-verbose-error-response
+  message: Exception message sent to HTTP response — information leakage
+  pattern: \.(?:getWriter|getOutputStream)\s*\(\s*\)\s*\.(?:write|print|println)\s*\(\s*\w+\.(?:getMessage|toString|getStackTrace)\s*\(\s*\)
+  severity: warning
+  suggestion: Return a generic error message, log details server-side
+- category: security
+  id: java-catch-generic-exception
+  message: Catching generic Exception or Throwable — may swallow critical errors
+  pattern: 'catch\s*\(\s*(?:Exception|Throwable)\s+\w+\s*\)\s*\{'
+  severity: info
+  suggestion: Catch specific exception types to handle errors appropriately
+- category: security
+  id: java-empty-catch-block
+  message: Empty catch block — silently swallows exceptions
+  pattern: 'catch\s*\(\s*\w+\s+\w+\s*\)\s*\{\s*\}'
+  severity: warning
+  suggestion: At minimum log the exception, or rethrow as appropriate
+- category: security
+  id: java-printstacktrace
+  message: printStackTrace() in production code — should use proper logging
+  pattern: '\.printStackTrace\s*\(\s*\)'
+  severity: info
+  suggestion: Replace with logger.error("message", exception) using a logging framework
+# --- Concurrency ---
+- category: security
+  id: java-double-checked-locking
+  message: Double-checked locking without volatile — broken under Java Memory Model
+  pattern: 'if\s*\(\s*\w+\s*==\s*null\s*\)\s*\{\s*synchronized\s*\([^)]*\)\s*\{\s*if\s*\(\s*\w+\s*==\s*null\s*\)'
+  severity: warning
+  suggestion: Declare the field as volatile, or use an initialization-on-demand holder pattern
+- category: security
+  id: java-non-atomic-check-then-act
+  message: Non-atomic check-then-act on File — race condition (TOCTOU)
+  pattern: '\.exists\s*\(\s*\)\s*\)\s*\{[\s\S]{0,100}\.(?:create|delete|mkdir|renameTo)\s*\('
+  severity: warning
+  suggestion: Use atomic file operations (Files.createFile with CREATE_NEW, etc.)
+- category: security
+  id: java-synchronized-on-boxed
+  message: Synchronizing on boxed primitive — shared instances cause unintended locking
+  pattern: 'synchronized\s*\(\s*(?:Integer|Long|Boolean|Short|Byte|Character|Float|Double)\b'
+  severity: warning
+  suggestion: Synchronize on a dedicated private final Object lock = new Object()
+# --- Android ---
+- category: security
+  id: java-android-exported-component
+  message: Android component exported without permission — accessible to other apps
+  pattern: 'android:exported\s*=\s*["'']true["''](?![\s\S]{0,100}android:permission)'
+  severity: critical
+  suggestion: Set android:exported="false" or require a permission
+- category: security
+  id: java-android-webview-js
+  message: WebView with JavaScript enabled — XSS and code execution risk
+  pattern: '\.getSettings\s*\(\s*\)\s*\.setJavaScriptEnabled\s*\(\s*true\s*\)'
+  severity: warning
+  suggestion: Disable JavaScript unless strictly required, use addJavascriptInterface carefully
+- category: security
+  id: java-android-cleartext-traffic
+  message: Android app allows cleartext HTTP traffic
+  pattern: 'android:usesCleartextTraffic\s*=\s*["'']true["'']|\.setCleartextTrafficPermitted\s*\(\s*true\s*\)'
+  severity: warning
+  suggestion: Use HTTPS only — set android:usesCleartextTraffic="false"
+- category: security
+  id: java-android-webview-file-access
+  message: WebView allows file system access — local file theft risk
+  pattern: '\.setAllowFileAccess\s*\(\s*true\s*\)|\.setAllowUniversalAccessFromFileURLs\s*\(\s*true\s*\)'
+  severity: critical
+  suggestion: Disable file access on WebView unless absolutely necessary
+- category: security
+  id: java-android-world-readable
+  message: Android file created as world-readable — other apps can read it
+  pattern: MODE_WORLD_READABLE|openFileOutput\s*\([^)]*,\s*1\s*\)
+  severity: critical
+  suggestion: Use MODE_PRIVATE and ContentProvider for controlled sharing
+# --- Kotlin Interop ---
+- category: security
+  id: java-kotlin-platform-type
+  message: Platform type from Java used without null check in Kotlin — NPE risk
+  pattern: '(?:fun|val|var)\s+\w+[^?:]*=\s*\w+\.(?:get|find|query|load|fetch|retrieve)\w*\s*\([^)]*\)(?!\s*[?!])'
+  severity: info
+  suggestion: Explicitly declare nullable types for Java return values in Kotlin
+- category: security
+  id: java-nullable-annotation-missing
+  message: Public Java method lacks @Nullable/@NonNull — unsafe for Kotlin callers
+  pattern: 'public\s+(?:static\s+)?(?:String|Object|List|Map|Set|Optional)\s+\w+\s*\([^)]*\)\s*\{(?![\s\S]{0,10}@(?:Nullable|NonNull|NotNull|Nonnull))'
+  severity: info
+  suggestion: Add @Nullable or @NonNull annotations for Kotlin interop safety
+# --- Additional Injection ---
+- category: security
+  id: java-template-injection
+  message: Server-side template injection — user input in template engine
+  pattern: (?:Velocity|Freemarker|Thymeleaf|Mustache)[\s\S]{0,100}\.(?:evaluate|process|merge|compile)\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Never use user input as template content — only as template data/variables
+- category: security
+  id: java-regex-dos
+  message: Regex with nested quantifiers — ReDoS vulnerability
+  pattern: Pattern\.compile\s*\(\s*["'][^"']*(?:\.\*|\.\+|\[^\\]\]\*|\[^\\]\]\+){2}[^"']*["']
+  severity: warning
+  suggestion: Avoid nested quantifiers, use possessive quantifiers or atomic groups
+- category: security
+  id: java-unvalidated-redirect-response
+  message: Unvalidated redirect via HttpServletResponse
+  pattern: response\.sendRedirect\s*\(\s*(?:request\.getParameter|req\.getParameter|getHeader)\s*\(
+  severity: critical
+  suggestion: Validate redirect target against an allowlist of trusted URLs
+- category: security
+  id: java-header-injection
+  message: HTTP header injection — user input in response header
+  pattern: response\.(?:setHeader|addHeader|setDateHeader)\s*\(\s*["'][^"']*["']\s*,\s*(?:request\.getParameter|req\.getParameter|getHeader)\s*\(
+  severity: critical
+  suggestion: Sanitize header values — strip CR/LF characters
+- category: security
+  id: java-insecure-ssl-factory
+  message: Custom SSLSocketFactory bypassing certificate validation
+  pattern: SSLSocketFactory\.getDefault\s*\(\s*\)|\.setSSLSocketFactory\s*\(\s*(?!null)(?:[a-z]\w*)\s*\)
+  severity: warning
+  suggestion: Use the default SSLSocketFactory with proper CA trust store
+# --- Miscellaneous ---
+- category: security
+  id: java-system-exit
+  message: System.exit() in library/web code — kills the entire JVM
+  pattern: System\.exit\s*\(\s*\d+\s*\)|Runtime\.getRuntime\s*\(\s*\)\.halt\s*\(
+  severity: warning
+  suggestion: Throw an exception instead of terminating the JVM
+- category: security
+  id: java-thread-sleep-in-sync
+  message: Thread.sleep() inside synchronized block — holds lock while sleeping
+  pattern: 'synchronized[\s\S]{0,100}Thread\.sleep\s*\('
+  severity: warning
+  suggestion: Use wait() with timeout instead, or move sleep outside synchronized
+- category: security
+  id: java-unsafe-reflection
+  message: Class.forName() with user input — arbitrary class instantiation
+  pattern: Class\.forName\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Validate class names against a strict allowlist
+- category: security
+  id: java-insecure-temp-file
+  message: Predictable temporary file creation — symlink race condition
+  pattern: File\.createTempFile\s*\(\s*["'][^"']*["']\s*,\s*["'][^"']*["']\s*\)(?![\s\S]{0,50}\.toPath)
+  severity: warning
+  suggestion: Use Files.createTempFile() which creates files with restrictive permissions
+- category: security
+  id: java-runtime-exec
+  message: Runtime.exec() with user-controlled argument
+  pattern: Runtime\.getRuntime\s*\(\s*\)\.exec\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Use ProcessBuilder with an explicit argument list, validate input against allowlist
+- category: security
+  id: java-cors-credentials-wildcard
+  message: CORS with credentials and wildcard origin — cookie theft risk
+  pattern: '\.allowCredentials\s*\(\s*true\s*\)[\s\S]{0,200}\.allowedOrigins\s*\(\s*["'']\*["'']\s*\)'
+  severity: critical
+  suggestion: Never combine Access-Control-Allow-Credentials with wildcard origin
+- category: security
+  id: java-spring-actuator-exposed
+  message: Spring Actuator endpoints exposed without security
+  pattern: management\.endpoints\.web\.exposure\.include\s*=\s*\*|management\.endpoint\.(?:shutdown|env|heapdump)\.enabled\s*=\s*true
+  severity: critical
+  suggestion: Restrict actuator endpoints with management.endpoints.web.exposure.include=health,info
+- category: security
+  id: java-deserialization-gadget
+  message: Known deserialization gadget class in classpath usage
+  pattern: (?:InvokerTransformer|InstantiateTransformer|LazyMap|ChainedTransformer|ConstantTransformer|TransformedMap)\s*[\.(]
+  severity: critical
+  suggestion: Remove Apache Commons Collections 3.x or upgrade to 4.1+, use ObjectInputFilter
+- category: security
+  id: java-insecure-xml-validation
+  message: XML Schema loaded from untrusted source
+  pattern: SchemaFactory\.newInstance[\s\S]{0,100}\.newSchema\s*\(\s*new\s+(?:StreamSource|URL)\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Load XML schemas from trusted local resources only
+- category: security
+  id: java-permission-check-missing
+  message: SecurityManager check bypassed or permission not verified
+  pattern: \.checkPermission\s*\(\s*null\s*\)|AccessController\.doPrivileged\s*\(
+  severity: warning
+  suggestion: Ensure proper permission checks, minimize privileged code blocks
+- category: security
+  id: java-unsafe-object-binding
+  message: Spring mass assignment — binding request directly to domain model
+  pattern: '@(?:ModelAttribute|RequestBody)\s+(?!.*(?:Dto|DTO|Request|Form|Command|Input))\w+Entity\s+'
+  severity: warning
+  suggestion: Use a DTO/Form object instead of binding directly to entity classes

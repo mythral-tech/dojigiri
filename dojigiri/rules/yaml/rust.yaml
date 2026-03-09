@@ -17,3 +17,195 @@ rules:
   pattern: \bunsafe\s*\{
   severity: warning
   suggestion: Minimize unsafe usage and document invariants
+- category: bug
+  id: unwrap-or-default
+  message: .unwrap_or() with potentially expensive default — consider unwrap_or_else()
+  pattern: \.unwrap_or\s*\([^)]*(?:vec!|Vec::new|String::new|format!|to_string)
+  severity: info
+  suggestion: Use .unwrap_or_else(|| ...) for lazy evaluation of the default
+- category: bug
+  id: clone-on-copy
+  message: .clone() on a Copy type is unnecessary
+  pattern: (?:i8|i16|i32|i64|i128|u8|u16|u32|u64|u128|f32|f64|bool|char|usize|isize)\)\.clone\(\)
+  severity: info
+  suggestion: Remove .clone() — Copy types are copied automatically
+- category: bug
+  id: index-panic
+  message: Direct indexing can panic on out-of-bounds — use .get() for safe access
+  pattern: \w+\[\s*\w+\s*\](?!\s*=)
+  severity: info
+  suggestion: Use .get(index) which returns Option instead of panicking
+- category: security
+  id: transmute
+  message: std::mem::transmute bypasses type safety — UB risk
+  pattern: \btransmute\s*[:<(]
+  severity: critical
+  suggestion: Use safe casts (as, From/Into) or well-typed alternatives
+- category: security
+  id: raw-pointer-deref
+  message: Raw pointer dereference — undefined behavior if pointer is invalid
+  pattern: \*(?:const|mut)\s+\w+|(?:\*\w+)\.(?:read|write|offset)
+  severity: warning
+  suggestion: Ensure pointer validity and wrap in unsafe with documented invariants
+- category: security
+  id: forget-leak
+  message: std::mem::forget leaks resources — destructors will not run
+  pattern: \bmem::forget\s*\(|\bforget\s*\(
+  severity: warning
+  suggestion: Use ManuallyDrop for explicit control or restructure to avoid leaks
+- category: security
+  id: command-injection
+  message: Command::new with dynamic argument — command injection risk
+  pattern: Command::new\s*\(\s*(?!['"])
+  severity: warning
+  suggestion: Validate command and arguments; never pass unsanitized user input
+- category: security
+  id: command-shell
+  message: Shell execution via sh/cmd — command injection risk
+  pattern: Command::new\s*\(\s*['"](?:sh|bash|cmd|powershell)['"]
+  severity: critical
+  suggestion: Avoid shell invocation; use Command::new with the target binary directly
+- category: security
+  id: format-string-sql
+  message: SQL query built with format! — SQL injection risk
+  pattern: (?i)format!\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b
+  severity: critical
+  suggestion: Use parameterized queries with your database driver
+- category: security
+  id: hardcoded-credential
+  message: Possible hardcoded credential in Rust source
+  pattern: (?i)(?:password|passwd|secret|api_key|token)\s*[:=]\s*['"][^'"]{8,}['"]
+  severity: critical
+  suggestion: Use environment variables or a secrets manager
+- category: security
+  id: weak-crypto-md5
+  message: MD5 is cryptographically broken — collisions are trivial
+  pattern: \bMd5::(?:new|digest)\b|use\s+md5\b
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 for integrity; use argon2/bcrypt for passwords
+- category: security
+  id: weak-crypto-sha1
+  message: SHA1 is cryptographically weak — collision attacks demonstrated
+  pattern: \bSha1::(?:new|digest)\b|use\s+sha1\b
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 instead
+- category: security
+  id: tls-no-verify
+  message: TLS certificate verification disabled — MITM risk
+  pattern: danger_accept_invalid_certs\s*\(\s*true\s*\)|danger_accept_invalid_hostnames\s*\(\s*true\s*\)
+  severity: critical
+  suggestion: Enable certificate verification; configure proper CA certificates
+- category: bug
+  id: todo-unfinished
+  message: TODO/FIXME marker found in code
+  pattern: (?i)(?://|/\*).*\b(?:TODO|FIXME|HACK|XXX)\b
+  severity: info
+  suggestion: null
+- category: bug
+  id: panic-in-lib
+  message: panic!() crashes the program — inappropriate for library code
+  pattern: \bpanic!\s*\(
+  severity: warning
+  suggestion: Return Result with a descriptive error type instead
+- category: bug
+  id: unreachable-macro
+  message: unreachable!() will panic at runtime if reached
+  pattern: \bunreachable!\s*\(
+  severity: info
+  suggestion: Ensure all code paths are truly unreachable; consider returning an error
+- category: bug
+  id: unimplemented-macro
+  message: unimplemented!() / todo!() will panic at runtime
+  pattern: \b(?:unimplemented|todo)!\s*\(
+  severity: warning
+  suggestion: Implement the missing functionality before shipping
+- category: performance
+  id: box-vec
+  message: Box<Vec<T>> is double-indirection — usually unnecessary
+  pattern: Box<Vec<\w+>>
+  severity: info
+  suggestion: Use Vec<T> directly (already heap-allocated)
+- category: performance
+  id: box-string
+  message: Box<String> is double-indirection — usually unnecessary
+  pattern: Box<String>
+  severity: info
+  suggestion: Use String directly (already heap-allocated) or Box<str>
+- category: performance
+  id: rc-refcell-vec
+  message: Rc<RefCell<Vec<T>>> — complex ownership; consider redesigning
+  pattern: Rc<RefCell<Vec<\w+>>>
+  severity: info
+  suggestion: Consider using indices into a flat Vec or arena allocation
+- category: bug
+  id: lossy-conversion
+  message: as cast can silently truncate or wrap — use try_from for checked conversion
+  pattern: \bas\s+(?:i8|i16|i32|u8|u16|u32|usize|isize)\b
+  severity: info
+  suggestion: Use TryFrom/TryInto for checked conversions that detect overflow
+- category: security
+  id: env-var-secret
+  message: Reading environment variable that may contain secrets — audit logging
+  pattern: (?i)(?:env::var|env::var_os)\s*\(\s*['"](?:password|secret|token|api_key|private_key)
+  severity: info
+  suggestion: Ensure secret env vars are not logged or leaked in error messages
+- category: bug
+  id: mutex-poison
+  message: .lock().unwrap() will panic if the mutex is poisoned
+  pattern: \.lock\(\)\.unwrap\(\)
+  severity: warning
+  suggestion: Handle the PoisonError or use .lock().unwrap_or_else(|e| e.into_inner())
+- category: bug
+  id: sleep-in-async
+  message: std::thread::sleep in async context blocks the executor thread
+  pattern: thread::sleep\s*\(
+  severity: warning
+  suggestion: Use tokio::time::sleep or async_std::task::sleep instead
+- category: bug
+  id: blocking-in-async
+  message: Blocking I/O in async context — will block the executor thread
+  pattern: std::fs::(?:read|write|remove|create|copy|rename|read_to_string)\s*\(
+  severity: warning
+  suggestion: Use tokio::fs or spawn_blocking for filesystem operations in async code
+- category: security
+  id: process-exit
+  message: process::exit() skips destructors and cleanup
+  pattern: \bprocess::exit\s*\(
+  severity: info
+  suggestion: Return from main() instead to ensure proper cleanup
+- category: bug
+  id: string-push-in-loop
+  message: String concatenation in loop — O(n^2) if not pre-allocated
+  pattern: (?:push_str|\.push)\s*\([^)]*\)\s*;.*(?:for|while|loop)|\b(?:for|while|loop)\b[^{}]*\{[^}]*(?:push_str|\.push)\s*\(
+  severity: info
+  suggestion: Pre-allocate with String::with_capacity() or use a Vec and join
+- category: security
+  id: allow-lint
+  message: "allow attribute suppresses compiler warnings — ensure suppression is justified"
+  pattern: '#\[allow\s*\('
+  severity: info
+  suggestion: Document why the lint suppression is needed
+- category: bug
+  id: recursive-type-no-box
+  message: Recursive type without indirection — will not compile or may stack overflow
+  pattern: enum\s+\w+\s*\{[^}]*\w+\(\s*\w+\s*\)
+  severity: info
+  suggestion: Use Box<T> for recursive type fields
+- category: security
+  id: reqwest-no-timeout
+  message: HTTP client without timeout — can hang indefinitely
+  pattern: reqwest::Client::new\(\)|reqwest::get\s*\(
+  severity: warning
+  suggestion: Use ClientBuilder with .timeout() to prevent indefinite hangs
+- category: bug
+  id: dbg-macro
+  message: dbg!() macro left in code — prints to stderr
+  pattern: \bdbg!\s*\(
+  severity: warning
+  suggestion: Remove dbg!() before shipping; use proper logging instead
+- category: bug
+  id: println-in-lib
+  message: println!() in library code — use log/tracing crate instead
+  pattern: \bprintln!\s*\(
+  severity: info
+  suggestion: Use log::info!() or tracing::info!() for library code

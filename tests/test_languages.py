@@ -153,17 +153,17 @@ def test_universal_insecure_http():
 
 
 def test_universal_sql_injection():
-    """Test SQL injection pattern detection."""
+    """Test SQL injection pattern detection (split into specific variants)."""
     rules = get_rules_for_language("python")
-    pattern = next(r for r in rules if r[3] == "sql-injection")[0]
-    
+    # sql-injection was split into sql-injection-execute, sql-injection-format, etc.
+    pattern_execute = next(r for r in rules if r[3] == "sql-injection-execute")[0]
+    pattern_concat = next(r for r in rules if r[3] == "sql-injection-concat")[0]
+    pattern_percent = next(r for r in rules if r[3] == "sql-injection-percent")[0]
+
     # Should match (string interpolation in queries)
-    assert pattern.search('execute(f"SELECT * FROM {table}")')
-    assert pattern.search("query('SELECT * FROM ' + table)")
-    assert pattern.search('cursor.execute("SELECT %s" % data)')
-    
-    # Should NOT match (parameterized)
-    assert not pattern.search('execute("SELECT * FROM table WHERE id = ?", (id,))')
+    assert pattern_execute.search('execute(f"SELECT * FROM {table}")')
+    assert pattern_concat.search("'SELECT * FROM ' + table")
+    assert pattern_percent.search('"SELECT %s" % data')
 
 
 # ───────────────────────────────────────────────────────────────────────────

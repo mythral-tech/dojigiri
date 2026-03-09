@@ -209,3 +209,501 @@ rules:
   pattern: \bvoid\s+0\b
   severity: info
   suggestion: Use undefined directly in modern JavaScript
+# ── React XSS ──────────────────────────────────────────────
+- category: security
+  id: react-dangerously-set-innerhtml
+  message: dangerouslySetInnerHTML bypasses React XSS protection
+  pattern: dangerouslySetInnerHTML\s*=\s*\{
+  severity: critical
+  suggestion: Sanitize HTML with DOMPurify before passing to dangerouslySetInnerHTML
+- category: security
+  id: react-ref-innerhtml
+  message: Setting innerHTML via ref bypasses React XSS protection
+  pattern: \.current\s*\.innerHTML\s*=
+  severity: critical
+  suggestion: Use React state and JSX rendering instead of direct DOM manipulation
+- category: security
+  id: react-href-javascript
+  message: "javascript: URI in href — XSS vector in React"
+  pattern: 'href\s*=\s*\{?\s*[''"`]javascript:'
+  severity: critical
+  suggestion: "Never use javascript: URIs; use onClick handlers instead"
+# ── Express.js Security ────────────────────────────────────
+- category: security
+  id: express-no-helmet
+  message: Express app without helmet — missing security headers
+  pattern: express\(\)\s*;(?![\s\S]*helmet)
+  severity: warning
+  suggestion: Use helmet() middleware to set secure HTTP headers
+- category: security
+  id: express-session-no-secure
+  message: Express session cookie without secure flag
+  pattern: session\s*\(\s*\{[\s\S]*?cookie\s*:\s*\{(?![\s\S]*?secure\s*:\s*true)
+  severity: warning
+  suggestion: "Set cookie.secure = true to prevent session cookies over HTTP"
+- category: security
+  id: express-session-no-httponly
+  message: Express session cookie with httpOnly disabled
+  pattern: session\s*\(\s*\{[\s\S]*?httpOnly\s*:\s*false
+  severity: warning
+  suggestion: Keep httpOnly as true (the default) to prevent XSS session theft
+- category: security
+  id: express-trust-proxy-true
+  message: trust proxy set to true trusts all proxies — IP spoofing risk
+  pattern: trust\s+proxy['"]\s*,\s*true\b
+  severity: warning
+  suggestion: Set trust proxy to a specific number of hops or IP addresses
+- category: security
+  id: express-bodyparser-no-limit
+  message: body-parser without size limit — denial of service risk
+  pattern: (?:bodyParser|express)\.(?:json|urlencoded|raw|text)\s*\(\s*\)
+  severity: info
+  suggestion: "Set a request size limit, e.g. express.json({ limit: '100kb' })"
+- category: security
+  id: express-static-dotfiles
+  message: express.static serving dotfiles — may expose .env and .git
+  pattern: express\.static\s*\([^)]*dotfiles\s*:\s*['"]allow['"]
+  severity: warning
+  suggestion: "Set dotfiles to 'ignore' or 'deny' to hide sensitive files"
+- category: security
+  id: express-cors-credentials-wildcard
+  message: CORS with credentials and wildcard origin — misconfiguration
+  pattern: credentials\s*:\s*true[\s\S]*?origin\s*:\s*['"]\*['"]|origin\s*:\s*['"]\*['"][\s\S]*?credentials\s*:\s*true
+  severity: warning
+  suggestion: Use a specific origin list when credentials are enabled
+# ── Node.js Crypto ─────────────────────────────────────────
+- category: security
+  id: crypto-create-cipher
+  message: crypto.createCipher() is deprecated — uses weak key derivation
+  pattern: crypto\.createCipher\s*\(
+  severity: critical
+  suggestion: Use crypto.createCipheriv() with a proper key and random IV
+- category: security
+  id: crypto-weak-hash-md5
+  message: MD5 hash algorithm is cryptographically broken
+  pattern: createHash\s*\(\s*['"]md5['"]
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 for integrity checks; use bcrypt/argon2 for passwords
+- category: security
+  id: crypto-weak-hash-sha1
+  message: SHA-1 is deprecated — collision attacks are practical
+  pattern: createHash\s*\(\s*['"]sha1['"]
+  severity: warning
+  suggestion: Use SHA-256 or SHA-3 instead
+- category: security
+  id: crypto-static-iv
+  message: Static/hardcoded initialization vector — defeats encryption security
+  pattern: createCipheriv\s*\([^)]*,\s*(?:Buffer\.from\s*\(\s*)?['"][a-fA-F0-9]+['"]
+  severity: critical
+  suggestion: Generate a random IV with crypto.randomBytes() for each encryption
+- category: security
+  id: crypto-ecb-mode
+  message: ECB mode does not use an IV — identical blocks produce identical ciphertext
+  pattern: createCipheriv\s*\(\s*['"](?:aes-(?:128|192|256)-)?ecb['"]
+  severity: critical
+  suggestion: Use AES-GCM or AES-CBC with a random IV instead of ECB
+- category: security
+  id: crypto-des-algorithm
+  message: DES/3DES algorithms are weak and deprecated
+  pattern: createCipher(?:iv)?\s*\(\s*['"](?:des|des3|des-ede3?)['"]
+  severity: critical
+  suggestion: Use AES-256-GCM for symmetric encryption
+- category: security
+  id: crypto-weak-random-token
+  message: Math.random() used for token/secret generation — predictable
+  pattern: (?:token|secret|key|nonce|salt|password|apiKey)\s*=.*Math\.random
+  severity: critical
+  suggestion: Use crypto.randomBytes() or crypto.randomUUID() for security tokens
+# ── SQL Injection (Node) ───────────────────────────────────
+- category: security
+  id: sql-string-concat
+  message: SQL query built with string concatenation — SQL injection risk
+  pattern: (?:query|execute)\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE)\b[^'"]*['"]\s*\+
+  severity: critical
+  suggestion: Use parameterized queries with placeholders ($1, ?) instead of concatenation
+- category: security
+  id: sql-template-literal
+  message: SQL query with template literal interpolation — SQL injection risk
+  pattern: (?:query|execute)\s*\(\s*`(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE)\b[^`]*\$\{
+  severity: critical
+  suggestion: Use parameterized queries instead of template literal interpolation
+- category: security
+  id: sequelize-raw-query
+  message: Sequelize raw query with interpolation — SQL injection risk
+  pattern: sequelize\.query\s*\(\s*(?:`[^`]*\$\{|['"][^'"]*['"]\s*\+)
+  severity: critical
+  suggestion: Use Sequelize replacements or bind parameters for dynamic values
+- category: security
+  id: knex-raw-interpolation
+  message: knex.raw() with template literal — SQL injection risk
+  pattern: \.raw\s*\(\s*`[^`]*\$\{
+  severity: critical
+  suggestion: "Use knex.raw('? query', [binding]) with parameter bindings"
+# ── NoSQL Injection ────────────────────────────────────────
+- category: security
+  id: mongodb-where-operator
+  message: MongoDB $where operator executes JavaScript — injection risk
+  pattern: \$where\s*:\s*(?:['"`]|function)
+  severity: critical
+  suggestion: Use standard MongoDB query operators instead of $where
+- category: security
+  id: mongodb-regex-user-input
+  message: MongoDB $regex with variable — ReDoS and injection risk
+  pattern: \$regex\s*:\s*(?:req\.|params\.|query\.|body\.|args\.|input\.)
+  severity: critical
+  suggestion: Escape user input before using in regex or use exact match instead
+- category: security
+  id: mongoose-find-user-object
+  message: Mongoose query with unsanitized user input — NoSQL injection risk
+  pattern: \.(?:find|findOne|findOneAndUpdate|findOneAndDelete|deleteOne|deleteMany|updateOne|updateMany)\s*\(\s*(?:req\.(?:body|query|params))
+  severity: critical
+  suggestion: Validate and sanitize user input; strip $ operators before passing to queries
+# ── SSRF ───────────────────────────────────────────────────
+- category: security
+  id: ssrf-fetch-user-url
+  message: fetch() with user-controlled URL — SSRF risk
+  pattern: \bfetch\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|url|userUrl|targetUrl)
+  severity: critical
+  suggestion: Validate URLs against an allowlist of domains and block internal IPs
+- category: security
+  id: ssrf-axios-user-url
+  message: axios request with user-controlled URL — SSRF risk
+  pattern: axios\.(?:get|post|put|delete|patch|request)\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|url|userUrl|targetUrl)
+  severity: critical
+  suggestion: Validate URLs against an allowlist of domains and block internal IPs
+- category: security
+  id: ssrf-got-user-url
+  message: got() with user-controlled URL — SSRF risk
+  pattern: \bgot\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|url|userUrl|targetUrl)
+  severity: critical
+  suggestion: Validate URLs against an allowlist; use ssrf-req-filter or similar library
+- category: security
+  id: ssrf-request-user-url
+  message: HTTP request with user-controlled URL — SSRF risk
+  pattern: (?:request|http\.get|https\.get|http\.request|https\.request)\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.)
+  severity: critical
+  suggestion: Validate URLs against an allowlist of trusted domains
+# ── Authentication ─────────────────────────────────────────
+- category: security
+  id: jwt-no-expiry
+  message: JWT signed without expiresIn — tokens valid forever
+  pattern: jwt\.sign\s*\([^)]*\)\s*(?![\s\S]*expiresIn)
+  severity: warning
+  suggestion: Always set expiresIn option when signing JWTs
+- category: security
+  id: bcrypt-low-rounds
+  message: bcrypt with low cost factor — too fast to resist brute force
+  pattern: (?:bcrypt\.(?:hash|genSalt)(?:Sync)?)\s*\([^)]*,\s*(?:[1-9]|1[01])\s*[),]
+  severity: warning
+  suggestion: Use at least 12 rounds for bcrypt (OWASP recommendation)
+- category: security
+  id: password-in-query-string
+  message: Password in URL query string — logged in server logs and history
+  pattern: (?:password|passwd|pwd|secret)\s*=.*(?:req\.query|searchParams\.get|url\.parse)
+  severity: critical
+  suggestion: Send passwords in the request body over HTTPS, never in query strings
+- category: security
+  id: password-in-url
+  message: Password included in URL — will appear in logs and referrer headers
+  pattern: "['`\"]https?://[^'`\"]*[:?&](?:password|passwd|pwd)=[^'`\"]+['`\"]"
+  severity: critical
+  suggestion: Never include credentials in URLs; use request headers or body
+- category: security
+  id: hardcoded-password
+  message: Hardcoded password in source code
+  pattern: (?:password|passwd|pwd)\s*[:=]\s*['"][^'"]{4,}['"]
+  severity: critical
+  suggestion: Use environment variables or a secrets manager for credentials
+# ── Deserialization ────────────────────────────────────────
+- category: security
+  id: node-serialize-usage
+  message: node-serialize is unsafe — can execute arbitrary code during deserialization
+  pattern: (?:require|import).*['"]node-serialize['"]
+  severity: critical
+  suggestion: Use JSON.parse() or a safe serialization library instead
+- category: security
+  id: js-yaml-unsafe-load
+  message: js-yaml load() without safe schema — arbitrary code execution risk
+  pattern: yaml\.load\s*\([^)]*(?!,\s*\{\s*schema\s*:\s*yaml\.SAFE_SCHEMA)
+  severity: critical
+  suggestion: "Use yaml.load(str, { schema: yaml.SAFE_SCHEMA }) or yaml.safeLoad()"
+- category: security
+  id: serialize-unserialize
+  message: Unsafe deserialization of user-controlled data — object injection risk
+  pattern: (?:unserialize|deserialize)\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.)
+  severity: critical
+  suggestion: Use JSON.parse() with schema validation for deserialization
+# ── Electron Security ──────────────────────────────────────
+- category: security
+  id: electron-node-integration
+  message: Electron nodeIntegration enabled — renderer can access Node.js APIs
+  pattern: nodeIntegration\s*:\s*true
+  severity: critical
+  suggestion: Keep nodeIntegration disabled and use contextBridge for IPC
+- category: security
+  id: electron-context-isolation-off
+  message: Electron contextIsolation disabled — renderer shares context with preload
+  pattern: contextIsolation\s*:\s*false
+  severity: critical
+  suggestion: Keep contextIsolation enabled to prevent prototype pollution attacks
+- category: security
+  id: electron-websecurity-off
+  message: Electron webSecurity disabled — disables same-origin policy
+  pattern: webSecurity\s*:\s*false
+  severity: critical
+  suggestion: Keep webSecurity enabled to enforce same-origin policy
+- category: security
+  id: electron-remote-module
+  message: Electron remote module is deprecated and insecure
+  pattern: enableRemoteModule\s*:\s*true|require\s*\(\s*['"]@electron/remote['"]
+  severity: warning
+  suggestion: Use IPC (ipcMain/ipcRenderer) with contextBridge instead of remote module
+- category: security
+  id: electron-shell-openexternal
+  message: shell.openExternal() with user input — can launch arbitrary programs
+  pattern: shell\.openExternal\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|url|userUrl|href)
+  severity: critical
+  suggestion: "Validate URLs against an allowlist of protocols (https:) before opening"
+- category: security
+  id: electron-allow-running-insecure
+  message: Electron allowRunningInsecureContent enables mixed content attacks
+  pattern: allowRunningInsecureContent\s*:\s*true
+  severity: critical
+  suggestion: Remove allowRunningInsecureContent and serve all content over HTTPS
+# ── TypeScript-specific ────────────────────────────────────
+- category: security
+  id: ts-any-security-context
+  message: "'any' type in security-critical code bypasses type checking"
+  pattern: (?:password|secret|token|credential|auth|session|key)\s*:\s*any\b
+  severity: warning
+  suggestion: Use a specific type definition for security-critical values
+- category: security
+  id: ts-double-assertion
+  message: "Type assertion via 'as unknown as' bypasses TypeScript safety"
+  pattern: as\s+unknown\s+as\s+
+  severity: warning
+  suggestion: Fix the underlying type mismatch instead of using double assertion
+- category: security
+  id: ts-non-null-assertion-chain
+  message: Non-null assertion (!) on potentially unsafe value — can mask runtime errors
+  pattern: (?:req|input|params|query|body)\.[a-zA-Z]+!\.
+  severity: info
+  suggestion: Use optional chaining (?.) and proper null checks instead
+# ── WebSocket ──────────────────────────────────────────────
+- category: security
+  id: websocket-unencrypted
+  message: "Unencrypted WebSocket (ws://) — data transmitted in cleartext"
+  pattern: "['\"](ws://)(?!localhost|127\\.0\\.0\\.1)"
+  severity: warning
+  suggestion: "Use wss:// (WebSocket Secure) for encrypted connections"
+- category: security
+  id: websocket-no-origin-check
+  message: WebSocket server without origin verification — CSWSH risk
+  pattern: new\s+(?:WebSocket\.Server|WebSocketServer|ws\.Server)\s*\(\s*\{(?![\s\S]*?verifyClient)
+  severity: warning
+  suggestion: Implement verifyClient to validate the Origin header
+# ── GraphQL ────────────────────────────────────────────────
+- category: security
+  id: graphql-introspection-enabled
+  message: GraphQL introspection enabled — exposes full schema to attackers
+  pattern: introspection\s*:\s*true
+  severity: warning
+  suggestion: "Disable introspection in production with introspection: false"
+- category: security
+  id: graphql-no-depth-limit
+  message: GraphQL without depth limiting — allows deeply nested query attacks
+  pattern: new\s+ApolloServer\s*\(\s*\{(?![\s\S]*?(?:depthLimit|validationRules))
+  severity: warning
+  suggestion: Use graphql-depth-limit to prevent deeply nested query attacks
+- category: security
+  id: graphql-no-cost-analysis
+  message: GraphQL query without complexity analysis — resource exhaustion risk
+  pattern: new\s+ApolloServer\s*\(\s*\{(?![\s\S]*?(?:costAnalysis|queryComplexity|complexityLimit))
+  severity: info
+  suggestion: Add query cost analysis to prevent expensive queries from DoSing the server
+# ── Next.js / Nuxt ─────────────────────────────────────────
+- category: security
+  id: nextjs-exposed-server-env
+  message: Server-side secret exposed to client via NEXT_PUBLIC_ prefix
+  pattern: NEXT_PUBLIC_(?:SECRET|PASSWORD|API_KEY|PRIVATE_KEY|JWT_SECRET|DATABASE_URL|DB_PASSWORD)
+  severity: critical
+  suggestion: Never prefix server-side secrets with NEXT_PUBLIC_; use server-only env vars
+- category: security
+  id: nextjs-getserversideprops-leak
+  message: getServerSideProps returning sensitive data to client
+  pattern: getServerSideProps[\s\S]*?return\s*\{[\s\S]*?props\s*:\s*\{[\s\S]*?(?:password|secret|token|apiKey|privateKey|connectionString)
+  severity: critical
+  suggestion: Filter sensitive data before returning props — only send what the UI needs
+- category: security
+  id: nextjs-api-no-auth
+  message: Next.js API route handler without authentication check
+  pattern: export\s+(?:default\s+)?(?:async\s+)?function\s+(?:handler|GET|POST|PUT|DELETE|PATCH)\s*\((?:req|request)[\s\S]*?\)\s*\{(?![\s\S]*?(?:auth|session|token|verify|getUser|getSession|getServerSession))
+  severity: info
+  suggestion: Add authentication middleware or check session/token in API routes
+- category: security
+  id: nuxt-exposed-runtime-secret
+  message: Private runtime config exposed via public runtimeConfig in Nuxt
+  pattern: runtimeConfig\s*:\s*\{[\s\S]*?public\s*:\s*\{[\s\S]*?(?:secret|password|apiKey|privateKey|dbPassword)
+  severity: critical
+  suggestion: Keep secrets in private runtimeConfig, never in public
+# ── npm / package ──────────────────────────────────────────
+- category: security
+  id: npm-postinstall-script
+  message: Package has a postinstall script — may execute arbitrary code on install
+  pattern: "['\"]postinstall['\"]\\s*:\\s*['\"][^'\"]+['\"]"
+  severity: warning
+  suggestion: Review postinstall scripts for malicious behavior; use --ignore-scripts for untrusted packages
+- category: security
+  id: npm-preinstall-script
+  message: Package has a preinstall script — runs before any install verification
+  pattern: "['\"]preinstall['\"]\\s*:\\s*['\"][^'\"]+['\"]"
+  severity: warning
+  suggestion: Review preinstall scripts carefully; they run before any security checks
+- category: security
+  id: npm-dependency-confusion
+  message: Private scope package without registry restriction — dependency confusion risk
+  pattern: "['\"](\\@[a-z]+/[a-z])[\\s\\S]*?['\"]registry['\"]\\s*:\\s*['\"]https://registry\\.npmjs\\.org"
+  severity: info
+  suggestion: Configure .npmrc to point private scopes to your internal registry
+# ── Prototype Pollution ────────────────────────────────────
+- category: security
+  id: deep-merge-no-proto-check
+  message: Deep merge without __proto__/constructor filtering — prototype pollution risk
+  pattern: (?:deepMerge|deepAssign|merge|extend)\s*\(\s*(?:target|dest|obj)[\s\S]*?(?:req\.|body\.|params\.|query\.|input\.)
+  severity: critical
+  suggestion: "Filter out __proto__, constructor, and prototype keys before merging"
+- category: security
+  id: lodash-merge-user-input
+  message: lodash merge/defaultsDeep with user input — prototype pollution risk
+  pattern: _\.(?:merge|defaultsDeep|mergeWith)\s*\([^)]*(?:req\.|body\.|params\.|query\.|input\.)
+  severity: critical
+  suggestion: Use lodash >= 4.17.21 and sanitize input objects before merging
+- category: security
+  id: object-assign-user-input
+  message: Object.assign() with user-controlled source — prototype pollution risk
+  pattern: Object\.assign\s*\([^)]*(?:req\.|body\.|params\.|query\.|input\.)
+  severity: warning
+  suggestion: Sanitize input objects by removing __proto__ and constructor properties
+- category: security
+  id: spread-constructor-pollution
+  message: Spreading user input into object — constructor/prototype pollution risk
+  pattern: \{\s*\.\.\.(?:req\.body|req\.query|req\.params|input|args|userData)
+  severity: warning
+  suggestion: Destructure only expected fields instead of spreading entire user input
+# ── RegExp DoS ─────────────────────────────────────────────
+- category: security
+  id: redos-nested-quantifier
+  message: Nested quantifiers in regex — catastrophic backtracking risk
+  pattern: \/(?:[^/]*\([^)]*(?:\+|\*)\)[^/]*(?:\+|\*|\{))[^/]*\/
+  severity: warning
+  suggestion: Refactor regex to avoid nested quantifiers or use RE2 for untrusted input
+- category: security
+  id: redos-overlapping-alternation
+  message: Regex with overlapping alternation and quantifier — ReDoS risk
+  pattern: \/(?:[^/]*\([^)]*\|[^)]*\)[^/]*(?:\+|\*))[^/]*\/
+  severity: info
+  suggestion: Use non-overlapping alternatives or switch to RE2 for user-controlled input
+# ── File System ────────────────────────────────────────────
+- category: security
+  id: fs-user-controlled-read
+  message: fs.readFile with user-controlled path — arbitrary file read risk
+  pattern: fs\.readFile(?:Sync)?\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|args\.)
+  severity: critical
+  suggestion: Validate and resolve paths against a base directory; reject ../ sequences
+- category: security
+  id: fs-user-controlled-write
+  message: fs.writeFile with user-controlled path — arbitrary file write risk
+  pattern: fs\.writeFile(?:Sync)?\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|args\.)
+  severity: critical
+  suggestion: Validate paths against a safe base directory; reject traversal sequences
+- category: security
+  id: fs-user-controlled-unlink
+  message: fs.unlink with user-controlled path — arbitrary file deletion risk
+  pattern: fs\.(?:unlink|rm|rmdir)(?:Sync)?\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|args\.)
+  severity: critical
+  suggestion: Validate paths strictly and check against an allowlist before deletion
+- category: security
+  id: fs-chmod-world-writable
+  message: chmod with world-writable permissions — any user can modify the file
+  pattern: (?:chmod|chmodSync)\s*\(\s*[^,]+,\s*(?:0o?777|0o?766|0o?776|['"]777['"])
+  severity: warning
+  suggestion: Use restrictive permissions (0o600 or 0o644) instead of world-writable
+- category: security
+  id: temp-file-predictable
+  message: Predictable temp file path — symlink race condition risk
+  pattern: (?:\/tmp\/|os\.tmpdir\(\)[\s\S]*?)\+\s*['"][a-zA-Z_-]+['"]
+  severity: warning
+  suggestion: Use fs.mkdtemp() or tmp library to create unique temp directories
+# ── Miscellaneous Security ─────────────────────────────────
+- category: security
+  id: child-process-spawn-shell
+  message: "spawn() with shell: true re-introduces command injection risk"
+  pattern: spawn\s*\([^)]*\{[\s\S]*?shell\s*:\s*true
+  severity: warning
+  suggestion: "Remove shell: true and pass arguments as array elements instead"
+- category: security
+  id: vm-module-escape
+  message: Node.js vm module is NOT a sandbox — code can escape trivially
+  pattern: (?:require|import).*['"]vm['"]
+  severity: warning
+  suggestion: Use vm2 or isolated-vm for actual sandboxing; vm provides no security
+- category: security
+  id: unsafe-redirect
+  message: HTTP redirect using user-controlled value — open redirect risk
+  pattern: (?:res\.redirect|response\.redirect)\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.)
+  severity: critical
+  suggestion: Validate redirect targets against an allowlist of trusted URLs
+- category: security
+  id: helmet-csp-unsafe-inline
+  message: "Content Security Policy with 'unsafe-inline' — XSS protection weakened"
+  pattern: "(?:script-src|style-src)[^;]*'unsafe-inline'"
+  severity: warning
+  suggestion: Remove unsafe-inline and use nonce or hash-based CSP directives
+- category: security
+  id: cors-reflect-origin
+  message: CORS reflecting request Origin — equivalent to wildcard with credentials
+  pattern: "['\"](Access-Control-Allow-Origin)['\"]\\s*[:,]\\s*(?:req\\.headers\\.origin|origin)"
+  severity: critical
+  suggestion: Validate origin against an allowlist before reflecting it in CORS headers
+- category: security
+  id: hardcoded-api-key
+  message: Hardcoded API key in source code
+  pattern: (?:api[_-]?key|apikey|api[_-]?secret)\s*[:=]\s*['"][a-zA-Z0-9_\-]{16,}['"]
+  severity: critical
+  suggestion: Store API keys in environment variables or a secrets manager
+- category: security
+  id: buffer-alloc-unsafe
+  message: Buffer.allocUnsafe() may contain old memory data — information leak
+  pattern: Buffer\.allocUnsafe\s*\(
+  severity: warning
+  suggestion: Use Buffer.alloc() which zero-fills memory, or fill after allocUnsafe
+- category: security
+  id: buffer-from-number
+  message: Buffer(number) is deprecated and creates uninitialized memory
+  pattern: new\s+Buffer\s*\(\s*\d+\s*\)
+  severity: warning
+  suggestion: Use Buffer.alloc(size) to create zero-filled buffers
+- category: security
+  id: zip-slip-extract
+  message: Archive extraction without path validation — Zip Slip vulnerability
+  pattern: (?:extract|unzip|decompress|tar\.x)\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|userFile|uploadedFile)
+  severity: critical
+  suggestion: Validate extracted file paths stay within the target directory
+- category: security
+  id: process-env-default-secret
+  message: Fallback value for secret in process.env — secret leaks if env is unset
+  pattern: process\.env\.(?:SECRET|JWT_SECRET|API_KEY|PASSWORD|PRIVATE_KEY|DB_PASSWORD)\s*\|\|\s*['"][^'"]{4,}['"]
+  severity: warning
+  suggestion: Fail loudly if required secrets are missing instead of using fallback values
+- category: security
+  id: source-map-in-production
+  message: Source maps enabled in production — exposes source code
+  pattern: (?:devtool|sourceMap)\s*:\s*['"]?(?:source-map|eval-source-map|inline-source-map|true)['"]?
+  severity: info
+  suggestion: Disable source maps in production builds or use hidden-source-map
+- category: security
+  id: window-open-user-url
+  message: window.open() with user-controlled URL — tabnabbing or phishing risk
+  pattern: window\.open\s*\(\s*(?!['"]https?://)[a-zA-Z]
+  severity: warning
+  suggestion: "Validate URLs against an allowlist and set noopener, noreferrer features"

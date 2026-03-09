@@ -94,7 +94,7 @@ class TestCWETaxonomy:
 
     def test_known_rule_has_taxa_on_result(self):
         """Results for CWE-mapped rules have taxa references."""
-        sarif = to_sarif(_report([_finding(rule="sql-injection",
+        sarif = to_sarif(_report([_finding(rule="sql-injection-execute",
                                            severity=Severity.CRITICAL,
                                            category=Category.SECURITY)]))
         result = sarif["runs"][0]["results"][0]

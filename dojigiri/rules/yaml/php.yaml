@@ -1,0 +1,277 @@
+rules:
+- category: security
+  id: php-sql-injection-mysql
+  message: mysql_query() is deprecated and prone to SQL injection
+  pattern: \bmysql_query\s*\(
+  severity: critical
+  suggestion: Use PDO with prepared statements or mysqli with parameterized queries
+- category: security
+  id: php-sql-injection-mysqli-concat
+  message: mysqli_query with string concatenation — SQL injection risk
+  pattern: mysqli_query\s*\(\s*\$\w+\s*,\s*["'].*?\.\s*\$
+  severity: critical
+  suggestion: Use mysqli_prepare() with bind_param() for parameterized queries
+- category: security
+  id: php-sql-injection-pdo-concat
+  message: PDO query with concatenated user input — SQL injection
+  pattern: ->query\s*\(\s*["'].*?\.\s*\$
+  severity: critical
+  suggestion: Use PDO::prepare() with bindParam()/bindValue() for parameterized queries
+- category: security
+  id: php-sql-injection-interpolation
+  message: SQL string with variable interpolation — SQL injection risk
+  pattern: (?:query|execute|exec)\s*\(\s*["'](?:SELECT|INSERT|UPDATE|DELETE|DROP).*?\$\w+
+  severity: critical
+  suggestion: Use prepared statements with parameter binding
+- category: security
+  id: php-xss-echo
+  message: echo/print with raw variable — XSS risk if user-controlled
+  pattern: (?:echo|print)\s+.*?\$_(?:GET|POST|REQUEST|COOKIE|SERVER)
+  severity: critical
+  suggestion: Use htmlspecialchars($var, ENT_QUOTES, 'UTF-8') before output
+- category: security
+  id: php-xss-no-escape
+  message: Direct output of variable without encoding — XSS risk
+  pattern: <\?=\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  suggestion: Use htmlspecialchars() before outputting any user input
+- category: security
+  id: php-command-injection-exec
+  message: exec() can execute system commands — command injection risk
+  pattern: \bexec\s*\(\s*(?!\s*["'][^$"']*["'])
+  severity: critical
+  suggestion: Use escapeshellarg()/escapeshellcmd() on all arguments, or avoid entirely
+- category: security
+  id: php-command-injection-system
+  message: system() executes shell command — injection risk if input is user-controlled
+  pattern: \bsystem\s*\(
+  severity: critical
+  suggestion: Use escapeshellarg() on arguments and prefer specific PHP functions
+- category: security
+  id: php-command-injection-passthru
+  message: passthru() executes shell command with raw output — injection risk
+  pattern: \bpassthru\s*\(
+  severity: critical
+  suggestion: Use escapeshellarg() on arguments or use safer alternatives
+- category: security
+  id: php-command-injection-shell-exec
+  message: shell_exec() executes command via shell — injection risk
+  pattern: \bshell_exec\s*\(
+  severity: critical
+  suggestion: Use escapeshellarg() on all arguments or avoid shell execution
+- category: security
+  id: php-command-injection-backtick
+  message: Backtick operator executes shell command — injection risk
+  pattern: '`[^`]*\$'
+  severity: critical
+  suggestion: Use escapeshellarg() on variables or avoid backtick execution
+- category: security
+  id: php-command-injection-proc-open
+  message: proc_open() spawns a process — injection risk if command is user-controlled
+  pattern: \bproc_open\s*\(
+  severity: warning
+  suggestion: Validate and sanitize all arguments; use escapeshellarg()
+- category: security
+  id: php-command-injection-popen
+  message: popen() opens a process — injection risk
+  pattern: \bpopen\s*\(
+  severity: warning
+  suggestion: Use escapeshellarg() on all arguments passed to the command
+- category: security
+  id: php-file-inclusion-variable
+  message: Dynamic file inclusion — LFI/RFI vulnerability if path is user-controlled
+  pattern: (?:include|require|include_once|require_once)\s*\(?\s*\$
+  severity: critical
+  suggestion: Use a whitelist of allowed files; never pass user input to include/require
+- category: security
+  id: php-file-inclusion-concat
+  message: File inclusion with concatenation — LFI/RFI risk
+  pattern: (?:include|require|include_once|require_once)\s*\(?\s*["'].*?\.\s*\$
+  severity: critical
+  suggestion: Validate against a whitelist of allowed paths; never include user-controlled paths
+- category: security
+  id: php-unserialize
+  message: unserialize() with user input — arbitrary object injection/RCE
+  pattern: \bunserialize\s*\(\s*\$
+  severity: critical
+  suggestion: Use json_decode() for data exchange; if unserialize is needed, use allowed_classes option
+- category: security
+  id: php-file-upload-no-validation
+  message: move_uploaded_file without type validation — unrestricted file upload
+  pattern: move_uploaded_file\s*\(
+  severity: warning
+  suggestion: Validate file extension, MIME type, and content; store outside webroot
+- category: security
+  id: php-path-traversal-fopen
+  message: fopen/file_get_contents with dynamic path — path traversal risk
+  pattern: (?:fopen|file_get_contents|file_put_contents|readfile|file)\s*\(\s*\$
+  severity: warning
+  suggestion: Use realpath() and verify the path starts with an allowed base directory
+- category: security
+  id: php-path-traversal-unlink
+  message: File deletion with dynamic path — path traversal risk
+  pattern: \bunlink\s*\(\s*\$
+  severity: warning
+  suggestion: Canonicalize with realpath() and verify against allowed base directory
+- category: security
+  id: php-ssrf-curl
+  message: curl_exec with user-controlled URL — SSRF vulnerability
+  pattern: curl_setopt\s*\([^)]*CURLOPT_URL\s*,\s*\$
+  severity: warning
+  suggestion: Validate URL against allowlist; block private/internal IP ranges
+- category: security
+  id: php-ssrf-file-get-contents
+  message: file_get_contents with user URL — SSRF risk
+  pattern: file_get_contents\s*\(\s*\$_(?:GET|POST|REQUEST)
+  severity: critical
+  suggestion: Validate URL scheme and host against allowlist; disable allow_url_fopen if not needed
+- category: security
+  id: php-md5-password
+  message: md5() for password hashing — trivially crackable
+  pattern: \bmd5\s*\(\s*\$(?:pass|password|passwd)
+  severity: critical
+  suggestion: Use password_hash() with PASSWORD_BCRYPT or PASSWORD_ARGON2ID
+- category: security
+  id: php-sha1-password
+  message: sha1() for password hashing — insufficient for passwords
+  pattern: \bsha1\s*\(\s*\$(?:pass|password|passwd)
+  severity: critical
+  suggestion: Use password_hash() with PASSWORD_BCRYPT or PASSWORD_ARGON2ID
+- category: security
+  id: php-weak-hash-general
+  message: md5/sha1 used for security purposes — cryptographically broken
+  pattern: \b(?:md5|sha1)\s*\(\s*(?:\$_(?:GET|POST|REQUEST|COOKIE)|.*?(?:token|secret|key|session))
+  severity: warning
+  suggestion: Use hash('sha256', ...) or password_hash() depending on the use case
+- category: security
+  id: php-mt-rand-security
+  message: mt_rand() is predictable — not suitable for security tokens
+  pattern: \bmt_rand\s*\(
+  severity: warning
+  suggestion: Use random_int() or random_bytes() for cryptographic purposes
+- category: security
+  id: php-rand-security
+  message: rand() has poor randomness — not suitable for security
+  pattern: \brand\s*\(
+  severity: info
+  suggestion: Use random_int() for secure random integers
+- category: security
+  id: php-weak-encryption
+  message: Weak cipher algorithm — mcrypt is deprecated and often misused
+  pattern: \bmcrypt_(?:encrypt|decrypt|generic)\s*\(
+  severity: critical
+  suggestion: Use openssl_encrypt() with AES-256-GCM or sodium_crypto_secretbox()
+- category: security
+  id: php-strcmp-bypass
+  message: strcmp() returns 0 for array input — authentication bypass via type juggling
+  pattern: \bstrcmp\s*\(\s*\$_(?:GET|POST|REQUEST)
+  severity: critical
+  suggestion: Use hash_equals() for secure string comparison or strict === operator
+- category: security
+  id: php-type-juggling-password
+  message: Loose comparison (==) for password check — type juggling bypass
+  pattern: \$(?:pass|password|passwd|token|secret)\s*==\s*(?!\s*=)
+  severity: critical
+  suggestion: Use === (strict comparison) or hash_equals() for constant-time comparison
+- category: security
+  id: php-session-fixation
+  message: session_id() set from user input — session fixation attack
+  pattern: session_id\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  suggestion: Always regenerate session ID after authentication with session_regenerate_id(true)
+- category: security
+  id: php-xxe-simplexml
+  message: simplexml_load_string without disabling entities — XXE risk
+  pattern: simplexml_load_string\s*\(\s*(?!.*LIBXML_NOENT)
+  severity: warning
+  suggestion: Pass LIBXML_NOENT and call libxml_disable_entity_loader(true) before parsing
+- category: security
+  id: php-xxe-dom
+  message: DOMDocument::loadXML without entity restrictions — XXE risk
+  pattern: ->loadXML\s*\(
+  severity: warning
+  suggestion: Set libxml_disable_entity_loader(true) and use LIBXML_NOENT|LIBXML_DTDLOAD
+- category: security
+  id: php-eval
+  message: eval() executes arbitrary PHP code — code injection risk
+  pattern: \beval\s*\(
+  severity: critical
+  suggestion: Refactor to avoid eval(); use proper control flow or whitelisted operations
+- category: security
+  id: php-preg-replace-e
+  message: preg_replace with /e modifier executes replacement as PHP — code injection
+  pattern: preg_replace\s*\(\s*["']/.*?/[a-zA-Z]*e[a-zA-Z]*["']
+  severity: critical
+  suggestion: Use preg_replace_callback() instead of the deprecated /e modifier
+- category: security
+  id: php-assert-string
+  message: assert() with string argument executes as PHP code — code injection
+  pattern: \bassert\s*\(\s*["']\s*
+  severity: critical
+  suggestion: Pass boolean expressions to assert(), not strings
+- category: security
+  id: php-create-function
+  message: create_function() uses eval internally — code injection risk
+  pattern: \bcreate_function\s*\(
+  severity: critical
+  suggestion: Use anonymous functions (closures) instead — create_function is deprecated in PHP 7.2+
+- category: security
+  id: php-extract-globals
+  message: extract() on user input overwrites variables — variable injection
+  pattern: \bextract\s*\(\s*\$_(?:GET|POST|REQUEST|COOKIE)
+  severity: critical
+  suggestion: Access superglobal values directly or use a whitelist with EXTR_IF_EXISTS
+- category: security
+  id: php-register-globals
+  message: Simulating register_globals — variable injection vulnerability
+  pattern: \bextract\s*\(\s*\$_(?:GET|POST|REQUEST)
+  severity: critical
+  suggestion: Access superglobal arrays directly instead of extracting into scope
+- category: security
+  id: php-header-injection
+  message: header() with user input — HTTP header injection / response splitting
+  pattern: \bheader\s*\(\s*["'].*?\.\s*\$_(?:GET|POST|REQUEST)
+  severity: critical
+  suggestion: Validate and sanitize header values; strip \r\n from user input
+- category: security
+  id: php-open-redirect
+  message: Redirect with user-controlled URL — open redirect vulnerability
+  pattern: \bheader\s*\(\s*["']Location:\s*["']\s*\.\s*\$
+  severity: warning
+  suggestion: Validate redirect URL against an allowlist of trusted domains
+- category: security
+  id: php-hardcoded-credentials
+  message: Hardcoded database credentials in source code
+  pattern: (?:password|passwd|pwd)\s*(?:=>|=)\s*["'][A-Za-z0-9+/=_\-!@#$%^&*]{4,}["']
+  severity: warning
+  suggestion: Store credentials in environment variables or a secrets file outside webroot
+- category: security
+  id: php-error-display
+  message: display_errors enabled — leaks internal paths and info to users
+  pattern: (?:ini_set|display_errors)\s*\(\s*["']display_errors["']\s*,\s*["']?(?:1|on|true)["']?
+  severity: warning
+  suggestion: Disable display_errors in production; log errors to file instead
+- category: security
+  id: php-expose-phpinfo
+  message: phpinfo() exposes server configuration details
+  pattern: \bphpinfo\s*\(
+  severity: warning
+  suggestion: Remove phpinfo() calls from production code
+- category: security
+  id: php-curl-ssl-verify-off
+  message: cURL SSL verification disabled — MITM attack risk
+  pattern: CURLOPT_SSL_VERIFYPEER\s*,\s*(?:false|0|FALSE)
+  severity: critical
+  suggestion: Set CURLOPT_SSL_VERIFYPEER to true and configure proper CA bundle
+- category: security
+  id: php-curl-ssl-host-off
+  message: cURL SSL host verification disabled — MITM attack risk
+  pattern: CURLOPT_SSL_VERIFYHOST\s*,\s*(?:false|0|FALSE)
+  severity: critical
+  suggestion: Set CURLOPT_SSL_VERIFYHOST to 2 for strict hostname verification
+- category: security
+  id: php-deserialize-phar
+  message: phar:// stream wrapper can trigger deserialization — RCE risk
+  pattern: phar://
+  severity: warning
+  suggestion: Disable phar stream wrapper or validate all file paths against phar:// prefix

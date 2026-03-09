@@ -33,7 +33,7 @@ def report_with_findings():
             severity=Severity.CRITICAL,
             category=Category.SECURITY,
             source=Source.STATIC,
-            rule="sql-injection",
+            rule="sql-injection-execute",
             message="SQL injection via string concat",
             suggestion="Use parameterized queries",
             snippet="cursor.execute('SELECT * FROM ' + user_input)",
@@ -99,7 +99,7 @@ class TestRenderHtml:
 
     def test_findings_table(self, report_with_findings):
         result = render_html(report_with_findings)
-        assert "sql-injection" in result
+        assert "sql-injection-execute" in result
         assert "eval-usage" in result
         assert "SQL injection via string concat" in result
         assert "Use parameterized queries" in result

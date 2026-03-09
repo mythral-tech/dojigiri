@@ -11,9 +11,11 @@ Data in -> Data out: language string in -> list[Rule] out.
 from __future__ import annotations
 
 from .rules import (
+    CSHARP_RULES,
     GO_RULES,
     JAVA_RULES,
     JAVASCRIPT_RULES,
+    PHP_RULES,
     PYTHON_RULES,
     RUST_RULES,
     SECURITY_RULES,
@@ -31,6 +33,8 @@ LANGUAGE_RULES: dict[str, list[Rule]] = {
     "go": GO_RULES,
     "rust": RUST_RULES,
     "java": JAVA_RULES,
+    "csharp": CSHARP_RULES,
+    "php": PHP_RULES,
 }
 
 
