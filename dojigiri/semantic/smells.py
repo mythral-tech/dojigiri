@@ -654,6 +654,31 @@ def _transitive_reduce(pairs: list[ClonePair]) -> list[ClonePair]:
     return kept
 
 
+def _is_example_or_docs_path(fp: str) -> bool:
+    """Return True if the path is in an example or docs directory."""
+    fp_lower = fp.lower().replace("\\", "/")
+    return any(
+        seg in fp_lower
+        for seg in ("/docs_src/", "/docs/", "/examples/", "/example/")
+    )
+
+
+# Same segments used by detector.py's _is_test_path
+_CLONE_TEST_PATH_SEGMENTS = (
+    "/test/", "/tests/", "test_", "_test.", "/spec/", "/specs/",
+)
+_CLONE_TEST_FILENAMES = ("conftest.py",)
+
+
+def _is_test_path_for_clones(fp: str) -> bool:
+    """Return True if the path looks like a test file."""
+    fp_lower = fp.lower().replace("\\", "/")
+    if any(seg in fp_lower for seg in _CLONE_TEST_PATH_SEGMENTS):
+        return True
+    basename = fp_lower.rsplit("/", 1)[-1]
+    return basename in _CLONE_TEST_FILENAMES
+
+
 def find_semantic_clone_pairs(
     semantics_by_file: dict[str, FileSemantics],
     similarity_threshold: float = 0.85,
@@ -665,11 +690,16 @@ def find_semantic_clone_pairs(
 
     Applies transitive reduction: if functions A, B, C are all similar,
     only the spanning-tree edges are reported (N-1 pairs instead of N*(N-1)/2).
+
+    Suppresses clones in example/docs directories and between test files.
     """
     pairs: list[ClonePair] = []
     sigs: list[tuple[str, FunctionDef, SemanticSignature]] = []
 
     for filepath, sem in semantics_by_file.items():
+        # Skip files in example/docs directories entirely
+        if _is_example_or_docs_path(filepath):
+            continue
         for fdef in sem.function_defs:
             sig = build_semantic_signature(fdef, sem)
             if sig:
@@ -682,6 +712,14 @@ def find_semantic_clone_pairs(
             file_b, func_b, sig_b = sigs[j]
 
             if file_a == file_b and func_a.line == func_b.line:
+                continue
+
+            # Suppress clone detection between two test files
+            if (
+                file_a != file_b
+                and _is_test_path_for_clones(file_a)
+                and _is_test_path_for_clones(file_b)
+            ):
                 continue
 
             sim = sig_a.similarity(sig_b)

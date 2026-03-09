@@ -233,12 +233,16 @@ def func():
     findings = run_python_ast_checks(code, "test.py")
     
     shadowed = [f for f in findings if f.rule == "shadowed-builtin"]
-    assert len(shadowed) == 5
-    
+    # type and id are excluded — they're idiomatic parameter/variable names
+    assert len(shadowed) == 3
+
     shadowed_names = {f.message for f in shadowed}
     assert any("list" in msg for msg in shadowed_names)
     assert any("dict" in msg for msg in shadowed_names)
-    assert any("type" in msg for msg in shadowed_names)
+    assert any("len" in msg for msg in shadowed_names)
+    # These should NOT be flagged
+    assert not any("'type'" in msg for msg in shadowed_names)
+    assert not any("'id'" in msg for msg in shadowed_names)
 
 
 def test_python_ast_type_comparison():
@@ -627,7 +631,8 @@ def process(list, dict, input):
 '''
     findings = run_python_ast_checks(code, "test.py")
     shadow = [f for f in findings if f.rule == "shadowed-builtin-param"]
-    assert len(shadow) == 3  # list, dict, input
+    # input is excluded (idiomatic param name), list and dict remain
+    assert len(shadow) == 2  # list, dict
 
 
 def test_regression_block_comments_skipped():

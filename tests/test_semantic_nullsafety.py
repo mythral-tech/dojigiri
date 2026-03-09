@@ -324,6 +324,59 @@ class Request:
         null_findings = [f for f in findings if f.rule == "null-dereference"]
         assert len(null_findings) == 0
 
+    def test_self_attr_is_none_early_exit_not_flagged(self):
+        """if self.x is None: return — guard line should not flag x."""
+        code = '''\
+class Foo:
+    def setup(self):
+        self.x = None
+        if self.x is None:
+            return
+        self.x.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_if_not_self_attr_early_exit_not_flagged(self):
+        """if not self.x: return — guard line should not flag x."""
+        code = '''\
+class Foo:
+    def setup(self):
+        self.x = None
+        if not self.x:
+            return
+        self.x.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_is_not_none_guard_line_not_flagged_local(self):
+        """if x is not None: — bare variable guard line is not a dereference."""
+        code = '''\
+def f():
+    x = d.get("key")
+    if x is not None:
+        x.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_is_none_guard_line_not_flagged_local(self):
+        """if x is None: return — bare variable guard line is not a dereference."""
+        code = '''\
+def f():
+    x = d.get("key")
+    if x is None:
+        return
+    x.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
 
 # ─── Guarded Access: Reassignment Patterns ───────────────────────────────────
 
@@ -446,6 +499,85 @@ def get_name() -> Optional[str]:
         assert len(return_anns) >= 1
         ann_text = list(return_anns.values())[0]
         assert "Optional[str]" in ann_text
+
+
+# ─── Local Variable vs Attribute Name Confusion ──────────────────────────────
+
+@needs_tree_sitter
+class TestLocalVsAttributeConfusion:
+    """Don't confuse local variables with instance attributes of the same name."""
+
+    def test_local_var_same_name_as_obj_attr_not_flagged(self):
+        """raw_data = None local should not make response.raw_data nullable."""
+        code = '''\
+def process(response):
+    raw_data = None
+    if response.raw_data is not None:
+        raw_data = response.raw_data.decode()
+    return raw_data
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_local_var_same_name_as_self_attr_not_flagged(self):
+        """content = None local should not make self.content nullable."""
+        code = '''\
+def text(self):
+    content = None
+    encoding = self.encoding
+    if not self.content:
+        return str('')
+    content = str(self.content, encoding, errors='replace')
+    return content
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_self_attr_assigned_none_still_flagged(self):
+        """self.data = None should still flag self.data.strip() without a guard."""
+        code = '''\
+class Foo:
+    def process(self):
+        self.data = None
+        self.data.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) >= 1
+        assert any("data" in f.message for f in null_findings)
+
+    def test_self_attr_assigned_none_guarded_not_flagged(self):
+        """self.data = None guarded by if self.data is not None should not flag."""
+        code = '''\
+class Foo:
+    def process(self):
+        self.data = None
+        if self.data is not None:
+            self.data.strip()
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
+
+    def test_is_not_none_guard_line_is_not_dereference(self):
+        """The comparison `if self.raw_data is not None:` is a guard, not a dereference."""
+        code = '''\
+class ServerSentEvent:
+    def __init__(self, data=None):
+        self.data = data
+        self.raw_data = None
+
+    def encode(self):
+        buffer = ''
+        if self.raw_data is not None:
+            buffer += str(self.raw_data)
+        return buffer.encode('utf-8')
+'''
+        findings = _check_python(code)
+        null_findings = [f for f in findings if f.rule == "null-dereference"]
+        assert len(null_findings) == 0
 
 
 # ─── Edge Cases ──────────────────────────────────────────────────────────────

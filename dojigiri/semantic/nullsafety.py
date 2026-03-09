@@ -214,6 +214,9 @@ def _find_guarded_lines(
             m = pattern.match(stripped)
             if m:
                 var_name = m.group(1)
+                # Guard the if-line itself — `self.x` in `if self.x is None:`
+                # is a comparison, not a dereference
+                guarded.setdefault(var_name, set()).add(lineno)
                 # Track as potential early-exit; body must contain raise/return
                 early_exit_guards.append((var_name, indent, lineno, False))
                 # Also look for single-line: `if x is None: raise ValueError`
@@ -304,6 +307,35 @@ def check_null_safety(
     if not nullable_vars:
         return []
 
+    # Build a set of nullable vars that were assigned via `self.attr = None`
+    # (as opposed to bare `attr = None`).  For each nullable (name, scope_id),
+    # check whether the assignment line also has an attribute_access reference
+    # with receiver="self"/"this" — that means it was `self.attr = None`.
+    _self_keywords = {"self", "this", "cls"}
+    self_assigned_attrs: set[tuple[str, int]] = set()
+    # Index lines where a variable is assigned a nullable value (e.g., `= None`)
+    # Only these lines matter for checking if the assignment was `self.x = None`
+    _nullable_assign_lines: dict[tuple[str, int], set[int]] = {}
+    for a in semantics.assignments:
+        vt = getattr(a, "value_text", "")
+        if vt == "None" or vt == "null" or vt == "nil":
+            _nullable_assign_lines.setdefault((a.name, a.scope_id), set()).add(a.line)
+    for key in nullable_vars:
+        name, scope_id = key
+        alines = _nullable_assign_lines.get(key, set())
+        if not alines:
+            continue
+        for ref in semantics.references:
+            if (
+                ref.name == name
+                and ref.scope_id == scope_id
+                and ref.context == "attribute_access"
+                and ref.receiver in _self_keywords
+                and ref.line in alines
+            ):
+                self_assigned_attrs.add(key)
+                break
+
     # We need source bytes for narrowing detection — reconstruct from file
     try:
         with open(filepath, encoding="utf-8", errors="replace") as f:
@@ -318,6 +350,38 @@ def check_null_safety(
     for ref in semantics.references:
         if ref.context != "attribute_access":
             continue
+
+        # Skip attribute accesses on objects when the nullable var is a local
+        # variable, not a self/this attribute.  `obj.attr` should not match a
+        # local `attr = None` — they are different names in different namespaces.
+        if ref.receiver is not None:
+            # Find which nullable key would be resolved
+            resolved_key = None
+            for sid in [ref.scope_id]:
+                if (ref.name, sid) in nullable_vars:
+                    resolved_key = (ref.name, sid)
+                    break
+            if resolved_key is None:
+                # Walk parent scopes
+                for scope in semantics.scopes:
+                    if scope.scope_id == ref.scope_id:
+                        parent = scope.parent_id
+                        while parent is not None:
+                            if (ref.name, parent) in nullable_vars:
+                                resolved_key = (ref.name, parent)
+                                break
+                            for s in semantics.scopes:
+                                if s.scope_id == parent:
+                                    parent = s.parent_id
+                                    break
+                            else:
+                                break
+                        break
+            if resolved_key is not None and resolved_key not in self_assigned_attrs:
+                # The nullable var is a local variable (e.g., `x = None`), but
+                # the reference is an attribute access (e.g., `self.x` or `obj.x`).
+                # These are different things — skip.
+                continue
 
         tinfo = _resolve_nullable_in_scope(ref.name, ref.scope_id, nullable_vars, semantics)  # type: ignore[assignment]  # None handled on next line
         if tinfo is None:

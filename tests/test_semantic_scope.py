@@ -587,3 +587,81 @@ def f():
         # x is first assigned on line 2, then x = x + 1 on line 3 reads x at line 3
         # which is after assignment at line 2 -- no finding expected
         assert len(findings) == 0
+
+    def test_nonlocal_variable_not_flagged(self):
+        """Variables declared nonlocal should not be flagged as uninitialized."""
+        from dojigiri.semantic.scope import check_uninitialized_variables
+        code = """\
+def outer():
+    count = 0
+    def inner():
+        nonlocal count
+        count += 1
+    inner()
+    return count
+"""
+        sem = _semantics(code)
+        findings = check_uninitialized_variables(sem, "test.py")
+        uninit_names = [f.message for f in findings]
+        assert not any("'count'" in m for m in uninit_names)
+
+    def test_nonlocal_multiple_names_not_flagged(self):
+        """Multiple nonlocal names should all be excluded."""
+        from dojigiri.semantic.scope import check_uninitialized_variables
+        code = """\
+def outer():
+    a = 0
+    b = 0
+    def inner():
+        nonlocal a, b
+        a += 1
+        b += 2
+    inner()
+    return a + b
+"""
+        sem = _semantics(code)
+        findings = check_uninitialized_variables(sem, "test.py")
+        uninit_names = [f.message for f in findings]
+        assert not any("'a'" in m for m in uninit_names)
+        assert not any("'b'" in m for m in uninit_names)
+
+    def test_with_as_target_not_flagged(self):
+        """Variables assigned via 'with X as Y' should not be flagged as uninitialized."""
+        from dojigiri.semantic.scope import check_uninitialized_variables
+        code = """\
+def f():
+    with open("file.txt") as fh:
+        data = fh.read()
+    return data
+"""
+        sem = _semantics(code)
+        findings = check_uninitialized_variables(sem, "test.py")
+        uninit_names = [f.message for f in findings]
+        assert not any("'fh'" in m for m in uninit_names)
+
+    def test_with_as_target_is_assignment(self):
+        """'with X as Y' should be tracked as an assignment (not unused if referenced)."""
+        from dojigiri.semantic.scope import check_unused_variables
+        code = """\
+def f():
+    with open("file.txt") as fh:
+        data = fh.read()
+    return data
+"""
+        sem = _semantics(code)
+        findings = check_unused_variables(sem, "test.py")
+        unused_names = [f.message for f in findings]
+        assert not any("'fh'" in m for m in unused_names)
+
+    def test_with_as_flask_pattern_not_flagged(self):
+        """Flask-style 'with client.get() as rv' should not flag rv as uninitialized."""
+        from dojigiri.semantic.scope import check_uninitialized_variables
+        code = """\
+def test_endpoint(client):
+    with client.get("/endpoint") as rv:
+        assert rv.status_code == 200
+"""
+        sem = _semantics(code)
+        findings = check_uninitialized_variables(sem, "test.py")
+        uninit_names = [f.message for f in findings]
+        assert not any("'rv'" in m for m in uninit_names)

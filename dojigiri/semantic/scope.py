@@ -394,6 +394,10 @@ def check_uninitialized_variables(semantics: FileSemantics, filepath: str) -> li
         if name in loop_var_names.get(ref.scope_id, set()):
             continue
 
+        # Skip nonlocal variables (declared as initialized from outer scope)
+        if name in semantics.nonlocal_names.get(ref.scope_id, set()):
+            continue
+
         # Check if name is assigned in this scope
         scope_assigns = first_assignment.get(ref.scope_id, {})
         if name in scope_assigns:

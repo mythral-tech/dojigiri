@@ -28,11 +28,26 @@ _SECURITY_CATEGORIES = {Category.SECURITY}
 _COMMENT_RULES = {"todo-marker"}
 
 # Rules to suppress in test/example files (high FP in non-production code)
-_SKIP_IN_TEST_FILES = {"insecure-http", "console-log"}
+_SKIP_IN_TEST_FILES = {
+    "insecure-http",
+    "console-log",
+    "assert-statement",      # tests are *supposed* to use assert
+    "unused-variable",       # test fixtures, setup vars, captures
+    "variable-shadowing",    # parametrize/fixtures reuse names freely
+    "long-method",           # test functions are naturally long
+    "too-many-args",         # parametrized tests have many args
+    "feature-envy",          # tests naturally reach into objects
+    "ssrf-risk",             # tests use URLs/endpoints by design
+    "requests-no-timeout",   # test HTTP calls don't need timeouts
+    "hardcoded-ip",          # test fixtures use literal IPs
+    "hardcoded-secret",      # test credentials are intentional
+    "subprocess-audit",      # test harness subprocess calls
+}
 _SKIP_IN_EXAMPLE_FILES = {"console-log"}
 
 # Path segments identifying test and example files
 _TEST_PATH_SEGMENTS = ("/test/", "/tests/", "test_", "_test.", "/spec/", "/specs/")
+_TEST_FILENAMES = ("conftest.py",)  # exact filenames that are always test infra
 _EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/")
 
 # Inline comment patterns per language family
@@ -58,6 +73,15 @@ _SLASH_LANGUAGES = frozenset(
     }
 )
 _HASH_LANGUAGES = frozenset({"python", "ruby", "bash"})
+
+
+def _is_test_path(fp_lower: str) -> bool:
+    """Return True if the normalized-lowercase path looks like a test file."""
+    if any(seg in fp_lower for seg in _TEST_PATH_SEGMENTS):
+        return True
+    # Check exact filenames (e.g. conftest.py at any level)
+    basename = fp_lower.rsplit("/", 1)[-1]
+    return basename in _TEST_FILENAMES
 
 
 def _get_comment_style(language: str) -> str | None:
@@ -167,7 +191,7 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules=No
 
     # Detect test/example files for rule suppression
     fp_lower = filepath.lower().replace("\\", "/")
-    is_test_file = any(seg in fp_lower for seg in _TEST_PATH_SEGMENTS)
+    is_test_file = _is_test_path(fp_lower)
     is_example_file = any(seg in fp_lower for seg in _EXAMPLE_PATH_SEGMENTS)
 
     # Rules to skip for this file based on path
@@ -668,34 +692,26 @@ def _check_exception_handling(
 _SHADOW_BUILTINS = {
     "list",
     "dict",
-    "type",
     "str",
     "int",
     "float",
     "set",
     "tuple",
     "len",
-    "range",
     "open",
-    "input",
     "print",
     "sum",
     "min",
     "max",
-    "id",
     "sorted",
-    "next",
-    "map",
-    "filter",
     "zip",
-    "hash",
     "iter",
     "bool",
     "bytes",
     "complex",
     "frozenset",
-    "object",
-    "super",
+    "exec",
+    "eval",
 }
 
 
@@ -1424,6 +1440,18 @@ def analyze_file_static(filepath: str, content: str, language: str, custom_rules
         else:
             deduped.append(f)
     unique = deduped
+
+    # Post-filter: suppress rules in test/example files (applies to ALL sources)
+    fp_lower = filepath.lower().replace("\\", "/")
+    is_test = _is_test_path(fp_lower)
+    is_example = any(seg in fp_lower for seg in _EXAMPLE_PATH_SEGMENTS)
+    if is_test or is_example:
+        post_skip: set[str] = set()
+        if is_test:
+            post_skip |= _SKIP_IN_TEST_FILES
+        if is_example:
+            post_skip |= _SKIP_IN_EXAMPLE_FILES
+        unique = [f for f in unique if f.rule not in post_skip]
 
     # Sort by severity (critical first), then line number
     from .types import SEVERITY_ORDER

@@ -95,6 +95,8 @@ class FileSemantics:
     function_calls: list[FunctionCall] = field(default_factory=list)
     class_defs: list[ClassDef] = field(default_factory=list)
     scopes: list[ScopeInfo] = field(default_factory=list)
+    # Per-scope nonlocal declarations: {scope_id: {name, ...}}
+    nonlocal_names: dict[int, set[str]] = field(default_factory=dict)
     # Source lines (1-indexed: source_lines[0] is line 1) for effective-line counting
     source_lines: list[str] = field(default_factory=list, repr=False)
     # Cached tree-sitter root node (v0.9.0) — avoids double parsing for CFG
@@ -184,6 +186,14 @@ class _Extractor:
         # ── For-loop variables (treated as assignments) ───────────
         if ntype in self._for_types:
             self._handle_for_loop_var(node)
+
+        # ── With-statement targets (with X as Y → Y is an assignment) ──
+        if ntype == "with_statement":
+            self._handle_with_statement(node)
+
+        # ── Nonlocal declarations (nonlocal x → x is from outer scope) ──
+        if ntype == "nonlocal_statement":
+            self._handle_nonlocal(node)
 
         # ── Function calls ────────────────────────────────────────
         if ntype in self._call_types:
@@ -380,6 +390,57 @@ class _Extractor:
                             is_augmented=False,
                         )
                     )
+
+    def _handle_with_statement(self, node: Any) -> None:
+        """Extract 'with X as Y' targets as assignments.
+
+        Python tree-sitter: with_statement has with_clause children,
+        each with_clause has a with_item child that may have an 'alias' field.
+        Or directly: with_item nodes with value + alias fields.
+        """
+        for child in self._walk_all(node):
+            if child.type == "as_pattern":
+                # Python 3.10+ match-style: `with expr as name`
+                # The alias is the last named child
+                alias = child.child_by_field_name("alias")
+                if alias and alias.type == "as_pattern_target":
+                    for sub in alias.children:
+                        if sub.type == "identifier":
+                            self._record_assignment(
+                                _get_text(sub, self.src), sub,
+                                value_node_type="with_clause",
+                            )
+                elif alias and alias.type == "identifier":
+                    self._record_assignment(
+                        _get_text(alias, self.src), alias,
+                        value_node_type="with_clause",
+                    )
+            # Some tree-sitter Python versions use with_item node
+            # with 'value' and 'alias' fields directly
+            if child.type == "with_item":
+                alias = child.child_by_field_name("alias")
+                if alias:
+                    if alias.type == "identifier":
+                        self._record_assignment(
+                            _get_text(alias, self.src), alias,
+                            value_node_type="with_clause",
+                        )
+                    else:
+                        # Tuple unpacking: with X as (a, b)
+                        for sub in alias.children:
+                            if sub.type == "identifier":
+                                self._record_assignment(
+                                    _get_text(sub, self.src), sub,
+                                    value_node_type="with_clause",
+                                )
+
+    def _handle_nonlocal(self, node: Any) -> None:
+        """Track nonlocal declarations: nonlocal x, y → record names per scope."""
+        scope_id = self._current_scope
+        for child in node.children:
+            if child.type == "identifier":
+                name = _get_text(child, self.src)
+                self.result.nonlocal_names.setdefault(scope_id, set()).add(name)
 
     def _record_assignment(
         self,

@@ -33,7 +33,7 @@ UNIVERSAL_RULES: list[Rule] = _compile(
     [
         # Secrets & credentials — exclude common placeholder values
         (
-            r"""(?i)(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]""",
+            r"""(?i)(?<!\w)(?!(?:fake|mock|dummy|stub)[_-])(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]""",
             Severity.CRITICAL,
             Category.SECURITY,
             "hardcoded-secret",
@@ -217,8 +217,9 @@ PYTHON_RULES: list[Rule] = _compile(
             "Pass command as a list without shell=True",
         ),
         # subprocess call audit — flag any subprocess.run/call/Popen for review
+        # Excludes: calls with hardcoded list args like subprocess.run(["git", ...])
         (
-            r"subprocess\.(?:run|call|check_call|check_output|Popen)\s*\(",
+            r"subprocess\.(?:run|call|check_call|check_output|Popen)\s*\((?!\s*\[)",
             Severity.INFO,
             Category.SECURITY,
             "subprocess-audit",
@@ -904,8 +905,9 @@ SECURITY_RULES: list[Rule] = _compile(
             "Validate URL scheme against allowlist (e.g., only https://) before opening",
         ),
         # SSTI — template rendering from string (not file)
+        # Excludes: function definitions, calls with immediate string literal args (safe)
         (
-            r"""(?:Template\s*\(|render_template_string\s*\(|from_string\s*\(|Environment\s*\(\s*\)\.from_string|Jinja2\s*\(.*\bstring\b|new\s+Function\s*\()""",
+            r"""(?<!def )(?:Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|Jinja2\s*\(.*\bstring\b|new\s+Function\s*\()""",
             Severity.CRITICAL,
             Category.SECURITY,
             "ssti-risk",
