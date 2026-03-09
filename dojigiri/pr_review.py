@@ -25,14 +25,6 @@ from .analyzer import (
     _git_run,
     scan_diff,
 )
-from .llm import (
-    CostTracker,
-    LLMError,
-    _api_call_with_retry,
-    _get_backend,
-)
-from .llm_backend import TIER_DEEP
-from .llm_prompts import _sanitize_code, _sanitize_for_prompt
 from .types import (
     SEVERITY_ORDER,
     Finding,
@@ -250,6 +242,8 @@ def _build_review_prompt(
     static_findings: list[Finding],
 ) -> str:
     """Build the user message for LLM review of a single file."""
+    from .llm_prompts import _sanitize_code, _sanitize_for_prompt
+
     parts = [f"File: {filepath}"]
 
     # Add diff
@@ -384,8 +378,18 @@ def review_diff(
             file_reviews.append(FileReview(path=fa.path, findings=sorted_findings))
 
     # Step 3: Optionally enrich with LLM
+    from .plugin import require_llm_plugin
+
+    _llm = require_llm_plugin()
+    CostTracker = _llm.CostTracker
+    LLMError = _llm.LLMError
+    _api_call_with_retry = _llm._api_call_with_retry
+    _get_backend = _llm._get_backend
+
     cost_tracker = CostTracker()
     if use_llm and file_reviews:
+        from .llm_backend import TIER_DEEP
+
         backend = _get_backend(tier=TIER_DEEP)
 
         for fr in file_reviews:

@@ -283,8 +283,10 @@ def cmd_fix(args: argparse.Namespace) -> int:
 
     cost_tracker = None
     if use_llm:
-        from ..llm import CostTracker
+        from ..plugin import require_llm_plugin
 
+        _llm = require_llm_plugin()
+        CostTracker = _llm.CostTracker
         cost_tracker = CostTracker()
 
     all_fixes = []

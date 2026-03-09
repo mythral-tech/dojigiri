@@ -80,6 +80,14 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
     # LLM confirmation for deep scan
     if args.deep:
+        from ..plugin import has_llm_plugin
+
+        if not has_llm_plugin():
+            print(
+                "Error: Deep scan requires dojigiri-ai. Install with: pip install dojigiri-ai",
+                file=sys.stderr,
+            )
+            return 1
         _setup_llm_backend(args, project_config)
         if not _confirm_llm_usage(args):
             return 1

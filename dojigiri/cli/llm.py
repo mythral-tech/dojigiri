@@ -67,8 +67,9 @@ def _run_llm_subcommand(
         print(status_msg.format(filepath))
 
     try:
-        from .. import llm as _llm
+        from ..plugin import require_llm_plugin
 
+        _llm = require_llm_plugin()
         llm_func = getattr(_llm, llm_func_name)
         llm_result, tracker = llm_func(
             content,
@@ -170,7 +171,11 @@ def cmd_explain(args: argparse.Namespace) -> int:
             if not api_key:
                 print("\n  --deep requires ANTHROPIC_API_KEY. Showing offline analysis only.", file=sys.stderr)
             else:
-                from ..llm import CostTracker, explain_file_llm
+                from ..plugin import require_llm_plugin
+
+                _llm = require_llm_plugin()
+                CostTracker = _llm.CostTracker
+                explain_file_llm = _llm.explain_file_llm
 
                 tracker = CostTracker()
                 llm_result, tracker = explain_file_llm(

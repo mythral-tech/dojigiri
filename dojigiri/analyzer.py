@@ -27,7 +27,6 @@ logger = logging.getLogger(__name__)
 from .chunker import chunk_file, estimate_tokens
 from .detector import analyze_file_static
 from .discovery import collect_files, detect_language
-from .llm import CostLimitExceeded, CostTracker, LLMError, analyze_chunk
 from .storage import file_hash, load_cache, save_cache, save_report
 from .types import (
     SEVERITY_ORDER,
@@ -265,6 +264,14 @@ def scan_deep(
         custom_rules: Compiled custom rules from compile_custom_rules()
         max_cost: Maximum LLM cost in USD (None = no limit)
     """
+    from .plugin import require_llm_plugin
+
+    llm = require_llm_plugin()
+    CostLimitExceeded = llm.CostLimitExceeded
+    CostTracker = llm.CostTracker
+    LLMError = llm.LLMError
+    analyze_chunk = llm.analyze_chunk
+
     files, skipped = collect_files(root, language_filter)
     cost_tracker = CostTracker(max_cost=max_cost)
     cache = load_cache() if use_cache else {}

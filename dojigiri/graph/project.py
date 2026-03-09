@@ -301,7 +301,13 @@ def analyze_project(
         )
 
     # 6. LLM analysis
-    from ..llm import CostTracker, LLMError, analyze_file_with_context, synthesize_project
+    from ..plugin import require_llm_plugin
+
+    _llm = require_llm_plugin()
+    CostTracker = _llm.CostTracker
+    LLMError = _llm.LLMError
+    analyze_file_with_context = _llm.analyze_file_with_context
+    synthesize_project = _llm.synthesize_project
 
     cost_tracker = CostTracker()
 

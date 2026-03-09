@@ -511,7 +511,10 @@ def fix_file(
 
     # Part 2: LLM fixes for remaining findings
     if use_llm and remaining:
-        from ..llm import CostTracker
+        from ..plugin import require_llm_plugin
+
+        llm_mod = require_llm_plugin()
+        CostTracker = llm_mod.CostTracker
 
         if cost_tracker is None:
             cost_tracker = CostTracker()

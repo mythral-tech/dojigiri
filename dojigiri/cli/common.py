@@ -82,7 +82,10 @@ def _apply_profile(args: argparse.Namespace) -> None:
 
 def _setup_llm_backend(args: argparse.Namespace, project_config: dict | None = None) -> None:
     """Configure LLM backend from CLI args + project config."""
-    from ..llm import set_backend_config
+    from ..plugin import require_llm_plugin
+
+    llm = require_llm_plugin()
+    set_backend_config = llm.set_backend_config
 
     llm_config = get_llm_config(project_config)
 
