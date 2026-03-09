@@ -30,6 +30,7 @@ _SCAN_FINDING_SCHEMA = {
         "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
     },
     "required": ["line", "severity", "category", "rule", "message", "confidence"],
+    "additionalProperties": False,
 }
 
 SCAN_RESPONSE_TOOL = {
@@ -45,6 +46,7 @@ SCAN_RESPONSE_TOOL = {
             },
         },
         "required": ["findings"],
+        "additionalProperties": False,
     },
 }
 
@@ -64,6 +66,7 @@ _DEBUG_FINDING_SCHEMA = {
         "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
     },
     "required": ["line", "severity", "category", "title", "description", "confidence"],
+    "additionalProperties": False,
 }
 
 DEBUG_RESPONSE_TOOL = {
@@ -84,6 +87,7 @@ DEBUG_RESPONSE_TOOL = {
             },
         },
         "required": ["summary", "findings", "quick_wins"],
+        "additionalProperties": False,
     },
 }
 
@@ -105,6 +109,7 @@ OPTIMIZE_RESPONSE_TOOL = {
             },
         },
         "required": ["summary", "findings", "quick_wins"],
+        "additionalProperties": False,
     },
 }
 
@@ -125,6 +130,7 @@ _CROSS_FILE_FINDING_SCHEMA = {
         "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
     },
     "required": ["source_file", "target_file", "line", "severity", "category", "rule", "message", "confidence"],
+    "additionalProperties": False,
 }
 
 CROSS_FILE_RESPONSE_TOOL = {
@@ -143,6 +149,7 @@ CROSS_FILE_RESPONSE_TOOL = {
             },
         },
         "required": ["cross_file_findings", "local_findings"],
+        "additionalProperties": False,
     },
 }
 
@@ -168,6 +175,7 @@ SYNTHESIS_RESPONSE_TOOL = {
                         "suggestion": {"type": "string"},
                     },
                     "required": ["title", "severity", "description"],
+                    "additionalProperties": False,
                 },
             },
             "positive_patterns": {"type": "array", "items": {"type": "string"}},
@@ -181,10 +189,12 @@ SYNTHESIS_RESPONSE_TOOL = {
                         "description": {"type": "string"},
                     },
                     "required": ["priority", "title", "description"],
+                    "additionalProperties": False,
                 },
             },
         },
         "required": ["architecture_summary", "health_score", "architectural_issues", "positive_patterns", "recommendations"],
+        "additionalProperties": False,
     },
 }
 
@@ -208,10 +218,12 @@ FIX_RESPONSE_TOOL = {
                         "explanation": {"type": "string"},
                     },
                     "required": ["line", "rule", "original_code", "fixed_code", "explanation"],
+                    "additionalProperties": False,
                 },
             },
         },
         "required": ["fixes"],
+        "additionalProperties": False,
     },
 }
 
@@ -234,6 +246,7 @@ EXPLAIN_RESPONSE_TOOL = {
                         "lines": {"type": "string"},
                     },
                     "required": ["concept", "explanation"],
+                    "additionalProperties": False,
                 },
             },
             "data_flow": {"type": "string"},
@@ -247,10 +260,12 @@ EXPLAIN_RESPONSE_TOOL = {
                         "plain_english": {"type": "string"},
                     },
                     "required": ["rule", "plain_english"],
+                    "additionalProperties": False,
                 },
             },
         },
         "required": ["purpose", "key_concepts", "data_flow", "gotchas", "findings_explained"],
+        "additionalProperties": False,
     },
 }
 
