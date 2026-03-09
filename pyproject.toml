@@ -48,9 +48,9 @@ dev = [
 doji = "dojigiri.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/Inklling/Genesis"
-Repository = "https://github.com/Inklling/Genesis"
-Issues = "https://github.com/Inklling/Genesis/issues"
+Homepage = "https://github.com/Inklling/dojigiri"
+Repository = "https://github.com/Inklling/dojigiri"
+Issues = "https://github.com/Inklling/dojigiri/issues"
 
 [tool.setuptools.packages.find]
 include = ["dojigiri*"]

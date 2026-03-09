@@ -36,6 +36,7 @@ class Source(Enum):
     STATIC = "static"
     AST = "ast"
     LLM = "llm"
+    SCA = "sca"
 
 
 class Category(Enum):

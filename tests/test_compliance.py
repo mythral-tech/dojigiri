@@ -118,6 +118,7 @@ class TestCoverage:
             "god-class", "feature-envy",
             "long-method", "near-duplicate", "semantic-clone", "dead-function",
             "arg-count-mismatch", "cross-file-issue", "mutable-default",
+            "vulnerable-dependency",
         }
         all_known = rule_names | semantic_rules
         orphans = [k for k in CWE_MAP if k not in all_known]

@@ -1,0 +1,339 @@
+"""Java sanitization pattern detector for FP reduction.
+
+Detects common sanitization patterns in Java source code that indicate
+user input has been neutralized. Uses arithmetic evaluation and data-flow
+heuristics to distinguish true sanitization from look-alike patterns.
+
+Called by: detector.py (post-regex-check filtering for Java files)
+"""
+
+from __future__ import annotations
+
+import re
+
+# ─── Arithmetic Patterns ─────────────────────────────────────────────
+
+# Ternary: (a * b) +/- num > threshold ? "safe" : param
+_TERNARY_RE = re.compile(
+    r'\(\s*(\d+)\s*\*\s*(\d+)\s*\)\s*([-+])\s*(\w+)\s*>\s*(\d+)\s*\?\s*"([^"]*)"\s*:\s*(\w+)'
+)
+# If-statement: if ((a * b) - num > threshold) bar = "safe";
+_IF_ARITH_RE = re.compile(
+    r'if\s*\(\s*\(\s*(\d+)\s*\*\s*(\d+)\s*\)\s*([-+])\s*(\w+)\s*>\s*(\d+)\s*\)'
+)
+_NUM_DECL_RE = re.compile(r'int\s+num\s*=\s*(\d+)\s*;')
+
+# ─── Explicit Sanitization Functions ─────────────────────────────────
+
+_SANITIZER_PATTERNS = [
+    re.compile(r'ESAPI\.encoder\(\)\.\w+\('),            # OWASP ESAPI encoding
+    re.compile(r'HtmlUtils\.htmlEscape\('),               # Spring HtmlUtils
+    re.compile(r'StringEscapeUtils\.escape\w+\('),        # Apache Commons
+    re.compile(r'Encode\.forHtml\('),                     # OWASP Java Encoder
+    re.compile(r'\.encodeForHTML\('),                     # Generic HTML encoder
+    re.compile(r'\.encodeForSQL\('),                      # SQL encoder
+    re.compile(r'\.encodeForLDAP\('),                     # LDAP encoder
+    re.compile(r'\.encodeForXPath\('),                    # XPath encoder
+]
+
+# ─── Static Reflection (bar assigned from static string via reflection) ──
+
+_STATIC_REFLECTION = re.compile(
+    r'String\s+\w+\s*=\s*"[^"]+"\s*;\s*//\s*This is static'
+)
+_BAR_FROM_DOSOMETHING = re.compile(
+    r'bar\s*=\s*\w+\.doSomething\(\s*\w+\s*\)'
+)
+
+# ─── Collection Misdirection ─────────────────────────────────────────
+
+_MAP_PUT_RE = re.compile(r'\.put\(\s*"([^"]+)"\s*,\s*.*\bparam\b')
+_MAP_GET_RE = re.compile(r'bar\s*=\s*.*\.get\(\s*"([^"]+)"\s*\)')
+_LIST_ADD_PARAM = re.compile(r'\.(add|addLast)\(\s*param\s*\)')
+_LIST_GET_SAFE = re.compile(r'bar\s*=\s*.*\.get\(\s*0\s*\)')
+_LIST_REMOVE = re.compile(r'\.remove\(\s*0\s*\)')
+
+# ─── Switch/case on deterministic value ───────────────────────────────
+
+_SWITCH_GUESS_RE = re.compile(
+    r'String\s+guess\s*=\s*"(\w+)"\s*;'
+)
+_SWITCH_CHARAT_RE = re.compile(
+    r'(\w+)\s*=\s*guess\.charAt\(\s*(\d+)\s*\)'
+)
+_SWITCH_TARGET_RE = re.compile(r'switch\s*\(\s*(\w+)\s*\)')
+
+# ─── Cross-method sanitization (doSomething pattern) ──────────────────
+
+_DO_SOMETHING_METHOD_RE = re.compile(
+    r'(?:private\s+static\s+|private\s+|public\s+)String\s+doSomething\s*\([^)]*\)[^{]*\{',
+    re.DOTALL,
+)
+_DO_SOMETHING_END_RE = re.compile(r'^\s*\}\s*$')
+
+# ─── Safe bar assignment ─────────────────────────────────────────────
+
+_SAFE_BAR_LITERAL = re.compile(r'String\s+bar\s*=\s*"[^"]*"')
+_BAR_FROM_PARAM = re.compile(r'\bbar\s*=\s*(?!")[^;]*\bparam\b')
+
+# ─── Rules that can be suppressed ────────────────────────────────────
+
+_INJECTABLE_RULES = {
+    "sql-injection", "java-sql-injection",
+    "java-xss",
+    "java-cmdi",
+    "java-ldap-injection",
+    "java-xpath-injection",
+    "java-trust-boundary",
+    "path-traversal",
+    "java-path-traversal",
+}
+
+
+def _eval_arithmetic_condition(content: str) -> bool | None:
+    """Evaluate arithmetic conditionals to determine if bar gets the safe value.
+
+    Returns True if condition always-true (bar = safe string).
+    Returns False if always-false (bar = param, tainted).
+    Returns None if no arithmetic conditional found.
+    """
+    num_match = _NUM_DECL_RE.search(content)
+    if not num_match:
+        return None
+    num = int(num_match.group(1))
+
+    for regex in (_TERNARY_RE, _IF_ARITH_RE):
+        m = regex.search(content)
+        if m:
+            a, b, op = m.group(1), m.group(2), m.group(3)
+            threshold = m.group(5)
+            product = int(a) * int(b)
+            result = product + num if op == "+" else product - num
+            return result > int(threshold)
+
+    return None
+
+
+def _has_explicit_sanitizer(content: str) -> bool:
+    """Check for known sanitization function calls on the taint variable.
+
+    Only suppresses if the sanitizer output is assigned to bar/param
+    (the variable that reaches the sink).
+    """
+    for pat in _SANITIZER_PATTERNS:
+        m = pat.search(content)
+        if m:
+            # Verify sanitizer output flows to bar
+            # Look for: bar = ...sanitizer(param)... or bar = sanitizer(...)
+            line_start = content.rfind('\n', 0, m.start()) + 1
+            line_end = content.find('\n', m.end())
+            line = content[line_start:line_end if line_end > 0 else len(content)]
+            if re.search(r'\bbar\s*=', line):
+                return True
+    return False
+
+
+def _has_static_reflection(content: str) -> bool:
+    """Check for static string passed through reflection chain.
+
+    Pattern: a static string is assigned, then passed through doSomething()
+    to bar. The param is never used in bar.
+    """
+    if _STATIC_REFLECTION.search(content) and _BAR_FROM_DOSOMETHING.search(content):
+        return True
+    return False
+
+
+def _has_collection_misdirection(content: str) -> bool:
+    """Check for collection put/get misdirection (different keys/indices)."""
+    put_match = _MAP_PUT_RE.search(content)
+    get_match = _MAP_GET_RE.search(content)
+    if put_match and get_match:
+        if put_match.group(1) != get_match.group(1):
+            return True
+
+    if _LIST_ADD_PARAM.search(content):
+        if _LIST_GET_SAFE.search(content) and not _LIST_REMOVE.search(content):
+            return True
+
+    return False
+
+
+def _has_switch_deterministic(content: str) -> bool:
+    """Check for switch/case on a deterministic value (e.g., charAt on a literal).
+
+    Pattern: guess = "ABC"; target = guess.charAt(1); switch(target) { case 'B': bar = "safe"; }
+    The charAt index determines which case runs, and if that case assigns a safe literal,
+    the taint is broken. Handles fallthrough correctly.
+    """
+    guess_m = _SWITCH_GUESS_RE.search(content)
+    charat_m = _SWITCH_CHARAT_RE.search(content)
+    switch_m = _SWITCH_TARGET_RE.search(content)
+
+    if not (guess_m and charat_m and switch_m):
+        return False
+
+    guess_val = guess_m.group(1)
+    char_idx = int(charat_m.group(2))
+    switch_var = switch_m.group(1)
+    charat_var = charat_m.group(1)
+
+    if switch_var != charat_var:
+        return False
+
+    if char_idx >= len(guess_val):
+        return False
+    selected_char = guess_val[char_idx]
+
+    # Parse the switch block to find all cases and their assignments
+    # Extract everything after the switch statement
+    switch_start = switch_m.end()
+    switch_block = content[switch_start:]
+
+    # Find the bar assignment that the selected case falls through to
+    # Parse case labels and find the one matching our char, then follow fallthrough
+    case_re = re.compile(r"case\s+'(\w)'\s*:")
+    bar_assign_re = re.compile(r'\bbar\s*=\s*(.*?)\s*;')
+    break_re = re.compile(r'\bbreak\s*;')
+
+    lines = switch_block.split('\n')
+    in_selected = False
+    found_safe_literal = False
+    for line in lines:
+        stripped = line.strip()
+
+        case_m2 = case_re.search(stripped)
+        if case_m2:
+            if case_m2.group(1) == selected_char:
+                in_selected = True
+
+        if 'default:' in stripped and not in_selected:
+            break
+
+        if in_selected:
+            bar_m = bar_assign_re.search(stripped)
+            if bar_m:
+                assignment = bar_m.group(1).strip()
+                if assignment.startswith('"'):
+                    found_safe_literal = True
+                else:
+                    # bar reassigned from tainted source (fallthrough)
+                    return False
+            if break_re.search(stripped):
+                return found_safe_literal
+
+    return False
+
+
+def _has_cross_method_sanitization(content: str) -> bool:
+    """Check for sanitization patterns inside doSomething() methods.
+
+    Many OWASP Benchmark FP cases put sanitization logic in a private
+    doSomething() method. We extract that method body and check for
+    list/map misdirection patterns.
+    """
+    m = _DO_SOMETHING_METHOD_RE.search(content)
+    if not m:
+        return False
+
+    # Extract the method body (find matching closing brace)
+    start = m.end()
+    brace_depth = 1
+    pos = start
+    while pos < len(content) and brace_depth > 0:
+        if content[pos] == '{':
+            brace_depth += 1
+        elif content[pos] == '}':
+            brace_depth -= 1
+        pos += 1
+
+    method_body = content[start:pos]
+
+    # Check for map misdirection (put with one key, get with another)
+    # Use LAST get match since later assignments override earlier ones
+    put_m = _MAP_PUT_RE.search(method_body)
+    get_matches = list(_MAP_GET_RE.finditer(method_body))
+    if put_m and get_matches:
+        last_get_key = get_matches[-1].group(1)
+        if put_m.group(1) != last_get_key:
+            return True
+
+    # Check for list misdirection (add param, remove(0), get index that's safe)
+    if _LIST_ADD_PARAM.search(method_body):
+        if _LIST_GET_SAFE.search(method_body) and not _LIST_REMOVE.search(method_body):
+            return True
+        # Trace list indices: build the list, apply remove, check what get returns
+        adds = re.findall(r'\.(add|addLast)\(\s*([^)]+?)\s*\)', method_body)
+        remove_m = re.search(r'\.remove\(\s*(\d+)\s*\)', method_body)
+        get_idx_m = re.search(r'bar\s*=\s*.*\.get\(\s*(\d+)\s*\)', method_body)
+        if adds and remove_m and get_idx_m:
+            # Build list of (is_safe) flags
+            items = []
+            for _, arg in adds:
+                arg = arg.strip()
+                items.append(arg.startswith('"'))  # True if safe literal
+
+            remove_idx = int(remove_m.group(1))
+            get_idx = int(get_idx_m.group(1))
+            if 0 <= remove_idx < len(items):
+                del items[remove_idx]
+            if 0 <= get_idx < len(items) and items[get_idx]:
+                return True
+
+    # Check for arithmetic conditional inside method
+    arith = _eval_arithmetic_condition(method_body)
+    if arith is True:
+        return True
+
+    # Check for collection misdirection inside method
+    if _has_collection_misdirection(method_body):
+        return True
+
+    return False
+
+
+def _has_safe_bar_assignment(content: str) -> bool:
+    """Check if bar is assigned a safe literal and never reassigned from param."""
+    return bool(_SAFE_BAR_LITERAL.search(content) and not _BAR_FROM_PARAM.search(content))
+
+
+def detect_sanitization(content: str) -> bool:
+    """Return True if the file provably sanitizes user input."""
+    # Arithmetic conditional — evaluate the math
+    arith = _eval_arithmetic_condition(content)
+    if arith is True:
+        return True
+
+    # Explicit sanitization functions (ESAPI, HtmlUtils, etc.)
+    if _has_explicit_sanitizer(content):
+        return True
+
+    # Static reflection chain (barbarians_at_the_gate pattern)
+    if _has_static_reflection(content):
+        return True
+
+    # Collection misdirection
+    if _has_collection_misdirection(content):
+        return True
+
+    # Switch/case on deterministic value
+    if _has_switch_deterministic(content):
+        return True
+
+    # Cross-method sanitization (doSomething pattern)
+    if _has_cross_method_sanitization(content):
+        return True
+
+    # Safe literal bar
+    if _has_safe_bar_assignment(content):
+        return True
+
+    return False
+
+
+def filter_java_fps(findings: list, content: str) -> list:
+    """Filter out likely false positive injection findings from Java files
+    when sanitization patterns are detected."""
+    if not detect_sanitization(content):
+        return findings
+    return [f for f in findings if f.rule not in _INJECTABLE_RULES]

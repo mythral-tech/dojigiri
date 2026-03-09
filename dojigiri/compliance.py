@@ -107,6 +107,18 @@ CWE_MAP: dict[str, str] = {
     # Fold 7 additions
     "os-exec": "CWE-78",
     "os-spawn": "CWE-78",
+    # Java-specific rules
+    "java-sql-injection": "CWE-89",
+    "java-xss": "CWE-79",
+    "java-cmdi": "CWE-78",
+    "java-ldap-injection": "CWE-90",
+    "java-xpath-injection": "CWE-643",
+    "java-weak-crypto": "CWE-327",
+    "java-weak-hash": "CWE-328",
+    "java-weak-random": "CWE-330",
+    "java-trust-boundary": "CWE-501",
+    "java-insecure-cookie": "CWE-614",
+    "java-path-traversal": "CWE-22",
     # Semantic/AST rules (detector.py, semantic/)
     "syntax-error": "CWE-670",
     "unused-import": "CWE-561",
@@ -141,6 +153,8 @@ CWE_MAP: dict[str, str] = {
     "dead-function": "CWE-561",
     "arg-count-mismatch": "CWE-628",
     "cross-file-issue": "CWE-710",
+    # SCA
+    "vulnerable-dependency": "CWE-1395",
 }
 
 
@@ -254,6 +268,20 @@ NIST_MAP: dict[str, list[str]] = {
     "unreachable-code": ["SA-11"],
     "unused-import": ["SA-11"],
     "unused-variable": ["SA-11"],
+    # SCA
+    "vulnerable-dependency": ["RA-5", "SI-2"],
+    # Java-specific rules
+    "java-sql-injection": ["SI-10", "SI-16"],
+    "java-xss": ["SI-10", "SI-16"],
+    "java-cmdi": ["SI-10", "SI-16"],
+    "java-ldap-injection": ["SI-10", "SI-16"],
+    "java-xpath-injection": ["SI-10", "SI-16"],
+    "java-weak-crypto": ["SC-13", "SC-12"],
+    "java-weak-hash": ["SC-13", "SC-12"],
+    "java-weak-random": ["SC-13", "SC-12"],
+    "java-trust-boundary": ["SI-10", "AC-4"],
+    "java-insecure-cookie": ["SC-8", "SC-23"],
+    "java-path-traversal": ["SI-10", "AC-3"],
 }
 
 

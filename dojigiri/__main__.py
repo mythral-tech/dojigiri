@@ -38,7 +38,7 @@ from .config import (
 from .detector import analyze_file_static
 from .discovery import detect_language
 from .storage import list_reports, load_baseline_report, load_latest_report
-from .types import Confidence, Severity
+from .types import Confidence, Severity, SEVERITY_ORDER
 
 SEVERITY_MAP = {"critical": Severity.CRITICAL, "warning": Severity.WARNING, "info": Severity.INFO}
 CONFIDENCE_MAP = {"high": Confidence.HIGH, "medium": Confidence.MEDIUM, "low": Confidence.LOW}
@@ -1105,6 +1105,87 @@ def cmd_review(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_sca(args: argparse.Namespace) -> int:
+    """Scan dependencies for known vulnerabilities via OSV."""
+    from .sca.scanner import scan_sca
+    from .types import ScanReport, Severity
+
+    root = Path(args.path).resolve()
+    if not root.exists():
+        print(f"Error: {root} does not exist", file=sys.stderr)
+        return 1
+
+    offline = getattr(args, "offline", False)
+    if offline:
+        print("Error: SCA requires network access to query the OSV vulnerability database.", file=sys.stderr)
+        print("Remove --offline to use SCA.", file=sys.stderr)
+        return 1
+
+    min_sev = SEVERITY_MAP.get(args.min_severity, Severity.INFO)
+    t0 = time.time()
+
+    analyses = scan_sca(root, timeout=args.timeout)
+
+    # Filter by severity
+    for fa in analyses:
+        fa.findings = [f for f in fa.findings if SEVERITY_ORDER.get(f.severity, 2) <= SEVERITY_ORDER.get(min_sev, 2)]
+    analyses = [fa for fa in analyses if fa.findings]
+
+    elapsed = time.time() - t0
+
+    if args.output == "json":
+        import json as json_mod
+
+        report = ScanReport(
+            root=str(root),
+            mode="sca",
+            files_scanned=len(analyses),
+            files_skipped=0,
+            file_analyses=analyses,
+        )
+        print(json_mod.dumps(report.to_dict(), indent=2))
+    elif args.output == "sarif":
+        from .sarif import findings_to_sarif
+        import json as json_mod
+
+        all_findings = [f for fa in analyses for f in fa.findings]
+        sarif = findings_to_sarif(all_findings, str(root))
+        print(json_mod.dumps(sarif, indent=2))
+    else:
+        # Text output
+        total_vulns = sum(len(fa.findings) for fa in analyses)
+        if not analyses:
+            print(f"No vulnerable dependencies found. ({elapsed:.1f}s)")
+            return 0
+
+        critical = sum(1 for fa in analyses for f in fa.findings if f.severity == Severity.CRITICAL)
+        warnings = sum(1 for fa in analyses for f in fa.findings if f.severity == Severity.WARNING)
+        info = sum(1 for fa in analyses for f in fa.findings if f.severity == Severity.INFO)
+
+        print(f"\n{'=' * 60}")
+        print(f"  SCA Results — {total_vulns} vulnerable dependencies found")
+        print(f"  {critical} critical · {warnings} warning · {info} info")
+        print(f"{'=' * 60}\n")
+
+        for fa in analyses:
+            print(f"  {fa.path}")
+            for f in fa.findings:
+                sev_tag = f.severity.value.upper()
+                color = "\033[91m" if f.severity == Severity.CRITICAL else "\033[93m" if f.severity == Severity.WARNING else "\033[94m"
+                reset = "\033[0m"
+                print(f"    {color}[{sev_tag}]{reset} {f.message}")
+                if f.suggestion:
+                    print(f"           → {f.suggestion}")
+            print()
+
+        print(f"  Scanned in {elapsed:.1f}s")
+        print()
+
+    if any(f.severity == Severity.CRITICAL for fa in analyses for f in fa.findings):
+        return 2
+    return 0
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="doji",
@@ -1345,6 +1426,14 @@ def main() -> None:
     # privacy
     p_privacy = subparsers.add_parser("privacy", help="Show data handling and privacy information")
     p_privacy.set_defaults(func=cmd_privacy)
+
+    # sca
+    p_sca = subparsers.add_parser("sca", help="Scan dependencies for known vulnerabilities (CVEs)")
+    p_sca.add_argument("path", nargs="?", default=".", help="Project directory to scan (default: current directory)")
+    p_sca.add_argument("--output", choices=["text", "json", "sarif"], default="text", help="Output format")
+    p_sca.add_argument("--min-severity", choices=["critical", "warning", "info"], default="info", help="Minimum severity to report")
+    p_sca.add_argument("--timeout", type=int, default=30, help="HTTP timeout for OSV API in seconds (default: 30)")
+    p_sca.set_defaults(func=cmd_sca)
 
     args = parser.parse_args()
     if not args.command:

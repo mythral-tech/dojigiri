@@ -1410,6 +1410,12 @@ def analyze_file_static(filepath: str, content: str, language: str, custom_rules
 
     findings = run_regex_checks(content, filepath, language, custom_rules=custom_rules)
 
+    # Java: filter false positives from sanitized injection patterns
+    if language == "java":
+        from .java_sanitize import filter_java_fps
+
+        findings = filter_java_fps(findings, content)
+
     # AST checks: tree-sitter for all languages, Python ast as supplement/fallback
     from .semantic.checks import run_tree_sitter_checks
 

@@ -54,3 +54,10 @@ RELEASE_CHECKLIST.md
 INCIDENT.md
 dojigiri/HANDOFF.md
 reviews/
+
+# Build/tool caches
+.coverage
+semgrep_benchmark.json
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
