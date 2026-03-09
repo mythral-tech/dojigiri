@@ -354,7 +354,7 @@ class TestParallelDeepScan:
         test_file.write_text("x = 1\n", encoding="utf-8")
 
         # Mock the LLM to avoid actual API calls
-        with patch("dojigiri.analyzer.analyze_chunk", return_value=[]):
+        with patch("dojigiri.llm.analyze_chunk", return_value=[]):
             with patch("dojigiri.analyzer.chunk_file", return_value=[]):
                 report = scan_deep(tmp_path, max_workers=1, use_cache=False)
                 assert report.files_scanned >= 0

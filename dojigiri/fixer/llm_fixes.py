@@ -30,8 +30,11 @@ def generate_llm_fixes(
         return []
 
     try:
-        from ..llm import CostTracker
-        from ..llm import fix_file as llm_fix_file
+        from ..plugin import require_llm_plugin
+
+        _llm = require_llm_plugin()
+        CostTracker = _llm.CostTracker
+        llm_fix_file = _llm.fix_file
 
         if cost_tracker is None:
             cost_tracker = CostTracker()
