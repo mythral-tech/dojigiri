@@ -219,7 +219,7 @@ All defined in `types.py`:
 
 ## File Count & Size
 
-- **57 Python modules** across 5 packages (`dojigiri/`, `semantic/`, `graph/`, `fixer/`, `sca/`)
-- **~26,000 lines** production code + **~33,000 lines** tests (80 test files)
-- Largest files: `__main__.py` (~1450 lines, CLI), `languages.py` (regex rules), `ast_checks.py` (Python AST checks)
+- **72 Python modules** across 7 packages (`dojigiri/`, `cli/`, `rules/`, `semantic/`, `graph/`, `fixer/`, `sca/`)
+- **~26,500 lines** production code + **~33,000 lines** tests (80 test files)
+- Largest files: `fixer/deterministic.py` (~1300 lines), `llm.py` (~1285 lines), `ast_checks.py` (~1012 lines)
 - Compiled to standalone `.exe` via Nuitka (Python → C → native binary)
