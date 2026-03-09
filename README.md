@@ -1,6 +1,6 @@
 # Dojigiri
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-1088%20passing-brightgreen.svg)]()
 [![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-Youden%20%2B83.4%25-brightgreen.svg)]()
@@ -222,7 +222,7 @@ x = eval(user_input)  # doji:ignore(dangerous-eval)
 | **SARIF output** | Yes | Yes (plugin) | Yes | No |
 | **OWASP Benchmark** | Youden +83.4% | Not published | Not published (OSS) | Varies by language |
 | **Self-hosted** | CLI / pip | CLI / pip | CLI / Docker | Server (JVM) |
-| **License** | MIT | Apache 2.0 | LGPL 2.1 | LGPL 3.0 |
+| **License** | BSL 1.1 | Apache 2.0 | LGPL 2.1 | LGPL 3.0 |
 
 Comparison based on publicly available documentation as of March 2026. Semgrep Pro and SonarQube commercial editions offer additional features not reflected here.
 
@@ -255,4 +255,6 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full system map.
 
 ## License
 
-MIT -- see [LICENSE](LICENSE) for details.
+BSL 1.1 (Business Source License) -- see [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md) for details.
+
+Free for development, testing, personal projects, and education. Production use in commercial products requires a commercial license. Converts to Apache 2.0 on 2030-03-09.

@@ -662,6 +662,212 @@ PYTHON_RULES: list[Rule] = _compile(
             "TripleDES/3DES is deprecated — slow and approaching theoretical breaks",
             "Use AES-256 or ChaCha20 instead",
         ),
+        # ── Flask/Django security ─────────────────────────────────────────
+        # Hardcoded SECRET_KEY — must be a string assignment, not env lookup
+        (
+            r"""^\s*SECRET_KEY\s*=\s*['"][A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "hardcoded-secret-key",
+            "SECRET_KEY hardcoded in source — session hijacking and forgery risk",
+            "Load SECRET_KEY from environment variable or secrets manager",
+        ),
+        # Django CSRF middleware disabled
+        (
+            r"""(?:MIDDLEWARE(?:_CLASSES)?)\s*=\s*\[(?:[^\]]*?)(?!.*CsrfViewMiddleware).*?\]""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "csrf-middleware-disabled",
+            "CsrfViewMiddleware not found in MIDDLEWARE — CSRF protection disabled",
+            "Add 'django.middleware.csrf.CsrfViewMiddleware' to MIDDLEWARE",
+        ),
+        # @csrf_exempt decorator — disables CSRF on specific view
+        (
+            r"@csrf_exempt\b",
+            Severity.WARNING,
+            Category.SECURITY,
+            "csrf-exempt",
+            "@csrf_exempt disables CSRF protection on this view",
+            "Remove @csrf_exempt or implement alternative CSRF validation",
+        ),
+        # Django ALLOWED_HOSTS wildcard — allows any host header
+        (
+            r"""ALLOWED_HOSTS\s*=\s*\[\s*['\"]\*['\"]""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "django-allowed-hosts-wildcard",
+            "ALLOWED_HOSTS = ['*'] accepts any Host header — HTTP Host header attacks",
+            "Set ALLOWED_HOSTS to specific domain names",
+        ),
+        # Django RawSQL / raw() — SQL injection risk
+        (
+            r"\.raw\s*\(\s*(?!['\"]SELECT\s)(?!['\"]INSERT\s)|RawSQL\s*\(",
+            Severity.WARNING,
+            Category.SECURITY,
+            "django-raw-sql",
+            "Raw SQL query — injection risk if parameters are not properly escaped",
+            "Use Django ORM queries or pass parameters via the params argument",
+        ),
+        # Flask/Django unsafe redirect — open redirect via user input
+        (
+            r"\bredirect\s*\(\s*(?:request\.|f['\"]|[a-zA-Z_]\w*(?:\[|\.))",
+            Severity.WARNING,
+            Category.SECURITY,
+            "unsafe-redirect",
+            "Redirect target may be user-controlled — open redirect vulnerability",
+            "Validate redirect URL against allowlist or use url_for()/reverse()",
+        ),
+        # Flask send_file with user input — path traversal
+        (
+            r"\bsend_file\s*\(\s*(?:request\.|f['\"]|os\.path\.join\s*\([^)]*request\.)",
+            Severity.WARNING,
+            Category.SECURITY,
+            "flask-send-file-traversal",
+            "send_file() with user-controlled path — directory traversal risk",
+            "Use send_from_directory() with a fixed base directory instead",
+        ),
+        # ── Cryptography — weak TLS ──────────────────────────────────────
+        # Weak TLS protocol versions — SSLv2, SSLv3, TLSv1, TLSv1.1
+        (
+            r"\bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "weak-tls-version",
+            "Weak TLS protocol version — SSLv2/v3/TLS1.0/1.1 are broken or deprecated",
+            "Use ssl.PROTOCOL_TLS_CLIENT or ssl.TLSVersion.TLSv1_2 minimum",
+        ),
+        # SSLContext with minimum_version set to broken protocol
+        (
+            r"minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "weak-tls-version",
+            "TLS minimum version set to deprecated protocol",
+            "Set minimum_version to ssl.TLSVersion.TLSv1_2 or TLSv1_3",
+        ),
+        # pyOpenSSL weak TLS method
+        (
+            r"\bSSL\.(?:SSLv2_METHOD|SSLv3_METHOD|SSLv23_METHOD|TLSv1_METHOD|TLSv1_1_METHOD)\b",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "weak-tls-version",
+            "pyOpenSSL weak TLS method — use TLS 1.2+ only",
+            "Use SSL.TLSv1_2_METHOD or SSL.TLS_METHOD with proper options",
+        ),
+        # Weak cipher suites — RC4, DES, NULL, EXPORT, anon
+        (
+            r"""set_ciphers\s*\(\s*['"](?:[^'"]*(?:RC4|DES|NULL|EXPORT|anon|eNULL|aNULL)[^'"]*)['"]\s*\)""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "weak-cipher-suite",
+            "Weak cipher suite configured — RC4/DES/NULL/EXPORT/anon ciphers are broken",
+            "Use strong cipher suites: set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM')",
+        ),
+        # ── Authentication ────────────────────────────────────────────────
+        # Empty password comparison — if password == ""
+        (
+            r"""(?:password|passwd|pass|secret)\s*(?:==|!=)\s*['"]["']""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "empty-password-check",
+            "Comparing password against empty string — weak authentication logic",
+            "Use proper password validation with minimum length/complexity requirements",
+        ),
+        # No password / allow_agent patterns in connection functions
+        (
+            r"""\.connect\s*\([^)]*password\s*=\s*['"]["']""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "empty-password-connection",
+            "Connection with empty password string — authentication bypass risk",
+            "Require non-empty password from secure credential store",
+        ),
+        # ── Network / CORS / Headers ─────────────────────────────────────
+        # CORS wildcard — Access-Control-Allow-Origin: *
+        (
+            r"""(?:Access-Control-Allow-Origin|CORS_ORIGIN_ALLOW_ALL|CORS_ALLOW_ALL_ORIGINS)\s*[:=]\s*(?:['\"]?\*['\"]?|True)""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "cors-wildcard",
+            "CORS wildcard allows any origin — credentials and data may leak cross-origin",
+            "Specify allowed origins explicitly via an allowlist",
+        ),
+        # Flask CORS with wildcard origins
+        (
+            r"\bCORS\s*\(\s*\w+\s*(?:,\s*origins\s*=\s*['\"]?\*['\"]?)?(?:\s*\))",
+            Severity.WARNING,
+            Category.SECURITY,
+            "cors-wildcard",
+            "Flask-CORS with default wildcard origin — all cross-origin requests allowed",
+            "Pass origins=['https://yourdomain.com'] to restrict allowed origins",
+        ),
+        # Missing security headers — X-Content-Type-Options / X-Frame-Options
+        # (this is a settings audit for Django)
+        (
+            r"^\s*(?:SECURE_BROWSER_XSS_FILTER|X_FRAME_OPTIONS|SECURE_CONTENT_TYPE_NOSNIFF)\s*=\s*False",
+            Severity.WARNING,
+            Category.SECURITY,
+            "security-header-disabled",
+            "Security header explicitly disabled — browser protections weakened",
+            "Set to True or remove the override to use Django's secure defaults",
+        ),
+        # Django SECURE_SSL_REDIRECT disabled
+        (
+            r"^\s*SECURE_SSL_REDIRECT\s*=\s*False",
+            Severity.INFO,
+            Category.SECURITY,
+            "ssl-redirect-disabled",
+            "SECURE_SSL_REDIRECT=False — HTTP traffic not redirected to HTTPS",
+            "Set SECURE_SSL_REDIRECT=True in production",
+        ),
+        # ── Deserialization — additional coverage ─────────────────────────
+        # cpickle (Python 2 compat, sometimes imported in Py3 codebases)
+        (
+            r"\b(?:cPickle|_pickle)\.(?:loads?\s*\(|Unpickler\s*\()",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "pickle-unsafe",
+            "cPickle/_pickle deserialization can execute arbitrary code",
+            "Use json or msgpack for untrusted data",
+        ),
+        # ── File operations — zip slip single extract ─────────────────────
+        # ZipFile.extract() without path validation — single-file zip slip
+        (
+            r"\.extract\s*\(\s*(?!.*\bfilter\b)",
+            Severity.INFO,
+            Category.SECURITY,
+            "zipfile-extract-audit",
+            "Archive extract() — verify member path does not escape target directory",
+            "Check that extracted path starts with intended directory (no ../ traversal)",
+        ),
+        # ── Additional high-value rules ───────────────────────────────────
+        # Django SESSION_COOKIE_SECURE = False — session hijacking over HTTP
+        (
+            r"^\s*SESSION_COOKIE_SECURE\s*=\s*False",
+            Severity.WARNING,
+            Category.SECURITY,
+            "session-cookie-insecure",
+            "SESSION_COOKIE_SECURE=False — session cookie sent over HTTP",
+            "Set SESSION_COOKIE_SECURE=True in production to restrict to HTTPS",
+        ),
+        # Django SESSION_COOKIE_HTTPONLY = False — XSS can steal sessions
+        (
+            r"^\s*SESSION_COOKIE_HTTPONLY\s*=\s*False",
+            Severity.WARNING,
+            Category.SECURITY,
+            "session-cookie-no-httponly",
+            "SESSION_COOKIE_HTTPONLY=False — session cookie accessible to JavaScript",
+            "Set SESSION_COOKIE_HTTPONLY=True to prevent XSS-based session theft",
+        ),
+        # Flask app.run(host='0.0.0.0') — binding to all interfaces in production
+        (
+            r"""\.run\s*\([^)]*host\s*=\s*['"]0\.0\.0\.0['"]""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "bind-all-interfaces",
+            "Flask app binding to 0.0.0.0 — exposed to all network interfaces",
+            "Bind to 127.0.0.1 for local dev or use a reverse proxy in production",
+        ),
     ]
 )
 
