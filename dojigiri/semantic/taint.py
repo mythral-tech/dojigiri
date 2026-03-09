@@ -188,12 +188,19 @@ def _is_sanitized(
     config: LanguageConfig,
     tainted_var: str,
     func_scope_ids: set[int],
+    sink_line: int = 0,
 ) -> bool:
-    """Check if a tainted variable passes through a sanitizer."""
+    """Check if a tainted variable passes through a sanitizer before *sink_line*.
+
+    Only sanitization that occurs *before* the sink counts — a sanitizer
+    applied after the dangerous call is irrelevant.
+    """
     for asgn in semantics.assignments:
         if asgn.scope_id not in func_scope_ids:
             continue
         if asgn.name != tainted_var:
+            continue
+        if sink_line and asgn.line >= sink_line:
             continue
         for sanitizer in config.taint_sanitizer_patterns:
             if sanitizer in asgn.value_text:
@@ -202,6 +209,8 @@ def _is_sanitized(
     # Also check if sanitizer is called on the variable in any call
     for call in semantics.function_calls:
         if call.scope_id not in func_scope_ids:
+            continue
+        if sink_line and call.line >= sink_line:
             continue
         call_text = call.name
         if call.receiver:
@@ -362,7 +371,7 @@ def analyze_taint(
         # 4. Build findings
         for sink in sinks:
             # Check sanitization
-            if _is_sanitized(semantics, config, sink.variable, func_scope_ids):
+            if _is_sanitized(semantics, config, sink.variable, func_scope_ids, sink_line=sink.line):
                 continue
 
             # Find the source for this tainted variable

@@ -20,7 +20,7 @@ Tree-sitter grammars are included via `tree-sitter-language-pack`. For LLM featu
 pytest tests/ -q
 ```
 
-The full suite (1100+ tests) should pass. Two tests may be skipped on Windows due to Unix-specific permission checks. There are no external service dependencies for the test suite -- all LLM calls are mocked.
+The full suite (1426 tests) should pass. Two tests may be skipped on Windows due to Unix-specific permission checks. There are no external service dependencies for the test suite -- all LLM calls are mocked.
 
 ## Code Style
 
@@ -86,4 +86,4 @@ When filing an issue, include:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under the BSL 1.1.

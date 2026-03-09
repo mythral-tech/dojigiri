@@ -22,8 +22,7 @@ from __future__ import annotations
 
 import ast
 import logging
-import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .types import Category, CrossFileFinding, Finding, Severity, Source
 
@@ -267,7 +266,6 @@ def analyze_taint_ast(filepath: str, content: str) -> list[Finding]:
             for f in func_findings:
                 key = (f.line, id(f))  # Use source line for dedup
                 # Extract source line from message for dedup
-                src_line = f.line
                 if key not in seen:
                     seen.add(key)
                     findings.append(f)
@@ -688,7 +686,6 @@ def _extract_imports(tree: ast.Module) -> list[ImportInfo]:
 
 def _module_name_from_path(filepath: str) -> str:
     """Derive a module-style name from a file path (best effort)."""
-    import os
 
     # Strip .py extension and convert separators to dots
     name = filepath.replace("\\", "/")

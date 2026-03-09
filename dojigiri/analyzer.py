@@ -792,8 +792,9 @@ def scan_diff(
     skipped = 0
 
     # Load .doji-ignore patterns for diff scan (matches discovery.py behavior)
-    from .config import load_ignore_patterns
     import fnmatch as _fnmatch
+
+    from .config import load_ignore_patterns
 
     ignore_root = git_root
     ignore_patterns = load_ignore_patterns(ignore_root)

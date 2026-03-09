@@ -9,7 +9,17 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from dojigiri.mcp_server import doji_scan, doji_scan_file, doji_fix, doji_explain, doji_analyze_project
+from dojigiri.mcp_server import (
+    doji_scan,
+    doji_scan_file,
+    doji_fix,
+    doji_explain,
+    doji_analyze_project,
+    doji_sca,
+    resource_rules,
+    resource_languages,
+    resource_config,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -107,9 +117,8 @@ class TestDojiScan:
         assert "0 critical" in result
 
     def test_scan_nonexistent_path(self, tmp_path):
-        result = doji_scan(str(tmp_path / "nonexistent" / "path"))
-        assert "Error:" in result
-        assert "does not exist" in result
+        with pytest.raises(ValueError, match="does not exist"):
+            doji_scan(str(tmp_path / "nonexistent" / "path"))
 
     def test_scan_min_severity_filter(self, buggy_py_file):
         result_all = doji_scan(buggy_py_file, min_severity="info")
@@ -120,9 +129,8 @@ class TestDojiScan:
         assert "Findings:" in result_critical
 
     def test_scan_invalid_min_severity(self, buggy_py_file):
-        result = doji_scan(buggy_py_file, min_severity="banana")
-        assert "Error:" in result
-        assert "invalid min_severity" in result
+        with pytest.raises(ValueError, match="Invalid min_severity 'banana'"):
+            doji_scan(buggy_py_file, min_severity="banana")
 
     def test_scan_ignore_rules(self, buggy_py_file):
         result_full = doji_scan(buggy_py_file, min_severity="info")
@@ -169,15 +177,14 @@ class TestDojiScanFile:
         assert "python" in result
 
     def test_scan_file_nonexistent(self, tmp_path):
-        result = doji_scan_file(str(tmp_path / "nonexistent_file.py"))
-        assert "Error:" in result
+        with pytest.raises(ValueError, match="is not a file"):
+            doji_scan_file(str(tmp_path / "nonexistent_file.py"))
 
     def test_scan_file_unsupported_type(self, tmp_path):
         f = tmp_path / "data.xyz"
         f.write_text("some content", encoding="utf-8")
-        result = doji_scan_file(str(f))
-        assert "Error:" in result
-        assert "unsupported" in result
+        with pytest.raises(ValueError, match="unsupported"):
+            doji_scan_file(str(f))
 
     def test_scan_file_js(self, buggy_js_file):
         result = doji_scan_file(buggy_js_file)
@@ -185,8 +192,8 @@ class TestDojiScanFile:
         assert "javascript" in result
 
     def test_scan_file_directory_not_file(self, tmp_path):
-        result = doji_scan_file(str(tmp_path))
-        assert "Error:" in result
+        with pytest.raises(ValueError, match="is not a file"):
+            doji_scan_file(str(tmp_path))
 
 
 # ─── doji_fix ──────────────────────────────────────────────────────────
@@ -202,15 +209,14 @@ class TestDojiFix:
             assert "-" in result or "+" in result
 
     def test_fix_nonexistent_path(self, tmp_path):
-        result = doji_fix(str(tmp_path / "nonexistent_path"))
-        assert "Error:" in result
+        with pytest.raises(ValueError, match="does not exist"):
+            doji_fix(str(tmp_path / "nonexistent_path"))
 
     def test_fix_unsupported_file(self, tmp_path):
         f = tmp_path / "data.xyz"
         f.write_text("content", encoding="utf-8")
-        result = doji_fix(str(f))
-        assert "Error:" in result
-        assert "unsupported" in result
+        with pytest.raises(ValueError, match="Unsupported file type"):
+            doji_fix(str(f))
 
     def test_fix_does_not_modify_file(self, buggy_py_file):
         """Critical: doji_fix must be dry-run only — file content unchanged."""
@@ -256,8 +262,8 @@ class TestDojiExplain:
         assert "process" in result
 
     def test_explain_nonexistent(self, tmp_path):
-        result = doji_explain(str(tmp_path / "nonexistent_file.py"))
-        assert "Error:" in result
+        with pytest.raises(ValueError, match="is not a file"):
+            doji_explain(str(tmp_path / "nonexistent_file.py"))
 
     def test_explain_js(self, buggy_js_file):
         result = doji_explain(buggy_js_file)
@@ -274,13 +280,12 @@ class TestDojiAnalyzeProject:
         assert "2 files" in result or "files" in result
 
     def test_analyze_project_not_a_directory(self, buggy_py_file):
-        result = doji_analyze_project(buggy_py_file)
-        assert "Error:" in result
-        assert "not a directory" in result
+        with pytest.raises(ValueError, match="not a directory"):
+            doji_analyze_project(buggy_py_file)
 
     def test_analyze_project_nonexistent(self, tmp_path):
-        result = doji_analyze_project(str(tmp_path / "nonexistent_dir"))
-        assert "Error:" in result
+        with pytest.raises(ValueError, match="not a directory"):
+            doji_analyze_project(str(tmp_path / "nonexistent_dir"))
 
     def test_analyze_project_empty_dir(self, tmp_path):
         result = doji_analyze_project(str(tmp_path))
@@ -316,3 +321,92 @@ class TestToolSequences:
         file_result = doji_scan_file(buggy_py_file)
         assert "Scan:" in dir_result
         assert "File:" in file_result
+
+
+# ─── doji_sca ─────────────────────────────────────────────────────────
+
+class TestDojiSca:
+    def test_sca_no_lockfiles(self, tmp_path):
+        """Empty dir with no lockfiles returns clean message."""
+        result = doji_sca(str(tmp_path), offline=True)
+        assert "No vulnerable dependencies" in result or "no lockfiles" in result.lower()
+
+    def test_sca_with_requirements_txt(self, tmp_path):
+        """SCA parses a requirements.txt without crashing (offline mode)."""
+        req = tmp_path / "requirements.txt"
+        req.write_text("flask==2.0.0\nrequests==2.25.0\n", encoding="utf-8")
+        result = doji_sca(str(tmp_path), offline=True)
+        # Offline mode won't find vulns, but should not crash
+        assert isinstance(result, str)
+        assert "SCA:" in result
+
+    def test_sca_invalid_path_raises(self, tmp_path):
+        """SCA on a path outside allowed roots raises ValueError."""
+        with pytest.raises(ValueError, match="outside allowed"):
+            doji_sca("/nonexistent/forbidden/path", offline=True)
+
+    def test_sca_file_not_dir_raises(self, buggy_py_file):
+        """SCA requires a directory, not a file."""
+        with pytest.raises(ValueError, match="not a directory"):
+            doji_sca(buggy_py_file, offline=True)
+
+
+# ─── Resources ────────────────────────────────────────────────────────
+
+class TestResources:
+    def test_resource_rules_not_empty(self):
+        result = resource_rules()
+        assert isinstance(result, str)
+        assert len(result) > 0
+        assert "Rules" in result
+        # Should contain at least one known rule
+        assert "bare-except" in result or "eval-usage" in result
+
+    def test_resource_rules_contains_cwe(self):
+        result = resource_rules()
+        assert "CWE-" in result
+
+    def test_resource_languages_not_empty(self):
+        result = resource_languages()
+        assert isinstance(result, str)
+        assert len(result) > 0
+        assert "python" in result
+        assert "javascript" in result
+        assert ".py" in result
+
+    def test_resource_config_not_empty(self):
+        result = resource_config()
+        assert isinstance(result, str)
+        assert len(result) > 0
+        assert "Allowed roots" in result
+
+
+# ─── Error behavior (Phase 2A) ───────────────────────────────────────
+
+class TestErrorBehavior:
+    def test_scan_file_outside_roots_raises(self, tmp_path, monkeypatch):
+        """Paths outside allowed roots should raise ValueError."""
+        monkeypatch.setattr(
+            "dojigiri.mcp_server._allowed_roots",
+            [tmp_path.resolve()],
+        )
+        with pytest.raises(ValueError, match="outside allowed"):
+            doji_scan_file("/nonexistent/forbidden/file.py")
+
+    def test_scan_file_nonexistent_raises(self, tmp_path):
+        """Nonexistent file within allowed roots raises ValueError."""
+        with pytest.raises(ValueError, match="not a file"):
+            doji_scan_file(str(tmp_path / "nonexistent_file.py"))
+
+    def test_explain_outside_roots_raises(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(
+            "dojigiri.mcp_server._allowed_roots",
+            [tmp_path.resolve()],
+        )
+        with pytest.raises(ValueError, match="outside allowed"):
+            doji_explain("/nonexistent/forbidden/file.py")
+
+    def test_scan_invalid_severity_raises(self, buggy_py_file):
+        """Invalid severity should raise ValueError."""
+        with pytest.raises(ValueError, match="Invalid min_severity"):
+            doji_scan(buggy_py_file, min_severity="banana")

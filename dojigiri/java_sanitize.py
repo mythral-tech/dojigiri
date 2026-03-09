@@ -4,6 +4,10 @@ Detects common sanitization patterns in Java source code that indicate
 user input has been neutralized. Uses arithmetic evaluation and data-flow
 heuristics to distinguish true sanitization from look-alike patterns.
 
+Several filter functions are tuned specifically for the OWASP Benchmark
+synthetic test patterns and should not be assumed to generalize to
+production Java code.
+
 Called by: detector.py (post-regex-check filtering for Java files)
 """
 
@@ -122,7 +126,7 @@ _WEAK_HASH_RULES = {
 
 
 def _eval_arithmetic_condition(content: str) -> bool | None:
-    """Evaluate arithmetic conditionals to determine if bar gets the safe value.
+    """Evaluate arithmetic conditionals to determine if bar gets the safe value.  # [BENCHMARK-SPECIFIC]
 
     Returns True if condition always-true (bar = safe string).
     Returns False if always-false (bar = param, tainted).
@@ -146,7 +150,7 @@ def _eval_arithmetic_condition(content: str) -> bool | None:
 
 
 def _has_explicit_sanitizer(content: str) -> bool:
-    """Check for known sanitization function calls on the taint variable.
+    """Check for known sanitization function calls on the taint variable.  # [GENERAL]
 
     Only suppresses if the sanitizer output is assigned to bar/param
     (the variable that reaches the sink).
@@ -165,7 +169,7 @@ def _has_explicit_sanitizer(content: str) -> bool:
 
 
 def _has_static_reflection(content: str) -> bool:
-    """Check for static string passed through reflection chain.
+    """Check for static string passed through reflection chain.  # [BENCHMARK-SPECIFIC]
 
     Pattern: a static string is assigned, then passed through doSomething()
     to bar. The param is never used in bar.
@@ -176,7 +180,7 @@ def _has_static_reflection(content: str) -> bool:
 
 
 def _has_collection_misdirection(content: str) -> bool:
-    """Check for collection put/get misdirection (different keys/indices)."""
+    """Check for collection put/get misdirection (different keys/indices).  # [BENCHMARK-SPECIFIC]"""
     put_matches = list(_MAP_PUT_RE.finditer(content))
     # Use LAST get match since later assignments override earlier ones
     get_matches = list(_MAP_GET_RE.finditer(content))
@@ -224,7 +228,7 @@ def _has_collection_misdirection(content: str) -> bool:
 
 
 def _has_switch_deterministic(content: str) -> bool:
-    """Check for switch/case on a deterministic value (e.g., charAt on a literal).
+    """Check for switch/case on a deterministic value (e.g., charAt on a literal).  # [BENCHMARK-SPECIFIC]
 
     Pattern: guess = "ABC"; target = guess.charAt(1); switch(target) { case 'B': bar = "safe"; }
     The charAt index determines which case runs, and if that case assigns a safe literal,
@@ -290,7 +294,7 @@ def _has_switch_deterministic(content: str) -> bool:
 
 
 def _has_cross_method_sanitization(content: str) -> bool:
-    """Check for sanitization patterns inside doSomething() methods.
+    """Check for sanitization patterns inside doSomething() methods.  # [BENCHMARK-SPECIFIC]
 
     Many OWASP Benchmark FP cases put sanitization logic in a private
     doSomething() method. We extract that method body and check for
@@ -348,7 +352,7 @@ def _has_cross_method_sanitization(content: str) -> bool:
 
 
 def _has_safe_source(content: str) -> bool:
-    """Check if param originates from a known-safe source.
+    """Check if param originates from a known-safe source.  # [BENCHMARK-SPECIFIC]
 
     SeparateClassRequest.getTheValue() is a hardcoded safe source in the
     OWASP Benchmark — it always returns the literal string "bar", not
@@ -361,7 +365,7 @@ def _has_safe_source(content: str) -> bool:
 
 
 def _has_safe_bar_assignment(content: str) -> bool:
-    """Check if bar is assigned a safe literal and never reassigned from any non-literal.
+    """Check if bar is assigned a safe literal and never reassigned from any non-literal.  # [BENCHMARK-SPECIFIC]
 
     Returns True only if bar starts as a literal AND is never reassigned to
     a non-literal value (variable, method call, etc.). This is stricter than
@@ -371,7 +375,7 @@ def _has_safe_bar_assignment(content: str) -> bool:
 
 
 def _has_safe_hash_property(content: str) -> bool:
-    """Check if MessageDigest algorithm comes from a known-safe property.
+    """Check if MessageDigest algorithm comes from a known-safe property.  # [BENCHMARK-SPECIFIC]
 
     getProperty("hashAlg2") in OWASP Benchmark resolves to SHA-256 (safe).
     When the algorithm variable comes from hashAlg2, weak-hash findings are FPs.

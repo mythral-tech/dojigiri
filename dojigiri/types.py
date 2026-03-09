@@ -67,7 +67,29 @@ class FixSource(Enum):
 
 # ─── Constants tied to types ──────────────────────────────────────────
 
-REDACT_SNIPPET_RULES = {"hardcoded-secret", "aws-credentials"}
+# Rules that always get redacted (secrets/credentials)
+_REDACT_RULES_EXPLICIT = {
+    "hardcoded-secret",
+    "aws-credentials",
+    "private-key",
+    "db-connection-string",
+    "hardcoded-secret-key",
+    "hardcoded-password-default",
+}
+
+# Patterns in rule names that trigger auto-redaction
+_REDACT_PATTERNS = ("secret", "credential", "password", "private-key", "api-key", "token")
+
+
+def should_redact_snippet(rule: str) -> bool:
+    """Check if a finding's snippet should be redacted."""
+    if rule in _REDACT_RULES_EXPLICIT:
+        return True
+    return any(pattern in rule for pattern in _REDACT_PATTERNS)
+
+
+# Backward-compat alias — prefer should_redact_snippet() for new code
+REDACT_SNIPPET_RULES = _REDACT_RULES_EXPLICIT
 
 
 # ─── Dataclasses ──────────────────────────────────────────────────────
@@ -89,7 +111,7 @@ class Finding:
     def to_dict(self) -> dict:
         from .compliance import get_cwe, get_nist
 
-        snippet = "[REDACTED]" if self.rule in REDACT_SNIPPET_RULES else self.snippet
+        snippet = "[REDACTED]" if should_redact_snippet(self.rule) else self.snippet
         d = {
             "file": self.file,
             "line": self.line,

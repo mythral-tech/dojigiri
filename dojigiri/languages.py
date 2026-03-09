@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import re
 
-from .types import Category, Severity
+from .types import SEVERITY_ORDER, Category, Severity
 
 # Each rule: (pattern, severity, category, rule_name, message, suggestion)
 # pattern can be a compiled regex or a string (compiled at load time)
@@ -1468,11 +1468,7 @@ def get_rules_for_language(lang: str) -> list[Rule]:
     return rules
 
 
-_SEVERITY_ORDER = {
-    Severity.CRITICAL.value: 0,
-    Severity.WARNING.value: 1,
-    Severity.INFO.value: 2,
-}
+_SEVERITY_ORDER = {s.value: v for s, v in SEVERITY_ORDER.items()}
 
 
 def list_all_rules() -> list[dict]:

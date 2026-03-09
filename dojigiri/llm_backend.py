@@ -30,6 +30,7 @@ class LLMResponse:
     output_tokens: int
     cache_read_tokens: int = 0
     cache_create_tokens: int = 0
+    tool_use_data: dict | list | None = None  # Structured data from tool_use responses
 
 
 @runtime_checkable
@@ -43,6 +44,22 @@ class LLMBackend(Protocol):
         max_tokens: int = 4096,
         temperature: float = 0.0,
     ) -> LLMResponse: ...
+
+    def chat_with_tools(
+        self,
+        system: str,
+        messages: list[dict[str, str]],
+        tools: list[dict[str, Any]],
+        tool_choice: dict[str, str] | None = None,
+        max_tokens: int = 4096,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        """Call the LLM with tool definitions for structured output.
+
+        Default implementation falls back to chat() — backends that support
+        tool_use (e.g. AnthropicBackend) override this with native support.
+        """
+        return self.chat(system=system, messages=messages, max_tokens=max_tokens, temperature=temperature)
 
     @property
     def is_local(self) -> bool:
@@ -145,6 +162,83 @@ class AnthropicBackend:
             cache_create_tokens=cache_create,
         )
 
+    def chat_with_tools(
+        self,
+        system: str,
+        messages: list[dict[str, str]],
+        tools: list[dict[str, Any]],
+        tool_choice: dict[str, str] | None = None,
+        max_tokens: int = 4096,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        """Call the Anthropic API with tool definitions to get structured output.
+
+        Uses the tool_use feature to force the model to return structured data
+        matching a predefined schema, eliminating the need for JSON text parsing.
+
+        Args:
+            system: System prompt.
+            messages: Conversation messages.
+            tools: Tool definitions (Anthropic tool schema format).
+            tool_choice: Force a specific tool, e.g. {"type": "tool", "name": "..."}.
+            max_tokens: Maximum output tokens.
+            temperature: Sampling temperature.
+
+        Returns:
+            LLMResponse with tool_use_data populated if the model used a tool,
+            or text populated if the model returned text instead.
+        """
+        client = self._get_client()
+        system_with_cache = [
+            {
+                "type": "text",
+                "text": system,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ]
+        kwargs: dict[str, Any] = {
+            "model": self._model,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "system": system_with_cache,
+            "messages": messages,
+            "tools": tools,
+        }
+        if tool_choice:
+            kwargs["tool_choice"] = tool_choice
+
+        response = client.messages.create(**kwargs)
+
+        # Track cache performance
+        usage = response.usage
+        cache_read = getattr(usage, "cache_read_input_tokens", 0)
+        cache_create = getattr(usage, "cache_creation_input_tokens", 0)
+        if cache_read or cache_create:
+            logger.debug(
+                "Prompt cache: %d read, %d created, %d uncached",
+                cache_read,
+                cache_create,
+                usage.input_tokens - cache_read - cache_create,
+            )
+
+        # Extract tool_use content if present
+        tool_use_data = None
+        text = ""
+        for block in response.content:
+            if hasattr(block, "type") and block.type == "tool_use":
+                tool_use_data = block.input
+            elif hasattr(block, "text"):
+                text = block.text
+
+        return LLMResponse(
+            text=text,
+            input_tokens=usage.input_tokens,
+            output_tokens=usage.output_tokens,
+            cache_read_tokens=cache_read,
+            cache_create_tokens=cache_create,
+            tool_use_data=tool_use_data,
+        )
+
     @property
     def is_local(self) -> bool:
         return False
@@ -233,6 +327,18 @@ class OpenAICompatibleBackend:
             input_tokens=usage.get("prompt_tokens", 0),
             output_tokens=usage.get("completion_tokens", 0),
         )
+
+    def chat_with_tools(
+        self,
+        system: str,
+        messages: list[dict[str, str]],
+        tools: list[dict[str, Any]],
+        tool_choice: dict[str, str] | None = None,
+        max_tokens: int = 4096,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        """Fall back to plain chat — OpenAI-compatible backends don't support Anthropic tool_use."""
+        return self.chat(system=system, messages=messages, max_tokens=max_tokens, temperature=temperature)
 
     @property
     def is_local(self) -> bool:

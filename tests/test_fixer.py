@@ -394,7 +394,7 @@ class TestFixFile:
 # ─── CLI tests ────────────────────────────────────────────────────────
 
 
-def _run_wiz(*args, cwd=None, timeout=30):
+def _run_doji(*args, cwd=None, timeout=30):
     """Run doji CLI as subprocess."""
     cmd = [sys.executable, "-m", "dojigiri"] + list(args)
     result = subprocess.run(cmd, capture_output=True, timeout=timeout, cwd=cwd)
@@ -907,21 +907,21 @@ class TestFixCLI:
         """doji fix <file> --dry-run exits 0."""
         fp = temp_dir / "test.py"
         fp.write_text('import os\nx = 1\n', encoding="utf-8")
-        rc, out, err = _run_wiz("fix", str(fp))
+        rc, out, err = _run_doji("fix", str(fp))
         assert rc == 0
 
     def test_fix_apply(self, temp_dir):
         """doji fix <file> --apply creates backup and modifies file."""
         fp = temp_dir / "test.py"
         fp.write_text('import os\nx = 1\n', encoding="utf-8")
-        rc, out, err = _run_wiz("fix", str(fp), "--apply")
+        rc, out, err = _run_doji("fix", str(fp), "--apply")
         assert rc == 0
         backup = Path(str(fp) + ".doji.bak")
         assert backup.exists()
 
     def test_fix_help(self):
         """doji fix --help shows all flags."""
-        rc, out, err = _run_wiz("fix", "--help")
+        rc, out, err = _run_doji("fix", "--help")
         assert rc == 0
         assert "--apply" in out
         assert "--llm" in out

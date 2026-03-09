@@ -190,6 +190,7 @@ def _parse_yarn_lock(content: str, ecosystem: str) -> list[Dependency]:
     """Parse yarn.lock: name@version blocks with 'version' field."""
     deps: list[Dependency] = []
     seen: set[str] = set()
+    current_name: str | None = None
 
     for line in content.splitlines():
         stripped = line.strip()

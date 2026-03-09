@@ -23,15 +23,13 @@ if TYPE_CHECKING:
         ScanReport,
     )
 
-from .types import Severity
+from .types import SEVERITY_ORDER, Severity
 
 _MAX_FINDINGS = 50
 _MAX_CROSS_FILE = 20
 _MAX_FAN_IN_DISPLAY = 5
 _MAX_CYCLES_DISPLAY = 5
 _MAX_FILE_RANKINGS = 10
-
-_SEVERITY_ORDER = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
 _SEVERITY_DISPLAY = [Severity.CRITICAL, Severity.WARNING, Severity.INFO]
 
 
@@ -92,7 +90,7 @@ def format_scan_report(report: ScanReport, max_findings: int = _MAX_FINDINGS) ->
     all_findings: list[Finding] = []
     for fa in report.file_analyses:
         all_findings.extend(fa.findings)
-    all_findings.sort(key=lambda f: _SEVERITY_ORDER.get(f.severity, 9))
+    all_findings.sort(key=lambda f: SEVERITY_ORDER.get(f.severity, 9))
 
     by_severity: dict[Severity, list[Finding]] = {}
     for f in all_findings:
@@ -137,7 +135,7 @@ def format_file_findings(
     info = sum(1 for f in findings if f.severity == Severity.INFO)
     parts.append(f"Findings: {critical} critical, {warnings} warning, {info} info")
 
-    findings_sorted = sorted(findings, key=lambda f: _SEVERITY_ORDER.get(f.severity, 9))
+    findings_sorted = sorted(findings, key=lambda f: SEVERITY_ORDER.get(f.severity, 9))
     for f in findings_sorted[:_MAX_FINDINGS]:
         parts.append(_finding_line(f))
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from ..types import Category, Finding, FileAnalysis, Severity, Source
+from ..types import Category, FileAnalysis, Finding, Severity, Source
 from .osv import Vulnerability, query_osv
 from .parsers import Dependency, discover_lockfiles, parse_lockfile
 

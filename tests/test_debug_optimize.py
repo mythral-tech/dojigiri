@@ -426,7 +426,7 @@ def test_optimize_file_chunks_large_file(mock_get_backend, mock_response):
 
 # ─── CLI Integration ──────────────────────────────────────────────────
 
-def _run_wiz(*args, timeout=30):
+def _run_doji(*args, timeout=30):
     """Run doji CLI as subprocess."""
     cmd = [sys.executable, "-m", "dojigiri"] + list(args)
     result = subprocess.run(cmd, capture_output=True, timeout=timeout)
@@ -437,7 +437,7 @@ def _run_wiz(*args, timeout=30):
 
 def test_cli_debug_nonexistent():
     """Test debug with nonexistent file."""
-    rc, out, err = _run_wiz("debug", "/nonexistent/file.py")
+    rc, out, err = _run_doji("debug", "/nonexistent/file.py")
     assert rc == 1
     assert "not a file" in err or "Error" in err
 
@@ -445,14 +445,14 @@ def test_cli_debug_nonexistent():
 def test_cli_debug_unsupported(temp_dir):
     """Test debug with unsupported file type."""
     (temp_dir / "test.xyz").write_text("hello")
-    rc, out, err = _run_wiz("debug", str(temp_dir / "test.xyz"))
+    rc, out, err = _run_doji("debug", str(temp_dir / "test.xyz"))
     assert rc == 1
     assert "unsupported" in err
 
 
 def test_cli_debug_help():
     """Test debug --help shows --context and --output flags."""
-    rc, out, err = _run_wiz("debug", "--help")
+    rc, out, err = _run_doji("debug", "--help")
     assert rc == 0
     assert "--context" in out
     assert "--output" in out
@@ -461,7 +461,7 @@ def test_cli_debug_help():
 
 def test_cli_optimize_nonexistent():
     """Test optimize with nonexistent file."""
-    rc, out, err = _run_wiz("optimize", "/nonexistent/file.py")
+    rc, out, err = _run_doji("optimize", "/nonexistent/file.py")
     assert rc == 1
     assert "not a file" in err or "Error" in err
 
@@ -469,14 +469,14 @@ def test_cli_optimize_nonexistent():
 def test_cli_optimize_unsupported(temp_dir):
     """Test optimize with unsupported file type."""
     (temp_dir / "test.xyz").write_text("hello")
-    rc, out, err = _run_wiz("optimize", str(temp_dir / "test.xyz"))
+    rc, out, err = _run_doji("optimize", str(temp_dir / "test.xyz"))
     assert rc == 1
     assert "unsupported" in err
 
 
 def test_cli_optimize_help():
     """Test optimize --help shows --output flag."""
-    rc, out, err = _run_wiz("optimize", "--help")
+    rc, out, err = _run_doji("optimize", "--help")
     assert rc == 0
     assert "--output" in out
     assert "json" in out

@@ -38,7 +38,7 @@ from .config import (
 from .detector import analyze_file_static
 from .discovery import detect_language
 from .storage import list_reports, load_baseline_report, load_latest_report
-from .types import Confidence, Severity, SEVERITY_ORDER
+from .types import SEVERITY_ORDER, Confidence, Severity
 
 SEVERITY_MAP = {"critical": Severity.CRITICAL, "warning": Severity.WARNING, "info": Severity.INFO}
 CONFIDENCE_MAP = {"high": Confidence.HIGH, "medium": Confidence.MEDIUM, "low": Confidence.LOW}
@@ -1145,8 +1145,9 @@ def cmd_sca(args: argparse.Namespace) -> int:
         )
         print(json_mod.dumps(report.to_dict(), indent=2))
     elif args.output == "sarif":
-        from .sarif import findings_to_sarif
         import json as json_mod
+
+        from .sarif import findings_to_sarif
 
         all_findings = [f for fa in analyses for f in fa.findings]
         sarif = findings_to_sarif(all_findings, str(root))

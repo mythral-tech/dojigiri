@@ -150,11 +150,25 @@ core.extract_semantics()  -->  FileSemantics
 | `compliance.py` | CWE and NIST SP 800-53 rule mappings | rule name | CWE ID, NIST controls |
 | `metrics.py` | Session observability (scan stats, costs) | scan events | SessionMetrics |
 
+### SCA (Software Composition Analysis)
+
+| Module | Role | Input | Output |
+|--------|------|-------|--------|
+| `sca/scanner.py` | SCA scan orchestrator | directory path | list of vulnerable dependencies |
+| `sca/parsers.py` | Lockfile parsers (10 formats) | lockfile content | list of dependencies |
+| `sca/osv.py` | Google OSV API client | package names + versions | vulnerability records |
+
 ### Other
 
 | Module | Role |
 |--------|------|
 | `fixer/` | Auto-fix engine: deterministic fixers + LLM-assisted fixes (package: engine, deterministic, cascade, llm_fixes, helpers) |
+| `sarif.py` | SARIF report generation for GitHub Code Scanning integration |
+| `taint.py` | Top-level taint analysis coordination |
+| `types.py` | Core data types: Finding, FileAnalysis, ScanReport, Severity, Category, etc. |
+| `discovery.py` | File discovery and language detection |
+| `context.py` | Context file handling for scan scope |
+| `bundling.py` | Bundle/package detection and handling |
 | `java_sanitize.py` | OWASP Benchmark Java sanitizer detection |
 | `pr_review.py` | Pull request review integration |
 | `hooks.py` | Git pre-commit hook install/uninstall |
@@ -187,19 +201,22 @@ All defined in `types.py`:
 | How the LLM is called | `llm.py` → follow `analyze_chunk()` |
 | How findings merge (static + LLM) | `analyzer.py` → `_merge_findings()` |
 | How cross-file analysis works | `graph/project.py` → `analyze_project()` |
-| How fixes are generated | `fixer.py` |
+| How fixes are generated | `fixer/` (start with `fixer/engine.py`) |
 | How the CLI is structured | `__main__.py` → argparse setup at top, subcommand handlers below |
 | How results are displayed | `report.py` (console), `report_html.py` (HTML), `mcp_format.py` (AI) |
 | How caching works | `storage.py` → `file_hash()`, `load_cache()`, `save_cache()` |
 | How inline suppression works | `detector.py` → `_parse_line_suppression()`, `doji:ignore` |
 | How config files work | `config.py` → `load_project_config()`, `compile_custom_rules()` |
 | How it runs as an MCP server | `mcp_server.py` → `@mcp.tool()` decorated functions |
+| How dependency scanning works | `sca/scanner.py` → SCA orchestrator, lockfile parsing, OSV queries |
+| How SARIF reports are generated | `sarif.py` → GitHub Code Scanning compatible output |
+| How taint tracking works | `semantic/taint.py` → `analyze_taint()` and `analyze_taint_pathsensitive()` |
 
 ---
 
 ## File Count & Size
 
-- **42 Python modules** across 4 packages (`dojigiri/`, `semantic/`, `graph/`, `fixer/`)
-- **~15,000 lines** production code + **~17,000 lines** tests (39 test files)
+- **53 Python modules** across 5 packages (`dojigiri/`, `semantic/`, `graph/`, `fixer/`, `sca/`)
+- **~25,000 lines** production code + **~33,000 lines** tests (44 test files)
 - Largest files: `__main__.py` (~1300 lines, CLI), `languages.py` (regex rules), `detector.py` (analysis engine)
 - Compiled to standalone `.exe` via Nuitka (Python → C → native binary)

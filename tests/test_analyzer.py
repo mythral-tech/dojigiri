@@ -139,7 +139,7 @@ def test_collect_files_with_language_filter(temp_dir):
     assert files[0].suffix == ".js"
 
 
-def test_collect_files_with_wizignore(temp_dir):
+def test_collect_files_with_dojiignore(temp_dir):
     """Test that .doji-ignore patterns are respected."""
     # Create .doji-ignore
     (temp_dir / ".doji-ignore").write_text("*.log\ntest_*\n")

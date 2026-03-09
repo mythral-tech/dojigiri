@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from . import __version__
 from .compliance import get_cwe, get_nist
-from .types import Severity, ScanReport
+from .types import ScanReport, Severity
 
 # SARIF severity mapping
 _SEVERITY_TO_LEVEL = {

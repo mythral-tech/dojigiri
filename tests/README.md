@@ -4,7 +4,7 @@ Comprehensive test suite for the Dojigiri static analysis tool.
 
 ## Test Coverage
 
-The test suite includes 120+ tests covering:
+The test suite includes 1426 tests covering:
 
 ### Core Modules (High Priority)
 - **test_config.py** - Data structures, enums, and utility functions
@@ -65,7 +65,7 @@ Shared fixtures are defined in `conftest.py`:
 ## Known Issues
 
 ### Documented Bugs
-The test suite includes tests that document known bugs from the handoff notes:
+The test suite includes tests that document known bugs:
 
 1. **yaml-unsafe regex** (test_languages.py:319-336)
    - Pattern incorrectly matches even when SafeLoader is present
@@ -80,17 +80,16 @@ These should be removed as they are no longer called after the analyzer.py refac
 
 ## Test Statistics
 
-- **Total Tests**: 120
-- **Pass Rate**: 100%
-- **Execution Time**: ~0.5s
+- **Total Tests**: 1426
+- **Pass Rate**: 100% (2 skipped on Windows due to Unix-specific permission checks)
+- **Execution Time**: ~55s
 
-## Future Improvements
+## Completed Improvements
 
-From the handoff notes (priority order):
-1. ✅ **Tests** - Complete (this test suite)
-2. **Baseline/diff mode** - Show only new findings since last scan
-3. **Config file** - .doji.toml for project-level settings
-4. **Deep scan cache** - Cache support for deep scans
-5. **Block comments** - Support for /* */, """ """, <!-- -->
-6. **SARIF output** - GitHub Code Scanning integration
-7. **Parallel scanning** - concurrent.futures for large repos
+All originally planned improvements have been implemented:
+- ✅ Baseline/diff mode (`--diff`, `--baseline`)
+- ✅ Config file (`.doji.toml`)
+- ✅ SARIF output (`--output sarif`)
+- ✅ Parallel scanning (worker pool)
+- ✅ Block comment support
+- ✅ Deep scan cache

@@ -384,6 +384,16 @@ def _validate_syntax(filepath: str, content: str, language: str) -> str | None:
             if count != 0:
                 closer = {"(": ")", "[": "]", "{": "}"}[opener]
                 return f"Unbalanced '{opener}'/'{closer}' (off by {count})"
+
+        # Tree-sitter structural validation (if available)
+        try:
+            from tree_sitter_language_pack import get_parser
+            parser = get_parser("typescript" if language == "typescript" else "javascript")
+            tree = parser.parse(content.encode("utf-8"))
+            if tree.root_node.has_error:
+                return "Syntax error detected by tree-sitter parser"
+        except (ImportError, LookupError, ValueError, RuntimeError, MemoryError, RecursionError):
+            pass
     return None
 
 

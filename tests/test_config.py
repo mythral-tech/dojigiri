@@ -272,8 +272,8 @@ def test_load_ignore_patterns_no_file(temp_dir):
 
 def test_load_ignore_patterns_with_patterns(temp_dir):
     """Test load_ignore_patterns with a .doji-ignore file."""
-    wizignore = temp_dir / ".doji-ignore"
-    wizignore.write_text(
+    dojiignore = temp_dir / ".doji-ignore"
+    dojiignore.write_text(
         "*.log\n"
         "test_*.py\n"
         "# This is a comment\n"
@@ -296,8 +296,8 @@ def test_load_ignore_patterns_with_patterns(temp_dir):
 
 def test_load_ignore_patterns_whitespace_handling(temp_dir):
     """Test that load_ignore_patterns strips whitespace."""
-    wizignore = temp_dir / ".doji-ignore"
-    wizignore.write_text(
+    dojiignore = temp_dir / ".doji-ignore"
+    dojiignore.write_text(
         "  *.log  \n"
         "\t*.tmp\t\n"
         "  # comment with spaces  \n"

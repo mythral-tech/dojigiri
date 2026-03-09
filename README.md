@@ -2,24 +2,25 @@
 
 [![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1292%20passing-brightgreen.svg)]()
-[![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-Youden%20%2B100.0%25-brightgreen.svg)]()
-[![Languages](https://img.shields.io/badge/languages-10-blue.svg)]()
+[![Tests](https://img.shields.io/badge/tests-1426-brightgreen.svg)]()
+[![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-100%25%20(with%20tuned%20filters)-brightgreen.svg)]()
+[![Languages](https://img.shields.io/badge/languages-18-blue.svg)]()
 
-**Static analysis (SAST) and software composition analysis (SCA) with a three-tier engine: regex, AST/semantic, and LLM. Zero external runtime dependencies for regex scanning. AST layer uses tree-sitter.**
+**Static analysis (SAST) and software composition analysis (SCA) with a three-tier engine: regex, AST/semantic, and LLM. Tier 1 regex engine uses stdlib only; pip install pulls tree-sitter for Tier 2 semantic analysis.**
 
 ---
 
 ## OWASP Benchmark v1.2 Results
 
 ```
-Youden Index:  +100.0%
-True Positive Rate:  100.0%
-False Positive Rate:   0.0%
-Perfect categories:     11/11
+With benchmark-tuned filters:   Youden +100.0%  (TPR 100.0%, FPR 0.0%)
+General-purpose rules only:     [TBD - run with --no-benchmark-filters]
+Perfect categories:             11/11
 ```
 
 Tested against [OWASP Benchmark v1.2](https://owasp.org/www-project-benchmark/) -- 2,740 test cases across 11 vulnerability categories in internal testing. Youden Index = TPR - FPR; a perfect tool scores +100%, random guessing scores 0%. Results are reproducible using the included scoring script (`benchmarks/owasp_scorecard.py`).
+
+**Disclosure:** The 100% Youden Index includes 8 benchmark-specific filters in `java_sanitize.py` tuned to synthetic test patterns (arithmetic conditionals, collection misdirection, static reflection, switch/charAt on literals, doSomething() cross-method patterns, SeparateClassRequest safe source, safe bar literals, and hashAlg2 property lookups). These patterns appear in the OWASP Benchmark suite but are uncommon in production Java code. Our general-purpose rules alone score [TBD - run with `--no-benchmark-filters`] -- the benchmark-tuned pipeline adds [TBD] percentage points. Only one filter (`_has_explicit_sanitizer`, covering ESAPI/Spring/Apache Commons encoding) is general-purpose.
 
 ---
 
@@ -30,7 +31,7 @@ pip install dojigiri
 ```
 
 ```bash
-doji scan .                    # SAST scan (130+ rules, 10 languages)
+doji scan .                    # SAST scan (130+ rules, 18 languages)
 doji sca .                     # dependency vulnerability scan
 doji fix . --apply             # auto-fix findings
 doji explain <file>            # plain-language walkthrough of findings
@@ -42,9 +43,9 @@ No API key required for core scanning. Deep scan mode (`--deep`) uses an LLM for
 
 ## Features
 
-### SAST Engine -- 130+ Rules, 10 Languages
+### SAST Engine -- 130+ Rules, 18 Languages
 
-Python, JavaScript/TypeScript, Java, Go, Rust, C/C++, Ruby, PHP, C#, Swift, Kotlin.
+Python, JavaScript/TypeScript, Java, Go, Rust, C/C++, Ruby, PHP, C#, Swift, Kotlin, Pine Script, Bash, SQL, HTML, CSS.
 
 **Security** -- SQL injection, XSS, path traversal, shell injection, hardcoded secrets, unsafe deserialization, weak crypto, path-sensitive taint flow from source to sink.
 
@@ -134,7 +135,7 @@ AI agents can call `scan`, `sca`, `fix`, and `explain` as MCP tools -- no CLI wr
   Tier 3: Deepest. LLM analysis grounded in Tier 1+2 findings. Optional.
 ```
 
-Zero external runtime dependencies for Tier 1 (stdlib only). Tier 2 requires tree-sitter. Tier 3 requires an LLM API key.
+Tier 1 regex engine uses stdlib only; pip install pulls tree-sitter for Tier 2 semantic analysis. Tier 3 requires an LLM API key.
 
 ---
 
@@ -210,17 +211,17 @@ x = eval(user_input)  # doji:ignore(dangerous-eval)
 | | Dojigiri | Bandit | Semgrep (OSS) | SonarQube (CE) |
 |---|---|---|---|---|
 | **Type** | SAST + SCA | SAST | SAST | SAST |
-| **Languages** | 10 | Python only | 30+ | 17 |
+| **Languages** | 18 | Python only | 30+ | 17 |
 | **Analysis depth** | Regex + AST + LLM | AST (Python) | Pattern + taint | AST + dataflow |
-| **Taint tracking** | Yes (path-sensitive) | No | Yes (Pro only) | Yes |
+| **Taint tracking** | Yes (path-sensitive) | No | Yes (limited in OSS, full in Pro) | Yes |
 | **SCA** | Built-in (OSV) | No | Supply Chain (paid) | No (requires plugins) |
 | **LLM analysis** | Built-in (optional) | No | No | No (AI CodeFix paid) |
 | **MCP server** | Yes | No | No | No |
 | **CWE mapping** | Yes | Yes (partial) | Yes | Yes |
 | **NIST SP 800-53** | Yes | No | No | No |
 | **External deps** | tree-sitter (Tier 2) | 3+ | Requires binary | JVM + database |
-| **SARIF output** | Yes | Yes (plugin) | Yes | No |
-| **OWASP Benchmark** | Youden +100.0% | Not published | Not published (OSS) | Varies by language |
+| **SARIF output** | Yes | Yes (plugin) | Yes | No (plugin available) |
+| **OWASP Benchmark** | Youden +100.0% (with tuned filters) | Not published | Not published (OSS) | Varies by language |
 | **Self-hosted** | CLI / pip | CLI / pip | CLI / Docker | Server (JVM) |
 | **License** | BSL 1.1 | Apache 2.0 | LGPL 2.1 | LGPL 3.0 |
 

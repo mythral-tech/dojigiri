@@ -482,7 +482,7 @@ def format_pr_comment(review: PRReview) -> str:
 
                 snippet = finding.get("snippet", "")
                 if snippet:
-                    lines.append(f"```python")
+                    lines.append("```python")
                     lines.append(snippet)
                     lines.append("```")
 
@@ -494,7 +494,7 @@ def format_pr_comment(review: PRReview) -> str:
                 fix = finding.get("fix", "")
                 if fix:
                     lines.append("**Fix:**")
-                    lines.append(f"```python")
+                    lines.append("```python")
                     lines.append(fix)
                     lines.append("```")
                     lines.append("")

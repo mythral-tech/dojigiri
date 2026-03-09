@@ -1,12 +1,13 @@
 """FastMCP server exposing Dojigiri static analysis tools to AI agents.
 
-Runs as a subprocess via MCP protocol. Provides five tools: doji_scan,
-doji_scan_file, doji_fix, doji_explain, and doji_analyze_project.
+Runs as a subprocess via MCP protocol. Provides six tools: doji_scan,
+doji_scan_file, doji_fix, doji_explain, doji_analyze_project, and doji_sca.
+Three resources: dojigiri://rules, dojigiri://languages, dojigiri://config.
 All tools return concise plain text, not JSON. Errors return as strings.
 
 Called by: external (MCP protocol, e.g. Claude Code)
 Calls into: config.py, analyzer.py, mcp_format.py, semantic/explain.py,
-            graph/project.py, fixer.py
+            graph/project.py, fixer.py, sca/scanner.py
 Data in -> Data out: tool requests (file paths, options) -> formatted text
 """
 
@@ -19,23 +20,31 @@ logger = logging.getLogger(__name__)
 from collections.abc import Sequence
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 
-from .types import Severity
+from .types import SEVERITY_ORDER, Severity
+
+_READ_ONLY_ANNOTATIONS = ToolAnnotations(readOnlyHint=True, idempotentHint=True)
 
 mcp = FastMCP(
     "dojigiri",
     instructions=(
-        "Dojigiri is a static analyzer with 40+ rules, tree-sitter semantic analysis, "
+        "Dojigiri is a static analyzer with 130+ rules, tree-sitter semantic analysis, "
         "taint tracking, null safety, and cross-file analysis. "
-        "Use doji_scan for broad scans, doji_scan_file for single files, "
-        "doji_fix to preview fixes (then apply with Edit tool), "
-        "doji_explain to understand file structure, "
-        "doji_analyze_project for cross-file dependency analysis."
+        "Resources: dojigiri://rules (all rules with severity/CWE), "
+        "dojigiri://languages (supported languages), dojigiri://config (server config). "
+        "Read dojigiri://rules to understand available checks before scanning. "
+        "Use doji_scan for directories, doji_scan_file for single files. "
+        "doji_fix previews fixes (then apply with Edit tool), "
+        "doji_explain explains file structure, "
+        "doji_analyze_project does cross-file dependency analysis, "
+        "doji_sca scans dependencies for known vulnerabilities. "
+        "Workflow: read dojigiri://rules first, then scan. "
+        "Error behavior: tools raise ValueError on invalid input (isError=true in MCP response)."
     ),
 )
 
 _SEVERITY_MAP = {"critical": Severity.CRITICAL, "warning": Severity.WARNING, "info": Severity.INFO}
-_SEVERITY_RANK = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
 
 # ─── Path boundary validation ────────────────────────────────────────
 # Default: only allow paths under cwd. Extendable via .doji.toml:
@@ -111,11 +120,11 @@ def _validate_path(path: Path) -> Path:
     raise ValueError(f"Path '{path}' is outside allowed directories: {roots_str}")
 
 
-def _parse_severity(value: str) -> Severity | str:
-    """Parse a severity string. Returns Severity on success, error string on failure."""
+def _parse_severity(value: str) -> Severity:
+    """Parse a severity string. Returns Severity on success, raises ValueError on failure."""
     sev = _SEVERITY_MAP.get(value)
     if sev is None:
-        return f"Error: invalid min_severity '{value}'. Use: critical, warning, or info"
+        raise ValueError(f"Invalid min_severity '{value}'. Use: critical, warning, or info")
     return sev
 
 
@@ -151,14 +160,14 @@ def _collect_files_with_lang(root: Path) -> list[tuple[Path, str]]:
 
 def _filter_findings_by_severity(findings: list, min_severity: Severity) -> list:
     """Filter findings to those at or above min_severity."""
-    threshold = _SEVERITY_RANK[min_severity]
-    return [f for f in findings if _SEVERITY_RANK.get(f.severity, 9) <= threshold]
+    threshold = SEVERITY_ORDER[min_severity]
+    return [f for f in findings if SEVERITY_ORDER.get(f.severity, 9) <= threshold]
 
 
 # ─── Tools ───────────────────────────────────────────────────────────
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY_ANNOTATIONS)
 def doji_scan(
     path: str,
     language: str | None = None,
@@ -182,15 +191,10 @@ def doji_scan(
     from .mcp_format import format_scan_report
 
     sev = _parse_severity(min_severity)
-    if isinstance(sev, str):
-        return sev
 
-    try:
-        root = _validate_path(Path(path))
-    except ValueError as e:
-        return str(e)
+    root = _validate_path(Path(path))
     if not root.exists():
-        return f"Error: path '{path}' does not exist"
+        raise ValueError(f"Path '{path}' does not exist")
 
     scan_root = root if root.is_dir() else root.parent
     project_config = load_project_config(scan_root)
@@ -198,15 +202,12 @@ def doji_scan(
 
     try:
         if diff_only:
-            try:
-                report, _ = scan_diff(
-                    root,
-                    base_ref=diff_ref or None,
-                    language_filter=language,
-                    custom_rules=custom_rules,
-                )
-            except ValueError as e:
-                return f"Error: {e}"
+            report, _ = scan_diff(
+                root,
+                base_ref=diff_ref or None,
+                language_filter=language,
+                custom_rules=custom_rules,
+            )
         else:
             report = scan_quick(
                 root,
@@ -214,8 +215,8 @@ def doji_scan(
                 custom_rules=custom_rules,
                 use_cache=False,
             )
-    except Exception as e:  # MCP tool boundary: return user-friendly error
-        return f"Error during scan: {e}"
+    except Exception as e:
+        raise ValueError(f"Scan failed: {e}") from e
 
     ignore_set = {r.strip() for r in ignore_rules.split(",")} if ignore_rules else None
     report = filter_report(report, ignore_rules=ignore_set, min_severity=sev)
@@ -223,7 +224,7 @@ def doji_scan(
     return format_scan_report(report)
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY_ANNOTATIONS)
 def doji_scan_file(path: str) -> str:
     """Quick scan of a single file. Faster than doji_scan for one file.
 
@@ -233,21 +234,18 @@ def doji_scan_file(path: str) -> str:
     from .detector import analyze_file_static
     from .mcp_format import format_file_findings
 
-    try:
-        content, lang, filepath = _read_file(path)
-    except ValueError as e:
-        return str(e)
+    content, lang, filepath = _read_file(path)
 
     try:
         findings = analyze_file_static(filepath, content, lang).findings
-    except Exception as e:  # MCP tool boundary: return user-friendly error
-        return f"Error analyzing file: {e}"
+    except Exception as e:
+        raise ValueError(f"Analysis failed: {e}") from e
 
     lines = content.count("\n") + 1
     return format_file_findings(filepath, lang, lines, findings)
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY_ANNOTATIONS)
 def doji_fix(
     path: str,
     rules: str | None = None,
@@ -269,20 +267,15 @@ def doji_fix(
     from .types import FixReport
 
     sev = _parse_severity(min_severity)
-    if isinstance(sev, str):
-        return sev
 
-    try:
-        root = _validate_path(Path(path))
-    except ValueError as e:
-        return str(e)
+    root = _validate_path(Path(path))
     if not root.exists():
-        return f"Error: path '{path}' does not exist"
+        raise ValueError(f"Path '{path}' does not exist")
 
     files = _collect_files_with_lang(root)
     if not files:
         if root.is_file():
-            return f"Error: unsupported file type '{root.suffix}'"
+            raise ValueError(f"Unsupported file type '{root.suffix}'")
         return "No fixable files found."
 
     fix_root = root if root.is_dir() else root.parent
@@ -343,7 +336,7 @@ def doji_fix(
     return result
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY_ANNOTATIONS)
 def doji_explain(path: str) -> str:
     """Get a structural explanation of a code file.
 
@@ -356,10 +349,7 @@ def doji_explain(path: str) -> str:
     from .mcp_format import format_explanation
     from .semantic.explain import explain_file
 
-    try:
-        content, lang, filepath = _read_file(path)
-    except ValueError as e:
-        return str(e)
+    content, lang, filepath = _read_file(path)
 
     # analyze_file_static already runs semantics + type inference internally
     result = analyze_file_static(filepath, content, lang)
@@ -376,7 +366,7 @@ def doji_explain(path: str) -> str:
     return format_explanation(explanation)
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY_ANNOTATIONS)
 def doji_analyze_project(
     path: str,
     language: str | None = None,
@@ -394,12 +384,9 @@ def doji_analyze_project(
     from .graph.project import analyze_project
     from .mcp_format import format_project_analysis
 
-    try:
-        root = _validate_path(Path(path))
-    except ValueError as e:
-        return str(e)
+    root = _validate_path(Path(path))
     if not root.is_dir():
-        return f"Error: '{path}' is not a directory"
+        raise ValueError(f"'{path}' is not a directory")
 
     # Clamp depth to prevent excessive graph traversal on large projects
     depth = max(1, min(depth, 10))
@@ -411,7 +398,132 @@ def doji_analyze_project(
             depth=depth,
             use_llm=False,
         )
-    except Exception as e:  # MCP tool boundary: return user-friendly error
-        return f"Error analyzing project: {e}"
+    except Exception as e:
+        raise ValueError(f"Project analysis failed: {e}") from e
 
     return format_project_analysis(analysis)
+
+
+@mcp.tool(annotations=_READ_ONLY_ANNOTATIONS)
+def doji_sca(path: str, offline: bool = False) -> str:
+    """Scan project dependencies for known vulnerabilities (SCA).
+
+    Args:
+        path: Project directory containing package manifests (package.json, requirements.txt, etc.).
+        offline: If True, skip network vulnerability lookups and only parse manifests.
+    """
+    from .sca.scanner import scan_sca
+
+    root = _validate_path(Path(path))
+    if not root.is_dir():
+        raise ValueError(f"'{path}' is not a directory")
+
+    analyses = scan_sca(root, offline=offline)
+
+    if not analyses:
+        return "SCA: No vulnerable dependencies found (or no lockfiles detected)."
+
+    lines = []
+    total_findings = 0
+    for analysis in analyses:
+        lines.append(f"Lockfile: {analysis.path}")
+        for finding in analysis.findings:
+            sev_tag = finding.severity.value.upper()
+            lines.append(f"  [{sev_tag}] {finding.message}")
+            if finding.suggestion:
+                lines.append(f"    Fix: {finding.suggestion}")
+            total_findings += 1
+        lines.append("")
+
+    header = f"SCA: {total_findings} vulnerable dependencies in {len(analyses)} lockfile(s)\n"
+    return header + "\n".join(lines)
+
+
+# ─── Resources ────────────────────────────────────────────────────────
+
+
+@mcp.resource("dojigiri://rules")
+def resource_rules() -> str:
+    """List all Dojigiri rules with severity, category, and CWE mapping."""
+    from .languages import list_all_rules
+
+    rules = list_all_rules()
+    lines = [f"Dojigiri Rules ({len(rules)} total)\n"]
+    for r in rules:
+        cwe = r.get("cwe", "")
+        cwe_str = f" [{cwe}]" if cwe else ""
+        langs = ", ".join(r["languages"])
+        lines.append(f"  {r['name']}  severity={r['severity']}  category={r['category']}  languages={langs}{cwe_str}")
+    return "\n".join(lines)
+
+
+@mcp.resource("dojigiri://languages")
+def resource_languages() -> str:
+    """List supported languages and their file extensions."""
+    from .config import LANGUAGE_EXTENSIONS
+
+    # Group extensions by language
+    lang_exts: dict[str, list[str]] = {}
+    for ext, lang in sorted(LANGUAGE_EXTENSIONS.items()):
+        lang_exts.setdefault(lang, []).append(ext)
+
+    lines = [f"Supported Languages ({len(lang_exts)})\n"]
+    for lang in sorted(lang_exts):
+        exts = ", ".join(sorted(lang_exts[lang]))
+        lines.append(f"  {lang}: {exts}")
+    return "\n".join(lines)
+
+
+@mcp.resource("dojigiri://config")
+def resource_config() -> str:
+    """Show current MCP server configuration."""
+    lines = ["Dojigiri MCP Config\n"]
+    lines.append("Allowed roots:")
+    for root in _allowed_roots:
+        lines.append(f"  {root}")
+    lines.append(f"\nTotal allowed roots: {len(_allowed_roots)}")
+    return "\n".join(lines)
+
+
+@mcp.resource("dojigiri://rules/{language}")
+def resource_rules_by_language(language: str) -> str:
+    """List Dojigiri rules filtered to a specific language."""
+    from .languages import list_all_rules
+
+    rules = list_all_rules()
+    lang_lower = language.lower()
+    filtered = [r for r in rules if lang_lower in r["languages"] or "all" in r["languages"]]
+    if not filtered:
+        return f"No rules found for language '{language}'."
+    lines = [f"Dojigiri Rules for {language} ({len(filtered)} rules)\n"]
+    for r in filtered:
+        cwe = r.get("cwe", "")
+        cwe_str = f" [{cwe}]" if cwe else ""
+        lines.append(f"  {r['name']}  severity={r['severity']}  category={r['category']}{cwe_str}")
+    return "\n".join(lines)
+
+
+# ─── Prompts ──────────────────────────────────────────────────────────
+
+
+@mcp.prompt()
+def review_file(path: str) -> str:
+    """Comprehensive file review: scan for issues then explain the file structure."""
+    return (
+        f"Review the file at {path}:\n"
+        f"1. Run doji_scan_file on {path} to find bugs, security issues, and quality problems.\n"
+        f"2. Run doji_explain on {path} to understand the file's structure and design.\n"
+        f"3. Summarize all findings and explain which are most important to fix, and why."
+    )
+
+
+@mcp.prompt()
+def security_audit(path: str) -> str:
+    """Security-focused audit: SAST scan plus dependency vulnerability check."""
+    return (
+        f"Perform a security audit of {path}:\n"
+        f"1. Run doji_scan on {path} with min_severity='critical' to find security vulnerabilities.\n"
+        f"2. Run doji_scan on {path} with min_severity='warning' to catch lower-severity security issues.\n"
+        f"3. Run doji_sca on {path} to check dependencies for known CVEs.\n"
+        f"4. Provide a prioritized list of security findings with remediation guidance."
+    )
