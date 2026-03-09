@@ -1,0 +1,125 @@
+name: Doji Scan (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      path:
+        type: string
+        default: '.'
+      min-severity:
+        type: string
+        default: 'warning'
+      output-format:
+        type: string
+        default: 'sarif'
+      fail-on-findings:
+        type: boolean
+        default: true
+      deep:
+        type: boolean
+        default: false
+      diff-only:
+        type: boolean
+        default: false
+      profile:
+        type: string
+        default: ''
+      ignore-rules:
+        type: string
+        default: ''
+      python-version:
+        type: string
+        default: '3.12'
+      dojigiri-version:
+        description: 'Git ref or version of dojigiri to install (default: main)'
+        type: string
+        default: 'main'
+    secrets:
+      anthropic-api-key:
+        description: 'Anthropic API key (required for deep scans)'
+        required: false
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  doji-scan:
+    name: Dojigiri Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ inputs.diff-only && 0 || 1 }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install Dojigiri
+        run: pip install --quiet "dojigiri @ git+https://github.com/Inklling/dojigiri.git@${{ inputs.dojigiri-version }}"
+
+      - name: Run scan
+        id: scan
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.anthropic-api-key }}
+        run: |
+          set +e
+
+          ARGS=("${{ inputs.path }}" --min-severity "${{ inputs.min-severity }}")
+
+          if [ "${{ inputs.deep }}" = "true" ]; then
+            ARGS+=(--deep --accept-remote)
+          fi
+
+          if [ "${{ inputs.diff-only }}" = "true" ]; then
+            ARGS+=(--diff)
+          fi
+
+          if [ -n "${{ inputs.profile }}" ]; then
+            ARGS+=(--profile "${{ inputs.profile }}")
+          fi
+
+          if [ -n "${{ inputs.ignore-rules }}" ]; then
+            ARGS+=(--ignore "${{ inputs.ignore-rules }}")
+          fi
+
+          # JSON run for counts
+          JSON_OUTPUT=$(python -m dojigiri scan "${ARGS[@]}" --output json 2>/dev/null)
+          FINDINGS=$(echo "$JSON_OUTPUT" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('total_findings',0))" 2>/dev/null || echo "0")
+          CRITICAL=$(echo "$JSON_OUTPUT" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('critical',0))" 2>/dev/null || echo "0")
+
+          echo "findings-count=$FINDINGS" >> "$GITHUB_OUTPUT"
+          echo "critical-count=$CRITICAL" >> "$GITHUB_OUTPUT"
+
+          # Requested output format
+          if [ "${{ inputs.output-format }}" = "sarif" ]; then
+            python -m dojigiri scan "${ARGS[@]}" --output sarif > dojigiri-results.sarif 2>/dev/null
+            echo "sarif-path=dojigiri-results.sarif" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Text summary for the log
+          python -m dojigiri scan "${ARGS[@]}" --output text || true
+
+          # Fail check
+          if [ "${{ inputs.fail-on-findings }}" = "true" ] && [ "$FINDINGS" -gt 0 ] 2>/dev/null; then
+            echo "::error::Dojigiri found $FINDINGS finding(s) ($CRITICAL critical)"
+            exit 1
+          fi
+
+      - name: Upload SARIF
+        if: inputs.output-format == 'sarif' && always()
+        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        with:
+          sarif_file: dojigiri-results.sarif
+          category: dojigiri
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "### Dojigiri Scan Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Findings: ${{ steps.scan.outputs.findings-count }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Critical: ${{ steps.scan.outputs.critical-count }}" >> "$GITHUB_STEP_SUMMARY"

@@ -1,4 +1,4 @@
-name: Doji Security Scan
+name: Doji Self-Scan
 
 on:
   push:
@@ -20,13 +20,14 @@ jobs:
         id: doji
         with:
           min-severity: warning
-          fail-on-critical: true
+          output-format: sarif
+          fail-on-findings: 'true'
 
       - name: Summary
         if: always()
         run: |
-          echo "### Dojigiri Scan Results" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Total findings: ${{ steps.doji.outputs.findings-count }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Dojigiri Self-Scan" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Findings: ${{ steps.doji.outputs.findings-count }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Critical: ${{ steps.doji.outputs.critical-count }}" >> "$GITHUB_STEP_SUMMARY"
 
   scan-pr-diff:
@@ -40,6 +41,6 @@ jobs:
 
       - uses: ./
         with:
-          diff-only: true
+          diff-only: 'true'
           min-severity: info
-          fail-on-critical: true
+          fail-on-findings: 'false'

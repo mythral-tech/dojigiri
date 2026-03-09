@@ -13,10 +13,13 @@ inputs:
     default: 'warning'
   output-format:
     description: 'Output format (text, json, sarif)'
-    default: 'sarif'
-  fail-on-critical:
-    description: 'Fail the action if critical issues are found'
+    default: 'text'
+  fail-on-findings:
+    description: 'Fail the action if any findings at or above min-severity'
     default: 'true'
+  deep:
+    description: 'Run deep scan with LLM analysis (requires ANTHROPIC_API_KEY)'
+    default: 'false'
   diff-only:
     description: 'Only scan changed files (PR mode)'
     default: 'false'
@@ -37,9 +40,9 @@ outputs:
   critical-count:
     description: 'Number of critical findings'
     value: ${{ steps.scan.outputs.critical-count }}
-  sarif-file:
-    description: 'Path to SARIF output file'
-    value: ${{ steps.scan.outputs.sarif-file }}
+  sarif-path:
+    description: 'Path to SARIF output file (only set when output-format is sarif)'
+    value: ${{ steps.scan.outputs.sarif-path }}
 
 runs:
   using: 'composite'
@@ -51,66 +54,92 @@ runs:
 
     - name: Install Dojigiri
       shell: bash
-      run: |
-        pip install --quiet "${{ github.action_path }}"
+      run: pip install --quiet "${{ github.action_path }}"
 
     - name: Run scan
       id: scan
       shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_MIN_SEVERITY: ${{ inputs.min-severity }}
+        INPUT_OUTPUT_FORMAT: ${{ inputs.output-format }}
+        INPUT_FAIL_ON_FINDINGS: ${{ inputs.fail-on-findings }}
+        INPUT_DEEP: ${{ inputs.deep }}
+        INPUT_DIFF_ONLY: ${{ inputs.diff-only }}
+        INPUT_PROFILE: ${{ inputs.profile }}
+        INPUT_IGNORE_RULES: ${{ inputs.ignore-rules }}
       run: |
         set +e
 
-        SCAN_ARGS="${{ inputs.path }}"
-        SCAN_ARGS="$SCAN_ARGS --min-severity ${{ inputs.min-severity }}"
-        SCAN_ARGS="$SCAN_ARGS --output ${{ inputs.output-format }}"
+        # Build scan command
+        ARGS=("$INPUT_PATH" --min-severity "$INPUT_MIN_SEVERITY" --output json)
 
-        # Profile
-        if [ -n "${{ inputs.profile }}" ]; then
-          SCAN_ARGS="$SCAN_ARGS --profile ${{ inputs.profile }}"
+        if [ "$INPUT_DEEP" = "true" ]; then
+          ARGS+=(--deep --accept-remote)
         fi
 
-        # Ignore rules
-        if [ -n "${{ inputs.ignore-rules }}" ]; then
-          SCAN_ARGS="$SCAN_ARGS --ignore ${{ inputs.ignore-rules }}"
+        if [ "$INPUT_DIFF_ONLY" = "true" ]; then
+          ARGS+=(--diff)
         fi
 
-        # Diff-only mode for PRs
-        if [ "${{ inputs.diff-only }}" = "true" ]; then
-          SCAN_ARGS="$SCAN_ARGS --diff"
+        if [ -n "$INPUT_PROFILE" ]; then
+          ARGS+=(--profile "$INPUT_PROFILE")
         fi
 
-        # Run the scan
-        if [ "${{ inputs.output-format }}" = "sarif" ]; then
-          python -m dojigiri scan $SCAN_ARGS > dojigiri-results.sarif 2>/tmp/doji-stderr.txt
-          EXIT_CODE=$?
-          # Also run text output for the log
-          python -m dojigiri scan ${{ inputs.path }} --min-severity ${{ inputs.min-severity }} --output text 2>/dev/null || true
-        else
-          python -m dojigiri scan $SCAN_ARGS 2>/tmp/doji-stderr.txt
-          EXIT_CODE=$?
+        if [ -n "$INPUT_IGNORE_RULES" ]; then
+          ARGS+=(--ignore "$INPUT_IGNORE_RULES")
         fi
 
-        # Parse counts from a JSON run
-        COUNTS=$(python -m dojigiri scan ${{ inputs.path }} --min-severity ${{ inputs.min-severity }} --output json 2>/dev/null || echo '{}')
-        FINDINGS=$(echo "$COUNTS" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('total_findings',0))" 2>/dev/null || echo "0")
-        CRITICAL=$(echo "$COUNTS" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('critical',0))" 2>/dev/null || echo "0")
+        # Always run JSON to get structured counts
+        JSON_OUTPUT=$(python -m dojigiri scan "${ARGS[@]}" 2>/tmp/doji-stderr.txt)
+        SCAN_EXIT=$?
+
+        FINDINGS=$(echo "$JSON_OUTPUT" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('total_findings',0))" 2>/dev/null || echo "0")
+        CRITICAL=$(echo "$JSON_OUTPUT" | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('critical',0))" 2>/dev/null || echo "0")
 
         echo "findings-count=$FINDINGS" >> "$GITHUB_OUTPUT"
         echo "critical-count=$CRITICAL" >> "$GITHUB_OUTPUT"
 
-        if [ "${{ inputs.output-format }}" = "sarif" ]; then
-          echo "sarif-file=dojigiri-results.sarif" >> "$GITHUB_OUTPUT"
+        # Produce requested output format
+        if [ "$INPUT_OUTPUT_FORMAT" = "sarif" ]; then
+          SARIF_ARGS=("$INPUT_PATH" --min-severity "$INPUT_MIN_SEVERITY" --output sarif)
+          if [ "$INPUT_DEEP" = "true" ]; then SARIF_ARGS+=(--deep --accept-remote); fi
+          if [ "$INPUT_DIFF_ONLY" = "true" ]; then SARIF_ARGS+=(--diff); fi
+          if [ -n "$INPUT_PROFILE" ]; then SARIF_ARGS+=(--profile "$INPUT_PROFILE"); fi
+          if [ -n "$INPUT_IGNORE_RULES" ]; then SARIF_ARGS+=(--ignore "$INPUT_IGNORE_RULES"); fi
+
+          python -m dojigiri scan "${SARIF_ARGS[@]}" > dojigiri-results.sarif 2>/dev/null
+          echo "sarif-path=dojigiri-results.sarif" >> "$GITHUB_OUTPUT"
+
+          # Also print text summary to the log
+          python -m dojigiri scan "$INPUT_PATH" --min-severity "$INPUT_MIN_SEVERITY" --output text 2>/dev/null || true
+        elif [ "$INPUT_OUTPUT_FORMAT" = "json" ]; then
+          echo "$JSON_OUTPUT"
+        else
+          # Text output for the log
+          python -m dojigiri scan "$INPUT_PATH" --min-severity "$INPUT_MIN_SEVERITY" --output text 2>/dev/null || true
         fi
 
-        # Fail on critical if configured
-        if [ "${{ inputs.fail-on-critical }}" = "true" ] && [ "$EXIT_CODE" = "2" ]; then
-          echo "::error::Dojigiri found critical security issues ($CRITICAL critical findings)"
+        # Stderr warnings
+        if [ -s /tmp/doji-stderr.txt ]; then
+          cat /tmp/doji-stderr.txt >&2
+        fi
+
+        # Fail logic
+        if [ "$INPUT_FAIL_ON_FINDINGS" = "true" ] && [ "$FINDINGS" -gt 0 ] 2>/dev/null; then
+          echo "::error::Dojigiri found $FINDINGS finding(s) ($CRITICAL critical)"
+          exit 1
+        fi
+
+        # Also fail if scan itself errored (exit 1 = bad args, not findings)
+        if [ "$SCAN_EXIT" = "1" ]; then
+          echo "::error::Dojigiri scan failed. Check stderr above."
           exit 1
         fi
 
         exit 0
 
-    - name: Upload SARIF to GitHub Code Scanning
+    - name: Upload SARIF
       if: inputs.output-format == 'sarif' && always()
       uses: github/codeql-action/upload-sarif@v3
       continue-on-error: true
