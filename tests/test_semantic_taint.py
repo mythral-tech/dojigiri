@@ -554,3 +554,62 @@ def foo():
         f = findings[0]
         assert "cmd" in f.message
         assert "os.system" in f.message or "system" in f.message
+
+
+# ─── Scope-Aware Sanitization Tests ──────────────────────────────────────────
+
+@needs_tree_sitter
+class TestScopeAwareSanitization:
+    """Verify that sanitizers in sibling branches don't suppress findings (scope dominance)."""
+
+    def test_sanitizer_in_if_does_not_suppress_else_branch(self):
+        """A sanitizer inside an `if` block should NOT suppress a finding in the `else` block.
+
+        The sanitizer and sink are in sibling scopes — neither dominates the other.
+        """
+        code = '''
+def process():
+    x = input("data: ")
+    if condition:
+        x = html.escape(x)
+        print(x)
+    else:
+        eval(x)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) >= 1, (
+            "Sanitizer in if-branch should not suppress finding in else-branch"
+        )
+
+    def test_sanitizer_in_parent_scope_suppresses_child(self):
+        """A sanitizer in the parent (function) scope SHOULD suppress a finding in a child scope.
+
+        The sanitizer's scope is an ancestor of the sink's scope.
+        """
+        code = '''
+def process():
+    x = input("data: ")
+    x = html.escape(x)
+    if condition:
+        eval(x)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) == 0, (
+            "Sanitizer in parent scope should suppress finding in child scope"
+        )
+
+    def test_sanitizer_in_same_scope_suppresses(self):
+        """A sanitizer in the same scope as the sink SHOULD suppress the finding.
+
+        This is the existing behavior — regression guard.
+        """
+        code = '''
+def process():
+    x = input("data: ")
+    x = html.escape(x)
+    eval(x)
+'''
+        findings = _analyze_python(code)
+        assert len(findings) == 0, (
+            "Sanitizer in same scope as sink should suppress finding"
+        )

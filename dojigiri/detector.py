@@ -18,6 +18,7 @@ import re
 
 logger = logging.getLogger(__name__)
 
+from .ast_checks import run_python_ast_checks
 from .languages import get_rules_for_language
 from .types import Category, Finding, Source
 
@@ -399,15 +400,12 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules=No
     return findings
 
 
-# ─── AST checks (extracted to ast_checks.py) ─────────────────────────────
-# TODO(fold-38): migrate callers to import from .ast_checks directly
-from .ast_checks import _count_branches, run_python_ast_checks  # noqa: E402, F401 — re-exported for backwards compat
-
 # ─── Internal helpers for analyze_file_static ─────────────────────────────
 
 
 def _run_all_checks(
-    filepath: str, content: str, language: str, custom_rules=None
+    filepath: str, content: str, language: str, custom_rules=None,
+    *, skip_benchmark_filters: bool = False,
 ) -> tuple[list[Finding], object | None, object | None]:
     """Run regex + AST + semantic checks. Returns (findings, semantics, type_map).
 
@@ -415,6 +413,11 @@ def _run_all_checks(
     dependencies. The semantic/* and java_sanitize modules pull in tree-sitter and
     other heavy dependencies that shouldn't be loaded at module import time (e.g.,
     when only regex checks are needed or when the module is imported for type access).
+
+    Args:
+        skip_benchmark_filters: If True, only apply general-purpose Java FP
+            filters (explicit sanitizer detection).  Passed through to
+            :func:`java_sanitize.filter_java_fps`.
     """
     findings = run_regex_checks(content, filepath, language, custom_rules=custom_rules)
 
@@ -422,7 +425,9 @@ def _run_all_checks(
     if language == "java":
         from .java_sanitize import filter_java_fps
 
-        findings = filter_java_fps(findings, content)
+        findings = filter_java_fps(
+            findings, content, skip_benchmark_filters=skip_benchmark_filters,
+        )
 
     # AST checks: tree-sitter for all languages, Python ast as supplement/fallback
     from .semantic.checks import run_tree_sitter_checks

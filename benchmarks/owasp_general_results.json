@@ -1,0 +1,8836 @@
+{
+  "BenchmarkTest00001": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00002": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00003": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00004": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00005": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00006": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00007": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00008": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00009": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00010": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00011": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00012": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00013": [
+    "java-xss"
+  ],
+  "BenchmarkTest00014": [
+    "java-xss"
+  ],
+  "BenchmarkTest00015": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00017": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00018": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00019": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00020": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00021": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00022": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00023": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00024": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00025": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00026": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00027": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00028": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00029": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00030": [
+    "java-xss"
+  ],
+  "BenchmarkTest00031": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00032": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00033": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00034": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00035": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00036": [
+    "java-xss"
+  ],
+  "BenchmarkTest00037": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00038": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00039": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00040": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00041": [
+    "java-xss"
+  ],
+  "BenchmarkTest00042": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00043": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00044": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00045": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00046": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00047": [
+    "java-xss"
+  ],
+  "BenchmarkTest00048": [
+    "java-xss"
+  ],
+  "BenchmarkTest00049": [
+    "java-xss"
+  ],
+  "BenchmarkTest00050": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00051": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00052": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00053": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00054": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00055": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00056": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00057": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00058": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00059": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00061": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00062": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00063": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00064": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00065": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00066": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00067": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00068": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00069": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00070": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00071": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00072": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00073": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00074": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00075": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00076": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00078": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00079": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00080": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest00081": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest00082": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00083": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00084": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00085": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00086": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00087": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00090": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00091": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00092": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00093": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00094": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00095": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00096": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00097": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00098": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00099": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00100": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00101": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00102": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00103": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00104": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00105": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00106": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00107": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00108": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00109": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00110": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00111": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00112": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00113": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00114": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00115": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00116": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00117": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00118": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00119": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00120": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00121": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00122": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00123": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00124": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00125": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00126": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00127": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00128": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00130": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00131": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00132": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00133": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00134": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00135": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00136": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00137": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00138": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00139": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00140": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00141": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00142": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00143": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00144": [
+    "java-xss"
+  ],
+  "BenchmarkTest00145": [
+    "java-xss"
+  ],
+  "BenchmarkTest00146": [
+    "java-xss"
+  ],
+  "BenchmarkTest00147": [
+    "java-xss"
+  ],
+  "BenchmarkTest00148": [
+    "java-xss"
+  ],
+  "BenchmarkTest00149": [
+    "java-xss"
+  ],
+  "BenchmarkTest00150": [
+    "java-xss"
+  ],
+  "BenchmarkTest00151": [
+    "java-xss"
+  ],
+  "BenchmarkTest00152": [
+    "java-xss"
+  ],
+  "BenchmarkTest00153": [
+    "java-xss"
+  ],
+  "BenchmarkTest00154": [
+    "java-xss"
+  ],
+  "BenchmarkTest00155": [
+    "java-xss"
+  ],
+  "BenchmarkTest00156": [
+    "java-xss"
+  ],
+  "BenchmarkTest00157": [
+    "java-xss"
+  ],
+  "BenchmarkTest00159": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00160": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00161": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00162": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest00163": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00164": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00165": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00166": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00167": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00168": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00169": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00170": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00171": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00172": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00173": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00174": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00175": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00176": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00177": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00178": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00179": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00180": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00181": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00182": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00183": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00184": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00185": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00186": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00187": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00188": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00189": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00190": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00191": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00192": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00193": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00194": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00195": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00196": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00197": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00198": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00199": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00200": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00201": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00202": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00203": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00204": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00205": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00206": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00207": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00208": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00209": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00210": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00211": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00212": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00213": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00214": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00216": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00217": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00218": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00219": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00220": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00221": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00222": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00223": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00224": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00225": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00226": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00227": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00228": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00229": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00230": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00231": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00232": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00233": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00234": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00235": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00236": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00237": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00238": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00239": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00240": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00241": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00243": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00244": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00245": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00246": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00247": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00248": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00249": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00250": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00251": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00252": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00253": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00254": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00255": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00256": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00257": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00258": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00259": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00262": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00263": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00264": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00265": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00266": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00267": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00268": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00269": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00270": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00271": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00272": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00273": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00274": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00275": [
+    "java-xss"
+  ],
+  "BenchmarkTest00276": [
+    "java-xss"
+  ],
+  "BenchmarkTest00277": [
+    "java-xss"
+  ],
+  "BenchmarkTest00279": [
+    "java-xss"
+  ],
+  "BenchmarkTest00280": [
+    "java-xss"
+  ],
+  "BenchmarkTest00281": [
+    "java-xss"
+  ],
+  "BenchmarkTest00284": [
+    "java-xss"
+  ],
+  "BenchmarkTest00287": [
+    "java-xss"
+  ],
+  "BenchmarkTest00288": [
+    "java-xss"
+  ],
+  "BenchmarkTest00290": [
+    "java-xss"
+  ],
+  "BenchmarkTest00291": [
+    "java-xss"
+  ],
+  "BenchmarkTest00292": [
+    "java-xss"
+  ],
+  "BenchmarkTest00293": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00295": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00296": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00297": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00298": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00299": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00300": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00301": [
+    "java-xss"
+  ],
+  "BenchmarkTest00302": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00303": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00304": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00305": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00306": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00307": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00308": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00309": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00310": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00311": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00312": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00313": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00314": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00315": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00316": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00317": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00318": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00319": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00320": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00321": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00322": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00323": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00324": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00325": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00326": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00327": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00328": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00329": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00330": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00331": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00332": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00333": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00334": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00335": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00336": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00337": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00338": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00339": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00340": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00341": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00342": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00343": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00344": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00345": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00346": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00347": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00348": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00349": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00350": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00351": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00352": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00353": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00354": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00355": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00356": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00357": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00358": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00359": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00360": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00361": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00362": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00363": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00364": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00365": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00366": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00367": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00368": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest00369": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00370": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00371": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00372": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00373": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00374": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00375": [
+    "java-xss"
+  ],
+  "BenchmarkTest00376": [
+    "java-xss"
+  ],
+  "BenchmarkTest00377": [
+    "java-xss"
+  ],
+  "BenchmarkTest00378": [
+    "java-xss"
+  ],
+  "BenchmarkTest00379": [
+    "java-xss"
+  ],
+  "BenchmarkTest00380": [
+    "java-xss"
+  ],
+  "BenchmarkTest00382": [
+    "java-xss"
+  ],
+  "BenchmarkTest00383": [
+    "java-xss"
+  ],
+  "BenchmarkTest00384": [
+    "java-xss"
+  ],
+  "BenchmarkTest00385": [
+    "java-xss"
+  ],
+  "BenchmarkTest00386": [
+    "java-xss"
+  ],
+  "BenchmarkTest00387": [
+    "java-xss"
+  ],
+  "BenchmarkTest00388": [
+    "java-xss"
+  ],
+  "BenchmarkTest00390": [
+    "java-xss"
+  ],
+  "BenchmarkTest00392": [
+    "java-xss"
+  ],
+  "BenchmarkTest00393": [
+    "java-xss"
+  ],
+  "BenchmarkTest00394": [
+    "java-xss"
+  ],
+  "BenchmarkTest00395": [
+    "java-xss"
+  ],
+  "BenchmarkTest00396": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00397": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00398": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00399": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00400": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00401": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00402": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00403": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00406": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00407": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00408": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00409": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00410": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00411": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00412": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00413": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00414": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00415": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00416": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00417": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00418": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00419": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00420": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00421": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00422": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00423": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00424": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00425": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00426": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00427": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00428": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00429": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00430": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00431": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00432": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00433": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00434": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00435": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00436": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00437": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00438": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00439": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00440": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00441": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00442": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00443": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00444": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00445": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00446": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00447": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00448": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00449": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00450": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00451": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00453": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00454": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00455": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00456": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00457": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00458": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00459": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00460": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00461": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest00462": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00464": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00465": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00466": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00467": [
+    "java-xss"
+  ],
+  "BenchmarkTest00468": [
+    "java-xss"
+  ],
+  "BenchmarkTest00469": [
+    "java-xss"
+  ],
+  "BenchmarkTest00470": [
+    "java-xss"
+  ],
+  "BenchmarkTest00472": [
+    "java-xss"
+  ],
+  "BenchmarkTest00473": [
+    "java-xss"
+  ],
+  "BenchmarkTest00475": [
+    "java-xss"
+  ],
+  "BenchmarkTest00476": [
+    "java-xss"
+  ],
+  "BenchmarkTest00477": [
+    "java-xss"
+  ],
+  "BenchmarkTest00478": [
+    "java-xss"
+  ],
+  "BenchmarkTest00480": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00482": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00483": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00484": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00485": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00486": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00487": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00488": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00489": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00490": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00491": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00492": [
+    "java-xss"
+  ],
+  "BenchmarkTest00493": [
+    "java-xss"
+  ],
+  "BenchmarkTest00494": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00495": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00496": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00497": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00498": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00499": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00500": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00501": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00502": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00503": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00504": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00505": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00506": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00507": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00508": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00509": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00510": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00511": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00512": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00513": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00514": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00515": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00516": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00517": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00518": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00519": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00520": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00521": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00522": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00523": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00524": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00525": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00526": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00527": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00528": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00529": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00530": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00531": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00532": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00533": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00534": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00535": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00536": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00537": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00538": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00539": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00540": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00541": [
+    "java-xss"
+  ],
+  "BenchmarkTest00542": [
+    "java-xss"
+  ],
+  "BenchmarkTest00543": [
+    "java-xss"
+  ],
+  "BenchmarkTest00544": [
+    "java-xss"
+  ],
+  "BenchmarkTest00545": [
+    "java-xss"
+  ],
+  "BenchmarkTest00546": [
+    "java-xss"
+  ],
+  "BenchmarkTest00547": [
+    "java-xss"
+  ],
+  "BenchmarkTest00548": [
+    "java-xss"
+  ],
+  "BenchmarkTest00549": [
+    "java-xss"
+  ],
+  "BenchmarkTest00550": [
+    "java-xss"
+  ],
+  "BenchmarkTest00551": [
+    "java-xss"
+  ],
+  "BenchmarkTest00552": [
+    "java-xss"
+  ],
+  "BenchmarkTest00553": [
+    "java-xss"
+  ],
+  "BenchmarkTest00554": [
+    "java-xss"
+  ],
+  "BenchmarkTest00555": [
+    "java-xss"
+  ],
+  "BenchmarkTest00556": [
+    "java-xss"
+  ],
+  "BenchmarkTest00557": [
+    "java-xss"
+  ],
+  "BenchmarkTest00560": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00561": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00562": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00563": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00564": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00565": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00566": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00567": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00568": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00569": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00570": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00571": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00572": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00573": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00574": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00575": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00576": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00577": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00578": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00579": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00580": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00581": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00582": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00583": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00584": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00585": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00586": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00587": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00588": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00589": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00590": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00591": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00592": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00593": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00594": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00595": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00596": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00597": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00598": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00599": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00600": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00601": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00602": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00603": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00604": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00605": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00606": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00607": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00608": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00609": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00610": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00611": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00612": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00613": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00614": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00615": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00616": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00617": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00618": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00622": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00623": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00624": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00625": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00626": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00627": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00628": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00629": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00630": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00631": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00632": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00633": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00634": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00635": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00636": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00637": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00638": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00639": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00640": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00641": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00642": [
+    "java-xss"
+  ],
+  "BenchmarkTest00643": [
+    "java-xss"
+  ],
+  "BenchmarkTest00644": [
+    "java-xss"
+  ],
+  "BenchmarkTest00645": [
+    "java-xss"
+  ],
+  "BenchmarkTest00646": [
+    "java-xss"
+  ],
+  "BenchmarkTest00650": [
+    "java-xss"
+  ],
+  "BenchmarkTest00651": [
+    "java-xss"
+  ],
+  "BenchmarkTest00652": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00653": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00654": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00656": [
+    "java-xss"
+  ],
+  "BenchmarkTest00657": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00658": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00659": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00660": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00661": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00662": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00663": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00664": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00665": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00666": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00667": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00668": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00669": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00670": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00671": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00672": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00673": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00674": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00675": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00676": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00677": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00678": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00679": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00680": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00681": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00682": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00683": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00684": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00685": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00686": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00687": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00688": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00689": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00690": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00691": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00692": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00693": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00694": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00695": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00696": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00697": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00698": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00699": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00700": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00701": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00702": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00703": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00704": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00705": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00707": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00708": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00710": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00711": [
+    "java-xss"
+  ],
+  "BenchmarkTest00712": [
+    "java-xss"
+  ],
+  "BenchmarkTest00715": [
+    "java-xss"
+  ],
+  "BenchmarkTest00717": [
+    "java-xss"
+  ],
+  "BenchmarkTest00719": [
+    "java-xss"
+  ],
+  "BenchmarkTest00720": [
+    "java-xss"
+  ],
+  "BenchmarkTest00721": [
+    "java-xss"
+  ],
+  "BenchmarkTest00722": [
+    "java-xss"
+  ],
+  "BenchmarkTest00723": [
+    "java-xss"
+  ],
+  "BenchmarkTest00724": [
+    "java-xss"
+  ],
+  "BenchmarkTest00725": [
+    "java-xss"
+  ],
+  "BenchmarkTest00727": [
+    "java-xss"
+  ],
+  "BenchmarkTest00728": [
+    "java-xss"
+  ],
+  "BenchmarkTest00729": [
+    "java-xss"
+  ],
+  "BenchmarkTest00730": [
+    "java-xss"
+  ],
+  "BenchmarkTest00732": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00733": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00734": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00735": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00736": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00737": [
+    "java-xss"
+  ],
+  "BenchmarkTest00738": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00739": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00740": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00741": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00742": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00743": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00744": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00745": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00746": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00747": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00748": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00749": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00750": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00751": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00752": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00753": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00754": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00755": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00756": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00757": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00758": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00759": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00760": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00761": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00762": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00763": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00764": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00765": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00766": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00767": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00768": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00769": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00770": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00771": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00772": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00773": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00774": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00775": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00776": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00777": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00778": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00779": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00780": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00781": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00782": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00783": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00784": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00785": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00786": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00787": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00788": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00789": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00790": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00792": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00794": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00795": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00796": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00797": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00798": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00799": [
+    "java-xss"
+  ],
+  "BenchmarkTest00800": [
+    "java-xss"
+  ],
+  "BenchmarkTest00801": [
+    "java-xss"
+  ],
+  "BenchmarkTest00802": [
+    "java-xss"
+  ],
+  "BenchmarkTest00803": [
+    "java-xss"
+  ],
+  "BenchmarkTest00804": [
+    "java-xss"
+  ],
+  "BenchmarkTest00805": [
+    "java-xss"
+  ],
+  "BenchmarkTest00806": [
+    "java-xss"
+  ],
+  "BenchmarkTest00807": [
+    "java-xss"
+  ],
+  "BenchmarkTest00808": [
+    "java-xss"
+  ],
+  "BenchmarkTest00809": [
+    "java-xss"
+  ],
+  "BenchmarkTest00810": [
+    "java-xss"
+  ],
+  "BenchmarkTest00811": [
+    "java-xss"
+  ],
+  "BenchmarkTest00812": [
+    "java-xss"
+  ],
+  "BenchmarkTest00813": [
+    "java-xss"
+  ],
+  "BenchmarkTest00814": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00815": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00816": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00817": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00818": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00819": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00820": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00821": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00822": [
+    "java-xss"
+  ],
+  "BenchmarkTest00823": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00824": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00825": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00826": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00827": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00828": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00829": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00830": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00831": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00832": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00833": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00834": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00835": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00836": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00837": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00838": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00839": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00840": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00841": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00842": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00843": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00844": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00845": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00846": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00847": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00848": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00849": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00850": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00851": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00852": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00853": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00854": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00855": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00856": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00857": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00858": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00859": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00860": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00861": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00862": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00863": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00864": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00865": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00866": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00867": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00868": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00869": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00870": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00871": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00872": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00873": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00875": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00876": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00877": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00878": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00879": [
+    "java-xss"
+  ],
+  "BenchmarkTest00880": [
+    "java-xss"
+  ],
+  "BenchmarkTest00881": [
+    "java-xss"
+  ],
+  "BenchmarkTest00882": [
+    "java-xss"
+  ],
+  "BenchmarkTest00883": [
+    "java-xss"
+  ],
+  "BenchmarkTest00884": [
+    "java-xss"
+  ],
+  "BenchmarkTest00885": [
+    "java-xss"
+  ],
+  "BenchmarkTest00886": [
+    "java-xss"
+  ],
+  "BenchmarkTest00887": [
+    "java-xss"
+  ],
+  "BenchmarkTest00889": [
+    "java-xss"
+  ],
+  "BenchmarkTest00890": [
+    "java-xss"
+  ],
+  "BenchmarkTest00891": [
+    "java-xss"
+  ],
+  "BenchmarkTest00892": [
+    "java-xss"
+  ],
+  "BenchmarkTest00893": [
+    "java-xss"
+  ],
+  "BenchmarkTest00894": [
+    "java-xss"
+  ],
+  "BenchmarkTest00897": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00898": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00899": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00900": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00901": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00902": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00903": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00905": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00906": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00907": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00908": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00909": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00910": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00911": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00912": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00913": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00914": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00915": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00916": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00917": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00918": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00919": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00920": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00921": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00922": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00923": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00924": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00925": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00926": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00927": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00928": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00929": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00930": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00931": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00932": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00933": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00934": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest00935": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00936": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00937": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00938": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00939": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00940": [
+    "sql-injection"
+  ],
+  "BenchmarkTest00941": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest00942": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00943": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00945": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00946": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest00947": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00948": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00949": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00950": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00951": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00952": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00953": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00954": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00955": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00956": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00957": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00958": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00959": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest00960": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00961": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00962": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest00963": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00964": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00965": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00966": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00967": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest00971": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00972": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00973": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest00974": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00975": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00976": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest00977": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest00978": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00979": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00980": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00981": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00982": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00983": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest00984": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00985": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00986": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00987": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00988": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00989": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest00990": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00991": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00992": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00993": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00994": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00995": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest00996": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00997": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00998": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest00999": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01000": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01001": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01002": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01003": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01004": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01005": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01006": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01007": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01008": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01009": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01010": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01011": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01012": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01013": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01014": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01015": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01016": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01017": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01018": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01019": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01020": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01021": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01022": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01023": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01024": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01025": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01026": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01027": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01028": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01029": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01030": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01031": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01032": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01033": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01034": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01035": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01036": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01037": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01038": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01039": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01040": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01041": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01042": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01043": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01044": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01045": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01046": [
+    "java-xss"
+  ],
+  "BenchmarkTest01047": [
+    "java-xss"
+  ],
+  "BenchmarkTest01049": [
+    "java-xss"
+  ],
+  "BenchmarkTest01050": [
+    "java-xss"
+  ],
+  "BenchmarkTest01051": [
+    "java-xss"
+  ],
+  "BenchmarkTest01052": [
+    "java-xss"
+  ],
+  "BenchmarkTest01053": [
+    "java-xss"
+  ],
+  "BenchmarkTest01055": [
+    "java-xss"
+  ],
+  "BenchmarkTest01056": [
+    "java-xss"
+  ],
+  "BenchmarkTest01057": [
+    "java-xss"
+  ],
+  "BenchmarkTest01058": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01059": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01060": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01061": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01063": [
+    "java-xss"
+  ],
+  "BenchmarkTest01064": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01065": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01066": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01067": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01068": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01069": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01070": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01071": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01072": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01073": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01074": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01075": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01076": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01077": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01078": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01079": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01080": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01081": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01082": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01083": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01084": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01085": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01086": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01087": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01088": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01089": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01090": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01091": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01092": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01093": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01094": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01095": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01096": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01097": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01098": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01099": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01100": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01102": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01103": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01104": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01105": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01106": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01107": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01108": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01109": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01110": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01111": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01112": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01113": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01114": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01115": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01116": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01117": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01118": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01119": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01120": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01121": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01122": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01123": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01124": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01125": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01126": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01127": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01128": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01129": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01130": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01131": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01132": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01133": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01134": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01135": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01136": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01137": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01138": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01139": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01140": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01141": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01142": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01143": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01144": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01145": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01146": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01147": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01148": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01149": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01150": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01151": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01152": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01153": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01154": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01155": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01156": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01157": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01158": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01159": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01160": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01161": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01162": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01163": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01164": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01165": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01166": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01167": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01168": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01169": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01170": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01171": [
+    "java-xss"
+  ],
+  "BenchmarkTest01172": [
+    "java-xss"
+  ],
+  "BenchmarkTest01173": [
+    "java-xss"
+  ],
+  "BenchmarkTest01174": [
+    "java-xss"
+  ],
+  "BenchmarkTest01176": [
+    "java-xss"
+  ],
+  "BenchmarkTest01177": [
+    "java-xss"
+  ],
+  "BenchmarkTest01178": [
+    "java-xss"
+  ],
+  "BenchmarkTest01179": [
+    "java-xss"
+  ],
+  "BenchmarkTest01180": [
+    "java-xss"
+  ],
+  "BenchmarkTest01181": [
+    "java-xss"
+  ],
+  "BenchmarkTest01183": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01184": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01185": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01186": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01187": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01189": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01190": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01191": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01192": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01193": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01194": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01195": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01196": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01197": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01198": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01199": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01200": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01201": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01202": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01203": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01204": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01205": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01206": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01207": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01208": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01209": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01210": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01211": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01212": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01213": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01214": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01215": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01216": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01217": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01218": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01219": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01220": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01221": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01222": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01223": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01224": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01225": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01226": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01227": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01228": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01229": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01230": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01234": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01235": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01236": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01237": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01238": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01239": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01240": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01241": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01242": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01243": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01244": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01245": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01246": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01247": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01248": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01249": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01250": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01252": [
+    "java-xss"
+  ],
+  "BenchmarkTest01253": [
+    "java-xss"
+  ],
+  "BenchmarkTest01254": [
+    "java-xss"
+  ],
+  "BenchmarkTest01256": [
+    "java-xss"
+  ],
+  "BenchmarkTest01257": [
+    "java-xss"
+  ],
+  "BenchmarkTest01258": [
+    "java-xss"
+  ],
+  "BenchmarkTest01259": [
+    "java-xss"
+  ],
+  "BenchmarkTest01260": [
+    "java-xss"
+  ],
+  "BenchmarkTest01261": [
+    "java-xss"
+  ],
+  "BenchmarkTest01262": [
+    "java-xss"
+  ],
+  "BenchmarkTest01263": [
+    "java-xss"
+  ],
+  "BenchmarkTest01265": [
+    "java-xss"
+  ],
+  "BenchmarkTest01266": [
+    "java-xss"
+  ],
+  "BenchmarkTest01267": [
+    "java-xss"
+  ],
+  "BenchmarkTest01268": [
+    "java-xss"
+  ],
+  "BenchmarkTest01269": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01270": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01271": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01272": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01273": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01274": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01275": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01276": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01277": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01278": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01279": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01280": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01281": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01282": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01283": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01284": [
+    "java-xss"
+  ],
+  "BenchmarkTest01285": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01286": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01287": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01288": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01289": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01290": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01291": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01292": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01293": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01294": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01295": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01296": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01297": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01298": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01299": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01300": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01301": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01302": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01303": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01304": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01305": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01306": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01307": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01308": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01309": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01310": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01311": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01312": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01313": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01314": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01315": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01316": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01317": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01318": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01319": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01320": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01321": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01322": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01323": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01324": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01325": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01326": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01327": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01328": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01329": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01330": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01331": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01332": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01333": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01334": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01335": [
+    "java-xss"
+  ],
+  "BenchmarkTest01336": [
+    "java-xss"
+  ],
+  "BenchmarkTest01337": [
+    "java-xss"
+  ],
+  "BenchmarkTest01338": [
+    "java-xss"
+  ],
+  "BenchmarkTest01340": [
+    "java-xss"
+  ],
+  "BenchmarkTest01341": [
+    "java-xss"
+  ],
+  "BenchmarkTest01343": [
+    "java-xss"
+  ],
+  "BenchmarkTest01344": [
+    "java-xss"
+  ],
+  "BenchmarkTest01345": [
+    "java-xss"
+  ],
+  "BenchmarkTest01346": [
+    "java-xss"
+  ],
+  "BenchmarkTest01347": [
+    "java-xss"
+  ],
+  "BenchmarkTest01349": [
+    "java-xss"
+  ],
+  "BenchmarkTest01350": [
+    "java-xss"
+  ],
+  "BenchmarkTest01353": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01354": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01355": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01356": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01357": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01358": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01360": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01361": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01362": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01363": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01364": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01365": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01366": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01367": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01368": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01369": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01370": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01371": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01372": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01373": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01374": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01375": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01376": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01377": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01378": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01379": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01380": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01381": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01382": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01383": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01384": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01385": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01386": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01387": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01388": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01389": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01390": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01391": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01392": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01393": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01394": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01395": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01396": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01397": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01398": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01399": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01400": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01401": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01402": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01404": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01405": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01406": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01407": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01408": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01409": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01410": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01411": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01412": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01413": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01414": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01415": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01416": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01417": [
+    "java-xss"
+  ],
+  "BenchmarkTest01418": [
+    "java-xss"
+  ],
+  "BenchmarkTest01419": [
+    "java-xss"
+  ],
+  "BenchmarkTest01421": [
+    "java-xss"
+  ],
+  "BenchmarkTest01422": [
+    "java-xss"
+  ],
+  "BenchmarkTest01423": [
+    "java-xss"
+  ],
+  "BenchmarkTest01424": [
+    "java-xss"
+  ],
+  "BenchmarkTest01425": [
+    "java-xss"
+  ],
+  "BenchmarkTest01426": [
+    "java-xss"
+  ],
+  "BenchmarkTest01427": [
+    "java-xss"
+  ],
+  "BenchmarkTest01428": [
+    "java-xss"
+  ],
+  "BenchmarkTest01429": [
+    "java-xss"
+  ],
+  "BenchmarkTest01430": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01431": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01432": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01433": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01434": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01435": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01437": [
+    "java-xss"
+  ],
+  "BenchmarkTest01438": [
+    "java-xss"
+  ],
+  "BenchmarkTest01439": [
+    "java-xss"
+  ],
+  "BenchmarkTest01440": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01441": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01442": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01443": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01444": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01445": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01446": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01447": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01448": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01449": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01450": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01451": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01452": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01453": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01454": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01455": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01456": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01457": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01458": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01459": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01460": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01461": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01462": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01463": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01464": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01465": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01466": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01467": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01468": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01469": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01470": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01471": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01472": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01473": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01474": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01475": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01476": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01477": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01478": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01479": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01480": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01481": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01482": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01483": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01484": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01485": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01486": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01487": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01488": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01489": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01490": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01491": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01492": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01494": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01495": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01496": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01497": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01498": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01499": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01500": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01501": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01502": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01503": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01504": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01505": [
+    "java-xss"
+  ],
+  "BenchmarkTest01506": [
+    "java-xss"
+  ],
+  "BenchmarkTest01507": [
+    "java-xss"
+  ],
+  "BenchmarkTest01508": [
+    "java-xss"
+  ],
+  "BenchmarkTest01509": [
+    "java-xss"
+  ],
+  "BenchmarkTest01510": [
+    "java-xss"
+  ],
+  "BenchmarkTest01511": [
+    "java-xss"
+  ],
+  "BenchmarkTest01512": [
+    "java-xss"
+  ],
+  "BenchmarkTest01513": [
+    "java-xss"
+  ],
+  "BenchmarkTest01514": [
+    "java-xss"
+  ],
+  "BenchmarkTest01515": [
+    "java-xss"
+  ],
+  "BenchmarkTest01516": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01517": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01518": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01519": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01520": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01521": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01525": [
+    "java-xss"
+  ],
+  "BenchmarkTest01526": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01527": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01528": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01529": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01530": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01531": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01532": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01533": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01534": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01535": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01536": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01537": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01538": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01539": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01540": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01541": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01542": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01543": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01544": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01545": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01546": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01547": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01548": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01549": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01550": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01551": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01552": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01553": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01554": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01555": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01556": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01557": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01558": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01559": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01560": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01561": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01562": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01563": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01565": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01566": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01567": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01568": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01569": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01571": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01572": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01573": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01574": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01575": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01576": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01577": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01578": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01579": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01580": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01581": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01582": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01583": [
+    "java-xss"
+  ],
+  "BenchmarkTest01584": [
+    "java-xss"
+  ],
+  "BenchmarkTest01587": [
+    "java-xss"
+  ],
+  "BenchmarkTest01588": [
+    "java-xss"
+  ],
+  "BenchmarkTest01589": [
+    "java-xss"
+  ],
+  "BenchmarkTest01590": [
+    "java-xss"
+  ],
+  "BenchmarkTest01591": [
+    "java-xss"
+  ],
+  "BenchmarkTest01592": [
+    "java-xss"
+  ],
+  "BenchmarkTest01593": [
+    "java-xss"
+  ],
+  "BenchmarkTest01594": [
+    "java-xss"
+  ],
+  "BenchmarkTest01596": [
+    "java-xss"
+  ],
+  "BenchmarkTest01597": [
+    "java-xss"
+  ],
+  "BenchmarkTest01598": [
+    "java-xss"
+  ],
+  "BenchmarkTest01599": [
+    "java-xss"
+  ],
+  "BenchmarkTest01600": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01602": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01603": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01606": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01607": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01608": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01609": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01610": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01611": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01612": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01613": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01614": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01615": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01616": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01617": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01618": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01619": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01620": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01621": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01622": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01623": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01624": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01625": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01626": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01627": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01628": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01629": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01630": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01631": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01632": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01633": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01634": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01635": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01636": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01637": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01638": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01639": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01640": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01641": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01642": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01643": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01644": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01645": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01646": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01647": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01648": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01649": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01650": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01651": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01652": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01653": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01654": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01655": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01656": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01657": [
+    "java-xss"
+  ],
+  "BenchmarkTest01658": [
+    "java-xss"
+  ],
+  "BenchmarkTest01660": [
+    "java-xss"
+  ],
+  "BenchmarkTest01662": [
+    "java-xss"
+  ],
+  "BenchmarkTest01663": [
+    "java-xss"
+  ],
+  "BenchmarkTest01665": [
+    "java-xss"
+  ],
+  "BenchmarkTest01666": [
+    "java-xss"
+  ],
+  "BenchmarkTest01667": [
+    "java-xss"
+  ],
+  "BenchmarkTest01668": [
+    "java-xss"
+  ],
+  "BenchmarkTest01670": [
+    "java-xss"
+  ],
+  "BenchmarkTest01672": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01674": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01675": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01676": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01677": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01678": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01679": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01680": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01681": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01682": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01683": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01685": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01686": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01687": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01688": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01689": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01690": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01691": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01692": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01693": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01694": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01695": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01696": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01697": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01698": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01699": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01700": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01701": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01702": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01703": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01704": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01705": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01706": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01707": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01708": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01709": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01710": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01711": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01712": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01713": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01714": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01715": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01716": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01717": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01718": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01719": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01720": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01721": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01722": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01723": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01724": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01725": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01726": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01727": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01728": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01729": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01730": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01731": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01732": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01733": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01734": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01735": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01736": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01737": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01739": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01740": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01741": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01742": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01743": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01744": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01745": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01746": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01747": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01748": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01749": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01750": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01751": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01752": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01753": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01754": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01755": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01756": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01757": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01758": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01760": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01761": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01762": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01763": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01765": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01766": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01767": [
+    "java-xss"
+  ],
+  "BenchmarkTest01768": [
+    "java-xss"
+  ],
+  "BenchmarkTest01769": [
+    "java-xss"
+  ],
+  "BenchmarkTest01770": [
+    "java-xss"
+  ],
+  "BenchmarkTest01771": [
+    "java-xss"
+  ],
+  "BenchmarkTest01772": [
+    "java-xss"
+  ],
+  "BenchmarkTest01774": [
+    "java-xss"
+  ],
+  "BenchmarkTest01775": [
+    "java-xss"
+  ],
+  "BenchmarkTest01776": [
+    "java-xss"
+  ],
+  "BenchmarkTest01777": [
+    "java-xss"
+  ],
+  "BenchmarkTest01778": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01779": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01780": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01781": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01782": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01783": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01784": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01785": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01786": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01787": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01788": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01789": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01791": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01792": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01793": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01794": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01795": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01796": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01797": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01798": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01799": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01800": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01801": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01802": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01803": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01804": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01805": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01806": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01807": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01808": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01809": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01810": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01811": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01812": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01813": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01814": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01815": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01816": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01817": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01818": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01819": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01820": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01821": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01822": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01823": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01824": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01825": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01826": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01827": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01828": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01829": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01830": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01831": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01832": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01833": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01834": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01835": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01836": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01837": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01838": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01839": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01840": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01841": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01842": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01843": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01844": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01845": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01846": [
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01847": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01848": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01849": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01852": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01853": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01854": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01855": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01856": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01857": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01858": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01859": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01860": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01861": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest01864": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01865": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01866": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01867": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01868": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01869": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01870": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01871": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01872": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01873": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01874": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01875": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01876": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01877": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest01878": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01879": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01880": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01881": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01882": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01883": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01884": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01885": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01886": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01887": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01888": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01889": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01890": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01891": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01892": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01893": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01894": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01895": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01896": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01897": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01898": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01899": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01900": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01901": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01902": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01903": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01904": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01905": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01906": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01907": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01908": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01909": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest01910": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01911": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01912": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01913": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01914": [
+    "java-xss"
+  ],
+  "BenchmarkTest01915": [
+    "java-xss"
+  ],
+  "BenchmarkTest01916": [
+    "java-xss"
+  ],
+  "BenchmarkTest01918": [
+    "java-xss"
+  ],
+  "BenchmarkTest01919": [
+    "java-xss"
+  ],
+  "BenchmarkTest01920": [
+    "java-xss"
+  ],
+  "BenchmarkTest01921": [
+    "java-xss"
+  ],
+  "BenchmarkTest01922": [
+    "java-xss"
+  ],
+  "BenchmarkTest01923": [
+    "java-xss"
+  ],
+  "BenchmarkTest01925": [
+    "java-xss"
+  ],
+  "BenchmarkTest01926": [
+    "java-xss"
+  ],
+  "BenchmarkTest01927": [
+    "java-xss"
+  ],
+  "BenchmarkTest01928": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01929": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01930": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01931": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01932": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01933": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01934": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest01936": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01937": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01938": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01939": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01940": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01941": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01942": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01943": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01944": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest01945": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01946": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01947": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01948": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01949": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01950": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01951": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01952": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01953": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01954": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest01955": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01956": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01957": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01958": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01959": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01960": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest01961": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01962": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01963": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01964": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01965": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest01966": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01967": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01968": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01969": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01970": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01971": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01972": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01973": [
+    "sql-injection"
+  ],
+  "BenchmarkTest01974": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest01975": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01976": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01977": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01978": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01979": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01980": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01981": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest01982": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01983": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01984": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01985": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01986": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01987": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01988": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01989": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01990": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01991": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01992": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest01993": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01994": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01995": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest01996": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01997": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01998": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest01999": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02000": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest02001": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest02002": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02003": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02004": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02005": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest02007": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02008": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02009": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02010": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02011": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02012": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02013": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02014": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02015": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02016": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02017": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02018": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02019": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02020": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02021": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02022": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02023": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02024": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02025": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02027": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02028": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02029": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02030": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02031": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02032": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02033": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02034": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02035": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02036": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02037": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02038": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02039": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest02040": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02041": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02042": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02043": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02044": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02045": [
+    "java-xss"
+  ],
+  "BenchmarkTest02046": [
+    "java-xss"
+  ],
+  "BenchmarkTest02047": [
+    "java-xss"
+  ],
+  "BenchmarkTest02048": [
+    "java-xss"
+  ],
+  "BenchmarkTest02050": [
+    "java-xss"
+  ],
+  "BenchmarkTest02051": [
+    "java-xss"
+  ],
+  "BenchmarkTest02052": [
+    "java-xss"
+  ],
+  "BenchmarkTest02053": [
+    "java-xss"
+  ],
+  "BenchmarkTest02054": [
+    "java-xss"
+  ],
+  "BenchmarkTest02055": [
+    "java-xss"
+  ],
+  "BenchmarkTest02056": [
+    "java-xss"
+  ],
+  "BenchmarkTest02057": [
+    "java-xss"
+  ],
+  "BenchmarkTest02059": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02060": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02061": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02062": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02063": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02067": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02068": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02069": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02070": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02071": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02072": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02073": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02074": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02075": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02076": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02077": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02078": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02079": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02080": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02081": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02082": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02083": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02084": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02085": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02086": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02087": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02088": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02089": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02090": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02091": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02092": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02093": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02094": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02095": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02096": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02097": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02098": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02099": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02100": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest02101": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02102": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02103": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02104": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02105": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02106": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02107": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02108": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02109": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02110": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02111": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02112": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02113": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02114": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02115": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02116": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02117": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02118": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02119": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02120": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02121": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02122": [
+    "java-xss"
+  ],
+  "BenchmarkTest02123": [
+    "java-xss"
+  ],
+  "BenchmarkTest02124": [
+    "java-xss"
+  ],
+  "BenchmarkTest02126": [
+    "java-xss"
+  ],
+  "BenchmarkTest02127": [
+    "java-xss"
+  ],
+  "BenchmarkTest02128": [
+    "java-xss"
+  ],
+  "BenchmarkTest02129": [
+    "java-xss"
+  ],
+  "BenchmarkTest02130": [
+    "java-xss"
+  ],
+  "BenchmarkTest02131": [
+    "java-xss"
+  ],
+  "BenchmarkTest02132": [
+    "java-xss"
+  ],
+  "BenchmarkTest02133": [
+    "java-xss"
+  ],
+  "BenchmarkTest02134": [
+    "java-xss"
+  ],
+  "BenchmarkTest02135": [
+    "java-xss"
+  ],
+  "BenchmarkTest02136": [
+    "java-xss"
+  ],
+  "BenchmarkTest02137": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02138": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02139": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest02140": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02141": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02142": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest02145": [
+    "java-xss"
+  ],
+  "BenchmarkTest02146": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02147": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02148": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02149": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02150": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02151": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02152": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02153": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02154": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02155": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02156": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02157": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02158": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02159": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02160": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02161": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02162": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02163": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02164": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02165": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02166": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02167": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02168": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02169": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02170": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02171": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02172": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02173": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02174": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02175": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02176": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02177": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02178": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02179": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02180": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02181": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02182": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02183": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02184": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02185": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02186": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02187": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02188": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02189": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest02190": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02191": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02192": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02193": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02194": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02195": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02196": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02198": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02199": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02200": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02201": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02202": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02203": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02204": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02205": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02206": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02207": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02208": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02209": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02211": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02212": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02213": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02214": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02215": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02216": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02217": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02218": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02219": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02220": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02221": [
+    "java-xss"
+  ],
+  "BenchmarkTest02222": [
+    "java-xss"
+  ],
+  "BenchmarkTest02223": [
+    "java-xss"
+  ],
+  "BenchmarkTest02224": [
+    "java-xss"
+  ],
+  "BenchmarkTest02225": [
+    "java-xss"
+  ],
+  "BenchmarkTest02226": [
+    "java-xss"
+  ],
+  "BenchmarkTest02227": [
+    "java-xss"
+  ],
+  "BenchmarkTest02228": [
+    "java-xss"
+  ],
+  "BenchmarkTest02229": [
+    "java-xss"
+  ],
+  "BenchmarkTest02230": [
+    "java-xss"
+  ],
+  "BenchmarkTest02231": [
+    "java-xss"
+  ],
+  "BenchmarkTest02232": [
+    "java-xss"
+  ],
+  "BenchmarkTest02233": [
+    "java-xss"
+  ],
+  "BenchmarkTest02234": [
+    "java-xss"
+  ],
+  "BenchmarkTest02235": [
+    "java-xss"
+  ],
+  "BenchmarkTest02236": [
+    "java-xss"
+  ],
+  "BenchmarkTest02238": [
+    "java-xss"
+  ],
+  "BenchmarkTest02239": [
+    "java-xss"
+  ],
+  "BenchmarkTest02240": [
+    "java-xss"
+  ],
+  "BenchmarkTest02241": [
+    "java-xss"
+  ],
+  "BenchmarkTest02242": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02245": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02246": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02249": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02250": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02251": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02252": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02253": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02254": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02255": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02256": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02257": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02258": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02259": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02260": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02261": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02262": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02263": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02264": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02265": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02266": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02267": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02268": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02269": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02270": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02271": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02272": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02273": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02274": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02275": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02276": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02277": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02278": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02279": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02280": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02281": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02282": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02283": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02284": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02285": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02286": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02287": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02288": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02290": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02291": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02292": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02293": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02294": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02295": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02296": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02297": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02298": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02299": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02301": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02302": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02303": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02304": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02305": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02306": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02307": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02308": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02309": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02310": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02311": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02312": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02313": [
+    "java-xss"
+  ],
+  "BenchmarkTest02314": [
+    "java-xss"
+  ],
+  "BenchmarkTest02315": [
+    "java-xss"
+  ],
+  "BenchmarkTest02316": [
+    "java-xss"
+  ],
+  "BenchmarkTest02317": [
+    "java-xss"
+  ],
+  "BenchmarkTest02319": [
+    "java-xss"
+  ],
+  "BenchmarkTest02321": [
+    "java-xss"
+  ],
+  "BenchmarkTest02322": [
+    "java-xss"
+  ],
+  "BenchmarkTest02323": [
+    "java-xss"
+  ],
+  "BenchmarkTest02324": [
+    "java-xss"
+  ],
+  "BenchmarkTest02325": [
+    "java-xss"
+  ],
+  "BenchmarkTest02326": [
+    "java-xss"
+  ],
+  "BenchmarkTest02327": [
+    "java-xss"
+  ],
+  "BenchmarkTest02328": [
+    "java-xss"
+  ],
+  "BenchmarkTest02329": [
+    "java-xss"
+  ],
+  "BenchmarkTest02330": [
+    "java-xss"
+  ],
+  "BenchmarkTest02332": [
+    "java-xss"
+  ],
+  "BenchmarkTest02333": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02334": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02335": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02336": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02337": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02338": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02339": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest02340": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02341": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02342": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02343": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02344": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02345": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02346": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02347": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02348": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02349": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02350": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02351": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02352": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02353": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02354": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02355": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02356": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02357": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02358": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02359": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02360": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02361": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02362": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02363": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02364": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02365": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02366": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02367": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02368": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02369": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02370": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest02372": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02373": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02374": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02375": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02376": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02377": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02378": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02379": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02380": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02381": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02382": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02383": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02384": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02385": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02386": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02387": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02388": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02389": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02390": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02391": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02392": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02393": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02395": [
+    "java-xss"
+  ],
+  "BenchmarkTest02396": [
+    "java-xss"
+  ],
+  "BenchmarkTest02397": [
+    "java-xss"
+  ],
+  "BenchmarkTest02399": [
+    "java-xss"
+  ],
+  "BenchmarkTest02400": [
+    "java-xss"
+  ],
+  "BenchmarkTest02402": [
+    "java-xss"
+  ],
+  "BenchmarkTest02403": [
+    "java-xss"
+  ],
+  "BenchmarkTest02404": [
+    "java-xss"
+  ],
+  "BenchmarkTest02405": [
+    "java-xss"
+  ],
+  "BenchmarkTest02406": [
+    "java-xss"
+  ],
+  "BenchmarkTest02407": [
+    "java-xss"
+  ],
+  "BenchmarkTest02408": [
+    "java-xss"
+  ],
+  "BenchmarkTest02409": [
+    "java-xss"
+  ],
+  "BenchmarkTest02410": [
+    "java-xss"
+  ],
+  "BenchmarkTest02411": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02412": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02413": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02415": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest02416": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02417": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02418": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02419": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02420": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02421": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02422": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02423": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02424": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02425": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest02426": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02427": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest02428": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02429": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02430": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02431": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02432": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02433": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02434": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02435": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02436": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02437": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02438": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02439": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02440": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02441": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02442": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02443": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02444": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02445": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02446": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02447": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02448": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02449": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02450": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02451": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02452": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02453": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02454": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02455": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02456": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02457": [
+    "insecure-http",
+    "java-xpath-injection",
+    "java-xss",
+    "xxe-risk"
+  ],
+  "BenchmarkTest02458": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02459": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02460": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02463": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02464": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02465": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02466": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02467": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02468": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02469": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02470": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02471": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02472": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02473": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02474": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02475": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02476": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02477": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02478": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02479": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02480": [
+    "java-xss"
+  ],
+  "BenchmarkTest02481": [
+    "java-xss"
+  ],
+  "BenchmarkTest02482": [
+    "java-xss"
+  ],
+  "BenchmarkTest02483": [
+    "java-xss"
+  ],
+  "BenchmarkTest02484": [
+    "java-xss"
+  ],
+  "BenchmarkTest02485": [
+    "java-xss"
+  ],
+  "BenchmarkTest02486": [
+    "java-xss"
+  ],
+  "BenchmarkTest02487": [
+    "java-xss"
+  ],
+  "BenchmarkTest02489": [
+    "java-xss"
+  ],
+  "BenchmarkTest02490": [
+    "java-xss"
+  ],
+  "BenchmarkTest02491": [
+    "java-xss"
+  ],
+  "BenchmarkTest02493": [
+    "java-xss"
+  ],
+  "BenchmarkTest02494": [
+    "java-xss"
+  ],
+  "BenchmarkTest02495": [
+    "java-xss"
+  ],
+  "BenchmarkTest02496": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02497": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02498": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02499": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02500": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02501": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02502": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02503": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02504": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02505": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02506": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02507": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest02509": [
+    "java-xss"
+  ],
+  "BenchmarkTest02510": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02511": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02512": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02513": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02514": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02515": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02516": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02517": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02518": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02519": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02520": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02521": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02522": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02523": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02524": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02525": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02526": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02527": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02528": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02529": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02530": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02531": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02532": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02533": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02534": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02535": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02536": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02537": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02538": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02539": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02540": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02541": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02542": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02543": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02544": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02545": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02546": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02547": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02548": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02549": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02550": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02551": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02552": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02553": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02555": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02556": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02557": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02558": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02559": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02560": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02561": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02562": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02563": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02564": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02565": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02566": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02567": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02568": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02569": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02570": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02571": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02572": [
+    "java-ldap-injection"
+  ],
+  "BenchmarkTest02573": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02574": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02575": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02576": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02577": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02578": [
+    "java-xss"
+  ],
+  "BenchmarkTest02579": [
+    "java-xss"
+  ],
+  "BenchmarkTest02580": [
+    "java-xss"
+  ],
+  "BenchmarkTest02582": [
+    "java-xss"
+  ],
+  "BenchmarkTest02583": [
+    "java-xss"
+  ],
+  "BenchmarkTest02584": [
+    "java-xss"
+  ],
+  "BenchmarkTest02585": [
+    "java-xss"
+  ],
+  "BenchmarkTest02586": [
+    "java-xss"
+  ],
+  "BenchmarkTest02587": [
+    "java-xss"
+  ],
+  "BenchmarkTest02588": [
+    "java-xss"
+  ],
+  "BenchmarkTest02589": [
+    "java-xss"
+  ],
+  "BenchmarkTest02590": [
+    "java-xss"
+  ],
+  "BenchmarkTest02591": [
+    "java-xss"
+  ],
+  "BenchmarkTest02592": [
+    "java-xss"
+  ],
+  "BenchmarkTest02593": [
+    "java-xss"
+  ],
+  "BenchmarkTest02594": [
+    "java-xss"
+  ],
+  "BenchmarkTest02595": [
+    "java-xss"
+  ],
+  "BenchmarkTest02597": [
+    "java-xss"
+  ],
+  "BenchmarkTest02598": [
+    "java-xss"
+  ],
+  "BenchmarkTest02599": [
+    "java-xss"
+  ],
+  "BenchmarkTest02600": [
+    "java-xss"
+  ],
+  "BenchmarkTest02602": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02603": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02604": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02605": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02606": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02608": [
+    "java-xss"
+  ],
+  "BenchmarkTest02610": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02611": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02612": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02613": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02614": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02615": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02616": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02617": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02618": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02619": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02620": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02621": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02622": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02623": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02624": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02625": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02626": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02627": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02628": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02629": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02630": [
+    "java-sql-injection"
+  ],
+  "BenchmarkTest02631": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02632": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02633": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02634": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02635": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02636": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02637": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02638": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02639": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02640": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02641": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02642": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02643": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02644": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02645": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02646": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02647": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02648": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02649": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02650": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02651": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02652": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02653": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02654": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02655": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02656": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02657": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02658": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02659": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02660": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02661": [
+    "java-path-traversal",
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02662": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02663": [
+    "java-weak-crypto"
+  ],
+  "BenchmarkTest02664": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02665": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02666": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02667": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02668": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02669": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02670": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02671": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02672": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02673": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02674": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02675": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02676": [
+    "java-path-traversal"
+  ],
+  "BenchmarkTest02677": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02678": [
+    "java-path-traversal",
+    "java-weak-hash"
+  ],
+  "BenchmarkTest02679": [
+    "java-xss"
+  ],
+  "BenchmarkTest02680": [
+    "java-xss"
+  ],
+  "BenchmarkTest02681": [
+    "java-xss"
+  ],
+  "BenchmarkTest02682": [
+    "java-xss"
+  ],
+  "BenchmarkTest02683": [
+    "java-xss"
+  ],
+  "BenchmarkTest02684": [
+    "java-xss"
+  ],
+  "BenchmarkTest02685": [
+    "java-xss"
+  ],
+  "BenchmarkTest02686": [
+    "java-xss"
+  ],
+  "BenchmarkTest02687": [
+    "java-xss"
+  ],
+  "BenchmarkTest02689": [
+    "java-xss"
+  ],
+  "BenchmarkTest02690": [
+    "java-xss"
+  ],
+  "BenchmarkTest02691": [
+    "java-xss"
+  ],
+  "BenchmarkTest02692": [
+    "java-xss"
+  ],
+  "BenchmarkTest02693": [
+    "java-xss"
+  ],
+  "BenchmarkTest02694": [
+    "java-xss"
+  ],
+  "BenchmarkTest02695": [
+    "java-xss"
+  ],
+  "BenchmarkTest02696": [
+    "java-xss"
+  ],
+  "BenchmarkTest02697": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02698": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02699": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02700": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02701": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02702": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02703": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02704": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02705": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02706": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02707": [
+    "java-trust-boundary",
+    "java-weak-random",
+    "java-xss"
+  ],
+  "BenchmarkTest02708": [
+    "java-trust-boundary",
+    "java-weak-random"
+  ],
+  "BenchmarkTest02709": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest02710": [
+    "java-insecure-cookie"
+  ],
+  "BenchmarkTest02712": [
+    "java-xss"
+  ],
+  "BenchmarkTest02713": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02714": [
+    "java-cmdi"
+  ],
+  "BenchmarkTest02715": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02716": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02717": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02718": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02719": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02720": [
+    "java-trust-boundary",
+    "java-xss"
+  ],
+  "BenchmarkTest02721": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02722": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02723": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02724": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02725": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02726": [
+    "java-trust-boundary"
+  ],
+  "BenchmarkTest02727": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02728": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02729": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02730": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02731": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02732": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02733": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02734": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02735": [
+    "java-xss",
+    "sql-injection"
+  ],
+  "BenchmarkTest02736": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02737": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02738": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02739": [
+    "sql-injection"
+  ],
+  "BenchmarkTest02740": [
+    "sql-injection"
+  ]
+}

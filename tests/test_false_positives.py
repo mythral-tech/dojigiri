@@ -5,7 +5,8 @@ These verify that Dojigiri doesn't cry wolf on legitimate code.
 """
 
 import pytest
-from dojigiri.detector import run_regex_checks, run_python_ast_checks, analyze_file_static
+from dojigiri.ast_checks import run_python_ast_checks
+from dojigiri.detector import run_regex_checks, analyze_file_static
 
 
 # ─── hardcoded-secret: dynamic assignment should NOT trigger ─────────

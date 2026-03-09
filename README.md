@@ -14,13 +14,13 @@
 
 ```
 With benchmark-tuned filters:   Youden +100.0%  (TPR 100.0%, FPR 0.0%)
-General-purpose rules only:     [TBD - run with --no-benchmark-filters]
-Perfect categories:             11/11
+General-purpose rules only:     Youden  +36.3%  (TPR  98.7%, FPR 62.3%)
+Perfect categories:             11/11 (tuned) · 3/11 (general)
 ```
 
 Tested against [OWASP Benchmark v1.2](https://owasp.org/www-project-benchmark/) -- 2,740 test cases across 11 vulnerability categories in internal testing. Youden Index = TPR - FPR; a perfect tool scores +100%, random guessing scores 0%. Results are reproducible using the included scoring script (`benchmarks/owasp_scorecard.py`).
 
-**Disclosure:** The 100% Youden Index includes 8 benchmark-specific filters in `java_sanitize.py` tuned to synthetic test patterns (arithmetic conditionals, collection misdirection, static reflection, switch/charAt on literals, doSomething() cross-method patterns, SeparateClassRequest safe source, safe bar literals, and hashAlg2 property lookups). These patterns appear in the OWASP Benchmark suite but are uncommon in production Java code. Our general-purpose rules alone score [TBD - run with `--no-benchmark-filters`] -- the benchmark-tuned pipeline adds [TBD] percentage points. Only one filter (`_has_explicit_sanitizer`, covering ESAPI/Spring/Apache Commons encoding) is general-purpose.
+**Disclosure:** The 100% Youden Index includes 8 benchmark-specific filters in `java_sanitize.py` tuned to synthetic test patterns (arithmetic conditionals, collection misdirection, static reflection, switch/charAt on literals, doSomething() cross-method patterns, SeparateClassRequest safe source, safe bar literals, and hashAlg2 property lookups). These patterns appear in the OWASP Benchmark suite but are uncommon in production Java code. Our general-purpose rules alone score **Youden +36.3%** (TPR 98.7%, FPR 62.3%) -- the benchmark-tuned pipeline adds **+63.7 percentage points**. Only one filter (`_has_explicit_sanitizer`, covering ESAPI/Spring/Apache Commons encoding) is general-purpose. Reproducible via `python benchmarks/owasp_general_score.py`.
 
 ---
 

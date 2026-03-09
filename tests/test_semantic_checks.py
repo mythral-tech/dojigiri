@@ -491,7 +491,7 @@ class TestIntegration:
 
     def test_python_parity_unused_imports(self):
         """Tree-sitter should find the same unused imports as Python AST."""
-        from dojigiri.detector import run_python_ast_checks
+        from dojigiri.ast_checks import run_python_ast_checks
 
         code = "import os\nimport sys\nimport json\nresult = os.getcwd()\n"
 
@@ -509,7 +509,7 @@ class TestIntegration:
 
     def test_python_parity_unreachable_code(self):
         """Tree-sitter should find unreachable code same as Python AST."""
-        from dojigiri.detector import run_python_ast_checks
+        from dojigiri.ast_checks import run_python_ast_checks
 
         code = "def f():\n    return 1\n    print('dead')\n"
 

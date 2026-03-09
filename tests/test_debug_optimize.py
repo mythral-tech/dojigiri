@@ -7,13 +7,15 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from dojigiri.llm import (
-    _parse_python_traceback,
-    _format_static_findings_for_llm,
-    _parse_debug_response,
     _merge_chunked_results,
     debug_file,
     optimize_file,
     CostTracker,
+)
+from dojigiri.llm_parsers import (
+    _parse_python_traceback,
+    _format_static_findings_for_llm,
+    _parse_debug_response,
 )
 from dojigiri.llm_backend import LLMResponse
 from dojigiri.types import Finding, Severity, Category, Source, Confidence

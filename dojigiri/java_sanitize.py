@@ -409,10 +409,31 @@ def _has_safe_dataflow(content: str) -> bool:
     return False
 
 
-def filter_java_fps(findings: list, content: str) -> list:
+def filter_java_fps(
+    findings: list, content: str, *, skip_benchmark_filters: bool = False,
+) -> list:
     """Filter out likely false positive injection findings from Java files
-    when sanitization patterns are detected."""
+    when sanitization patterns are detected.
+
+    Args:
+        findings: List of Finding objects from the regex/AST scan.
+        content: The full Java source code.
+        skip_benchmark_filters: If True, only apply general-purpose filters
+            (explicit sanitizer detection via ESAPI/Spring/Apache Commons).
+            The 8 benchmark-specific filters (arithmetic conditionals,
+            static reflection, collection misdirection, switch/charAt,
+            doSomething cross-method, safe source, safe bar literal, and
+            hashAlg2 property) are skipped.  Used for computing the
+            general-only OWASP Benchmark score.
+    """
     result = findings
+
+    if skip_benchmark_filters:
+        # General-purpose only: explicit sanitizer (ESAPI, Spring, Commons)
+        if _has_explicit_sanitizer(content):
+            result = [f for f in result if f.rule not in _INJECTABLE_RULES]
+        return result
+
     safe_dataflow = _has_safe_dataflow(content)
 
     # Filter injection findings when ANY sanitization is detected (data-flow OR encoding)

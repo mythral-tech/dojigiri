@@ -1,11 +1,10 @@
 """Tests for detector module - static analysis engine."""
 
 import pytest
+from dojigiri.ast_checks import run_python_ast_checks, _count_branches
 from dojigiri.detector import (
     run_regex_checks,
-    run_python_ast_checks,
     analyze_file_static,
-    _count_branches,
     _is_line_suppressed,
     _parse_line_suppression,
 )

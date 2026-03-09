@@ -34,25 +34,19 @@ from .config import (
 )
 from .llm_backend import TIER_DEEP, TIER_SCAN, LLMBackend, LLMResponse, get_tiered_backend
 from .llm_focus import MicroQuery, build_micro_queries
-
-# ─── Re-exports from sub-modules ──────────────────────────────────────
-# All existing imports from `dojigiri.llm` must still work.
-from .llm_parsers import (  # noqa: F401 — re-exported for backward compatibility
+from .llm_parsers import (
     _format_static_findings_for_llm,
     _parse_debug_response,
     _parse_python_traceback,
-    _parse_scan_response,
     _raw_to_findings,
     _recover_truncated_json,
     _strip_markdown_fences,
 )
-from .llm_prompts import (  # noqa: F401 — re-exported for backward compatibility
+from .llm_prompts import (
     _MICRO_QUERY_SYSTEM_PROMPT,
     ANALYZE_SYSTEM_PROMPT,
-    DEBUG_SYSTEM_PROMPT,
     EXPLAIN_SYSTEM_PROMPT,
     FIX_SYSTEM_PROMPT,
-    OPTIMIZE_SYSTEM_PROMPT,
     SYNTHESIS_SYSTEM_PROMPT,
     _build_debug_system_prompt,
     _build_optimize_system_prompt,
@@ -60,7 +54,7 @@ from .llm_prompts import (  # noqa: F401 — re-exported for backward compatibil
     _sanitize_code,
     _sanitize_for_prompt,
 )
-from .llm_schemas import (  # noqa: F401 — re-exported for backward compatibility
+from .llm_schemas import (
     CROSS_FILE_RESPONSE_TOOL,
     DEBUG_RESPONSE_TOOL,
     EXPLAIN_RESPONSE_TOOL,

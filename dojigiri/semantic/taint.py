@@ -19,7 +19,7 @@ import re
 from dataclasses import dataclass
 
 from ..types import Category, Finding, Severity, Source
-from .core import FileSemantics
+from .core import FileSemantics, ScopeInfo
 from .lang_config import LanguageConfig
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -38,6 +38,7 @@ class TaintSink:
     line: int
     kind: str  # "sql_query", "eval", "system_cmd", "html_output"
     function_name: str
+    scope_id: int = 0
 
 
 @dataclass
@@ -45,6 +46,105 @@ class TaintPath:
     source: TaintSource
     sink: TaintSink
     through: list[tuple[str, int]]  # (variable_name, line) assignment chain
+
+
+# ─── Branch sibling detection ─────────────────────────────────────────
+
+
+@dataclass
+class _BranchRange:
+    """A branch body (if/elif/else) with its line range."""
+    start_line: int
+    end_line: int
+
+
+def _collect_branch_siblings(tree_root) -> list[list[_BranchRange]]:
+    """Walk the AST and collect groups of sibling branch ranges.
+
+    Each group is a list of _BranchRange representing mutually exclusive
+    branches of the same conditional (e.g. if-body, elif-body, else-body).
+
+    Works with the cached tree-sitter root node from FileSemantics._tree_root.
+    """
+    if tree_root is None:
+        return []
+
+    groups: list[list[_BranchRange]] = []
+
+    def _walk(node):
+        # Python: if_statement has consequence (block) and alternative (elif/else)
+        # JS: if_statement has consequence (statement_block) and alternative
+        if node.type == "if_statement":
+            branches: list[_BranchRange] = []
+            _collect_if_branches(node, branches)
+            if len(branches) >= 2:
+                groups.append(branches)
+
+        for child in node.children:
+            # Don't recurse into branches we already processed as part of
+            # elif chains — those are handled by _collect_if_branches
+            if child.type not in ("elif_clause", "else_clause"):
+                _walk(child)
+
+    def _collect_if_branches(node, branches: list[_BranchRange]):
+        """Recursively collect all branches of an if/elif/else chain."""
+        # Find the consequence block (the "then" body)
+        consequence = node.child_by_field_name("consequence")
+        if consequence:
+            branches.append(_BranchRange(
+                start_line=consequence.start_point[0] + 1,
+                end_line=consequence.end_point[0] + 1,
+            ))
+
+        # Find the alternative (elif or else)
+        alternative = node.child_by_field_name("alternative")
+        if alternative:
+            if alternative.type in ("elif_clause", "else_clause", "else"):
+                # For elif: recurse to get its branches
+                if alternative.type == "elif_clause":
+                    _collect_if_branches(alternative, branches)
+                else:
+                    # else clause — find the body block
+                    body = alternative.child_by_field_name("body") or alternative.child_by_field_name("consequence")
+                    if body:
+                        branches.append(_BranchRange(
+                            start_line=body.start_point[0] + 1,
+                            end_line=body.end_point[0] + 1,
+                        ))
+                    else:
+                        # Fallback: use the else clause itself (minus the keyword)
+                        for child in alternative.children:
+                            if child.type in ("block", "statement_block"):
+                                branches.append(_BranchRange(
+                                    start_line=child.start_point[0] + 1,
+                                    end_line=child.end_point[0] + 1,
+                                ))
+                                break
+            elif alternative.type == "if_statement":
+                # JS-style else if: else { if ... }
+                _collect_if_branches(alternative, branches)
+
+    _walk(tree_root)
+    return groups
+
+
+def _are_in_sibling_branches(
+    line_a: int,
+    line_b: int,
+    branch_groups: list[list[_BranchRange]],
+) -> bool:
+    """Check if two lines are in different (sibling) branches of the same conditional."""
+    for group in branch_groups:
+        branch_of_a = None
+        branch_of_b = None
+        for i, br in enumerate(group):
+            if br.start_line <= line_a <= br.end_line:
+                branch_of_a = i
+            if br.start_line <= line_b <= br.end_line:
+                branch_of_b = i
+        if branch_of_a is not None and branch_of_b is not None and branch_of_a != branch_of_b:
+            return True
+    return False
 
 
 # ─── Analysis ────────────────────────────────────────────────────────
@@ -90,10 +190,15 @@ def _propagate_taint(
     initial_tainted: set[str],
     func_scope_ids: set[int],
     config: LanguageConfig,
+    branch_groups: list[list[_BranchRange]] | None = None,
 ) -> dict[str, list[tuple[str, int]]]:
     """Propagate taint through assignments within function scope.
 
     Returns: {tainted_var: [(source_var, line), ...]} chain.
+
+    Branch-aware (v0.10): sanitizers inside a conditional branch do NOT
+    clear taint globally — they might not execute on all paths.  A sanitizer
+    only clears taint if it is NOT inside any branch body.
     """
     tainted: dict[str, list[tuple[str, int]]] = {name: [] for name in initial_tainted}
 
@@ -122,10 +227,24 @@ def _propagate_taint(
             is_sanitized = any(sanitizer in rhs for sanitizer in config.taint_sanitizer_patterns)
 
             if is_sanitized:
-                # Sanitizer clears taint — remove from tainted set
-                if asgn.name in tainted:
-                    del tainted[asgn.name]
-                    changed = True
+                # Branch-aware: only clear taint if the sanitizer is NOT inside
+                # a conditional branch body.  A sanitizer inside an if/else
+                # branch might not execute on all paths.
+                in_branch = False
+                if branch_groups:
+                    for group in branch_groups:
+                        for br in group:
+                            if br.start_line <= asgn.line <= br.end_line:
+                                in_branch = True
+                                break
+                        if in_branch:
+                            break
+                if not in_branch:
+                    # Sanitizer at top level of function — clears taint
+                    if asgn.name in tainted:
+                        del tainted[asgn.name]
+                        changed = True
+                # If sanitizer is in a branch, don't clear taint globally.
                 continue
 
             # Skip already-tainted vars for propagation (no new info)
@@ -175,6 +294,7 @@ def _find_taint_sinks(
                                     line=call.line,
                                     kind=kind,
                                     function_name=call_text,
+                                    scope_id=call.scope_id,
                                 )
                             )
                             break
@@ -183,17 +303,51 @@ def _find_taint_sinks(
     return sinks
 
 
+def _is_ancestor_scope(
+    ancestor_id: int,
+    descendant_id: int,
+    scope_map: dict[int, ScopeInfo],
+) -> bool:
+    """Check if ancestor_id is an ancestor of (or equal to) descendant_id in the scope tree."""
+    current = descendant_id
+    visited: set[int] = set()
+    while current in scope_map:
+        if current in visited:
+            break
+        if current == ancestor_id:
+            return True
+        visited.add(current)
+        parent = scope_map[current].parent_id
+        if parent is None:
+            break
+        current = parent
+    return False
+
+
+def _build_scope_map(semantics: FileSemantics) -> dict[int, ScopeInfo]:
+    """Build scope_id → ScopeInfo lookup."""
+    return {s.scope_id: s for s in semantics.scopes}
+
+
 def _is_sanitized(
     semantics: FileSemantics,
     config: LanguageConfig,
     tainted_var: str,
     func_scope_ids: set[int],
     sink_line: int = 0,
+    sink_scope_id: int | None = None,
+    scope_map: dict[int, ScopeInfo] | None = None,
+    branch_groups: list[list[_BranchRange]] | None = None,
 ) -> bool:
     """Check if a tainted variable passes through a sanitizer before *sink_line*.
 
     Only sanitization that occurs *before* the sink counts — a sanitizer
     applied after the dangerous call is irrelevant.
+
+    Branch-aware (v0.10): a sanitizer in a sibling branch of the sink does
+    NOT suppress the finding.  Uses both scope dominance (for block-scoped
+    languages) and AST branch ranges (for Python and others without block
+    scoping).
     """
     for asgn in semantics.assignments:
         if asgn.scope_id not in func_scope_ids:
@@ -202,6 +356,14 @@ def _is_sanitized(
             continue
         if sink_line and asgn.line >= sink_line:
             continue
+        # Scope dominance check (block-scoped languages like JS/Go/Rust)
+        if sink_scope_id is not None and scope_map is not None:
+            if not _is_ancestor_scope(asgn.scope_id, sink_scope_id, scope_map):
+                continue
+        # Branch sibling check (all languages, especially Python)
+        if branch_groups and sink_line:
+            if _are_in_sibling_branches(asgn.line, sink_line, branch_groups):
+                continue
         for sanitizer in config.taint_sanitizer_patterns:
             if sanitizer in asgn.value_text:
                 return True
@@ -212,6 +374,14 @@ def _is_sanitized(
             continue
         if sink_line and call.line >= sink_line:
             continue
+        # Scope dominance check for call-based sanitizers
+        if sink_scope_id is not None and scope_map is not None:
+            if not _is_ancestor_scope(call.scope_id, sink_scope_id, scope_map):
+                continue
+        # Branch sibling check for call-based sanitizers
+        if branch_groups and sink_line:
+            if _are_in_sibling_branches(call.line, sink_line, branch_groups):
+                continue
         call_text = call.name
         if call.receiver:
             call_text = f"{call.receiver}.{call.name}"
@@ -348,6 +518,10 @@ def analyze_taint(
     # Analyze each function scope independently
     func_scopes = [s for s in semantics.scopes if s.kind == "function"]
     scope_children = _build_scope_children(semantics)
+    scope_map = _build_scope_map(semantics)
+
+    # Build branch sibling ranges from the AST for scope-aware sanitization
+    branch_groups = _collect_branch_siblings(getattr(semantics, "_tree_root", None))
 
     for func_scope in func_scopes:
         func_scope_ids = _get_all_children(func_scope.scope_id, scope_children)
@@ -357,9 +531,13 @@ def analyze_taint(
         if not sources:
             continue
 
-        # 2. Propagate taint
+        # 2. Propagate taint (branch-aware: sanitizers in conditional branches
+        #    don't clear taint globally)
         initial_tainted = {s.variable for s in sources}
-        taint_chains = _propagate_taint(semantics, initial_tainted, func_scope_ids, config)
+        taint_chains = _propagate_taint(
+            semantics, initial_tainted, func_scope_ids, config,
+            branch_groups=branch_groups,
+        )
         tainted_vars = set(taint_chains.keys())
 
         if not tainted_vars:
@@ -370,8 +548,12 @@ def analyze_taint(
 
         # 4. Build findings
         for sink in sinks:
-            # Check sanitization
-            if _is_sanitized(semantics, config, sink.variable, func_scope_ids, sink_line=sink.line):
+            # Check sanitization (scope-aware: sanitizer must dominate sink scope)
+            if _is_sanitized(
+                semantics, config, sink.variable, func_scope_ids,
+                sink_line=sink.line, sink_scope_id=sink.scope_id,
+                scope_map=scope_map, branch_groups=branch_groups,
+            ):
                 continue
 
             # Find the source for this tainted variable

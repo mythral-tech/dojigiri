@@ -6,11 +6,11 @@ from unittest.mock import patch, MagicMock
 
 from dojigiri.llm import (
     analyze_chunk,
-    _recover_truncated_json,
     CostTracker,
     LLMError,
     _api_call_with_retry,
 )
+from dojigiri.llm_parsers import _recover_truncated_json
 from dojigiri.llm_backend import LLMResponse
 from dojigiri.chunker import Chunk
 from dojigiri.types import Severity, Category, Source, Confidence
