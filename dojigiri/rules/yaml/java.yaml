@@ -397,6 +397,12 @@ rules:
   pattern: '\.lookup\s*\(\s*["''](?:ldap|rmi|ldaps|iiop)://'
   severity: critical
   suggestion: "Restrict JNDI to java: namespace only, disable remote classloading"
+- category: security
+  id: java-jndi-lookup-variable
+  message: JNDI lookup with variable argument — injection risk if value is user-controlled
+  pattern: (?:ctx|context|initialContext|jndiContext|namingContext)\s*\.\s*lookup\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Validate JNDI names against a strict allowlist; never pass user-controlled input to lookup()
 # --- Expression Language Injection ---
 - category: security
   id: java-spel-injection
@@ -422,6 +428,12 @@ rules:
   pattern: '@Value\s*\(\s*["'']#\{.*(?:request|param|header|cookie)'
   severity: critical
   suggestion: Use @RequestParam instead of SpEL to access request data
+- category: security
+  id: java-spel-parse-variable
+  message: SpEL parseExpression() with variable argument — code execution risk if user-controlled
+  pattern: (?:parser|expressionParser|spelParser|exprParser)\s*\.\s*parseExpression\s*\(\s*(?!["'])([a-z]\w*)
+  severity: critical
+  suggestion: Use SimpleEvaluationContext instead of StandardEvaluationContext; never parse user input as SpEL
 # --- Logging Injection ---
 - category: security
   id: java-log-injection

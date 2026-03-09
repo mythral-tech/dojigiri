@@ -358,6 +358,12 @@ rules:
   pattern: \.(?:find|findOne|findOneAndUpdate|findOneAndDelete|deleteOne|deleteMany|updateOne|updateMany)\s*\(\s*(?:req\.(?:body|query|params))
   severity: critical
   suggestion: Validate and sanitize user input; strip $ operators before passing to queries
+- category: security
+  id: nosql-injection-mongodb
+  message: MongoDB collection query with destructured or indirect request data — NoSQL operator injection risk ($gt, $ne bypass)
+  pattern: \.collection\s*\(\s*['"][^'"]+['"]\s*\)\s*\.(?:find|findOne|findOneAndUpdate|findOneAndDelete|deleteOne|deleteMany|updateOne|updateMany|aggregate|countDocuments|distinct|replaceOne)\s*\(\s*(?:\{[^}]*(?:email|password|username|user|name|role|token|query|filter|search|key|value|id)\s*[:,]|\{\s*$|(?!['"{])(?:[a-z]\w*)\s*[,)])
+  severity: warning
+  suggestion: Validate query values with mongo-sanitize or explicit type checks; strip $ operators before passing to MongoDB
 # ── SSRF ───────────────────────────────────────────────────
 - category: security
   id: ssrf-fetch-user-url
@@ -590,6 +596,12 @@ rules:
   pattern: \{\s*\.\.\.(?:req\.body|req\.query|req\.params|input|args|userData)
   severity: warning
   suggestion: Destructure only expected fields instead of spreading entire user input
+- category: security
+  id: prototype-pollution-merge
+  message: Deep merge/assign with potentially user-controlled object — prototype pollution risk
+  pattern: (?:_\.(?:merge|defaultsDeep|mergeWith)|Object\.assign|deepMerge|deepExtend)\s*\(\s*\w+\s*,\s*(?!['"{])(?:[a-zA-Z_$]\w*)
+  severity: warning
+  suggestion: Sanitize input objects by removing __proto__, constructor, and prototype keys before merging
 # ── RegExp DoS ─────────────────────────────────────────────
 - category: security
   id: redos-nested-quantifier

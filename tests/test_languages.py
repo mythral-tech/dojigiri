@@ -7,6 +7,7 @@ from dojigiri.languages import (
     UNIVERSAL_RULES,
     PYTHON_RULES,
     JAVASCRIPT_RULES,
+    JAVA_RULES,
     GO_RULES,
     RUST_RULES,
     SECURITY_RULES,
@@ -529,3 +530,106 @@ def test_security_private_key():
     assert pattern.search("-----BEGIN PRIVATE KEY-----")
     assert pattern.search("-----BEGIN RSA PRIVATE KEY-----")
     assert pattern.search("-----BEGIN EC PRIVATE KEY-----")
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# NOSQL INJECTION (MongoDB operator injection) — CWE-943
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_nosql_injection_mongodb_findone_with_field():
+    """Detect MongoDB collection.findOne() with common field names in query object."""
+    rules = get_rules_for_language("javascript")
+    pattern = next(r for r in rules if r[3] == "nosql-injection-mongodb")[0]
+
+    # Should match — destructured req.body fields passed to findOne
+    assert pattern.search('db.collection("users").findOne({ email: email, password: password })')
+    assert pattern.search("db.collection('users').findOne({email: email})")
+
+    # Should match — multi-line object (opening brace at end of line)
+    assert pattern.search('db.collection("users").findOne({')
+
+    # Should match — variable argument to find()
+    assert pattern.search('db.collection("users").find(filter)')
+    assert pattern.search("db.collection('logs').deleteOne(query)")
+
+
+def test_nosql_injection_mongodb_other_operations():
+    """Detect various MongoDB collection operations with variable arguments."""
+    rules = get_rules_for_language("javascript")
+    pattern = next(r for r in rules if r[3] == "nosql-injection-mongodb")[0]
+
+    assert pattern.search('db.collection("items").updateOne(filter, update)')
+    assert pattern.search('db.collection("items").deleteMany(criteria)')
+    assert pattern.search('db.collection("items").aggregate(pipeline)')
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# PROTOTYPE POLLUTION VIA MERGE — CWE-1321
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_prototype_pollution_merge_lodash():
+    """Detect _.merge with variable source argument — prototype pollution."""
+    rules = get_rules_for_language("javascript")
+    pattern = next(r for r in rules if r[3] == "prototype-pollution-merge")[0]
+
+    # Should match — lodash merge with variable
+    assert pattern.search("_.merge(config, userPrefs)")
+    assert pattern.search("_.defaultsDeep(defaults, overrides)")
+    assert pattern.search("_.mergeWith(target, source, customizer)")
+
+    # Should match — Object.assign with variable
+    assert pattern.search("Object.assign(config, userInput)")
+
+    # Should match — custom deep merge
+    assert pattern.search("deepMerge(target, source)")
+    assert pattern.search("deepExtend(obj, data)")
+
+
+def test_prototype_pollution_merge_safe():
+    """Should NOT match safe merge patterns with literals."""
+    rules = get_rules_for_language("javascript")
+    pattern = next(r for r in rules if r[3] == "prototype-pollution-merge")[0]
+
+    # Should NOT match — literal object as source
+    assert not pattern.search("_.merge(config, { theme: 'dark' })")
+    assert not pattern.search('Object.assign(config, { key: "val" })')
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# JNDI INJECTION (variable-based lookup) — CWE-74
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_jndi_injection_variable_lookup():
+    """Detect ctx.lookup(variable) pattern for JNDI injection."""
+    rules = get_rules_for_language("java")
+    pattern = next(r for r in rules if r[3] == "java-jndi-lookup-variable")[0]
+
+    # Should match — variable-based context lookup
+    assert pattern.search("ctx.lookup(path)")
+    assert pattern.search("context.lookup(resourceName)")
+    assert pattern.search("initialContext.lookup(jndiName)")
+    assert pattern.search("jndiContext.lookup(name)")
+
+    # Should NOT match — literal string lookup
+    assert not pattern.search('ctx.lookup("java:comp/env/jdbc/mydb")')
+    assert not pattern.search("context.lookup(\"ldap://safe.internal\")")
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# SpEL INJECTION (variable-based parseExpression) — CWE-917
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_spel_injection_variable_parse():
+    """Detect parser.parseExpression(variable) pattern for SpEL injection."""
+    rules = get_rules_for_language("java")
+    pattern = next(r for r in rules if r[3] == "java-spel-parse-variable")[0]
+
+    # Should match — variable-based expression parsing
+    assert pattern.search("parser.parseExpression(expression)")
+    assert pattern.search("expressionParser.parseExpression(input)")
+    assert pattern.search("spelParser.parseExpression(userExpr)")
+    assert pattern.search("exprParser.parseExpression(filterExpr)")
+
+    # Should NOT match — literal string expression
+    assert not pattern.search('parser.parseExpression("T(java.lang.Math).random()")')
+    assert not pattern.search("parser.parseExpression(\"1 + 1\")")

@@ -238,11 +238,13 @@ CWE_MAP: dict[str, str] = {
     "java-jndi-injection": "CWE-917",
     "java-jndi-lookup-concat": "CWE-917",
     "java-jndi-ldap-rmi": "CWE-917",
+    "java-jndi-lookup-variable": "CWE-74",
     # Java — Expression Language
     "java-spel-injection": "CWE-917",
     "java-spel-injection-concat": "CWE-917",
     "java-el-injection": "CWE-917",
     "java-spel-value-annotation": "CWE-917",
+    "java-spel-parse-variable": "CWE-917",
     # Java — Logging
     "java-log-injection": "CWE-117",
     "java-log4j-lookup": "CWE-917",
@@ -452,6 +454,7 @@ CWE_MAP: dict[str, str] = {
     "lodash-merge-user-input": "CWE-1321",
     "object-assign-user-input": "CWE-1321",
     "spread-constructor-pollution": "CWE-1321",
+    "prototype-pollution-merge": "CWE-1321",
     # ── Cross-language: LDAP / XPath Injection ────────────────────────
     "ldap-injection": "CWE-90",
     "xpath-injection": "CWE-643",
@@ -464,6 +467,7 @@ CWE_MAP: dict[str, str] = {
     "mongodb-regex-user-input": "CWE-943",
     "mongodb-where-operator": "CWE-943",
     "mongoose-find-user-object": "CWE-943",
+    "nosql-injection-mongodb": "CWE-943",
     # ── Cross-language: Information Disclosure ─────────────────────────
     "nextjs-exposed-server-env": "CWE-200",
     "nextjs-getserversideprops-leak": "CWE-200",
@@ -1037,11 +1041,13 @@ NIST_MAP: dict[str, list[str]] = {
     "java-jndi-injection": ["SI-10", "SI-16"],
     "java-jndi-lookup-concat": ["SI-10", "SI-16"],
     "java-jndi-ldap-rmi": ["SI-10", "SI-16"],
+    "java-jndi-lookup-variable": ["SI-10", "SI-16"],
     # Java — Expression Language
     "java-spel-injection": ["SI-10", "SI-16"],
     "java-spel-injection-concat": ["SI-10", "SI-16"],
     "java-el-injection": ["SI-10", "SI-16"],
     "java-spel-value-annotation": ["SI-10", "SI-16"],
+    "java-spel-parse-variable": ["SI-10", "SI-16"],
     # Java — Logging
     "java-log-injection": ["AU-9", "SI-10"],
     "java-log4j-lookup": ["SI-10", "SI-16"],
@@ -1215,6 +1221,7 @@ NIST_MAP: dict[str, list[str]] = {
     "lodash-merge-user-input": ["SI-10", "SI-16"],
     "object-assign-user-input": ["SI-10", "SI-16"],
     "spread-constructor-pollution": ["SI-10", "SI-16"],
+    "prototype-pollution-merge": ["SI-10", "SI-16"],
     # ── Cross-language: LDAP / XPath Injection ────────────────────────
     "ldap-injection": ["SI-10", "SI-16"],
     "xpath-injection": ["SI-10", "SI-16"],
@@ -1227,6 +1234,7 @@ NIST_MAP: dict[str, list[str]] = {
     "mongodb-regex-user-input": ["SI-10", "SI-16"],
     "mongodb-where-operator": ["SI-10", "SI-16"],
     "mongoose-find-user-object": ["SI-10", "SI-16"],
+    "nosql-injection-mongodb": ["SI-10", "SI-16"],
     # ── Cross-language: Information Disclosure ─────────────────────────
     "nextjs-exposed-server-env": ["CM-6", "SI-11"],
     "nextjs-getserversideprops-leak": ["CM-6", "SI-11"],
