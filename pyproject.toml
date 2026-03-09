@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "BSL-1.1"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Stephane"},
+    {name = "Stephane Perez"},
 ]
 keywords = ["static-analysis", "linter", "security", "code-quality", "llm", "tree-sitter"]
 classifiers = [
@@ -31,6 +31,7 @@ classifiers = [
 dependencies = [
     "tree-sitter>=0.24",
     "tree-sitter-language-pack>=0.10",
+    "tomli>=1.0; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]

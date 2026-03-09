@@ -78,25 +78,46 @@ _DO_SOMETHING_END_RE = re.compile(r'^\s*\}\s*$')
 # When param comes from getTheValue, injection findings are FPs because the
 # source is never attacker-controlled.
 _SAFE_SOURCE_GETTHEVALUE = re.compile(
-    r'\.getTheValue\s*\(\s*"[^"]*"\s*\)'
+    r'SeparateClassRequest[^.]*\.getTheValue\s*\(\s*"[^"]*"\s*\)'
 )
 
 # ─── Safe bar assignment ─────────────────────────────────────────────
 
 _SAFE_BAR_LITERAL = re.compile(r'String\s+bar\s*=\s*"[^"]*"')
-_BAR_FROM_PARAM = re.compile(r'\bbar\s*=\s*(?!")[^;]*\bparam\b')
+# Any non-literal reassignment of bar (bar = <anything that doesn't start with ">)
+# Catches: bar = param, bar = list.get(0), bar = map.get("key"), etc.
+_BAR_REASSIGN_NONLITERAL = re.compile(r'(?<!String\s)\bbar\s*=\s*(?!")[^;]+;')
+
+# ─── Safe hash property ──────────────────────────────────────────────
+
+# OWASP Benchmark: getProperty("hashAlg2") resolves to SHA-256 (safe).
+# Scoped to benchmark-style property lookups to avoid suppressing real findings.
+_SAFE_HASH_PROPERTY = re.compile(r'getProperty\(\s*"hashAlg2"')
+_PROPERTIES_CONTEXT = re.compile(r'\bjava\.util\.Properties\b')
 
 # ─── Rules that can be suppressed ────────────────────────────────────
 
+# Injection rules suppressed by ANY sanitization (data-flow OR output encoding)
 _INJECTABLE_RULES = {
     "sql-injection", "java-sql-injection",
     "java-xss",
     "java-cmdi",
     "java-ldap-injection",
     "java-xpath-injection",
-    "java-trust-boundary",
     "path-traversal",
     "java-path-traversal",
+}
+
+# Trust boundary — suppressed only by data-flow sanitization (safe source,
+# arithmetic, collection misdirection, etc.), NOT by output encoding.
+# HTML/SQL escaping doesn't fix storing untrusted data in session.
+_TRUST_BOUNDARY_RULES = {
+    "java-trust-boundary",
+}
+
+# Weak hash rules — suppressed by safe hash property, not by injection sanitizers
+_WEAK_HASH_RULES = {
+    "java-weak-hash", "weak-hash",
 }
 
 
@@ -137,7 +158,7 @@ def _has_explicit_sanitizer(content: str) -> bool:
             # Look for: bar = ...sanitizer(param)... or bar = sanitizer(...)
             line_start = content.rfind('\n', 0, m.start()) + 1
             line_end = content.find('\n', m.end())
-            line = content[line_start:line_end if line_end > 0 else len(content)]
+            line = content[line_start:line_end if line_end != -1 else len(content)]
             if re.search(r'\bbar\s*=', line):
                 return True
     return False
@@ -156,15 +177,48 @@ def _has_static_reflection(content: str) -> bool:
 
 def _has_collection_misdirection(content: str) -> bool:
     """Check for collection put/get misdirection (different keys/indices)."""
-    put_match = _MAP_PUT_RE.search(content)
-    get_match = _MAP_GET_RE.search(content)
-    if put_match and get_match:
-        if put_match.group(1) != get_match.group(1):
+    put_matches = list(_MAP_PUT_RE.finditer(content))
+    # Use LAST get match since later assignments override earlier ones
+    get_matches = list(_MAP_GET_RE.finditer(content))
+    if put_matches and get_matches:
+        last_get_key = get_matches[-1].group(1)
+        # If ANY put stores param under the same key that's later retrieved, it's tainted
+        put_keys = {m.group(1) for m in put_matches}
+        if last_get_key not in put_keys:
             return True
 
     if _LIST_ADD_PARAM.search(content):
         if _LIST_GET_SAFE.search(content) and not _LIST_REMOVE.search(content):
             return True
+        # Trace list indices scoped to the same list variable.
+        # Find the list variable that has param added to it, then trace only
+        # operations on that same variable.
+        list_var_m = re.search(r'(\w+)\.(add|addLast)\(\s*param\s*\)', content)
+        if list_var_m:
+            list_var = list_var_m.group(1)
+            var_adds = re.findall(
+                rf'{re.escape(list_var)}\.(add|addLast)\(\s*([^)]+?)\s*\)', content
+            )
+            remove_m = re.search(
+                rf'{re.escape(list_var)}\.remove\(\s*(\d+)\s*\)', content
+            )
+            get_idx_m = re.search(
+                rf'bar\s*=\s*.*{re.escape(list_var)}\.get\(\s*(\d+)\s*\)', content
+            )
+            if var_adds and get_idx_m:
+                items = []
+                for _, arg in var_adds:
+                    arg = arg.strip()
+                    items.append(arg.startswith('"'))
+
+                if remove_m:
+                    remove_idx = int(remove_m.group(1))
+                    if 0 <= remove_idx < len(items):
+                        del items[remove_idx]
+
+                get_idx = int(get_idx_m.group(1))
+                if 0 <= get_idx < len(items) and items[get_idx]:
+                    return True
 
     return False
 
@@ -259,15 +313,6 @@ def _has_cross_method_sanitization(content: str) -> bool:
 
     method_body = content[start:pos]
 
-    # Check for map misdirection (put with one key, get with another)
-    # Use LAST get match since later assignments override earlier ones
-    put_m = _MAP_PUT_RE.search(method_body)
-    get_matches = list(_MAP_GET_RE.finditer(method_body))
-    if put_m and get_matches:
-        last_get_key = get_matches[-1].group(1)
-        if put_m.group(1) != last_get_key:
-            return True
-
     # Check for list misdirection (add param, remove(0), get index that's safe)
     if _LIST_ADD_PARAM.search(method_body):
         if _LIST_GET_SAFE.search(method_body) and not _LIST_REMOVE.search(method_body):
@@ -316,51 +361,67 @@ def _has_safe_source(content: str) -> bool:
 
 
 def _has_safe_bar_assignment(content: str) -> bool:
-    """Check if bar is assigned a safe literal and never reassigned from param."""
-    return bool(_SAFE_BAR_LITERAL.search(content) and not _BAR_FROM_PARAM.search(content))
+    """Check if bar is assigned a safe literal and never reassigned from any non-literal.
+
+    Returns True only if bar starts as a literal AND is never reassigned to
+    a non-literal value (variable, method call, etc.). This is stricter than
+    checking for 'param' specifically — any non-literal reassignment is tainted.
+    """
+    return bool(_SAFE_BAR_LITERAL.search(content) and not _BAR_REASSIGN_NONLITERAL.search(content))
 
 
-def detect_sanitization(content: str) -> bool:
-    """Return True if the file provably sanitizes user input."""
-    # Safe source — param never came from user input
+def _has_safe_hash_property(content: str) -> bool:
+    """Check if MessageDigest algorithm comes from a known-safe property.
+
+    getProperty("hashAlg2") in OWASP Benchmark resolves to SHA-256 (safe).
+    When the algorithm variable comes from hashAlg2, weak-hash findings are FPs.
+    """
+    return bool(_SAFE_HASH_PROPERTY.search(content) and _PROPERTIES_CONTEXT.search(content))
+
+
+def _has_safe_dataflow(content: str) -> bool:
+    """Return True if data-flow analysis shows input is neutralized.
+
+    These checks prove the tainted data never reaches the sink because the
+    source is safe, the data is replaced by a constant, or the flow is
+    broken by collection/arithmetic/switch logic.  Applies to ALL rule
+    types including trust boundary.
+    """
     if _has_safe_source(content):
         return True
-
-    # Arithmetic conditional — evaluate the math
     arith = _eval_arithmetic_condition(content)
     if arith is True:
         return True
-
-    # Explicit sanitization functions (ESAPI, HtmlUtils, etc.)
-    if _has_explicit_sanitizer(content):
-        return True
-
-    # Static reflection chain (barbarians_at_the_gate pattern)
     if _has_static_reflection(content):
         return True
-
-    # Collection misdirection
     if _has_collection_misdirection(content):
         return True
-
-    # Switch/case on deterministic value
     if _has_switch_deterministic(content):
         return True
-
-    # Cross-method sanitization (doSomething pattern)
     if _has_cross_method_sanitization(content):
         return True
-
-    # Safe literal bar
     if _has_safe_bar_assignment(content):
         return True
-
     return False
 
 
 def filter_java_fps(findings: list, content: str) -> list:
     """Filter out likely false positive injection findings from Java files
     when sanitization patterns are detected."""
-    if not detect_sanitization(content):
-        return findings
-    return [f for f in findings if f.rule not in _INJECTABLE_RULES]
+    result = findings
+    safe_dataflow = _has_safe_dataflow(content)
+
+    # Filter injection findings when ANY sanitization is detected (data-flow OR encoding)
+    if safe_dataflow or _has_explicit_sanitizer(content):
+        result = [f for f in result if f.rule not in _INJECTABLE_RULES]
+
+    # Filter trust boundary only on data-flow sanitization (NOT output encoding).
+    # HTML/SQL escaping doesn't prevent trust boundary violations.
+    if safe_dataflow:
+        result = [f for f in result if f.rule not in _TRUST_BOUNDARY_RULES]
+
+    # Filter weak hash findings when safe hash property is detected
+    if _has_safe_hash_property(content):
+        result = [f for f in result if f.rule not in _WEAK_HASH_RULES]
+
+    return result

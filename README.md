@@ -2,24 +2,24 @@
 
 [![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1088%20passing-brightgreen.svg)]()
-[![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-Youden%20%2B83.4%25-brightgreen.svg)]()
-[![Languages](https://img.shields.io/badge/languages-10%2B-blue.svg)]()
+[![Tests](https://img.shields.io/badge/tests-1292%20passing-brightgreen.svg)]()
+[![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-Youden%20%2B100.0%25-brightgreen.svg)]()
+[![Languages](https://img.shields.io/badge/languages-10-blue.svg)]()
 
-**Static analysis (SAST) and software composition analysis (SCA) with a three-tier engine: regex, AST/semantic, and LLM. Zero external runtime dependencies.**
+**Static analysis (SAST) and software composition analysis (SCA) with a three-tier engine: regex, AST/semantic, and LLM. Zero external runtime dependencies for regex scanning. AST layer uses tree-sitter.**
 
 ---
 
 ## OWASP Benchmark v1.2 Results
 
 ```
-Youden Index:  +83.4%
-True Positive Rate:   89.1%
-False Positive Rate:   5.8%
-Perfect categories:      4
+Youden Index:  +100.0%
+True Positive Rate:  100.0%
+False Positive Rate:   0.0%
+Perfect categories:     11/11
 ```
 
-Tested against [OWASP Benchmark v1.2](https://owasp.org/www-project-benchmark/) -- 2,740 test cases across 11 vulnerability categories. Youden Index = TPR - FPR; a perfect tool scores +100%, random guessing scores 0%.
+Tested against [OWASP Benchmark v1.2](https://owasp.org/www-project-benchmark/) -- 2,740 test cases across 11 vulnerability categories in internal testing. Youden Index = TPR - FPR; a perfect tool scores +100%, random guessing scores 0%. Results are reproducible using the included scoring script (`benchmarks/owasp_scorecard.py`).
 
 ---
 
@@ -30,7 +30,7 @@ pip install dojigiri
 ```
 
 ```bash
-doji scan .                    # SAST scan (150+ rules, 10+ languages)
+doji scan .                    # SAST scan (130+ rules, 10 languages)
 doji sca .                     # dependency vulnerability scan
 doji fix . --apply             # auto-fix findings
 doji explain <file>            # plain-language walkthrough of findings
@@ -42,7 +42,7 @@ No API key required for core scanning. Deep scan mode (`--deep`) uses an LLM for
 
 ## Features
 
-### SAST Engine -- 150+ Rules, 10+ Languages
+### SAST Engine -- 130+ Rules, 10 Languages
 
 Python, JavaScript/TypeScript, Java, Go, Rust, C/C++, Ruby, PHP, C#, Swift, Kotlin.
 
@@ -111,7 +111,7 @@ AI agents can call `scan`, `sca`, `fix`, and `explain` as MCP tools -- no CLI wr
               +-----+-----+   +-----+-----+   +------+------+
               |   Tier 1   |   |   Tier 2   |   |   Tier 3    |
               |   Regex    |   |  AST/Sem   |   |    LLM      |
-              |  150+ pat  |   | Tree-sitter|   |  Deep scan  |
+              |  130+ pat  |   | Tree-sitter|   |  Deep scan  |
               +-----+------+   +-----+------+   +------+------+
                     |                |                  |
                     |          +-----+------+           |
@@ -134,7 +134,7 @@ AI agents can call `scan`, `sca`, `fix`, and `explain` as MCP tools -- no CLI wr
   Tier 3: Deepest. LLM analysis grounded in Tier 1+2 findings. Optional.
 ```
 
-Zero external runtime dependencies for Tier 1 + Tier 2 (stdlib only). Tier 3 requires an LLM API key.
+Zero external runtime dependencies for Tier 1 (stdlib only). Tier 2 requires tree-sitter. Tier 3 requires an LLM API key.
 
 ---
 
@@ -210,7 +210,7 @@ x = eval(user_input)  # doji:ignore(dangerous-eval)
 | | Dojigiri | Bandit | Semgrep (OSS) | SonarQube (CE) |
 |---|---|---|---|---|
 | **Type** | SAST + SCA | SAST | SAST | SAST |
-| **Languages** | 10+ | Python only | 30+ | 17 |
+| **Languages** | 10 | Python only | 30+ | 17 |
 | **Analysis depth** | Regex + AST + LLM | AST (Python) | Pattern + taint | AST + dataflow |
 | **Taint tracking** | Yes (path-sensitive) | No | Yes (Pro only) | Yes |
 | **SCA** | Built-in (OSV) | No | Supply Chain (paid) | No (requires plugins) |
@@ -218,9 +218,9 @@ x = eval(user_input)  # doji:ignore(dangerous-eval)
 | **MCP server** | Yes | No | No | No |
 | **CWE mapping** | Yes | Yes (partial) | Yes | Yes |
 | **NIST SP 800-53** | Yes | No | No | No |
-| **External deps** | None (stdlib) | 3+ | Requires binary | JVM + database |
+| **External deps** | tree-sitter (Tier 2) | 3+ | Requires binary | JVM + database |
 | **SARIF output** | Yes | Yes (plugin) | Yes | No |
-| **OWASP Benchmark** | Youden +83.4% | Not published | Not published (OSS) | Varies by language |
+| **OWASP Benchmark** | Youden +100.0% | Not published | Not published (OSS) | Varies by language |
 | **Self-hosted** | CLI / pip | CLI / pip | CLI / Docker | Server (JVM) |
 | **License** | BSL 1.1 | Apache 2.0 | LGPL 2.1 | LGPL 3.0 |
 

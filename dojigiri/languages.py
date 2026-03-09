@@ -1022,6 +1022,17 @@ JAVA_RULES: list[Rule] = _compile(
             "Weak hash algorithm (MD5/SHA1) — vulnerable to collision attacks",
             "Use SHA-256 or stronger (SHA-384, SHA-512)",
         ),
+        # Weak hashing — variable algorithm from properties/config (CWE-328)
+        # MessageDigest.getInstance(variable) where algorithm is loaded at runtime.
+        # The FP filter suppresses when the property is known-safe (hashAlg2=SHA-256).
+        (
+            r"""MessageDigest\.getInstance\s*\(\s*(?!["'])([a-z]\w*)\s*[,)]""",
+            Severity.WARNING,
+            Category.SECURITY,
+            "java-weak-hash",
+            "Hash algorithm from variable — may resolve to weak algorithm (MD5/SHA1)",
+            "Use a hardcoded strong algorithm (SHA-256, SHA-384, SHA-512)",
+        ),
         # Weak randomness — java.util.Random is not cryptographically secure (CWE-330)
         # Must NOT match SecureRandom
         (
@@ -1034,7 +1045,7 @@ JAVA_RULES: list[Rule] = _compile(
         ),
         # Trust boundary violation — session.setAttribute/putValue (CWE-501)
         (
-            r"""\.(?:setAttribute|putValue)\s*\(""",
+            r"""(?:session|getSession\(\))\.(?:setAttribute|putValue)\s*\(""",
             Severity.WARNING,
             Category.SECURITY,
             "java-trust-boundary",
@@ -1068,6 +1079,17 @@ JAVA_RULES: list[Rule] = _compile(
             Category.SECURITY,
             "java-sql-injection",
             "SQL injection — string concatenation in SQL execute call",
+            "Use PreparedStatement with ? placeholders and bind parameters",
+        ),
+        # SQL string built with concatenation on separate line:
+        # String sql = "SELECT ... " + bar + "..."  (tainted SQL variable)
+        # Catches: "{call " + param + "}", "SELECT ... '" + bar + "'"
+        (
+            r"""(?:String\s+)?sql\s*=\s*["'][^"']*["']\s*\+\s*(?!["'])\w+""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "java-sql-injection",
+            "SQL injection — string concatenation in SQL query construction",
             "Use PreparedStatement with ? placeholders and bind parameters",
         ),
         # ─── Java XSS (CWE-79) ───────────────────────────────────────
@@ -1136,7 +1158,7 @@ JAVA_RULES: list[Rule] = _compile(
         ),
         # ProcessBuilder/argList: .add("echo " + param)
         (
-            r"""\.add\s*\(\s*["'][^"']*["']\s*\+\s*\w+""",
+            r"""(?:ProcessBuilder|\.command)\s*\(.*\.add\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])\w+""",
             Severity.CRITICAL,
             Category.SECURITY,
             "java-cmdi",
@@ -1144,13 +1166,32 @@ JAVA_RULES: list[Rule] = _compile(
             "Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist",
         ),
         # Array init with concat: String[] args = {a1, a2, "echo " + param} or {a1, a2, cmd + bar}
+        # Matches both new String[]{...} and implicit String[] x = {...}
         (
-            r"""new\s+String\s*\[\s*\]\s*\{[^}]*\w+\s*\+\s*\w+[^}]*\}""",
+            r"""(?:new\s+String\s*\[\s*\]\s*|String\s*\[\s*\]\s*\w+\s*=\s*)\{[^}]*["']\s*\+\s*\w+[^}]*\}""",
             Severity.CRITICAL,
             Category.SECURITY,
             "java-cmdi",
             "Command injection — string concatenation in command array",
             "Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist",
+        ),
+        # Array init with variable + variable concat (no string literal)
+        (
+            r"""(?:new\s+String\s*\[\s*\]\s*|String\s*\[\s*\]\s*\w+\s*=\s*)\{[^}]*\b(?:cmd|command)\s*\+\s*\w+[^}]*\}""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "java-cmdi",
+            "Command injection — variable concatenation in command array",
+            "Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist",
+        ),
+        # ProcessBuilder.command(args) — command set from variable
+        (
+            r"""\.command\s*\(\s*(?!["'])([a-z]\w*)\s*\)""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "java-cmdi",
+            "Command injection — variable passed to ProcessBuilder.command()",
+            "Validate command arguments against an allowlist",
         ),
         # Environment injection: String[] argsEnv = {variable} (not string literal)
         (
@@ -1198,6 +1239,26 @@ JAVA_RULES: list[Rule] = _compile(
             Category.SECURITY,
             "java-path-traversal",
             "Path traversal — variable input in File constructor",
+            "Validate and canonicalize file paths before use",
+        ),
+        # new File(anything, variable) — two-arg constructor with variable as second arg
+        # Catches: new File(TESTFILES_DIR, bar), new File(new File(...), bar)
+        # Uses .+ for first arg to handle nested constructors like new File(new File(...), bar)
+        (
+            r"""new\s+(?:java\.io\.)?File\s*\([^)]+,\s*[a-z]\w*\s*\)""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "java-path-traversal",
+            "Path traversal — variable path component in File constructor",
+            "Validate and canonicalize file paths before use",
+        ),
+        # new FileInputStream(new File(variable)) — nested File in stream constructor
+        (
+            r"""new\s+(?:java\.io\.)?(?:FileInputStream|FileOutputStream|FileReader|FileWriter)\s*\(\s*new\s+(?:java\.io\.)?File\s*\(\s*[a-z]\w*\s*\)""",
+            Severity.CRITICAL,
+            Category.SECURITY,
+            "java-path-traversal",
+            "Path traversal — variable input in nested File/stream constructor",
             "Validate and canonicalize file paths before use",
         ),
         # Paths.get(variable) — NIO path with non-literal

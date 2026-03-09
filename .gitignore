@@ -44,6 +44,7 @@ nul
 # Benchmark results and cloned repos
 benchmarks/results/
 benchmarks/.repos/
+benchmarks/doji_owasp_results.json
 .hypothesis/
 
 # Internal development files (not for public repo)
@@ -53,6 +54,7 @@ IMPROVEMENTS.md
 RELEASE_CHECKLIST.md
 INCIDENT.md
 dojigiri/HANDOFF.md
+dojigiri-target-list.md
 reviews/
 
 # Build/tool caches

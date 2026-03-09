@@ -1,6 +1,6 @@
 [
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 927,
     "severity": "warning",
     "category": "bug",
@@ -15,7 +15,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1018,
     "severity": "warning",
     "category": "bug",
@@ -30,7 +30,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 45,
     "severity": "info",
     "category": "style",
@@ -45,7 +45,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 61,
     "severity": "info",
     "category": "style",
@@ -60,7 +60,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 61,
     "severity": "info",
     "category": "style",
@@ -75,7 +75,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 929,
     "severity": "info",
     "category": "bug",
@@ -87,7 +87,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 930,
     "severity": "info",
     "category": "bug",
@@ -99,7 +99,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 931,
     "severity": "info",
     "category": "style",
@@ -111,7 +111,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1102,
     "severity": "info",
     "category": "style",
@@ -126,7 +126,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1162,
     "severity": "info",
     "category": "style",
@@ -141,7 +141,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1162,
     "severity": "info",
     "category": "style",
@@ -156,7 +156,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1219,
     "severity": "info",
     "category": "style",
@@ -171,7 +171,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1219,
     "severity": "info",
     "category": "style",
@@ -186,7 +186,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1294,
     "severity": "info",
     "category": "style",
@@ -201,7 +201,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1359,
     "severity": "info",
     "category": "style",
@@ -216,7 +216,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1359,
     "severity": "info",
     "category": "style",
@@ -231,7 +231,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1564,
     "severity": "info",
     "category": "style",
@@ -246,7 +246,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1564,
     "severity": "info",
     "category": "style",
@@ -261,13 +261,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1564,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'get' is semantically similar (87%) to 'put' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:1937",
+    "message": "Function 'get' is semantically similar (87%) to 'put' in /tmp/benchmark/bench_fastapi\\fastapi\\applications.py:1937",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -276,7 +276,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1937,
     "severity": "info",
     "category": "style",
@@ -291,7 +291,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1937,
     "severity": "info",
     "category": "style",
@@ -306,13 +306,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 1937,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'put' is semantically similar (87%) to 'post' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:2315",
+    "message": "Function 'put' is semantically similar (87%) to 'post' in /tmp/benchmark/bench_fastapi\\fastapi\\applications.py:2315",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -321,7 +321,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 2315,
     "severity": "info",
     "category": "style",
@@ -336,7 +336,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 2315,
     "severity": "info",
     "category": "style",
@@ -351,13 +351,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 2315,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'post' is semantically similar (87%) to 'delete' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:2693",
+    "message": "Function 'post' is semantically similar (87%) to 'delete' in /tmp/benchmark/bench_fastapi\\fastapi\\applications.py:2693",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -366,7 +366,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 2693,
     "severity": "info",
     "category": "style",
@@ -381,7 +381,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 2693,
     "severity": "info",
     "category": "style",
@@ -396,13 +396,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 2693,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'delete' is semantically similar (87%) to 'options' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:3066",
+    "message": "Function 'delete' is semantically similar (87%) to 'options' in /tmp/benchmark/bench_fastapi\\fastapi\\applications.py:3066",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -411,7 +411,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3066,
     "severity": "info",
     "category": "style",
@@ -426,7 +426,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3066,
     "severity": "info",
     "category": "style",
@@ -441,13 +441,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3066,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'options' is semantically similar (87%) to 'head' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:3439",
+    "message": "Function 'options' is semantically similar (87%) to 'head' in /tmp/benchmark/bench_fastapi\\fastapi\\applications.py:3439",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -456,7 +456,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3439,
     "severity": "info",
     "category": "style",
@@ -471,7 +471,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3439,
     "severity": "info",
     "category": "style",
@@ -486,13 +486,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3439,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'head' is semantically similar (87%) to 'patch' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:3812",
+    "message": "Function 'head' is semantically similar (87%) to 'patch' in /tmp/benchmark/bench_fastapi\\fastapi\\applications.py:3812",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -501,7 +501,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3812,
     "severity": "info",
     "category": "style",
@@ -516,7 +516,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3812,
     "severity": "info",
     "category": "style",
@@ -531,13 +531,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 3812,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'patch' is semantically similar (87%) to 'trace' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py:4190",
+    "message": "Function 'patch' is semantically similar (87%) to 'trace' in /tmp/benchmark/bench_fastapi\\fastapi\\applications.py:4190",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -546,7 +546,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 4190,
     "severity": "info",
     "category": "style",
@@ -561,7 +561,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\applications.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/applications.py",
     "line": 4190,
     "severity": "info",
     "category": "style",
@@ -576,7 +576,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\concurrency.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/concurrency.py",
     "line": 8,
     "severity": "warning",
     "category": "dead_code",
@@ -591,7 +591,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\concurrency.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/concurrency.py",
     "line": 10,
     "severity": "warning",
     "category": "dead_code",
@@ -606,7 +606,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/datastructures.py",
     "line": 12,
     "severity": "warning",
     "category": "dead_code",
@@ -621,7 +621,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/datastructures.py",
     "line": 13,
     "severity": "warning",
     "category": "dead_code",
@@ -636,7 +636,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/datastructures.py",
     "line": 14,
     "severity": "warning",
     "category": "dead_code",
@@ -651,7 +651,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/datastructures.py",
     "line": 16,
     "severity": "warning",
     "category": "dead_code",
@@ -666,7 +666,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/datastructures.py",
     "line": 17,
     "severity": "warning",
     "category": "dead_code",
@@ -681,7 +681,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\datastructures.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/datastructures.py",
     "line": 86,
     "severity": "info",
     "category": "bug",
@@ -693,7 +693,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/encoders.py",
     "line": 42,
     "severity": "info",
     "category": "style",
@@ -705,7 +705,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/encoders.py",
     "line": 101,
     "severity": "info",
     "category": "bug",
@@ -717,7 +717,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/encoders.py",
     "line": 112,
     "severity": "info",
     "category": "style",
@@ -732,7 +732,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/encoders.py",
     "line": 112,
     "severity": "info",
     "category": "style",
@@ -747,7 +747,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/encoders.py",
     "line": 112,
     "severity": "info",
     "category": "style",
@@ -762,7 +762,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\encoders.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/encoders.py",
     "line": 243,
     "severity": "info",
     "category": "bug",
@@ -774,7 +774,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/exceptions.py",
     "line": 157,
     "severity": "warning",
     "category": "dead_code",
@@ -789,7 +789,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/exceptions.py",
     "line": 158,
     "severity": "warning",
     "category": "dead_code",
@@ -804,7 +804,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/exceptions.py",
     "line": 185,
     "severity": "warning",
     "category": "bug",
@@ -819,7 +819,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/exceptions.py",
     "line": 186,
     "severity": "warning",
     "category": "bug",
@@ -834,7 +834,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/exceptions.py",
     "line": 187,
     "severity": "warning",
     "category": "bug",
@@ -849,7 +849,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\exceptions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/exceptions.py",
     "line": 188,
     "severity": "warning",
     "category": "bug",
@@ -864,7 +864,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\logger.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/logger.py",
     "line": 3,
     "severity": "warning",
     "category": "dead_code",
@@ -879,7 +879,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 30,
     "severity": "info",
     "category": "style",
@@ -894,7 +894,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 30,
     "severity": "info",
     "category": "style",
@@ -909,13 +909,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 30,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function '__init__' is semantically similar (86%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py:471",
+    "message": "Function '__init__' is semantically similar (86%) to '__init__' in /tmp/benchmark/bench_fastapi\\fastapi\\params.py:471",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -924,7 +924,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 141,
     "severity": "info",
     "category": "style",
@@ -939,7 +939,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 141,
     "severity": "info",
     "category": "style",
@@ -954,13 +954,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 141,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py:307",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in /tmp/benchmark/bench_fastapi\\fastapi\\params.py:307",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -969,7 +969,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 186,
     "severity": "info",
     "category": "bug",
@@ -981,7 +981,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 187,
     "severity": "info",
     "category": "bug",
@@ -993,7 +993,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 225,
     "severity": "info",
     "category": "style",
@@ -1008,7 +1008,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 225,
     "severity": "info",
     "category": "style",
@@ -1023,7 +1023,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 307,
     "severity": "info",
     "category": "style",
@@ -1038,7 +1038,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 307,
     "severity": "info",
     "category": "style",
@@ -1053,7 +1053,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 391,
     "severity": "info",
     "category": "style",
@@ -1068,7 +1068,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 391,
     "severity": "info",
     "category": "style",
@@ -1083,7 +1083,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 471,
     "severity": "info",
     "category": "style",
@@ -1098,7 +1098,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 471,
     "severity": "info",
     "category": "style",
@@ -1113,7 +1113,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 583,
     "severity": "info",
     "category": "style",
@@ -1128,7 +1128,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 583,
     "severity": "info",
     "category": "style",
@@ -1143,7 +1143,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 665,
     "severity": "info",
     "category": "style",
@@ -1158,7 +1158,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\params.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/params.py",
     "line": 665,
     "severity": "info",
     "category": "style",
@@ -1173,7 +1173,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 14,
     "severity": "info",
     "category": "style",
@@ -1188,7 +1188,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 14,
     "severity": "info",
     "category": "style",
@@ -1203,13 +1203,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 14,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'Path' is semantically similar (88%) to 'Query' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:358",
+    "message": "Function 'Path' is semantically similar (88%) to 'Query' in /tmp/benchmark/bench_fastapi\\fastapi\\param_functions.py:358",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -1218,7 +1218,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 358,
     "severity": "info",
     "category": "style",
@@ -1233,7 +1233,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 358,
     "severity": "info",
     "category": "style",
@@ -1248,13 +1248,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 358,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'Query' is semantically similar (86%) to 'Header' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:702",
+    "message": "Function 'Query' is semantically similar (86%) to 'Header' in /tmp/benchmark/bench_fastapi\\fastapi\\param_functions.py:702",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -1263,7 +1263,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 702,
     "severity": "info",
     "category": "style",
@@ -1278,7 +1278,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 702,
     "severity": "info",
     "category": "style",
@@ -1293,13 +1293,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 702,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'Header' is semantically similar (86%) to 'Cookie' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1019",
+    "message": "Function 'Header' is semantically similar (86%) to 'Cookie' in /tmp/benchmark/bench_fastapi\\fastapi\\param_functions.py:1019",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -1308,7 +1308,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1019,
     "severity": "info",
     "category": "style",
@@ -1323,7 +1323,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1019,
     "severity": "info",
     "category": "style",
@@ -1338,13 +1338,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1019,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'Cookie' is semantically similar (86%) to 'Form' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1654",
+    "message": "Function 'Cookie' is semantically similar (86%) to 'Form' in /tmp/benchmark/bench_fastapi\\fastapi\\param_functions.py:1654",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -1353,7 +1353,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1324,
     "severity": "info",
     "category": "style",
@@ -1368,7 +1368,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1324,
     "severity": "info",
     "category": "style",
@@ -1383,13 +1383,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1324,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'Body' is semantically similar (86%) to 'Form' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1654",
+    "message": "Function 'Body' is semantically similar (86%) to 'Form' in /tmp/benchmark/bench_fastapi\\fastapi\\param_functions.py:1654",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -1398,7 +1398,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1654,
     "severity": "info",
     "category": "style",
@@ -1413,7 +1413,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1654,
     "severity": "info",
     "category": "style",
@@ -1428,13 +1428,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1654,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'Form' is semantically similar (88%) to 'File' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py:1969",
+    "message": "Function 'Form' is semantically similar (88%) to 'File' in /tmp/benchmark/bench_fastapi\\fastapi\\param_functions.py:1969",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -1443,7 +1443,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1969,
     "severity": "info",
     "category": "style",
@@ -1458,7 +1458,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 1969,
     "severity": "info",
     "category": "style",
@@ -1473,7 +1473,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 2284,
     "severity": "info",
     "category": "style",
@@ -1488,7 +1488,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\param_functions.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/param_functions.py",
     "line": 2373,
     "severity": "info",
     "category": "style",
@@ -1503,7 +1503,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\requests.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/requests.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -1518,7 +1518,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\requests.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/requests.py",
     "line": 2,
     "severity": "warning",
     "category": "dead_code",
@@ -1533,7 +1533,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 4,
     "severity": "warning",
     "category": "dead_code",
@@ -1548,7 +1548,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 5,
     "severity": "warning",
     "category": "dead_code",
@@ -1563,7 +1563,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 6,
     "severity": "warning",
     "category": "dead_code",
@@ -1578,7 +1578,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 8,
     "severity": "warning",
     "category": "dead_code",
@@ -1593,7 +1593,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 9,
     "severity": "warning",
     "category": "dead_code",
@@ -1608,7 +1608,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -1623,7 +1623,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 52,
     "severity": "info",
     "category": "bug",
@@ -1635,7 +1635,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\responses.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/responses.py",
     "line": 82,
     "severity": "info",
     "category": "bug",
@@ -1647,7 +1647,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 87,
     "severity": "warning",
     "category": "dead_code",
@@ -1662,7 +1662,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 403,
     "severity": "warning",
     "category": "bug",
@@ -1677,7 +1677,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 405,
     "severity": "warning",
     "category": "bug",
@@ -1692,7 +1692,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 470,
     "severity": "warning",
     "category": "bug",
@@ -1704,7 +1704,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 573,
     "severity": "warning",
     "category": "bug",
@@ -1719,7 +1719,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 573,
     "severity": "warning",
     "category": "bug",
@@ -1734,7 +1734,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 612,
     "severity": "warning",
     "category": "bug",
@@ -1749,7 +1749,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 614,
     "severity": "warning",
     "category": "bug",
@@ -1764,7 +1764,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 615,
     "severity": "warning",
     "category": "bug",
@@ -1779,7 +1779,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 648,
     "severity": "warning",
     "category": "bug",
@@ -1794,7 +1794,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 667,
     "severity": "warning",
     "category": "bug",
@@ -1806,7 +1806,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 668,
     "severity": "warning",
     "category": "bug",
@@ -1821,7 +1821,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 712,
     "severity": "warning",
     "category": "bug",
@@ -1836,7 +1836,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 713,
     "severity": "warning",
     "category": "bug",
@@ -1851,7 +1851,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 714,
     "severity": "warning",
     "category": "bug",
@@ -1866,7 +1866,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 842,
     "severity": "warning",
     "category": "bug",
@@ -1881,7 +1881,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 860,
     "severity": "warning",
     "category": "bug",
@@ -1896,7 +1896,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 864,
     "severity": "warning",
     "category": "bug",
@@ -1911,7 +1911,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 900,
     "severity": "warning",
     "category": "bug",
@@ -1926,7 +1926,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 905,
     "severity": "warning",
     "category": "bug",
@@ -1941,7 +1941,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 911,
     "severity": "warning",
     "category": "bug",
@@ -1956,7 +1956,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 912,
     "severity": "warning",
     "category": "bug",
@@ -1971,7 +1971,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 914,
     "severity": "warning",
     "category": "bug",
@@ -1986,7 +1986,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 920,
     "severity": "warning",
     "category": "bug",
@@ -2001,7 +2001,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1770,
     "severity": "warning",
     "category": "bug",
@@ -2013,13 +2013,13 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 137,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'websocket_session' is semantically similar (100%) to 'app' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:145",
+    "message": "Function 'websocket_session' is semantically similar (100%) to 'app' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:145",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2028,7 +2028,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 273,
     "severity": "info",
     "category": "style",
@@ -2043,7 +2043,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 321,
     "severity": "info",
     "category": "bug",
@@ -2055,7 +2055,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 347,
     "severity": "info",
     "category": "style",
@@ -2070,7 +2070,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 347,
     "severity": "info",
     "category": "style",
@@ -2085,7 +2085,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 365,
     "severity": "info",
     "category": "bug",
@@ -2097,7 +2097,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 378,
     "severity": "info",
     "category": "style",
@@ -2112,7 +2112,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 378,
     "severity": "info",
     "category": "style",
@@ -2127,7 +2127,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 381,
     "severity": "info",
     "category": "bug",
@@ -2139,7 +2139,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 450,
     "severity": "info",
     "category": "bug",
@@ -2151,7 +2151,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 462,
     "severity": "info",
     "category": "bug",
@@ -2163,7 +2163,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 722,
     "severity": "info",
     "category": "bug",
@@ -2175,13 +2175,13 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 728,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'get_websocket_app' is semantically similar (90%) to 'app' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:733",
+    "message": "Function 'get_websocket_app' is semantically similar (90%) to 'app' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:733",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2190,7 +2190,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 744,
     "severity": "info",
     "category": "bug",
@@ -2202,7 +2202,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 759,
     "severity": "info",
     "category": "bug",
@@ -2214,7 +2214,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 807,
     "severity": "info",
     "category": "style",
@@ -2229,7 +2229,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 808,
     "severity": "info",
     "category": "style",
@@ -2244,7 +2244,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 808,
     "severity": "info",
     "category": "style",
@@ -2259,7 +2259,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 808,
     "severity": "info",
     "category": "style",
@@ -2274,7 +2274,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 901,
     "severity": "info",
     "category": "bug",
@@ -2286,7 +2286,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 928,
     "severity": "info",
     "category": "bug",
@@ -2298,7 +2298,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 931,
     "severity": "info",
     "category": "bug",
@@ -2310,7 +2310,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 944,
     "severity": "info",
     "category": "bug",
@@ -2322,7 +2322,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1001,
     "severity": "info",
     "category": "style",
@@ -2337,7 +2337,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1028,
     "severity": "info",
     "category": "style",
@@ -2352,7 +2352,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1028,
     "severity": "info",
     "category": "style",
@@ -2367,7 +2367,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1285,
     "severity": "info",
     "category": "bug",
@@ -2379,7 +2379,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1286,
     "severity": "info",
     "category": "bug",
@@ -2391,7 +2391,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1292,
     "severity": "info",
     "category": "style",
@@ -2403,7 +2403,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1332,
     "severity": "info",
     "category": "style",
@@ -2418,7 +2418,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1332,
     "severity": "info",
     "category": "style",
@@ -2433,7 +2433,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1415,
     "severity": "info",
     "category": "style",
@@ -2448,7 +2448,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1415,
     "severity": "info",
     "category": "style",
@@ -2463,7 +2463,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1498,
     "severity": "info",
     "category": "style",
@@ -2478,7 +2478,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1574,
     "severity": "info",
     "category": "style",
@@ -2493,7 +2493,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1574,
     "severity": "info",
     "category": "style",
@@ -2508,7 +2508,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1574,
     "severity": "info",
     "category": "style",
@@ -2523,7 +2523,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1709,
     "severity": "info",
     "category": "bug",
@@ -2535,7 +2535,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1714,
     "severity": "info",
     "category": "bug",
@@ -2547,7 +2547,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1715,
     "severity": "info",
     "category": "bug",
@@ -2559,7 +2559,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1827,
     "severity": "info",
     "category": "style",
@@ -2574,7 +2574,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1827,
     "severity": "info",
     "category": "style",
@@ -2589,13 +2589,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 1827,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'get' is semantically similar (100%) to 'put' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:2204",
+    "message": "Function 'get' is semantically similar (100%) to 'put' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:2204",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2604,7 +2604,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2204,
     "severity": "info",
     "category": "style",
@@ -2619,7 +2619,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2204,
     "severity": "info",
     "category": "style",
@@ -2634,13 +2634,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2204,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'put' is semantically similar (100%) to 'post' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:2586",
+    "message": "Function 'put' is semantically similar (100%) to 'post' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:2586",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2649,7 +2649,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2586,
     "severity": "info",
     "category": "style",
@@ -2664,7 +2664,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2586,
     "severity": "info",
     "category": "style",
@@ -2679,13 +2679,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2586,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'post' is semantically similar (100%) to 'delete' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:2968",
+    "message": "Function 'post' is semantically similar (100%) to 'delete' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:2968",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2694,7 +2694,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2968,
     "severity": "info",
     "category": "style",
@@ -2709,7 +2709,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2968,
     "severity": "info",
     "category": "style",
@@ -2724,13 +2724,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 2968,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'delete' is semantically similar (100%) to 'options' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:3345",
+    "message": "Function 'delete' is semantically similar (100%) to 'options' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:3345",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2739,7 +2739,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 3345,
     "severity": "info",
     "category": "style",
@@ -2754,7 +2754,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 3345,
     "severity": "info",
     "category": "style",
@@ -2769,13 +2769,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 3345,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'options' is semantically similar (100%) to 'head' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:3722",
+    "message": "Function 'options' is semantically similar (100%) to 'head' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:3722",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2784,7 +2784,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 3722,
     "severity": "info",
     "category": "style",
@@ -2799,7 +2799,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 3722,
     "severity": "info",
     "category": "style",
@@ -2814,13 +2814,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 3722,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'head' is semantically similar (100%) to 'patch' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:4104",
+    "message": "Function 'head' is semantically similar (100%) to 'patch' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:4104",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2829,7 +2829,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4104,
     "severity": "info",
     "category": "style",
@@ -2844,7 +2844,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4104,
     "severity": "info",
     "category": "style",
@@ -2859,13 +2859,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4104,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'patch' is semantically similar (100%) to 'trace' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py:4486",
+    "message": "Function 'patch' is semantically similar (100%) to 'trace' in /tmp/benchmark/bench_fastapi\\fastapi\\routing.py:4486",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -2874,7 +2874,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4486,
     "severity": "info",
     "category": "style",
@@ -2889,7 +2889,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4486,
     "severity": "info",
     "category": "style",
@@ -2904,7 +2904,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4868,
     "severity": "info",
     "category": "style",
@@ -2916,7 +2916,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4884,
     "severity": "info",
     "category": "style",
@@ -2928,7 +2928,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4900,
     "severity": "info",
     "category": "style",
@@ -2940,7 +2940,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\routing.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/routing.py",
     "line": 4914,
     "severity": "info",
     "category": "bug",
@@ -2952,7 +2952,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/sse.py",
     "line": 137,
     "severity": "warning",
     "category": "bug",
@@ -2967,7 +2967,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/sse.py",
     "line": 164,
     "severity": "warning",
     "category": "bug",
@@ -2979,7 +2979,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/sse.py",
     "line": 164,
     "severity": "warning",
     "category": "bug",
@@ -2991,7 +2991,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/sse.py",
     "line": 218,
     "severity": "warning",
     "category": "dead_code",
@@ -3006,7 +3006,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\sse.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/sse.py",
     "line": 146,
     "severity": "info",
     "category": "style",
@@ -3021,7 +3021,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\staticfiles.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/staticfiles.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -3036,7 +3036,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\templating.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/templating.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -3051,7 +3051,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\testclient.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/testclient.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -3066,7 +3066,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/types.py",
     "line": 7,
     "severity": "warning",
     "category": "dead_code",
@@ -3081,7 +3081,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/types.py",
     "line": 10,
     "severity": "warning",
     "category": "dead_code",
@@ -3096,7 +3096,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/types.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -3111,7 +3111,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\types.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/types.py",
     "line": 12,
     "severity": "warning",
     "category": "dead_code",
@@ -3126,7 +3126,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/utils.py",
     "line": 98,
     "severity": "info",
     "category": "bug",
@@ -3138,7 +3138,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\websockets.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/websockets.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -3153,7 +3153,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\websockets.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/websockets.py",
     "line": 2,
     "severity": "warning",
     "category": "dead_code",
@@ -3168,7 +3168,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\websockets.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/websockets.py",
     "line": 3,
     "severity": "warning",
     "category": "dead_code",
@@ -3183,7 +3183,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 5,
     "severity": "warning",
     "category": "dead_code",
@@ -3198,7 +3198,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 8,
     "severity": "warning",
     "category": "dead_code",
@@ -3213,7 +3213,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 9,
     "severity": "warning",
     "category": "dead_code",
@@ -3228,7 +3228,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 10,
     "severity": "warning",
     "category": "dead_code",
@@ -3243,7 +3243,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -3258,7 +3258,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 12,
     "severity": "warning",
     "category": "dead_code",
@@ -3273,7 +3273,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 13,
     "severity": "warning",
     "category": "dead_code",
@@ -3288,7 +3288,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 14,
     "severity": "warning",
     "category": "dead_code",
@@ -3303,7 +3303,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 15,
     "severity": "warning",
     "category": "dead_code",
@@ -3318,7 +3318,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 16,
     "severity": "warning",
     "category": "dead_code",
@@ -3333,7 +3333,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 17,
     "severity": "warning",
     "category": "dead_code",
@@ -3348,7 +3348,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 18,
     "severity": "warning",
     "category": "dead_code",
@@ -3363,7 +3363,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 19,
     "severity": "warning",
     "category": "dead_code",
@@ -3378,7 +3378,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 20,
     "severity": "warning",
     "category": "dead_code",
@@ -3393,7 +3393,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 21,
     "severity": "warning",
     "category": "dead_code",
@@ -3408,7 +3408,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 22,
     "severity": "warning",
     "category": "dead_code",
@@ -3423,7 +3423,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 23,
     "severity": "warning",
     "category": "dead_code",
@@ -3438,7 +3438,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 24,
     "severity": "warning",
     "category": "dead_code",
@@ -3453,7 +3453,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/__init__.py",
     "line": 25,
     "severity": "warning",
     "category": "dead_code",
@@ -3468,7 +3468,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 26,
     "severity": "warning",
     "category": "bug",
@@ -3480,7 +3480,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 55,
     "severity": "warning",
     "category": "bug",
@@ -3495,7 +3495,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 57,
     "severity": "warning",
     "category": "bug",
@@ -3510,7 +3510,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 75,
     "severity": "warning",
     "category": "bug",
@@ -3525,7 +3525,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 77,
     "severity": "warning",
     "category": "bug",
@@ -3540,7 +3540,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 189,
     "severity": "warning",
     "category": "bug",
@@ -3555,7 +3555,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 32,
     "severity": "info",
     "category": "style",
@@ -3570,7 +3570,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 57,
     "severity": "info",
     "category": "bug",
@@ -3582,7 +3582,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/models.py",
     "line": 97,
     "severity": "info",
     "category": "bug",
@@ -3594,7 +3594,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 244,
     "severity": "warning",
     "category": "bug",
@@ -3606,7 +3606,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 401,
     "severity": "warning",
     "category": "bug",
@@ -3618,7 +3618,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 442,
     "severity": "warning",
     "category": "bug",
@@ -3633,7 +3633,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 444,
     "severity": "warning",
     "category": "bug",
@@ -3648,7 +3648,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 449,
     "severity": "warning",
     "category": "bug",
@@ -3663,7 +3663,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 451,
     "severity": "warning",
     "category": "bug",
@@ -3678,7 +3678,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 552,
     "severity": "warning",
     "category": "bug",
@@ -3693,7 +3693,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 553,
     "severity": "warning",
     "category": "bug",
@@ -3708,7 +3708,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 626,
     "severity": "warning",
     "category": "bug",
@@ -3723,7 +3723,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 627,
     "severity": "warning",
     "category": "bug",
@@ -3738,7 +3738,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 633,
     "severity": "warning",
     "category": "bug",
@@ -3753,7 +3753,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 821,
     "severity": "warning",
     "category": "bug",
@@ -3768,7 +3768,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 975,
     "severity": "warning",
     "category": "bug",
@@ -3780,7 +3780,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 99,
     "severity": "info",
     "category": "bug",
@@ -3792,7 +3792,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 105,
     "severity": "info",
     "category": "bug",
@@ -3804,7 +3804,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 112,
     "severity": "info",
     "category": "bug",
@@ -3816,7 +3816,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 122,
     "severity": "info",
     "category": "bug",
@@ -3828,7 +3828,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 136,
     "severity": "info",
     "category": "style",
@@ -3843,7 +3843,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 284,
     "severity": "info",
     "category": "style",
@@ -3858,7 +3858,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 316,
     "severity": "info",
     "category": "bug",
@@ -3870,7 +3870,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 322,
     "severity": "info",
     "category": "bug",
@@ -3882,7 +3882,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 347,
     "severity": "info",
     "category": "bug",
@@ -3894,7 +3894,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 351,
     "severity": "info",
     "category": "bug",
@@ -3906,7 +3906,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 390,
     "severity": "info",
     "category": "style",
@@ -3921,7 +3921,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 390,
     "severity": "info",
     "category": "style",
@@ -3936,7 +3936,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 441,
     "severity": "info",
     "category": "bug",
@@ -3948,7 +3948,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 448,
     "severity": "info",
     "category": "bug",
@@ -3960,7 +3960,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 457,
     "severity": "info",
     "category": "bug",
@@ -3972,7 +3972,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 461,
     "severity": "info",
     "category": "bug",
@@ -3984,7 +3984,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 468,
     "severity": "info",
     "category": "bug",
@@ -3996,7 +3996,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 496,
     "severity": "info",
     "category": "bug",
@@ -4008,7 +4008,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 521,
     "severity": "info",
     "category": "bug",
@@ -4020,7 +4020,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 546,
     "severity": "info",
     "category": "bug",
@@ -4032,7 +4032,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 550,
     "severity": "info",
     "category": "bug",
@@ -4044,7 +4044,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 569,
     "severity": "info",
     "category": "bug",
@@ -4056,7 +4056,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 578,
     "severity": "info",
     "category": "bug",
@@ -4068,7 +4068,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 595,
     "severity": "info",
     "category": "style",
@@ -4083,7 +4083,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 595,
     "severity": "info",
     "category": "style",
@@ -4098,7 +4098,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 595,
     "severity": "info",
     "category": "style",
@@ -4113,7 +4113,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 604,
     "severity": "info",
     "category": "style",
@@ -4125,7 +4125,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 610,
     "severity": "info",
     "category": "bug",
@@ -4137,7 +4137,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 614,
     "severity": "info",
     "category": "bug",
@@ -4149,7 +4149,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 781,
     "severity": "info",
     "category": "style",
@@ -4164,7 +4164,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 781,
     "severity": "info",
     "category": "style",
@@ -4179,7 +4179,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 840,
     "severity": "info",
     "category": "bug",
@@ -4191,7 +4191,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 852,
     "severity": "info",
     "category": "bug",
@@ -4203,7 +4203,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 930,
     "severity": "info",
     "category": "bug",
@@ -4215,7 +4215,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 955,
     "severity": "info",
     "category": "bug",
@@ -4227,7 +4227,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\dependencies\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/dependencies/utils.py",
     "line": 998,
     "severity": "info",
     "category": "style",
@@ -4242,7 +4242,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\cors.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/middleware/cors.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4257,7 +4257,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\gzip.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/middleware/gzip.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4272,7 +4272,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\httpsredirect.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/middleware/httpsredirect.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4287,7 +4287,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\trustedhost.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/middleware/trustedhost.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4302,7 +4302,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\wsgi.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/middleware/wsgi.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4317,7 +4317,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\middleware\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/middleware/__init__.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4332,7 +4332,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\constants.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/constants.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4347,7 +4347,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\constants.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/constants.py",
     "line": 2,
     "severity": "warning",
     "category": "dead_code",
@@ -4362,7 +4362,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\constants.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/constants.py",
     "line": 3,
     "severity": "warning",
     "category": "dead_code",
@@ -4377,7 +4377,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/docs.py",
     "line": 40,
     "severity": "info",
     "category": "style",
@@ -4392,7 +4392,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/docs.py",
     "line": 40,
     "severity": "info",
     "category": "style",
@@ -4407,7 +4407,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/docs.py",
     "line": 197,
     "severity": "info",
     "category": "style",
@@ -4422,7 +4422,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\docs.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/docs.py",
     "line": 301,
     "severity": "info",
     "category": "style",
@@ -4437,7 +4437,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/models.py",
     "line": 209,
     "severity": "warning",
     "category": "dead_code",
@@ -4452,7 +4452,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/models.py",
     "line": 19,
     "severity": "info",
     "category": "bug",
@@ -4464,7 +4464,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/models.py",
     "line": 123,
     "severity": "info",
     "category": "style",
@@ -4479,7 +4479,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/models.py",
     "line": 289,
     "severity": "info",
     "category": "style",
@@ -4494,7 +4494,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\models.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/models.py",
     "line": 305,
     "severity": "info",
     "category": "style",
@@ -4509,7 +4509,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 365,
     "severity": "warning",
     "category": "bug",
@@ -4521,7 +4521,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 108,
     "severity": "info",
     "category": "style",
@@ -4536,7 +4536,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 192,
     "severity": "info",
     "category": "bug",
@@ -4548,7 +4548,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 263,
     "severity": "info",
     "category": "style",
@@ -4563,7 +4563,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 263,
     "severity": "info",
     "category": "style",
@@ -4578,7 +4578,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 276,
     "severity": "info",
     "category": "bug",
@@ -4590,7 +4590,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 281,
     "severity": "info",
     "category": "bug",
@@ -4602,7 +4602,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 349,
     "severity": "info",
     "category": "style",
@@ -4614,7 +4614,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 427,
     "severity": "info",
     "category": "bug",
@@ -4626,7 +4626,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 496,
     "severity": "info",
     "category": "bug",
@@ -4638,7 +4638,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 517,
     "severity": "info",
     "category": "style",
@@ -4653,7 +4653,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 517,
     "severity": "info",
     "category": "style",
@@ -4668,7 +4668,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\openapi\\utils.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/openapi/utils.py",
     "line": 517,
     "severity": "info",
     "category": "style",
@@ -4683,7 +4683,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/api_key.py",
     "line": 85,
     "severity": "info",
     "category": "style",
@@ -4698,13 +4698,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/api_key.py",
     "line": 85,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py:177",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in /tmp/benchmark/bench_fastapi\\fastapi\\security\\api_key.py:177",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -4713,13 +4713,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/api_key.py",
     "line": 177,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\api_key.py:265",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in /tmp/benchmark/bench_fastapi\\fastapi\\security\\api_key.py:265",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -4728,7 +4728,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\http.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/http.py",
     "line": 140,
     "severity": "info",
     "category": "style",
@@ -4743,13 +4743,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\http.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/http.py",
     "line": 303,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function '__call__' is semantically similar (100%) to '__call__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\http.py:404",
+    "message": "Function '__call__' is semantically similar (100%) to '__call__' in /tmp/benchmark/bench_fastapi\\fastapi\\security\\http.py:404",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -4758,7 +4758,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/oauth2.py",
     "line": 59,
     "severity": "info",
     "category": "style",
@@ -4773,7 +4773,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/oauth2.py",
     "line": 226,
     "severity": "info",
     "category": "style",
@@ -4788,7 +4788,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/oauth2.py",
     "line": 343,
     "severity": "info",
     "category": "style",
@@ -4803,7 +4803,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/oauth2.py",
     "line": 442,
     "severity": "info",
     "category": "style",
@@ -4818,13 +4818,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/oauth2.py",
     "line": 442,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function '__init__' is semantically similar (100%) to '__init__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py:553",
+    "message": "Function '__init__' is semantically similar (100%) to '__init__' in /tmp/benchmark/bench_fastapi\\fastapi\\security\\oauth2.py:553",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -4833,13 +4833,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/oauth2.py",
     "line": 536,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function '__call__' is semantically similar (100%) to '__call__' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py:642",
+    "message": "Function '__call__' is semantically similar (100%) to '__call__' in /tmp/benchmark/bench_fastapi\\fastapi\\security\\oauth2.py:642",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -4848,7 +4848,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\oauth2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/oauth2.py",
     "line": 553,
     "severity": "info",
     "category": "style",
@@ -4863,7 +4863,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\open_id_connect_url.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/open_id_connect_url.py",
     "line": 22,
     "severity": "info",
     "category": "style",
@@ -4878,7 +4878,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -4893,7 +4893,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 2,
     "severity": "warning",
     "category": "dead_code",
@@ -4908,7 +4908,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 3,
     "severity": "warning",
     "category": "dead_code",
@@ -4923,7 +4923,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 4,
     "severity": "warning",
     "category": "dead_code",
@@ -4938,7 +4938,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 5,
     "severity": "warning",
     "category": "dead_code",
@@ -4953,7 +4953,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 6,
     "severity": "warning",
     "category": "dead_code",
@@ -4968,7 +4968,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 7,
     "severity": "warning",
     "category": "dead_code",
@@ -4983,7 +4983,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 8,
     "severity": "warning",
     "category": "dead_code",
@@ -4998,7 +4998,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 9,
     "severity": "warning",
     "category": "dead_code",
@@ -5013,7 +5013,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 10,
     "severity": "warning",
     "category": "dead_code",
@@ -5028,7 +5028,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -5043,7 +5043,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 12,
     "severity": "warning",
     "category": "dead_code",
@@ -5058,7 +5058,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 13,
     "severity": "warning",
     "category": "dead_code",
@@ -5073,7 +5073,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 14,
     "severity": "warning",
     "category": "dead_code",
@@ -5088,7 +5088,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\security\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/security/__init__.py",
     "line": 15,
     "severity": "warning",
     "category": "dead_code",
@@ -5103,7 +5103,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/shared.py",
     "line": 31,
     "severity": "warning",
     "category": "dead_code",
@@ -5118,13 +5118,13 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/shared.py",
     "line": 126,
     "severity": "info",
     "category": "style",
     "source": "ast",
     "rule": "semantic-clone",
-    "message": "Function 'is_bytes_or_nonable_bytes_annotation' is semantically similar (100%) to 'is_uploadfile_or_nonable_uploadfile_annotation' in C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py:137",
+    "message": "Function 'is_bytes_or_nonable_bytes_annotation' is semantically similar (100%) to 'is_uploadfile_or_nonable_uploadfile_annotation' in /tmp/benchmark/bench_fastapi\\fastapi\\_compat\\shared.py:137",
     "suggestion": "Consider extracting shared logic into a common function",
     "snippet": null,
     "cwe": "CWE-1041",
@@ -5133,7 +5133,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/shared.py",
     "line": 179,
     "severity": "info",
     "category": "style",
@@ -5145,7 +5145,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\shared.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/shared.py",
     "line": 191,
     "severity": "info",
     "category": "style",
@@ -5157,7 +5157,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 22,
     "severity": "warning",
     "category": "dead_code",
@@ -5172,7 +5172,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 23,
     "severity": "warning",
     "category": "dead_code",
@@ -5187,7 +5187,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 25,
     "severity": "warning",
     "category": "dead_code",
@@ -5202,7 +5202,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 34,
     "severity": "warning",
     "category": "dead_code",
@@ -5217,7 +5217,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 35,
     "severity": "warning",
     "category": "dead_code",
@@ -5232,7 +5232,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 39,
     "severity": "warning",
     "category": "dead_code",
@@ -5247,7 +5247,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 41,
     "severity": "warning",
     "category": "dead_code",
@@ -5262,7 +5262,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 152,
     "severity": "warning",
     "category": "bug",
@@ -5277,7 +5277,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 160,
     "severity": "warning",
     "category": "bug",
@@ -5289,7 +5289,7 @@
     "cwe": "CWE-1188"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 389,
     "severity": "warning",
     "category": "bug",
@@ -5304,7 +5304,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 45,
     "severity": "info",
     "category": "style",
@@ -5316,7 +5316,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 60,
     "severity": "info",
     "category": "style",
@@ -5328,7 +5328,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 86,
     "severity": "info",
     "category": "style",
@@ -5340,7 +5340,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 140,
     "severity": "info",
     "category": "style",
@@ -5352,7 +5352,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 177,
     "severity": "info",
     "category": "style",
@@ -5367,7 +5367,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 177,
     "severity": "info",
     "category": "bug",
@@ -5379,7 +5379,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 264,
     "severity": "info",
     "category": "style",
@@ -5391,7 +5391,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 272,
     "severity": "info",
     "category": "style",
@@ -5406,7 +5406,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\v2.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/v2.py",
     "line": 362,
     "severity": "info",
     "category": "bug",
@@ -5418,7 +5418,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 1,
     "severity": "warning",
     "category": "dead_code",
@@ -5433,7 +5433,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 2,
     "severity": "warning",
     "category": "dead_code",
@@ -5448,7 +5448,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 3,
     "severity": "warning",
     "category": "dead_code",
@@ -5463,7 +5463,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 4,
     "severity": "warning",
     "category": "dead_code",
@@ -5478,7 +5478,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 7,
     "severity": "warning",
     "category": "dead_code",
@@ -5493,7 +5493,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 8,
     "severity": "warning",
     "category": "dead_code",
@@ -5508,7 +5508,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -5523,7 +5523,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 12,
     "severity": "warning",
     "category": "dead_code",
@@ -5538,7 +5538,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 13,
     "severity": "warning",
     "category": "dead_code",
@@ -5553,7 +5553,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 16,
     "severity": "warning",
     "category": "dead_code",
@@ -5568,7 +5568,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 19,
     "severity": "warning",
     "category": "dead_code",
@@ -5583,7 +5583,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 20,
     "severity": "warning",
     "category": "dead_code",
@@ -5598,7 +5598,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 21,
     "severity": "warning",
     "category": "dead_code",
@@ -5613,7 +5613,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 22,
     "severity": "warning",
     "category": "dead_code",
@@ -5628,7 +5628,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 23,
     "severity": "warning",
     "category": "dead_code",
@@ -5643,7 +5643,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 24,
     "severity": "warning",
     "category": "dead_code",
@@ -5658,7 +5658,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 25,
     "severity": "warning",
     "category": "dead_code",
@@ -5673,7 +5673,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 26,
     "severity": "warning",
     "category": "dead_code",
@@ -5688,7 +5688,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 27,
     "severity": "warning",
     "category": "dead_code",
@@ -5703,7 +5703,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 28,
     "severity": "warning",
     "category": "dead_code",
@@ -5718,7 +5718,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 29,
     "severity": "warning",
     "category": "dead_code",
@@ -5733,7 +5733,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 30,
     "severity": "warning",
     "category": "dead_code",
@@ -5748,7 +5748,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 31,
     "severity": "warning",
     "category": "dead_code",
@@ -5763,7 +5763,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 32,
     "severity": "warning",
     "category": "dead_code",
@@ -5778,7 +5778,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 33,
     "severity": "warning",
     "category": "dead_code",
@@ -5793,7 +5793,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 34,
     "severity": "warning",
     "category": "dead_code",
@@ -5808,7 +5808,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 35,
     "severity": "warning",
     "category": "dead_code",
@@ -5823,7 +5823,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 36,
     "severity": "warning",
     "category": "dead_code",
@@ -5838,7 +5838,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 37,
     "severity": "warning",
     "category": "dead_code",
@@ -5853,7 +5853,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_fastapi\\fastapi\\_compat\\__init__.py",
+    "file": "/tmp/benchmark/bench_fastapi/fastapi/_compat/__init__.py",
     "line": 38,
     "severity": "warning",
     "category": "dead_code",

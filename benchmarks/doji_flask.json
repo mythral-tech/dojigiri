@@ -1,6 +1,6 @@
 [
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 64,
     "severity": "warning",
     "category": "dead_code",
@@ -15,7 +15,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 67,
     "severity": "warning",
     "category": "dead_code",
@@ -30,7 +30,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 68,
     "severity": "warning",
     "category": "dead_code",
@@ -45,7 +45,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 69,
     "severity": "warning",
     "category": "dead_code",
@@ -60,7 +60,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 70,
     "severity": "warning",
     "category": "dead_code",
@@ -75,7 +75,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 1165,
     "severity": "warning",
     "category": "bug",
@@ -87,7 +87,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 1285,
     "severity": "warning",
     "category": "bug",
@@ -99,7 +99,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 1601,
     "severity": "warning",
     "category": "bug",
@@ -114,7 +114,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 109,
     "severity": "info",
     "category": "style",
@@ -129,7 +129,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 254,
     "severity": "info",
     "category": "style",
@@ -144,7 +144,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 310,
     "severity": "info",
     "category": "style",
@@ -159,7 +159,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 310,
     "severity": "info",
     "category": "style",
@@ -174,7 +174,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 352,
     "severity": "info",
     "category": "bug",
@@ -186,7 +186,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 509,
     "severity": "info",
     "category": "style",
@@ -201,7 +201,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 632,
     "severity": "info",
     "category": "style",
@@ -216,7 +216,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 755,
     "severity": "info",
     "category": "style",
@@ -231,7 +231,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 897,
     "severity": "info",
     "category": "style",
@@ -246,7 +246,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 1102,
     "severity": "info",
     "category": "style",
@@ -261,7 +261,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 1224,
     "severity": "info",
     "category": "style",
@@ -276,7 +276,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 1224,
     "severity": "info",
     "category": "style",
@@ -291,7 +291,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/app.py",
     "line": 1566,
     "severity": "info",
     "category": "style",
@@ -306,7 +306,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/blueprints.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -321,7 +321,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/blueprints.py",
     "line": 19,
     "severity": "info",
     "category": "style",
@@ -336,7 +336,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 1023,
     "severity": "critical",
     "category": "security",
@@ -352,7 +352,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 331,
     "severity": "warning",
     "category": "bug",
@@ -367,7 +367,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 338,
     "severity": "warning",
     "category": "bug",
@@ -382,7 +382,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 371,
     "severity": "warning",
     "category": "bug",
@@ -397,7 +397,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 757,
     "severity": "warning",
     "category": "bug",
@@ -412,7 +412,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 804,
     "severity": "warning",
     "category": "bug",
@@ -424,7 +424,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 810,
     "severity": "warning",
     "category": "dead_code",
@@ -439,7 +439,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 975,
     "severity": "warning",
     "category": "bug",
@@ -451,7 +451,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 978,
     "severity": "warning",
     "category": "bug",
@@ -463,7 +463,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 1022,
     "severity": "warning",
     "category": "security",
@@ -479,7 +479,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 1036,
     "severity": "warning",
     "category": "bug",
@@ -494,7 +494,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 1036,
     "severity": "warning",
     "category": "bug",
@@ -509,7 +509,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 1098,
     "severity": "warning",
     "category": "bug",
@@ -524,7 +524,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 1098,
     "severity": "warning",
     "category": "bug",
@@ -539,7 +539,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 41,
     "severity": "info",
     "category": "style",
@@ -554,7 +554,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 120,
     "severity": "info",
     "category": "style",
@@ -569,7 +569,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 224,
     "severity": "info",
     "category": "security",
@@ -585,7 +585,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 422,
     "severity": "info",
     "category": "style",
@@ -597,7 +597,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 698,
     "severity": "info",
     "category": "style",
@@ -612,7 +612,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 754,
     "severity": "info",
     "category": "security",
@@ -627,7 +627,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 935,
     "severity": "info",
     "category": "style",
@@ -642,7 +642,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 935,
     "severity": "info",
     "category": "style",
@@ -657,7 +657,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\cli.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/cli.py",
     "line": 1021,
     "severity": "info",
     "category": "security",
@@ -672,7 +672,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 209,
     "severity": "critical",
     "category": "security",
@@ -688,7 +688,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 163,
     "severity": "warning",
     "category": "bug",
@@ -703,7 +703,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 163,
     "severity": "warning",
     "category": "bug",
@@ -718,7 +718,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 250,
     "severity": "warning",
     "category": "bug",
@@ -730,7 +730,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 23,
     "severity": "info",
     "category": "style",
@@ -742,7 +742,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 30,
     "severity": "info",
     "category": "style",
@@ -754,7 +754,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 33,
     "severity": "info",
     "category": "style",
@@ -766,7 +766,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 35,
     "severity": "info",
     "category": "style",
@@ -778,7 +778,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 46,
     "severity": "info",
     "category": "style",
@@ -790,7 +790,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\config.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/config.py",
     "line": 126,
     "severity": "info",
     "category": "style",
@@ -805,7 +805,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 141,
     "severity": "warning",
     "category": "bug",
@@ -820,7 +820,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 147,
     "severity": "warning",
     "category": "bug",
@@ -835,7 +835,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 315,
     "severity": "warning",
     "category": "bug",
@@ -850,7 +850,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 322,
     "severity": "warning",
     "category": "bug",
@@ -865,7 +865,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 326,
     "severity": "warning",
     "category": "bug",
@@ -880,7 +880,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 331,
     "severity": "warning",
     "category": "bug",
@@ -895,7 +895,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 465,
     "severity": "warning",
     "category": "bug",
@@ -910,7 +910,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 154,
     "severity": "info",
     "category": "style",
@@ -925,7 +925,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\ctx.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/ctx.py",
     "line": 446,
     "severity": "info",
     "category": "style",
@@ -940,7 +940,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\debughelpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/debughelpers.py",
     "line": 141,
     "severity": "warning",
     "category": "bug",
@@ -955,7 +955,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\debughelpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/debughelpers.py",
     "line": 59,
     "severity": "info",
     "category": "bug",
@@ -967,7 +967,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\debughelpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/debughelpers.py",
     "line": 124,
     "severity": "info",
     "category": "style",
@@ -982,7 +982,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/globals.py",
     "line": 44,
     "severity": "warning",
     "category": "dead_code",
@@ -997,7 +997,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/globals.py",
     "line": 47,
     "severity": "warning",
     "category": "dead_code",
@@ -1012,7 +1012,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/globals.py",
     "line": 57,
     "severity": "warning",
     "category": "dead_code",
@@ -1027,7 +1027,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\globals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/globals.py",
     "line": 60,
     "severity": "warning",
     "category": "dead_code",
@@ -1042,7 +1042,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 599,
     "severity": "warning",
     "category": "bug",
@@ -1057,7 +1057,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 611,
     "severity": "warning",
     "category": "bug",
@@ -1072,7 +1072,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 63,
     "severity": "info",
     "category": "style",
@@ -1087,7 +1087,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 121,
     "severity": "info",
     "category": "bug",
@@ -1099,7 +1099,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 200,
     "severity": "info",
     "category": "style",
@@ -1114,7 +1114,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 417,
     "severity": "info",
     "category": "style",
@@ -1129,7 +1129,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 417,
     "severity": "info",
     "category": "style",
@@ -1144,7 +1144,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\helpers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/helpers.py",
     "line": 587,
     "severity": "info",
     "category": "style",
@@ -1159,7 +1159,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sessions.py",
     "line": 281,
     "severity": "warning",
     "category": "security",
@@ -1175,7 +1175,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sessions.py",
     "line": 28,
     "severity": "info",
     "category": "style",
@@ -1187,7 +1187,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sessions.py",
     "line": 33,
     "severity": "info",
     "category": "style",
@@ -1199,7 +1199,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sessions.py",
     "line": 77,
     "severity": "info",
     "category": "style",
@@ -1211,7 +1211,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sessions.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sessions.py",
     "line": 78,
     "severity": "info",
     "category": "bug",
@@ -1223,7 +1223,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 8,
     "severity": "warning",
     "category": "dead_code",
@@ -1238,7 +1238,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 9,
     "severity": "warning",
     "category": "dead_code",
@@ -1253,7 +1253,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 10,
     "severity": "warning",
     "category": "dead_code",
@@ -1268,7 +1268,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -1283,7 +1283,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 12,
     "severity": "warning",
     "category": "dead_code",
@@ -1298,7 +1298,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 13,
     "severity": "warning",
     "category": "dead_code",
@@ -1313,7 +1313,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 14,
     "severity": "warning",
     "category": "dead_code",
@@ -1328,7 +1328,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 15,
     "severity": "warning",
     "category": "dead_code",
@@ -1343,7 +1343,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 16,
     "severity": "warning",
     "category": "dead_code",
@@ -1358,7 +1358,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\signals.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/signals.py",
     "line": 17,
     "severity": "warning",
     "category": "dead_code",
@@ -1373,7 +1373,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/templating.py",
     "line": 151,
     "severity": "critical",
     "category": "security",
@@ -1389,7 +1389,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/templating.py",
     "line": 159,
     "severity": "critical",
     "category": "security",
@@ -1405,7 +1405,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/templating.py",
     "line": 211,
     "severity": "critical",
     "category": "security",
@@ -1421,7 +1421,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\templating.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/templating.py",
     "line": 94,
     "severity": "warning",
     "category": "bug",
@@ -1433,7 +1433,7 @@
     "cwe": "CWE-390"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/testing.py",
     "line": 235,
     "severity": "warning",
     "category": "bug",
@@ -1448,7 +1448,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/testing.py",
     "line": 49,
     "severity": "info",
     "category": "style",
@@ -1460,7 +1460,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/testing.py",
     "line": 59,
     "severity": "info",
     "category": "bug",
@@ -1472,7 +1472,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/testing.py",
     "line": 88,
     "severity": "info",
     "category": "style",
@@ -1484,7 +1484,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\testing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/testing.py",
     "line": 101,
     "severity": "info",
     "category": "style",
@@ -1496,7 +1496,7 @@
     "cwe": "CWE-1108"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 49,
     "severity": "warning",
     "category": "dead_code",
@@ -1511,7 +1511,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 50,
     "severity": "warning",
     "category": "dead_code",
@@ -1526,7 +1526,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 54,
     "severity": "warning",
     "category": "dead_code",
@@ -1541,7 +1541,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 55,
     "severity": "warning",
     "category": "dead_code",
@@ -1556,7 +1556,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 59,
     "severity": "warning",
     "category": "dead_code",
@@ -1571,7 +1571,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 60,
     "severity": "warning",
     "category": "dead_code",
@@ -1586,7 +1586,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 64,
     "severity": "warning",
     "category": "dead_code",
@@ -1601,7 +1601,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 67,
     "severity": "warning",
     "category": "dead_code",
@@ -1616,7 +1616,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 68,
     "severity": "warning",
     "category": "dead_code",
@@ -1631,7 +1631,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 69,
     "severity": "warning",
     "category": "dead_code",
@@ -1646,7 +1646,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 70,
     "severity": "warning",
     "category": "dead_code",
@@ -1661,7 +1661,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 71,
     "severity": "warning",
     "category": "dead_code",
@@ -1676,7 +1676,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 79,
     "severity": "warning",
     "category": "dead_code",
@@ -1691,7 +1691,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\typing.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/typing.py",
     "line": 84,
     "severity": "warning",
     "category": "dead_code",
@@ -1706,7 +1706,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/views.py",
     "line": 9,
     "severity": "warning",
     "category": "dead_code",
@@ -1721,7 +1721,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/views.py",
     "line": 133,
     "severity": "warning",
     "category": "bug",
@@ -1736,7 +1736,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/views.py",
     "line": 134,
     "severity": "warning",
     "category": "bug",
@@ -1751,7 +1751,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/views.py",
     "line": 78,
     "severity": "info",
     "category": "style",
@@ -1763,7 +1763,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/views.py",
     "line": 86,
     "severity": "info",
     "category": "style",
@@ -1775,7 +1775,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/views.py",
     "line": 107,
     "severity": "info",
     "category": "bug",
@@ -1787,7 +1787,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\views.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/views.py",
     "line": 190,
     "severity": "info",
     "category": "bug",
@@ -1799,7 +1799,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 80,
     "severity": "warning",
     "category": "bug",
@@ -1814,7 +1814,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 90,
     "severity": "warning",
     "category": "bug",
@@ -1829,7 +1829,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 107,
     "severity": "warning",
     "category": "bug",
@@ -1844,7 +1844,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 117,
     "severity": "warning",
     "category": "bug",
@@ -1859,7 +1859,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 134,
     "severity": "warning",
     "category": "bug",
@@ -1874,7 +1874,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 144,
     "severity": "warning",
     "category": "bug",
@@ -1889,7 +1889,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 156,
     "severity": "warning",
     "category": "bug",
@@ -1904,7 +1904,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 60,
     "severity": "info",
     "category": "style",
@@ -1916,7 +1916,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 89,
     "severity": "info",
     "category": "style",
@@ -1928,7 +1928,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 93,
     "severity": "info",
     "category": "style",
@@ -1940,7 +1940,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 116,
     "severity": "info",
     "category": "style",
@@ -1952,7 +1952,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 120,
     "severity": "info",
     "category": "style",
@@ -1964,7 +1964,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 143,
     "severity": "info",
     "category": "style",
@@ -1976,7 +1976,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 147,
     "severity": "info",
     "category": "style",
@@ -1988,7 +1988,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 162,
     "severity": "info",
     "category": "style",
@@ -2000,7 +2000,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 181,
     "severity": "info",
     "category": "style",
@@ -2012,7 +2012,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 197,
     "severity": "info",
     "category": "style",
@@ -2024,7 +2024,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\wrappers.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/wrappers.py",
     "line": 212,
     "severity": "info",
     "category": "style",
@@ -2036,7 +2036,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 2,
     "severity": "warning",
     "category": "dead_code",
@@ -2051,7 +2051,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 3,
     "severity": "warning",
     "category": "dead_code",
@@ -2066,7 +2066,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 4,
     "severity": "warning",
     "category": "dead_code",
@@ -2081,7 +2081,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 5,
     "severity": "warning",
     "category": "dead_code",
@@ -2096,7 +2096,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 6,
     "severity": "warning",
     "category": "dead_code",
@@ -2111,7 +2111,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 7,
     "severity": "warning",
     "category": "dead_code",
@@ -2126,7 +2126,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 8,
     "severity": "warning",
     "category": "dead_code",
@@ -2141,7 +2141,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 9,
     "severity": "warning",
     "category": "dead_code",
@@ -2156,7 +2156,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 10,
     "severity": "warning",
     "category": "dead_code",
@@ -2171,7 +2171,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 11,
     "severity": "warning",
     "category": "dead_code",
@@ -2186,7 +2186,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 12,
     "severity": "warning",
     "category": "dead_code",
@@ -2201,7 +2201,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 13,
     "severity": "warning",
     "category": "dead_code",
@@ -2216,7 +2216,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 14,
     "severity": "warning",
     "category": "dead_code",
@@ -2231,7 +2231,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 15,
     "severity": "warning",
     "category": "dead_code",
@@ -2246,7 +2246,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 16,
     "severity": "warning",
     "category": "dead_code",
@@ -2261,7 +2261,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 17,
     "severity": "warning",
     "category": "dead_code",
@@ -2276,7 +2276,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 18,
     "severity": "warning",
     "category": "dead_code",
@@ -2291,7 +2291,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 19,
     "severity": "warning",
     "category": "dead_code",
@@ -2306,7 +2306,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 20,
     "severity": "warning",
     "category": "dead_code",
@@ -2321,7 +2321,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 21,
     "severity": "warning",
     "category": "dead_code",
@@ -2336,7 +2336,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 22,
     "severity": "warning",
     "category": "dead_code",
@@ -2351,7 +2351,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 23,
     "severity": "warning",
     "category": "dead_code",
@@ -2366,7 +2366,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 24,
     "severity": "warning",
     "category": "dead_code",
@@ -2381,7 +2381,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 25,
     "severity": "warning",
     "category": "dead_code",
@@ -2396,7 +2396,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 26,
     "severity": "warning",
     "category": "dead_code",
@@ -2411,7 +2411,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 27,
     "severity": "warning",
     "category": "dead_code",
@@ -2426,7 +2426,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 28,
     "severity": "warning",
     "category": "dead_code",
@@ -2441,7 +2441,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 29,
     "severity": "warning",
     "category": "dead_code",
@@ -2456,7 +2456,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 30,
     "severity": "warning",
     "category": "dead_code",
@@ -2471,7 +2471,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 31,
     "severity": "warning",
     "category": "dead_code",
@@ -2486,7 +2486,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 32,
     "severity": "warning",
     "category": "dead_code",
@@ -2501,7 +2501,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 33,
     "severity": "warning",
     "category": "dead_code",
@@ -2516,7 +2516,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 34,
     "severity": "warning",
     "category": "dead_code",
@@ -2531,7 +2531,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 35,
     "severity": "warning",
     "category": "dead_code",
@@ -2546,7 +2546,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 36,
     "severity": "warning",
     "category": "dead_code",
@@ -2561,7 +2561,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 37,
     "severity": "warning",
     "category": "dead_code",
@@ -2576,7 +2576,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 38,
     "severity": "warning",
     "category": "dead_code",
@@ -2591,7 +2591,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\__init__.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/__init__.py",
     "line": 39,
     "severity": "warning",
     "category": "dead_code",
@@ -2606,7 +2606,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/json/provider.py",
     "line": 208,
     "severity": "warning",
     "category": "bug",
@@ -2621,7 +2621,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/json/provider.py",
     "line": 166,
     "severity": "info",
     "category": "style",
@@ -2633,7 +2633,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/json/provider.py",
     "line": 181,
     "severity": "info",
     "category": "style",
@@ -2645,7 +2645,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\provider.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/json/provider.py",
     "line": 189,
     "severity": "info",
     "category": "style",
@@ -2657,7 +2657,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\tag.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/json/tag.py",
     "line": 310,
     "severity": "warning",
     "category": "bug",
@@ -2669,7 +2669,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\tag.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/json/tag.py",
     "line": 111,
     "severity": "info",
     "category": "bug",
@@ -2681,7 +2681,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\json\\tag.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/json/tag.py",
     "line": 115,
     "severity": "info",
     "category": "bug",
@@ -2693,7 +2693,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 997,
     "severity": "warning",
     "category": "bug",
@@ -2705,7 +2705,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 59,
     "severity": "info",
     "category": "style",
@@ -2720,7 +2720,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 279,
     "severity": "info",
     "category": "style",
@@ -2735,7 +2735,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 279,
     "severity": "info",
     "category": "style",
@@ -2747,7 +2747,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 279,
     "severity": "info",
     "category": "style",
@@ -2762,7 +2762,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 410,
     "severity": "info",
     "category": "style",
@@ -2774,7 +2774,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 423,
     "severity": "info",
     "category": "style",
@@ -2786,7 +2786,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 440,
     "severity": "info",
     "category": "style",
@@ -2798,7 +2798,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 467,
     "severity": "info",
     "category": "style",
@@ -2810,7 +2810,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 476,
     "severity": "info",
     "category": "style",
@@ -2822,7 +2822,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 479,
     "severity": "info",
     "category": "style",
@@ -2834,7 +2834,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 495,
     "severity": "info",
     "category": "style",
@@ -2846,7 +2846,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 507,
     "severity": "info",
     "category": "style",
@@ -2858,7 +2858,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 520,
     "severity": "info",
     "category": "style",
@@ -2870,7 +2870,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 533,
     "severity": "info",
     "category": "style",
@@ -2882,7 +2882,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 547,
     "severity": "info",
     "category": "style",
@@ -2894,7 +2894,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 560,
     "severity": "info",
     "category": "style",
@@ -2906,7 +2906,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 567,
     "severity": "info",
     "category": "style",
@@ -2918,7 +2918,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 594,
     "severity": "info",
     "category": "style",
@@ -2930,7 +2930,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 602,
     "severity": "info",
     "category": "style",
@@ -2942,7 +2942,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 602,
     "severity": "info",
     "category": "style",
@@ -2957,7 +2957,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 661,
     "severity": "info",
     "category": "style",
@@ -2969,7 +2969,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 663,
     "severity": "info",
     "category": "style",
@@ -2981,7 +2981,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 667,
     "severity": "info",
     "category": "style",
@@ -2993,7 +2993,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 689,
     "severity": "info",
     "category": "style",
@@ -3005,7 +3005,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 696,
     "severity": "info",
     "category": "style",
@@ -3017,7 +3017,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 711,
     "severity": "info",
     "category": "style",
@@ -3029,7 +3029,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 713,
     "severity": "info",
     "category": "style",
@@ -3041,7 +3041,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 717,
     "severity": "info",
     "category": "style",
@@ -3053,7 +3053,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 746,
     "severity": "info",
     "category": "style",
@@ -3065,7 +3065,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 753,
     "severity": "info",
     "category": "style",
@@ -3077,7 +3077,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 770,
     "severity": "info",
     "category": "style",
@@ -3089,7 +3089,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 772,
     "severity": "info",
     "category": "style",
@@ -3101,7 +3101,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 776,
     "severity": "info",
     "category": "style",
@@ -3113,7 +3113,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 800,
     "severity": "info",
     "category": "style",
@@ -3125,7 +3125,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 807,
     "severity": "info",
     "category": "style",
@@ -3137,7 +3137,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 824,
     "severity": "info",
     "category": "style",
@@ -3149,7 +3149,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 855,
     "severity": "info",
     "category": "style",
@@ -3161,7 +3161,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 865,
     "severity": "info",
     "category": "style",
@@ -3173,7 +3173,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 890,
     "severity": "info",
     "category": "style",
@@ -3185,7 +3185,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 936,
     "severity": "info",
     "category": "style",
@@ -3197,7 +3197,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 957,
     "severity": "info",
     "category": "style",
@@ -3209,7 +3209,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\app.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/app.py",
     "line": 978,
     "severity": "info",
     "category": "style",
@@ -3221,7 +3221,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 66,
     "severity": "warning",
     "category": "bug",
@@ -3236,7 +3236,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 70,
     "severity": "warning",
     "category": "bug",
@@ -3251,7 +3251,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 74,
     "severity": "warning",
     "category": "bug",
@@ -3266,7 +3266,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 77,
     "severity": "warning",
     "category": "bug",
@@ -3281,7 +3281,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 99,
     "severity": "warning",
     "category": "bug",
@@ -3293,7 +3293,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 195,
     "severity": "warning",
     "category": "bug",
@@ -3305,7 +3305,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 369,
     "severity": "warning",
     "category": "bug",
@@ -3320,7 +3320,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 119,
     "severity": "info",
     "category": "style",
@@ -3335,7 +3335,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 174,
     "severity": "info",
     "category": "style",
@@ -3350,7 +3350,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 174,
     "severity": "info",
     "category": "style",
@@ -3362,7 +3362,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 213,
     "severity": "info",
     "category": "style",
@@ -3374,7 +3374,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 224,
     "severity": "info",
     "category": "style",
@@ -3386,7 +3386,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 233,
     "severity": "info",
     "category": "style",
@@ -3398,7 +3398,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 246,
     "severity": "info",
     "category": "style",
@@ -3410,7 +3410,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 256,
     "severity": "info",
     "category": "style",
@@ -3422,7 +3422,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 273,
     "severity": "info",
     "category": "style",
@@ -3437,7 +3437,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 273,
     "severity": "info",
     "category": "style",
@@ -3449,7 +3449,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 273,
     "severity": "info",
     "category": "style",
@@ -3464,7 +3464,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 313,
     "severity": "info",
     "category": "style",
@@ -3476,7 +3476,7 @@
     "cwe": "CWE-1078"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 379,
     "severity": "info",
     "category": "style",
@@ -3488,7 +3488,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 380,
     "severity": "info",
     "category": "style",
@@ -3500,7 +3500,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 385,
     "severity": "info",
     "category": "bug",
@@ -3512,7 +3512,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 413,
     "severity": "info",
     "category": "style",
@@ -3524,7 +3524,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 444,
     "severity": "info",
     "category": "style",
@@ -3536,7 +3536,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 446,
     "severity": "info",
     "category": "style",
@@ -3548,7 +3548,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 450,
     "severity": "info",
     "category": "style",
@@ -3560,7 +3560,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 469,
     "severity": "info",
     "category": "style",
@@ -3572,7 +3572,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 476,
     "severity": "info",
     "category": "style",
@@ -3584,7 +3584,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 492,
     "severity": "info",
     "category": "style",
@@ -3596,7 +3596,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 498,
     "severity": "info",
     "category": "style",
@@ -3608,7 +3608,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 500,
     "severity": "info",
     "category": "style",
@@ -3620,7 +3620,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 504,
     "severity": "info",
     "category": "style",
@@ -3632,7 +3632,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 525,
     "severity": "info",
     "category": "style",
@@ -3644,7 +3644,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 532,
     "severity": "info",
     "category": "style",
@@ -3656,7 +3656,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 550,
     "severity": "info",
     "category": "style",
@@ -3668,7 +3668,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 556,
     "severity": "info",
     "category": "style",
@@ -3680,7 +3680,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 558,
     "severity": "info",
     "category": "style",
@@ -3692,7 +3692,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 562,
     "severity": "info",
     "category": "style",
@@ -3704,7 +3704,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 583,
     "severity": "info",
     "category": "style",
@@ -3716,7 +3716,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 590,
     "severity": "info",
     "category": "style",
@@ -3728,7 +3728,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 608,
     "severity": "info",
     "category": "style",
@@ -3740,7 +3740,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 614,
     "severity": "info",
     "category": "style",
@@ -3752,7 +3752,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 624,
     "severity": "info",
     "category": "style",
@@ -3764,7 +3764,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 634,
     "severity": "info",
     "category": "style",
@@ -3776,7 +3776,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 644,
     "severity": "info",
     "category": "style",
@@ -3788,7 +3788,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 656,
     "severity": "info",
     "category": "style",
@@ -3800,7 +3800,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 673,
     "severity": "info",
     "category": "style",
@@ -3812,7 +3812,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\blueprints.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/blueprints.py",
     "line": 685,
     "severity": "info",
     "category": "style",
@@ -3824,7 +3824,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 228,
     "severity": "warning",
     "category": "bug",
@@ -3839,7 +3839,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 235,
     "severity": "warning",
     "category": "bug",
@@ -3851,7 +3851,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 238,
     "severity": "warning",
     "category": "bug",
@@ -3866,7 +3866,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 255,
     "severity": "warning",
     "category": "bug",
@@ -3881,7 +3881,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 266,
     "severity": "warning",
     "category": "bug",
@@ -3893,7 +3893,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 269,
     "severity": "warning",
     "category": "bug",
@@ -3908,7 +3908,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 52,
     "severity": "info",
     "category": "style",
@@ -3923,7 +3923,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 75,
     "severity": "info",
     "category": "style",
@@ -3938,7 +3938,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 360,
     "severity": "info",
     "category": "style",
@@ -3950,7 +3950,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 368,
     "severity": "info",
     "category": "style",
@@ -3965,7 +3965,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_flask\\src\\flask\\sansio\\scaffold.py",
+    "file": "/tmp/benchmark/bench_flask/src/flask/sansio/scaffold.py",
     "line": 705,
     "severity": "info",
     "category": "bug",

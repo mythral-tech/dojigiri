@@ -36,6 +36,17 @@ Dojigiri reads API keys from environment variables (`ANTHROPIC_API_KEY`, `OPENAI
 
 When running as an MCP server, Dojigiri restricts file access to the current working directory by default. The server does not transmit data externally unless LLM-powered tools are explicitly invoked.
 
+## Commercial Customers
+
+For commercial license holders, the same data handling applies:
+
+- **Static scan mode:** No customer code or data leaves the customer's environment. Dojigiri processes everything locally.
+- **Deep scan mode:** Code is sent to the configured LLM provider only with explicit opt-in. The customer's API key is used directly — Dojigiri does not proxy, store, or have access to the transmitted code.
+- **No telemetry.** Dojigiri does not phone home, collect usage metrics, or transmit any data to Dojigiri's maintainers. There is no license server.
+- **Scan results** remain on the customer's infrastructure. Dojigiri has no access to customer findings, reports, or scan history.
+
+For enterprise data processing agreements, contact licensing@dojigiri.dev.
+
 ## Privacy flag
 
 Run `doji privacy` or `doji scan --help` to see this information from the CLI.

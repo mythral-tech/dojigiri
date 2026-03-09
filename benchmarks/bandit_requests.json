@@ -3,7 +3,7 @@
     "code": "59     urllib3_version = urllib3_version.split(\".\")\n60     assert urllib3_version != [\"dev\"]  # Verify urllib3 isn't installed from git.\n61 \n",
     "col_offset": 4,
     "end_col_offset": 37,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 703,
@@ -23,7 +23,7 @@
     "code": "69     # urllib3 >= 1.21.1\n70     assert major >= 1\n71     if major == 1:\n",
     "col_offset": 4,
     "end_col_offset": 21,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 703,
@@ -43,7 +43,7 @@
     "code": "71     if major == 1:\n72         assert minor >= 21\n73 \n",
     "col_offset": 8,
     "end_col_offset": 26,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 703,
@@ -63,7 +63,7 @@
     "code": "78         # chardet_version >= 3.0.2, < 8.0.0\n79         assert (3, 0, 2) <= (major, minor, patch) < (8, 0, 0)\n80     elif charset_normalizer_version:\n",
     "col_offset": 8,
     "end_col_offset": 61,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 703,
@@ -83,7 +83,7 @@
     "code": "83         # charset_normalizer >= 2.0.0 < 4.0.0\n84         assert (2, 0, 0) <= (major, minor, patch) < (4, 0, 0)\n85     else:\n",
     "col_offset": 8,
     "end_col_offset": 61,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 703,
@@ -103,7 +103,7 @@
     "code": "45     \"\"\"\n46     assert isinstance(u_string, str)\n47     try:\n",
     "col_offset": 4,
     "end_col_offset": 36,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/_internal_utils.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 703,
@@ -123,7 +123,7 @@
     "code": "147                     x = x.encode(\"utf-8\")\n148                 return hashlib.md5(x).hexdigest()\n149 \n",
     "col_offset": 23,
     "end_col_offset": 37,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 327,
@@ -143,7 +143,7 @@
     "code": "155                     x = x.encode(\"utf-8\")\n156                 return hashlib.sha1(x).hexdigest()\n157 \n",
     "col_offset": 23,
     "end_col_offset": 38,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 327,
@@ -163,7 +163,7 @@
     "code": "204 \n205         cnonce = hashlib.sha1(s).hexdigest()[:16]\n206         if _algorithm == \"MD5-SESS\":\n",
     "col_offset": 17,
     "end_col_offset": 32,
-    "filename": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "filename": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "issue_confidence": "HIGH",
     "issue_cwe": {
       "id": 327,

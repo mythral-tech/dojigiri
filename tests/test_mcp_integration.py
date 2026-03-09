@@ -12,6 +12,16 @@ from pathlib import Path
 from dojigiri.mcp_server import doji_scan, doji_scan_file, doji_fix, doji_explain, doji_analyze_project
 
 
+@pytest.fixture(autouse=True)
+def allow_tmp_path(tmp_path, monkeypatch):
+    """Allow MCP server to access pytest temp directories."""
+    from pathlib import Path
+    monkeypatch.setattr(
+        "dojigiri.mcp_server._allowed_roots",
+        [Path.cwd().resolve(), tmp_path.resolve()]
+    )
+
+
 # ─── Fixtures ─────────────────────────────────────────────────────────
 
 BUGGY_PYTHON = '''\
@@ -96,8 +106,8 @@ class TestDojiScan:
         # Clean file should have no critical issues
         assert "0 critical" in result
 
-    def test_scan_nonexistent_path(self):
-        result = doji_scan("/nonexistent/path/to/nowhere")
+    def test_scan_nonexistent_path(self, tmp_path):
+        result = doji_scan(str(tmp_path / "nonexistent" / "path"))
         assert "Error:" in result
         assert "does not exist" in result
 
@@ -158,8 +168,8 @@ class TestDojiScanFile:
         assert "File:" in result
         assert "python" in result
 
-    def test_scan_file_nonexistent(self):
-        result = doji_scan_file("/nonexistent/file.py")
+    def test_scan_file_nonexistent(self, tmp_path):
+        result = doji_scan_file(str(tmp_path / "nonexistent_file.py"))
         assert "Error:" in result
 
     def test_scan_file_unsupported_type(self, tmp_path):
@@ -191,8 +201,8 @@ class TestDojiFix:
             # Verify diff-style output
             assert "-" in result or "+" in result
 
-    def test_fix_nonexistent_path(self):
-        result = doji_fix("/nonexistent/path")
+    def test_fix_nonexistent_path(self, tmp_path):
+        result = doji_fix(str(tmp_path / "nonexistent_path"))
         assert "Error:" in result
 
     def test_fix_unsupported_file(self, tmp_path):
@@ -245,8 +255,8 @@ class TestDojiExplain:
         # Should identify the process function
         assert "process" in result
 
-    def test_explain_nonexistent(self):
-        result = doji_explain("/nonexistent/file.py")
+    def test_explain_nonexistent(self, tmp_path):
+        result = doji_explain(str(tmp_path / "nonexistent_file.py"))
         assert "Error:" in result
 
     def test_explain_js(self, buggy_js_file):
@@ -268,8 +278,8 @@ class TestDojiAnalyzeProject:
         assert "Error:" in result
         assert "not a directory" in result
 
-    def test_analyze_project_nonexistent(self):
-        result = doji_analyze_project("/nonexistent/dir")
+    def test_analyze_project_nonexistent(self, tmp_path):
+        result = doji_analyze_project(str(tmp_path / "nonexistent_dir"))
         assert "Error:" in result
 
     def test_analyze_project_empty_dir(self, tmp_path):

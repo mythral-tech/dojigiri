@@ -1,6 +1,6 @@
 # Dojigiri — Terms of Service
 
-**Effective date:** March 7, 2026
+**Effective date:** March 9, 2026
 
 These Terms of Service ("Terms") govern your use of Dojigiri ("the Software"), a static analysis and AI-powered code audit tool maintained at [github.com/Inklling/dojigiri](https://github.com/Inklling/dojigiri).
 
@@ -12,9 +12,11 @@ By downloading, installing, or using Dojigiri in any capacity — including as a
 
 ## 2. License
 
-Dojigiri is distributed under the MIT License. See the `LICENSE` file in the project repository for full license text. These Terms supplement but do not replace the MIT License.
+Dojigiri is distributed under the Business Source License 1.1 (BSL 1.1). See the `LICENSE` file in the project repository for full license text. These Terms supplement but do not replace the BSL 1.1 License.
 
-Commercial licensing options may be offered in the future. Any such licensing will be governed by separate agreements.
+Use of Dojigiri is free for development, testing, personal projects, education, evaluation, and CI/CD on open-source projects. Production use in commercial products or services requires a commercial license. See [LICENSING.md](LICENSING.md) for details.
+
+On 2030-03-09, the current version automatically converts to the Apache License 2.0.
 
 ## 3. Disclaimer of Warranties
 

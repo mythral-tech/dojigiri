@@ -18,7 +18,7 @@ Critical findings: 107 -> 2 (both are intentional exec/eval in Flask config load
 ### Per-Rule Impact
 
 **Fully eliminated (100% reduction):**
-- `var-usage`: 1699 -> 0 (removed from defaults, opt-in via .wiz.toml)
+- `var-usage`: 1699 -> 0 (removed from defaults, opt-in via .doji.toml)
 - `path-traversal`: 103 -> 0 (require() excluded)
 - `console-log`: 37 -> 0 (skipped in test/example dirs)
 - `resource-leak`: 24 -> 0 (FastAPI; word-boundary matching)

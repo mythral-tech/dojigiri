@@ -1,6 +1,6 @@
 [
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 10,
     "severity": "warning",
     "category": "dead_code",
@@ -15,7 +15,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 72,
     "severity": "warning",
     "category": "dead_code",
@@ -30,7 +30,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 73,
     "severity": "warning",
     "category": "dead_code",
@@ -45,7 +45,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 75,
     "severity": "warning",
     "category": "dead_code",
@@ -60,7 +60,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 646,
     "severity": "warning",
     "category": "security",
@@ -76,7 +76,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 94,
     "severity": "info",
     "category": "security",
@@ -91,7 +91,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 282,
     "severity": "info",
     "category": "style",
@@ -106,7 +106,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 304,
     "severity": "info",
     "category": "security",
@@ -121,7 +121,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 306,
     "severity": "info",
     "category": "style",
@@ -133,7 +133,7 @@
     "cwe": "CWE-1078"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 312,
     "severity": "info",
     "category": "security",
@@ -148,7 +148,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 330,
     "severity": "info",
     "category": "style",
@@ -160,7 +160,7 @@
     "cwe": "CWE-1078"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 592,
     "severity": "info",
     "category": "style",
@@ -175,7 +175,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 592,
     "severity": "info",
     "category": "style",
@@ -190,7 +190,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 638,
     "severity": "info",
     "category": "style",
@@ -202,7 +202,7 @@
     "cwe": "CWE-1078"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\adapters.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/adapters.py",
     "line": 665,
     "severity": "info",
     "category": "style",
@@ -214,7 +214,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 21,
     "severity": "warning",
     "category": "dead_code",
@@ -229,7 +229,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 22,
     "severity": "warning",
     "category": "dead_code",
@@ -244,7 +244,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 141,
     "severity": "warning",
     "category": "bug",
@@ -259,7 +259,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 148,
     "severity": "warning",
     "category": "security",
@@ -275,7 +275,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 156,
     "severity": "warning",
     "category": "security",
@@ -291,7 +291,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 176,
     "severity": "warning",
     "category": "bug",
@@ -303,7 +303,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 205,
     "severity": "warning",
     "category": "security",
@@ -319,7 +319,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 211,
     "severity": "warning",
     "category": "bug",
@@ -334,7 +334,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 126,
     "severity": "info",
     "category": "style",
@@ -349,7 +349,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 126,
     "severity": "info",
     "category": "style",
@@ -364,7 +364,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 145,
     "severity": "info",
     "category": "style",
@@ -376,7 +376,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 153,
     "severity": "info",
     "category": "style",
@@ -388,7 +388,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 161,
     "severity": "info",
     "category": "style",
@@ -400,7 +400,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 169,
     "severity": "info",
     "category": "style",
@@ -412,7 +412,7 @@
     "cwe": "CWE-1075"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 181,
     "severity": "info",
     "category": "style",
@@ -424,7 +424,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 215,
     "severity": "info",
     "category": "style",
@@ -436,7 +436,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\auth.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/auth.py",
     "line": 220,
     "severity": "info",
     "category": "style",
@@ -448,7 +448,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 20,
     "severity": "warning",
     "category": "dead_code",
@@ -463,7 +463,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 23,
     "severity": "warning",
     "category": "dead_code",
@@ -478,7 +478,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 37,
     "severity": "warning",
     "category": "bug",
@@ -493,7 +493,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 37,
     "severity": "warning",
     "category": "bug",
@@ -508,7 +508,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 52,
     "severity": "warning",
     "category": "dead_code",
@@ -523,7 +523,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 55,
     "severity": "warning",
     "category": "dead_code",
@@ -538,7 +538,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 64,
     "severity": "warning",
     "category": "dead_code",
@@ -553,7 +553,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 69,
     "severity": "warning",
     "category": "dead_code",
@@ -568,7 +568,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 72,
     "severity": "warning",
     "category": "dead_code",
@@ -583,7 +583,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 73,
     "severity": "warning",
     "category": "dead_code",
@@ -598,7 +598,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 74,
     "severity": "warning",
     "category": "dead_code",
@@ -613,7 +613,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 75,
     "severity": "warning",
     "category": "dead_code",
@@ -628,7 +628,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 76,
     "severity": "warning",
     "category": "dead_code",
@@ -643,7 +643,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 81,
     "severity": "warning",
     "category": "dead_code",
@@ -658,7 +658,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 93,
     "severity": "warning",
     "category": "dead_code",
@@ -673,7 +673,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 101,
     "severity": "warning",
     "category": "dead_code",
@@ -688,7 +688,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 102,
     "severity": "warning",
     "category": "bug",
@@ -700,7 +700,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 103,
     "severity": "warning",
     "category": "bug",
@@ -712,7 +712,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 104,
     "severity": "warning",
     "category": "dead_code",
@@ -727,7 +727,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 105,
     "severity": "warning",
     "category": "dead_code",
@@ -742,7 +742,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 106,
     "severity": "warning",
     "category": "dead_code",
@@ -757,7 +757,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 36,
     "severity": "info",
     "category": "security",
@@ -773,7 +773,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\compat.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/compat.py",
     "line": 36,
     "severity": "info",
     "category": "bug",
@@ -785,7 +785,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\cookies.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/cookies.py",
     "line": 176,
     "severity": "info",
     "category": "style",
@@ -800,7 +800,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\help.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/help.py",
     "line": 66,
     "severity": "info",
     "category": "style",
@@ -815,7 +815,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\hooks.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/hooks.py",
     "line": 26,
     "severity": "warning",
     "category": "bug",
@@ -830,7 +830,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\hooks.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/hooks.py",
     "line": 20,
     "severity": "info",
     "category": "style",
@@ -842,7 +842,7 @@
     "cwe": "CWE-546"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 13,
     "severity": "warning",
     "category": "dead_code",
@@ -857,7 +857,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 81,
     "severity": "warning",
     "category": "dead_code",
@@ -872,7 +872,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 83,
     "severity": "warning",
     "category": "dead_code",
@@ -887,7 +887,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 200,
     "severity": "warning",
     "category": "bug",
@@ -899,7 +899,7 @@
     "cwe": "CWE-457"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 338,
     "severity": "warning",
     "category": "bug",
@@ -914,7 +914,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 340,
     "severity": "warning",
     "category": "bug",
@@ -929,7 +929,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 342,
     "severity": "warning",
     "category": "bug",
@@ -944,7 +944,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 345,
     "severity": "warning",
     "category": "bug",
@@ -959,7 +959,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 347,
     "severity": "warning",
     "category": "bug",
@@ -974,7 +974,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 351,
     "severity": "warning",
     "category": "bug",
@@ -989,7 +989,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 517,
     "severity": "warning",
     "category": "bug",
@@ -1004,7 +1004,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 539,
     "severity": "warning",
     "category": "bug",
@@ -1019,7 +1019,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 572,
     "severity": "warning",
     "category": "bug",
@@ -1034,7 +1034,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 663,
     "severity": "warning",
     "category": "bug",
@@ -1049,7 +1049,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 666,
     "severity": "warning",
     "category": "bug",
@@ -1064,7 +1064,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 676,
     "severity": "warning",
     "category": "bug",
@@ -1079,7 +1079,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 679,
     "severity": "warning",
     "category": "bug",
@@ -1094,7 +1094,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 682,
     "severity": "warning",
     "category": "bug",
@@ -1109,7 +1109,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 690,
     "severity": "warning",
     "category": "bug",
@@ -1124,7 +1124,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 705,
     "severity": "warning",
     "category": "bug",
@@ -1139,7 +1139,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 896,
     "severity": "warning",
     "category": "bug",
@@ -1154,7 +1154,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 902,
     "severity": "warning",
     "category": "bug",
@@ -1169,7 +1169,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 904,
     "severity": "warning",
     "category": "bug",
@@ -1184,7 +1184,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 909,
     "severity": "warning",
     "category": "bug",
@@ -1199,7 +1199,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 928,
     "severity": "warning",
     "category": "bug",
@@ -1214,7 +1214,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 968,
     "severity": "warning",
     "category": "bug",
@@ -1229,7 +1229,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 968,
     "severity": "warning",
     "category": "bug",
@@ -1244,7 +1244,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 139,
     "severity": "info",
     "category": "style",
@@ -1259,7 +1259,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 139,
     "severity": "info",
     "category": "style",
@@ -1274,7 +1274,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 260,
     "severity": "info",
     "category": "style",
@@ -1289,7 +1289,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 315,
     "severity": "info",
     "category": "style",
@@ -1304,7 +1304,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 353,
     "severity": "info",
     "category": "style",
@@ -1319,7 +1319,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 411,
     "severity": "info",
     "category": "style",
@@ -1334,7 +1334,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 411,
     "severity": "info",
     "category": "style",
@@ -1349,7 +1349,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 496,
     "severity": "info",
     "category": "style",
@@ -1364,7 +1364,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 496,
     "severity": "info",
     "category": "style",
@@ -1379,7 +1379,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 642,
     "severity": "info",
     "category": "style",
@@ -1394,7 +1394,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\models.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/models.py",
     "line": 801,
     "severity": "info",
     "category": "style",
@@ -1409,7 +1409,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 34,
     "severity": "warning",
     "category": "dead_code",
@@ -1424,7 +1424,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 42,
     "severity": "warning",
     "category": "dead_code",
@@ -1439,7 +1439,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 399,
     "severity": "warning",
     "category": "bug",
@@ -1454,7 +1454,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 431,
     "severity": "warning",
     "category": "bug",
@@ -1469,7 +1469,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 452,
     "severity": "warning",
     "category": "security",
@@ -1485,7 +1485,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 683,
     "severity": "warning",
     "category": "bug",
@@ -1500,7 +1500,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 745,
     "severity": "warning",
     "category": "bug",
@@ -1515,7 +1515,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 745,
     "severity": "warning",
     "category": "bug",
@@ -1530,7 +1530,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 779,
     "severity": "warning",
     "category": "bug",
@@ -1545,7 +1545,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 160,
     "severity": "info",
     "category": "style",
@@ -1560,7 +1560,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 160,
     "severity": "info",
     "category": "style",
@@ -1575,7 +1575,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 357,
     "severity": "info",
     "category": "style",
@@ -1590,7 +1590,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 391,
     "severity": "info",
     "category": "style",
@@ -1605,7 +1605,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 503,
     "severity": "info",
     "category": "style",
@@ -1620,7 +1620,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 503,
     "severity": "info",
     "category": "style",
@@ -1635,7 +1635,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\sessions.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/sessions.py",
     "line": 676,
     "severity": "info",
     "category": "style",
@@ -1650,7 +1650,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\status_codes.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/status_codes.py",
     "line": 116,
     "severity": "info",
     "category": "bug",
@@ -1662,7 +1662,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\status_codes.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/status_codes.py",
     "line": 120,
     "severity": "info",
     "category": "style",
@@ -1674,7 +1674,7 @@
     "cwe": "CWE-1108"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 28,
     "severity": "warning",
     "category": "dead_code",
@@ -1689,7 +1689,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 62,
     "severity": "warning",
     "category": "dead_code",
@@ -1704,7 +1704,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 64,
     "severity": "warning",
     "category": "dead_code",
@@ -1719,7 +1719,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 152,
     "severity": "warning",
     "category": "bug",
@@ -1734,7 +1734,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 152,
     "severity": "warning",
     "category": "bug",
@@ -1749,7 +1749,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 245,
     "severity": "warning",
     "category": "bug",
@@ -1764,7 +1764,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 245,
     "severity": "warning",
     "category": "bug",
@@ -1779,7 +1779,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 109,
     "severity": "info",
     "category": "security",
@@ -1794,7 +1794,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 134,
     "severity": "info",
     "category": "style",
@@ -1809,7 +1809,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 134,
     "severity": "info",
     "category": "style",
@@ -1824,7 +1824,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 221,
     "severity": "info",
     "category": "security",
@@ -1839,7 +1839,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 261,
     "severity": "info",
     "category": "security",
@@ -1854,7 +1854,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 268,
     "severity": "info",
     "category": "security",
@@ -1869,7 +1869,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 286,
     "severity": "info",
     "category": "security",
@@ -1884,7 +1884,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 753,
     "severity": "info",
     "category": "style",
@@ -1899,7 +1899,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 753,
     "severity": "info",
     "category": "style",
@@ -1914,7 +1914,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/utils.py",
     "line": 1047,
     "severity": "info",
     "category": "style",
@@ -1926,7 +1926,7 @@
     "cwe": "CWE-1078"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/_internal_utils.py",
     "line": 20,
     "severity": "warning",
     "category": "dead_code",
@@ -1941,7 +1941,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/_internal_utils.py",
     "line": 13,
     "severity": "info",
     "category": "security",
@@ -1956,7 +1956,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/_internal_utils.py",
     "line": 15,
     "severity": "info",
     "category": "security",
@@ -1971,7 +1971,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\_internal_utils.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/_internal_utils.py",
     "line": 46,
     "severity": "info",
     "category": "bug",
@@ -1983,7 +1983,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 81,
     "severity": "warning",
     "category": "bug",
@@ -1998,7 +1998,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 138,
     "severity": "warning",
     "category": "bug",
@@ -2013,7 +2013,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 138,
     "severity": "warning",
     "category": "bug",
@@ -2028,7 +2028,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 150,
     "severity": "warning",
     "category": "dead_code",
@@ -2043,7 +2043,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 163,
     "severity": "warning",
     "category": "dead_code",
@@ -2058,7 +2058,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 164,
     "severity": "warning",
     "category": "dead_code",
@@ -2073,7 +2073,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 176,
     "severity": "warning",
     "category": "dead_code",
@@ -2088,7 +2088,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 177,
     "severity": "warning",
     "category": "dead_code",
@@ -2103,7 +2103,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 178,
     "severity": "warning",
     "category": "dead_code",
@@ -2118,7 +2118,7 @@
     ]
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 58,
     "severity": "info",
     "category": "bug",
@@ -2130,7 +2130,7 @@
     "cwe": "CWE-710"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 60,
     "severity": "info",
     "category": "bug",
@@ -2142,7 +2142,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 70,
     "severity": "info",
     "category": "bug",
@@ -2154,7 +2154,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 72,
     "severity": "info",
     "category": "bug",
@@ -2166,7 +2166,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 79,
     "severity": "info",
     "category": "bug",
@@ -2178,7 +2178,7 @@
     "cwe": "CWE-617"
   },
   {
-    "file": "C:\\Users\\Stephane\\AppData\\Local\\Temp\\bench_requests\\src\\requests\\__init__.py",
+    "file": "/tmp/benchmark/bench_requests/src/requests/__init__.py",
     "line": 84,
     "severity": "info",
     "category": "bug",

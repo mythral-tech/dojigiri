@@ -26,7 +26,7 @@ User runs: doji scan .
             |
             +---> detector.py (Static Analysis Engine)
             |         |
-            |         +---> languages.py ........... 50+ regex rules by language
+            |         +---> languages.py ........... 130+ regex rules by language
             |         +---> semantic/checks.py ..... tree-sitter AST checks
             |         +---> Python ast module ....... Python-specific AST checks
             |         +---> semantic/core.py ....... single-pass AST extraction
@@ -76,7 +76,7 @@ User runs: doji scan .
 | `config.py` | Enums, dataclasses, constants, project config loader | .doji.toml files | (imported everywhere) |
 | `analyzer.py` | Orchestrator: collect files, run analysis, merge, save | detector.py, chunker.py, llm.py, storage.py | ScanReport |
 | `detector.py` | Static analysis engine: regex + AST + semantic | languages.py, semantic/* | list[Finding] |
-| `languages.py` | 50+ regex rules organized by language group | config.py (enums only) | Rule tuples |
+| `languages.py` | 130+ regex rules organized by language group | config.py (enums only) | Rule tuples |
 | `storage.py` | SHA256 file cache, JSON report persistence | config.py (paths) | ~/.dojigiri/ |
 
 ### Semantic Analysis (tree-sitter powered)
@@ -154,14 +154,16 @@ core.extract_semantics()  -->  FileSemantics
 
 | Module | Role |
 |--------|------|
-| `fixer.py` | Auto-fix engine: deterministic fixers + LLM-assisted fixes |
+| `fixer/` | Auto-fix engine: deterministic fixers + LLM-assisted fixes (package: engine, deterministic, cascade, llm_fixes, helpers) |
+| `java_sanitize.py` | OWASP Benchmark Java sanitizer detection |
+| `pr_review.py` | Pull request review integration |
 | `hooks.py` | Git pre-commit hook install/uninstall |
 
 ---
 
 ## Key Data Types
 
-All defined in `config.py`:
+All defined in `types.py`:
 
 - **`Finding`** — a single issue found in code (file, line, severity, category, rule, message)
 - **`FileAnalysis`** — all findings for one file, plus metadata (language, line count, hash)
