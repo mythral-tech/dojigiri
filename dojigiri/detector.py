@@ -1393,6 +1393,38 @@ def analyze_file_static(filepath: str, content: str, language: str, custom_rules
             seen.add(key)
             unique.append(f)
 
+    # Merge overlapping rules at the same location — keep the preferred variant.
+    # Maps each rule to its overlap group ID and priority (lower = preferred).
+    _OVERLAP_PRIORITY: dict[str, tuple[int, int]] = {
+        # exception-swallowed (AST, has fixer) preferred over empty-exception-handler (tree-sitter)
+        "exception-swallowed": (1, 0),
+        "empty-exception-handler": (1, 1),
+        "exception-swallowed-continue": (2, 0),
+    }
+    # For each overlap group at each location, track the best finding
+    _overlap_best: dict[tuple[int, str, int], tuple[int, int]] = {}  # (group, file, line) -> (priority, idx)
+    for idx, f in enumerate(unique):
+        if f.rule in _OVERLAP_PRIORITY:
+            group_id, priority = _OVERLAP_PRIORITY[f.rule]
+            key = (group_id, f.file, f.line)
+            if key not in _overlap_best or priority < _overlap_best[key][0]:
+                _overlap_best[key] = (priority, idx)
+    # Build set of indices to keep
+    keep_indices = set()
+    for _, idx in _overlap_best.values():
+        keep_indices.add(idx)
+    # Filter: for overlap rules, only keep the preferred; non-overlap rules pass through
+    deduped = []
+    for idx, f in enumerate(unique):
+        if f.rule in _OVERLAP_PRIORITY:
+            group_id, _ = _OVERLAP_PRIORITY[f.rule]
+            key = (group_id, f.file, f.line)
+            if idx == _overlap_best.get(key, (0, -1))[1]:
+                deduped.append(f)
+        else:
+            deduped.append(f)
+    unique = deduped
+
     # Sort by severity (critical first), then line number
     from .types import SEVERITY_ORDER
 
