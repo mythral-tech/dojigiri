@@ -11,9 +11,12 @@ Data in -> Data out: ScanReport -> SARIF dict
 
 from __future__ import annotations
 
+import hashlib
+from datetime import datetime, timezone
+
 from . import __version__
 from .compliance import get_cwe, get_nist
-from .types import ScanReport, Severity
+from .types import CrossFileFinding, ScanReport, Severity
 
 # SARIF severity mapping
 _SEVERITY_TO_LEVEL = {
@@ -27,68 +30,121 @@ SARIF_SCHEMA = (
     "sarif-2.1/schema/sarif-schema-2.1.0.json"
 )
 
+DOJIGIRI_URI = "https://github.com/Inklling/dojigiri"
+
+CWE_TAXONOMY_URI = "https://cwe.mitre.org/data/published/cwe_latest.pdf"
+
+
+def _to_uri(path: str) -> str:
+    """Normalize a file path to a forward-slash URI-safe string."""
+    return path.replace("\\", "/")
+
+
+def _fingerprint(file: str, rule: str, snippet: str | None) -> str:
+    """Content-based fingerprint that survives line shifts.
+
+    Uses file + rule + snippet hash so that moving code doesn't generate
+    a new alert as long as the code itself hasn't changed.  Falls back to
+    file + rule when no snippet is available.
+    """
+    key = f"{file}:{rule}"
+    if snippet and snippet != "[REDACTED]":
+        key += f":{snippet}"
+    return hashlib.sha256(key.encode("utf-8", errors="replace")).hexdigest()[:16]
+
+
+def _build_rule(finding_or_cf: object, rules_map: dict[str, dict]) -> int:
+    """Register a rule in rules_map if new; return the rule index."""
+    rule = finding_or_cf.rule  # type: ignore[union-attr]
+    if rule in rules_map:
+        return list(rules_map.keys()).index(rule)
+
+    rule_entry: dict = {
+        "id": rule,
+        "shortDescription": {"text": finding_or_cf.message},  # type: ignore[union-attr]
+        "defaultConfiguration": {
+            "level": _SEVERITY_TO_LEVEL[finding_or_cf.severity],  # type: ignore[union-attr]
+        },
+        "properties": {
+            "tags": [],
+            "category": finding_or_cf.category.value,  # type: ignore[union-attr]
+        },
+    }
+    # Source is only on Finding, not CrossFileFinding
+    if hasattr(finding_or_cf, "source"):
+        rule_entry["properties"]["source"] = finding_or_cf.source.value
+
+    cwe = get_cwe(rule)
+    if cwe:
+        cwe_num = cwe.replace("CWE-", "")
+        rule_entry["properties"]["tags"].append(f"external/cwe/cwe-{cwe_num}")
+    nist = get_nist(rule)
+    if nist:
+        rule_entry["properties"]["nist"] = nist
+
+    rules_map[rule] = rule_entry
+    return len(rules_map) - 1
+
 
 def to_sarif(report: ScanReport) -> dict:
     """Convert a ScanReport to a SARIF 2.1.0 document (as a dict).
 
     The returned dict is JSON-serializable and conforms to the SARIF 2.1.0
     schema including tool metadata, rules with CWE tags, results with
-    locations, taxa references, and partial fingerprints.
+    locations, taxa references, artifacts, invocations, CWE taxonomy
+    declarations, cross-file findings, and content-based fingerprints.
     """
     rules_map: dict[str, dict] = {}
     results: list[dict] = []
+    artifacts_map: dict[str, int] = {}  # uri -> index
+    cwe_taxa: dict[str, dict] = {}  # cwe_num -> taxon
 
+    def _ensure_artifact(uri: str) -> int:
+        """Register an artifact and return its index."""
+        if uri not in artifacts_map:
+            artifacts_map[uri] = len(artifacts_map)
+        return artifacts_map[uri]
+
+    # ── Per-file findings ────────────────────────────────────────────
     for fa in report.file_analyses:
-        for f in fa.findings:
-            # Build rule entry (deduplicated by rule name)
-            if f.rule not in rules_map:
-                rule_entry: dict = {
-                    "id": f.rule,
-                    "shortDescription": {"text": f.message},
-                    "defaultConfiguration": {"level": _SEVERITY_TO_LEVEL[f.severity]},
-                    "properties": {
-                        "tags": [],
-                        "category": f.category.value,
-                        "source": f.source.value,
-                    },
-                }
-                cwe = get_cwe(f.rule)
-                if cwe:
-                    cwe_num = cwe.replace("CWE-", "")
-                    rule_entry["properties"]["tags"].append(f"external/cwe/cwe-{cwe_num}")
-                nist = get_nist(f.rule)
-                if nist:
-                    rule_entry["properties"]["nist"] = nist
-                rules_map[f.rule] = rule_entry
+        uri = _to_uri(fa.path)
+        artifact_idx = _ensure_artifact(uri)
 
-            # Build result entry
+        for f in fa.findings:
+            rule_idx = _build_rule(f, rules_map)
+
             message_text = f.message
             if f.suggestion:
                 message_text = f"{f.message} — {f.suggestion}"
 
+            # Snippet (secrets redacted via to_dict)
+            snippet = f.to_dict()["snippet"]
+
+            region: dict = {"startLine": f.line, "startColumn": 1}
+            if snippet:
+                region["snippet"] = {"text": snippet}
+
             result: dict = {
                 "ruleId": f.rule,
+                "ruleIndex": rule_idx,
                 "level": _SEVERITY_TO_LEVEL[f.severity],
                 "message": {"text": message_text},
                 "locations": [
                     {
                         "physicalLocation": {
-                            "artifactLocation": {"uri": f.file, "uriBaseId": "%SRCROOT%"},
-                            "region": {"startLine": f.line, "startColumn": 1},
+                            "artifactLocation": {
+                                "uri": uri,
+                                "uriBaseId": "%SRCROOT%",
+                                "index": artifact_idx,
+                            },
+                            "region": region,
                         }
                     }
                 ],
                 "partialFingerprints": {
-                    "primaryLocationLineHash": f"{f.file}:{f.rule}:{f.line}",
+                    "primaryLocationLineHash": _fingerprint(uri, f.rule, snippet),
                 },
             }
-
-            # Snippet (secrets redacted via to_dict)
-            snippet = f.to_dict()["snippet"]
-            if snippet:
-                result["locations"][0]["physicalLocation"]["region"]["snippet"] = {
-                    "text": snippet
-                }
 
             # Suggestion as SARIF fix
             if f.suggestion:
@@ -104,6 +160,8 @@ def to_sarif(report: ScanReport) -> dict:
                         "toolComponent": {"name": "cwe"},
                     }
                 ]
+                if cwe_num not in cwe_taxa:
+                    cwe_taxa[cwe_num] = {"id": cwe_num, "guid": cwe}
 
             # Confidence (LLM findings only)
             if f.confidence:
@@ -111,25 +169,127 @@ def to_sarif(report: ScanReport) -> dict:
 
             results.append(result)
 
+    # ── Cross-file findings ──────────────────────────────────────────
+    for cf in report.cross_file_findings:
+        rule_idx = _build_rule(cf, rules_map)
+        source_uri = _to_uri(cf.source_file)
+        target_uri = _to_uri(cf.target_file)
+        source_artifact = _ensure_artifact(source_uri)
+        _ensure_artifact(target_uri)
+
+        result = {
+            "ruleId": cf.rule,
+            "ruleIndex": rule_idx,
+            "level": _SEVERITY_TO_LEVEL[cf.severity],
+            "message": {"text": cf.message},
+            "locations": [
+                {
+                    "physicalLocation": {
+                        "artifactLocation": {
+                            "uri": source_uri,
+                            "uriBaseId": "%SRCROOT%",
+                            "index": source_artifact,
+                        },
+                        "region": {"startLine": cf.line, "startColumn": 1},
+                    }
+                }
+            ],
+            "partialFingerprints": {
+                "primaryLocationLineHash": _fingerprint(
+                    source_uri, cf.rule, None
+                ),
+            },
+        }
+
+        # Related location: the target file
+        related: dict = {
+            "id": 0,
+            "message": {"text": f"Related location in {cf.target_file}"},
+            "physicalLocation": {
+                "artifactLocation": {
+                    "uri": target_uri,
+                    "uriBaseId": "%SRCROOT%",
+                },
+            },
+        }
+        if cf.target_line is not None:
+            related["physicalLocation"]["region"] = {
+                "startLine": cf.target_line,
+                "startColumn": 1,
+            }
+        result["relatedLocations"] = [related]
+
+        if cf.suggestion:
+            result["fixes"] = [{"description": {"text": cf.suggestion}}]
+
+        cwe = get_cwe(cf.rule)
+        if cwe:
+            cwe_num = cwe.replace("CWE-", "")
+            result["taxa"] = [
+                {"id": cwe_num, "toolComponent": {"name": "cwe"}}
+            ]
+            if cwe_num not in cwe_taxa:
+                cwe_taxa[cwe_num] = {"id": cwe_num, "guid": cwe}
+
+        if cf.confidence:
+            result.setdefault("properties", {})["confidence"] = cf.confidence.value
+
+        results.append(result)
+
+    # ── Artifacts ────────────────────────────────────────────────────
+    artifacts = [
+        {"location": {"uri": uri, "uriBaseId": "%SRCROOT%"}}
+        for uri in artifacts_map
+    ]
+
+    # ── CWE taxonomy extension ───────────────────────────────────────
+    extensions = []
+    if cwe_taxa:
+        extensions.append({
+            "name": "cwe",
+            "version": "4.15",
+            "informationUri": CWE_TAXONOMY_URI,
+            "organization": "MITRE",
+            "shortDescription": {"text": "Common Weakness Enumeration"},
+            "taxa": list(cwe_taxa.values()),
+        })
+
+    # ── Invocation ───────────────────────────────────────────────────
+    now = report.timestamp or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    invocation: dict = {
+        "executionSuccessful": True,
+        "endTimeUtc": now,
+        "properties": {
+            "mode": report.mode,
+        },
+    }
+
+    # ── Assemble run ─────────────────────────────────────────────────
+    driver: dict = {
+        "name": "dojigiri",
+        "semanticVersion": __version__,
+        "informationUri": DOJIGIRI_URI,
+        "rules": list(rules_map.values()),
+    }
+
+    run: dict = {
+        "tool": {"driver": driver},
+        "invocations": [invocation],
+        "artifacts": artifacts,
+        "results": results,
+        "properties": {
+            "mode": report.mode,
+            "filesScanned": report.files_scanned,
+            "filesSkipped": report.files_skipped,
+        },
+    }
+
+    if extensions:
+        run["tool"]["extensions"] = extensions
+        run["taxonomies"] = extensions
+
     return {
         "version": "2.1.0",
         "$schema": SARIF_SCHEMA,
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "dojigiri",
-                        "semanticVersion": __version__,
-                        "informationUri": "https://github.com/Inklling/dojigiri",
-                        "rules": list(rules_map.values()),
-                    }
-                },
-                "results": results,
-                "properties": {
-                    "mode": report.mode,
-                    "filesScanned": report.files_scanned,
-                    "filesSkipped": report.files_skipped,
-                },
-            }
-        ],
+        "runs": [run],
     }
