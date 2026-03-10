@@ -583,34 +583,34 @@ def _check_shadowed_builtin_params(tree: ast.AST, filepath: str, findings: list[
 # When code does `import pickle as pkl`, we resolve pkl.loads → pickle.loads.
 _DANGEROUS_CALLS: dict[str, tuple[str, Severity, Category, str, str]] = {
     "os.system": ("os-system", Severity.WARNING, Category.SECURITY,
-                  "os.system() is vulnerable to shell injection",
+                  "os.system() is vulnerable to shell injection",  # doji:ignore(os-system)
                   "Use subprocess.run() with a list of arguments"),
     "os.popen": ("os-popen", Severity.WARNING, Category.SECURITY,
-                 "os.popen() starts a shell process — vulnerable to injection",
+                 "os.popen() starts a shell process — vulnerable to injection",  # doji:ignore(os-popen)
                  "Use subprocess.run() with a list of arguments instead"),
     "pickle.loads": ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
-                     "pickle.loads() can execute arbitrary code during deserialization",
+                     "pickle.loads() can execute arbitrary code during deserialization",  # doji:ignore(deserialization-unsafe,pickle-unsafe)
                      "Use json, msgpack, or a safe serialization format instead"),
     "pickle.load": ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
-                    "pickle.load() can execute arbitrary code during deserialization",
+                    "pickle.load() can execute arbitrary code during deserialization",  # doji:ignore(deserialization-unsafe,pickle-unsafe)
                     "Use json, msgpack, or a safe serialization format instead"),
     "yaml.load": ("yaml-unsafe", Severity.CRITICAL, Category.SECURITY,
-                  "yaml.load() without SafeLoader can execute arbitrary code",
-                  "Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)"),
+                  "yaml.load() without SafeLoader can execute arbitrary code",  # doji:ignore(deserialization-unsafe)
+                  "Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)"),  # doji:ignore(deserialization-unsafe)
     "marshal.loads": ("unsafe-deserialization", Severity.CRITICAL, Category.SECURITY,
-                      "marshal.loads() can execute arbitrary code during deserialization",
+                      "marshal.loads() can execute arbitrary code during deserialization",  # doji:ignore(deserialization-unsafe,unsafe-deserialization,marshal-loads-unsafe)
                       "Use json or msgpack for untrusted data"),
     "marshal.load": ("unsafe-deserialization", Severity.CRITICAL, Category.SECURITY,
-                     "marshal.load() can execute arbitrary code during deserialization",
+                     "marshal.load() can execute arbitrary code during deserialization",  # doji:ignore(deserialization-unsafe,unsafe-deserialization,marshal-loads-unsafe)
                      "Use json or msgpack for untrusted data"),
     "shelve.open": ("unsafe-deserialization", Severity.CRITICAL, Category.SECURITY,
-                    "shelve.open() is pickle-backed — can execute arbitrary code",
+                    "shelve.open() is pickle-backed — can execute arbitrary code",  # doji:ignore(unsafe-deserialization,shelve-open-unsafe)
                     "Use json or msgpack for untrusted data"),
-    "hashlib.md5": ("weak-hash", Severity.WARNING, Category.SECURITY,
-                    "MD5 is a cryptographically weak hash algorithm",
+    "hashlib.md5": ("weak-hash", Severity.WARNING, Category.SECURITY,  # doji:ignore(weak-hash-md5,weak-hash)
+                    "MD5 is a cryptographically weak hash algorithm",  # doji:ignore(weak-hash-md5,weak-hash)
                     "Use hashlib.sha256() or stronger for security-sensitive hashing"),
-    "hashlib.sha1": ("weak-hash", Severity.WARNING, Category.SECURITY,
-                     "SHA1 is a cryptographically weak hash algorithm",
+    "hashlib.sha1": ("weak-hash", Severity.WARNING, Category.SECURITY,  # doji:ignore(weak-hash-sha1,weak-hash)
+                     "SHA1 is a cryptographically weak hash algorithm",  # doji:ignore(weak-hash-sha1,weak-hash)
                      "Use hashlib.sha256() or stronger for security-sensitive hashing"),
     "random.choice": ("weak-random", Severity.INFO, Category.SECURITY,
                       "random module is not cryptographically secure",
@@ -766,16 +766,16 @@ def _check_multiline_shell_true(tree: ast.AST, filepath: str, findings: list[Fin
 # Catches getattr(os, "system"), getattr(pickle, "loads"), etc.
 _GETATTR_DANGEROUS: dict[tuple[str, str], tuple[str, Severity, Category, str, str]] = {
     ("os", "system"): ("os-system", Severity.WARNING, Category.SECURITY,
-                       "os.system() via getattr — shell injection risk",
+                       "os.system() via getattr — shell injection risk",  # doji:ignore(os-system)
                        "Use subprocess.run() with a list of arguments"),
     ("os", "popen"): ("os-popen", Severity.WARNING, Category.SECURITY,
-                      "os.popen() via getattr — shell injection risk",
+                      "os.popen() via getattr — shell injection risk",  # doji:ignore(os-popen)
                       "Use subprocess.run() with a list of arguments"),
     ("pickle", "loads"): ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
-                          "pickle.loads() via getattr — arbitrary code execution",
+                          "pickle.loads() via getattr — arbitrary code execution",  # doji:ignore(deserialization-unsafe,pickle-unsafe)
                           "Use json or msgpack instead"),
     ("pickle", "load"): ("pickle-unsafe", Severity.CRITICAL, Category.SECURITY,
-                         "pickle.load() via getattr — arbitrary code execution",
+                         "pickle.load() via getattr — arbitrary code execution",  # doji:ignore(deserialization-unsafe,pickle-unsafe)
                          "Use json or msgpack instead"),
     ("subprocess", "Popen"): ("subprocess-audit", Severity.INFO, Category.SECURITY,
                               "subprocess.Popen via getattr — verify arguments",
@@ -826,7 +826,7 @@ def _check_async_shell(tree: ast.AST, filepath: str, findings: list[Finding]):
                     file=filepath, line=node.lineno,
                     severity=Severity.WARNING, category=Category.SECURITY,
                     source=Source.AST, rule="shell-true",
-                    message="asyncio.create_subprocess_shell() runs command through shell",
+                    message="asyncio.create_subprocess_shell() runs command through shell",  # doji:ignore(async-subprocess-shell)
                     suggestion="Use asyncio.create_subprocess_exec() with argument list instead",
                 ))
             # Also catch: await asyncio.create_subprocess_shell in Await nodes

@@ -1,9 +1,3 @@
 # Steel-folding test corpus — intentionally vulnerable code
 tests/fold*_vulnerable_samples.py
 tests/test_taint_tracking.py
-
-# Doji source files contain rule descriptions that reference dangerous
-# functions (e.g. "pickle.loads() can execute...") — self-triggering
-dojigiri/languages.py
-dojigiri/detector.py
-dojigiri/taint.py

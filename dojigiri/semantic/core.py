@@ -123,7 +123,7 @@ class _Extractor:
         self._scope_counter = 0
         self._scope_stack: list[int] = []
         self._scope_info: dict[int, ScopeInfo] = {}
-        self._current_class: str | None = None
+        self._current_class: str | None = None  # doji:ignore(null-dereference)
 
         # Sets for fast lookup
         self._assignment_types = set(config.assignment_node_types)

@@ -66,7 +66,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "os-system",
-            "os.system() is vulnerable to shell injection",
+            "os.system() is vulnerable to shell injection",  # doji:ignore(os-system)
             "Use subprocess.run() with a list of arguments",
         ),
         (
@@ -123,7 +123,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.CRITICAL,
             Category.SECURITY,
             "pickle-unsafe",
-            "pickle.load()/loads()/Unpickler() can execute arbitrary code during deserialization",
+            "pickle.load()/loads()/Unpickler() can execute arbitrary code during deserialization",  # doji:ignore(deserialization-unsafe,pickle-unsafe)
             "Use json, msgpack, or a safe serialization format instead",
         ),
         # Pickle alternatives — equally dangerous
@@ -150,8 +150,8 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.CRITICAL,
             Category.SECURITY,
             "yaml-unsafe",
-            "yaml.load() without SafeLoader can execute arbitrary code",
-            "Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)",
+            "yaml.load() without SafeLoader can execute arbitrary code",  # doji:ignore(deserialization-unsafe)
+            "Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)",  # doji:ignore(deserialization-unsafe)
         ),
         # yaml.load_all and yaml.unsafe_load — same risk
         (
@@ -222,7 +222,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "os-popen",
-            "os.popen() starts a shell process — vulnerable to injection",
+            "os.popen() starts a shell process — vulnerable to injection",  # doji:ignore(os-popen)
             "Use subprocess.run() with a list of arguments instead",
         ),
         # subprocess.getoutput / getstatusoutput — always use shell
@@ -231,7 +231,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "subprocess-shell",
-            "subprocess.getoutput()/getstatusoutput() always uses shell — vulnerable to injection",
+            "subprocess.getoutput()/getstatusoutput() always uses shell — vulnerable to injection",  # doji:ignore(subprocess-shell)
             "Use subprocess.run() with a list of arguments instead",
         ),
         # os.startfile — opens file with default handler (Windows)
@@ -240,7 +240,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "os-startfile",
-            "os.startfile() opens file with default handler — could launch executables",
+            "os.startfile() opens file with default handler — could launch executables",  # doji:ignore(os-startfile)
             "Validate file type and path before opening",
         ),
         # os.chmod with permissive mask (world-writable/executable)
@@ -276,7 +276,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "ssl-wrap-socket",
-            "ssl.wrap_socket() is deprecated and does not verify certificates by default",
+            "ssl.wrap_socket() is deprecated and does not verify certificates by default",  # doji:ignore(ssl-wrap-socket)
             "Use ssl.SSLContext.wrap_socket() with proper cert verification",
         ),
         # requests with verify=False — disables SSL cert verification
@@ -303,16 +303,16 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "ssl-verify-disabled",
-            "ssl._create_unverified_context() disables all certificate verification",
+            "ssl._create_unverified_context() disables all certificate verification",  # doji:ignore(insecure-ssl-context,ssl-verify-disabled)
             "Use ssl.create_default_context() for verified connections",
         ),
         # ssl.CERT_NONE — disables certificate verification
         (
-            r"\bssl\.CERT_NONE\b",
+            r"\bssl\.CERT_NONE\b",  # doji:ignore(insecure-ssl-context)
             Severity.WARNING,
             Category.SECURITY,
             "ssl-verify-disabled",
-            "ssl.CERT_NONE disables certificate verification — MITM risk",
+            "ssl.CERT_NONE disables certificate verification — MITM risk",  # doji:ignore(insecure-ssl-context,ssl-verify-disabled)
             "Use ssl.CERT_REQUIRED for certificate verification",
         ),
         # Hardcoded /tmp directory — predictable location, symlink attacks
@@ -339,7 +339,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "debug-enabled",
-            "DEBUG=True may expose sensitive information in production",
+            "DEBUG=True may expose sensitive information in production",  # doji:ignore(debug-enabled)
             "Set DEBUG=False in production and use environment variables",
         ),
         # compile() with user input — code compilation
@@ -375,7 +375,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "archive-slip",
-            "Archive extractall() without path validation — zip/tar slip attack",
+            "Archive extractall() without path validation — zip/tar slip attack",  # doji:ignore(archive-slip)
             "Validate member paths before extraction or use extraction filters",
         ),
         # tarfile.open + extractall
@@ -385,7 +385,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Category.SECURITY,
             "tarfile-open",
             "tarfile.open() — ensure extractall() uses data_filter or validates member paths",
-            "Use tf.extractall(filter='data') (Python 3.12+) or validate each member",
+            "Use tf.extractall(filter='data') (Python 3.12+) or validate each member",  # doji:ignore(archive-slip)
         ),
         # Unencrypted protocols — FTP
         (
@@ -474,7 +474,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "django-mark-safe",
-            "mark_safe() bypasses Django's auto-escaping — XSS risk if content is user-controlled",
+            "mark_safe() bypasses Django's auto-escaping — XSS risk if content is user-controlled",  # doji:ignore(django-mark-safe)
             "Use format_html() or escape user content before marking safe",
         ),
         # Django QuerySet.extra() — raw SQL injection
@@ -483,7 +483,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "django-extra-sql",
-            "QuerySet.extra() uses raw SQL — injection risk if values are user-controlled",
+            "QuerySet.extra() uses raw SQL — injection risk if values are user-controlled",  # doji:ignore(django-extra-sql)
             "Use Django ORM methods (filter, annotate) instead of extra()",
         ),
         # Paramiko AutoAddPolicy — auto-accept unknown host keys
@@ -519,7 +519,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "insecure-crypto",
-            "TripleDES/3DES is deprecated — slow and approaching theoretical breaks",
+            "TripleDES/3DES is deprecated — slow and approaching theoretical breaks",  # doji:ignore(insecure-crypto)
             "Use AES-256 or ChaCha20 instead",
         ),
         # ── Flask/Django security ─────────────────────────────────────────
@@ -543,12 +543,12 @@ PYTHON_RULES: list[Rule] = _compile(
         ),
         # @csrf_exempt decorator — disables CSRF on specific view
         (
-            r"@csrf_exempt\b",
+            r"@csrf_exempt\b",  # doji:ignore(csrf-exempt,csrf-disabled)
             Severity.WARNING,
             Category.SECURITY,
             "csrf-exempt",
-            "@csrf_exempt disables CSRF protection on this view",
-            "Remove @csrf_exempt or implement alternative CSRF validation",
+            "@csrf_exempt disables CSRF protection on this view",  # doji:ignore(csrf-exempt,csrf-disabled)
+            "Remove @csrf_exempt or implement alternative CSRF validation",  # doji:ignore(csrf-exempt,csrf-disabled)
         ),
         # Django ALLOWED_HOSTS wildcard — allows any host header
         (
@@ -556,7 +556,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "django-allowed-hosts-wildcard",
-            "ALLOWED_HOSTS = ['*'] accepts any Host header — HTTP Host header attacks",
+            "ALLOWED_HOSTS = ['*'] accepts any Host header — HTTP Host header attacks",  # doji:ignore(django-allowed-hosts-wildcard)
             "Set ALLOWED_HOSTS to specific domain names",
         ),
         # Django RawSQL / raw() — SQL injection risk
@@ -589,16 +589,16 @@ PYTHON_RULES: list[Rule] = _compile(
         # ── Cryptography — weak TLS ──────────────────────────────────────
         # Weak TLS protocol versions — SSLv2, SSLv3, TLSv1, TLSv1.1
         (
-            r"\bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b",
+            r"\bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b",  # doji:ignore(weak-tls-version)
             Severity.CRITICAL,
             Category.SECURITY,
             "weak-tls-version",
-            "Weak TLS protocol version — SSLv2/v3/TLS1.0/1.1 are broken or deprecated",
+            "Weak TLS protocol version — SSLv2/v3/TLS1.0/1.1 are broken or deprecated",  # doji:ignore(weak-tls-version)
             "Use ssl.PROTOCOL_TLS_CLIENT or ssl.TLSVersion.TLSv1_2 minimum",
         ),
         # SSLContext with minimum_version set to broken protocol
         (
-            r"minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b",
+            r"minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b",  # doji:ignore(weak-tls-version)
             Severity.CRITICAL,
             Category.SECURITY,
             "weak-tls-version",
@@ -616,11 +616,11 @@ PYTHON_RULES: list[Rule] = _compile(
         ),
         # Weak cipher suites — RC4, DES, NULL, EXPORT, anon
         (
-            r"""set_ciphers\s*\(\s*['"](?:[^'"]*(?:RC4|DES|NULL|EXPORT|anon|eNULL|aNULL)[^'"]*)['"]\s*\)""",
+            r"""set_ciphers\s*\(\s*['"](?:[^'"]*(?:RC4|DES|NULL|EXPORT|anon|eNULL|aNULL)[^'"]*)['"]\s*\)""",  # doji:ignore(insecure-rc4)
             Severity.CRITICAL,
             Category.SECURITY,
             "weak-cipher-suite",
-            "Weak cipher suite configured — RC4/DES/NULL/EXPORT/anon ciphers are broken",
+            "Weak cipher suite configured — RC4/DES/NULL/EXPORT/anon ciphers are broken",  # doji:ignore(insecure-rc4)
             "Use strong cipher suites: set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM')",
         ),
         # ── Authentication ────────────────────────────────────────────────
@@ -707,7 +707,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "session-cookie-insecure",
-            "SESSION_COOKIE_SECURE=False — session cookie sent over HTTP",
+            "SESSION_COOKIE_SECURE=False — session cookie sent over HTTP",  # doji:ignore(session-insecure)
             "Set SESSION_COOKIE_SECURE=True in production to restrict to HTTPS",
         ),
         # Django SESSION_COOKIE_HTTPONLY = False — XSS can steal sessions

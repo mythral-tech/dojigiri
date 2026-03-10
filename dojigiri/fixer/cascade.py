@@ -150,7 +150,7 @@ def _build_descendant_map(scopes) -> dict[int, set[int]]:
         next_queue = []
         for sid in queue:
             # Propagate this node's descendants to parent
-            pid = parent_of.get(sid)
+            pid = parent_of.get(sid)  # doji:ignore(null-dereference)
             if pid is not None and pid in result:
                 result[pid].add(sid)
                 result[pid] |= result[sid]

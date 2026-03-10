@@ -557,7 +557,7 @@ def _fix_open_without_with(line: str, finding: Finding, content: str, ctx: FixCo
 
 
 def _fix_yaml_unsafe(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
-    """Replace yaml.load() with yaml.safe_load()."""
+    """Replace yaml.load() with yaml.safe_load()."""  # doji:ignore(deserialization-unsafe)
     # Skip if SafeLoader or Loader= already present on this line
     if "SafeLoader" in line or "Loader=" in line:
         return None
@@ -569,14 +569,14 @@ def _fix_yaml_unsafe(line: str, finding: Finding, content: str, ctx: FixContext 
             rule=finding.rule,
             original_code=line,
             fixed_code=new_line,
-            explanation="Replaced yaml.load() with yaml.safe_load() to prevent arbitrary code execution",
+            explanation="Replaced yaml.load() with yaml.safe_load() to prevent arbitrary code execution",  # doji:ignore(deserialization-unsafe)
             source=FixSource.DETERMINISTIC,
         )
     return None
 
 
 def _fix_weak_hash(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
-    """Replace hashlib.md5/sha1 with hashlib.sha256."""
+    """Replace hashlib.md5/sha1 with hashlib.sha256."""  # doji:ignore(weak-hash-md5,weak-hash)
     # Skip if usedforsecurity=False is present (legitimate non-crypto use)
     if "usedforsecurity=False" in line or "usedforsecurity = False" in line:
         return None
@@ -1107,7 +1107,7 @@ def _fix_sql_injection(line: str, finding: Finding, content: str, ctx: FixContex
         clean_sql = re.sub(r"'\{(\w+)\}'", "?", sql_body)
         clean_sql = re.sub(r"\{(\w+)\}", "?", clean_sql)
         param_tuple = ", ".join(params)
-        new_line = f'{indent}{call_obj}.execute("{clean_sql}", ({param_tuple},))\n'
+        new_line = f'{indent}{call_obj}.execute("{clean_sql}", ({param_tuple},))\n'  # doji:ignore(sql-injection-execute)
         return Fix(
             file=finding.file,
             line=finding.line,
@@ -1130,7 +1130,7 @@ def _fix_sql_injection(line: str, finding: Finding, content: str, ctx: FixContex
         call_obj = m.group(2)
         sql_body = m.group(4)
         param_var = m.group(5)
-        new_line = f'{indent}{call_obj}.execute("{sql_body} ?", ({param_var},))\n'  # doji:ignore(sql-injection)
+        new_line = f'{indent}{call_obj}.execute("{sql_body} ?", ({param_var},))\n'  # doji:ignore(sql-injection,sql-injection-execute)
         return Fix(
             file=finding.file,
             line=finding.line,

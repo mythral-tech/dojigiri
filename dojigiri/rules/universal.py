@@ -112,8 +112,8 @@ UNIVERSAL_RULES: list[Rule] = _compile(
             Severity.CRITICAL,
             Category.SECURITY,
             "sql-injection",
-            "Django .raw() with string interpolation — SQL injection",
-            "Use .raw() with parameterized query: Model.objects.raw('SELECT ... WHERE id = %s', [user_id])",
+            "Django .raw() with string interpolation — SQL injection",  # doji:ignore(django-raw-sql)
+            "Use .raw() with parameterized query: Model.objects.raw('SELECT ... WHERE id = %s', [user_id])",  # doji:ignore(sql-injection-raw,django-raw-sql)
         ),
     ]
 )

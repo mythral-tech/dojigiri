@@ -220,7 +220,7 @@ def _has_collection_misdirection(content: str) -> bool:
                     if 0 <= remove_idx < len(items):
                         del items[remove_idx]
 
-                get_idx = int(get_idx_m.group(1))
+                get_idx = int(get_idx_m.group(1))  # doji:ignore(null-dereference)
                 if 0 <= get_idx < len(items) and items[get_idx]:
                     return True
 
@@ -332,8 +332,8 @@ def _has_cross_method_sanitization(content: str) -> bool:
                 arg = arg.strip()
                 items.append(arg.startswith('"'))  # True if safe literal
 
-            remove_idx = int(remove_m.group(1))
-            get_idx = int(get_idx_m.group(1))
+            remove_idx = int(remove_m.group(1))  # doji:ignore(null-dereference)
+            get_idx = int(get_idx_m.group(1))  # doji:ignore(null-dereference)
             if 0 <= remove_idx < len(items):
                 del items[remove_idx]
             if 0 <= get_idx < len(items) and items[get_idx]:

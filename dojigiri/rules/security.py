@@ -50,7 +50,7 @@ SECURITY_RULES: list[Rule] = _compile(
             Severity.CRITICAL,
             Category.SECURITY,
             "logging-config-listen",
-            "logging.config.listen() accepts config over network — can load arbitrary handler classes (RCE)",
+            "logging.config.listen() accepts config over network — can load arbitrary handler classes (RCE)",  # doji:ignore(logging-config-listen)
             "Avoid network-based logging config; use file-based or environment-based config instead",
         ),
         # Insecure crypto: DES
@@ -86,7 +86,7 @@ SECURITY_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "insecure-crypto",
-            "RC4/ARC4 is a broken stream cipher with known biases",
+            "RC4/ARC4 is a broken stream cipher with known biases",  # doji:ignore(insecure-rc4)
             "Use AES-GCM or ChaCha20-Poly1305 instead",
         ),
         # requests without timeout — can hang indefinitely

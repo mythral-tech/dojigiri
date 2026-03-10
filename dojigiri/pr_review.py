@@ -283,7 +283,7 @@ def _parse_review_response(text: str) -> dict | None:
         result = json.loads(stripped)
         if isinstance(result, dict):
             return result
-    except json.JSONDecodeError:
+    except json.JSONDecodeError:  # doji:ignore(exception-swallowed,empty-exception-handler)
         pass
 
     # Strip markdown fences
@@ -296,7 +296,7 @@ def _parse_review_response(text: str) -> dict | None:
             result = json.loads(stripped)
             if isinstance(result, dict):
                 return result
-        except json.JSONDecodeError:
+        except json.JSONDecodeError:  # doji:ignore(exception-swallowed,empty-exception-handler)
             pass
 
     # Extract JSON from surrounding text
@@ -306,7 +306,7 @@ def _parse_review_response(text: str) -> dict | None:
             result = json.loads(match.group())
             if isinstance(result, dict):
                 return result
-        except json.JSONDecodeError:
+        except json.JSONDecodeError:  # doji:ignore(exception-swallowed,empty-exception-handler)
             pass
 
     return None
@@ -344,7 +344,7 @@ def review_diff(
     if pr_number is not None:
         # For PR mode, we still use scan_diff against the PR's base
         # gh pr view to get base ref
-        result = subprocess.run(
+        result = subprocess.run(  # doji:ignore(taint-flow)
             ["gh", "pr", "view", str(pr_number), "--json", "baseRefName", "--jq", ".baseRefName"],
             capture_output=True,
             cwd=str(git_root),

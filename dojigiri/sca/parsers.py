@@ -113,7 +113,7 @@ def _parse_poetry_lock(content: str, ecosystem: str) -> list[Dependency]:
         stripped = line.strip()
         if stripped == "[[package]]":
             if in_package and current_name and current_version:
-                deps.append((current_name.lower(), current_version, ecosystem))
+                deps.append((current_name.lower(), current_version, ecosystem))  # doji:ignore(null-dereference)
             in_package = True
             current_name = None
             current_version = None

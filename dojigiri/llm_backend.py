@@ -94,7 +94,7 @@ class AnthropicBackend:
     def __init__(self, api_key: str | None = None, model: str | None = None):
         self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         self._model = model or os.environ.get("DOJI_LLM_MODEL", "claude-sonnet-4-20250514")
-        self._client: Any = None
+        self._client: Any = None  # doji:ignore(null-dereference)
 
     def _get_client(self) -> Any:
         if self._client is not None:
@@ -303,7 +303,7 @@ class OpenAICompatibleBackend:
         req = urllib.request.Request(url, data=data, headers=headers, method="POST")
 
         try:
-            with urllib.request.urlopen(req, timeout=300) as resp:  # doji:ignore(ssrf-risk)
+            with urllib.request.urlopen(req, timeout=300) as resp:  # doji:ignore(ssrf-risk,url-scheme-audit)
                 body = json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
             error_body = ""

@@ -67,7 +67,7 @@ def _query_batch(packages: list[tuple[str, str, str]], timeout: int) -> list[Vul
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # doji:ignore(ssrf-risk,url-scheme-audit)
             data = json.loads(resp.read().decode("utf-8"))
     except (urllib.error.URLError, json.JSONDecodeError) as e:
         logger.error("OSV batch query failed: %s", e)
@@ -103,7 +103,7 @@ def _query_batch(packages: list[tuple[str, str, str]], timeout: int) -> list[Vul
                 detail = future.result()
                 if detail:
                     vuln_details[vid] = detail
-            except Exception:
+            except Exception:  # doji:ignore(exception-swallowed,empty-exception-handler)
                 pass
 
     # Build Vulnerability objects
@@ -131,7 +131,7 @@ def _fetch_vuln(vuln_id: str, timeout: int) -> dict | None:
     url = f"{OSV_VULN_URL}/{vuln_id}"
     req = urllib.request.Request(url)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # doji:ignore(ssrf-risk,url-scheme-audit)
             return json.loads(resp.read().decode("utf-8"))
     except (urllib.error.URLError, json.JSONDecodeError) as e:
         logger.debug("Failed to fetch %s: %s", vuln_id, e)

@@ -456,7 +456,7 @@ def fix_file(
     # Filter by rules if specified
     if rules:
         rule_set = set(rules)
-        findings = [f for f in findings if f.rule in rule_set]
+        findings = [f for f in findings if f.rule in rule_set]  # doji:ignore(possibly-uninitialized)
 
     if not findings:
         return FixReport(

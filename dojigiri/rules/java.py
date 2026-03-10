@@ -10,11 +10,11 @@ JAVA_RULES: list[Rule] = _compile(
         # Weak cryptography — DES, RC2, RC4, Blowfish, DESede/3DES (CWE-327)
         # Must NOT match AES, AES/GCM, ChaCha20
         (
-            r"""(?:Cipher|KeyGenerator)\.getInstance\s*\(\s*["'](?:[^"']*(?:DES|RC2|RC4|Blowfish|DESede)[^"']*)["']""",
+            r"""(?:Cipher|KeyGenerator)\.getInstance\s*\(\s*["'](?:[^"']*(?:DES|RC2|RC4|Blowfish|DESede)[^"']*)["']""",  # doji:ignore(insecure-rc4)
             Severity.CRITICAL,
             Category.SECURITY,
             "java-weak-crypto",
-            "Weak/broken cryptographic algorithm (DES, RC2, RC4, Blowfish, or 3DES)",
+            "Weak/broken cryptographic algorithm (DES, RC2, RC4, Blowfish, or 3DES)",  # doji:ignore(insecure-rc4,insecure-crypto)
             "Use AES/GCM/NoPadding or ChaCha20-Poly1305",
         ),
         # Weak hashing — MD5, SHA1, SHA-1 (CWE-328)

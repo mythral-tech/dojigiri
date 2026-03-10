@@ -217,30 +217,30 @@ def _raw_to_findings(
             if not isinstance(rf, dict):
                 continue
 
-            line = rf.get("line", 1)
+            line = rf.get("line", 1)  # doji:ignore(null-dereference)
             if not isinstance(line, int) or line < 1:
                 line = 1
             if chunk_index > 0:
                 line = line + chunk_start_line - 1
 
-            conf_str = rf.get("confidence", "medium")
+            conf_str = rf.get("confidence", "medium")  # doji:ignore(null-dereference)
             try:
                 confidence = Confidence(conf_str)
             except ValueError:
                 confidence = Confidence.MEDIUM
 
-            message = str(rf.get("message", "Issue found by Claude"))[:500]
-            suggestion = rf.get("suggestion")
+            message = str(rf.get("message", "Issue found by Claude"))[:500]  # doji:ignore(null-dereference)
+            suggestion = rf.get("suggestion")  # doji:ignore(null-dereference)
             if suggestion is not None:
                 suggestion = str(suggestion)[:500]
-            rule = str(rf.get("rule", "llm-finding"))[:100]
+            rule = str(rf.get("rule", "llm-finding"))[:100]  # doji:ignore(null-dereference)
 
             findings.append(
                 Finding(
                     file=filepath,
                     line=line,
-                    severity=Severity(rf.get("severity", "info")),
-                    category=Category(rf.get("category", "bug")),
+                    severity=Severity(rf.get("severity", "info")),  # doji:ignore(null-dereference)
+                    category=Category(rf.get("category", "bug")),  # doji:ignore(null-dereference)
                     source=Source.LLM,
                     rule=rule,
                     message=message,

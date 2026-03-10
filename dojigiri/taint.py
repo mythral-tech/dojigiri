@@ -655,7 +655,7 @@ def _summarize_function_taint(
                             try:
                                 idx = params.index(tvar.name)
                                 param_flows_to_sink[idx] = sink_kind
-                            except ValueError:
+                            except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
                                 pass
                     for kw in call_node.keywords:
                         if kw.value:
@@ -664,7 +664,7 @@ def _summarize_function_taint(
                                 try:
                                     idx = params.index(tvar.name)
                                     param_flows_to_sink[idx] = sink_kind
-                                except ValueError:
+                                except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
                                     pass
 
         if isinstance(stmt, ast.Return) and stmt.value is not None:
@@ -674,7 +674,7 @@ def _summarize_function_taint(
                 try:
                     idx = params.index(tvar.name)
                     returned_param_indices.add(idx)
-                except ValueError:
+                except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
                     pass
             # Also check if the return value contains tainted data via propagation
             for vname, vinfo in taint_map.items():

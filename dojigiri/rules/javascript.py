@@ -23,7 +23,7 @@ JAVASCRIPT_RULES: list[Rule] = _compile(
             Severity.CRITICAL,
             Category.SECURITY,
             "function-constructor",
-            "new Function() is equivalent to eval() — code injection risk",
+            "new Function() is equivalent to eval() — code injection risk",  # doji:ignore(ssti-risk)
             "Avoid dynamic code generation; use a lookup table or safe parser",
         ),
         # DOM XSS sinks
@@ -56,7 +56,7 @@ JAVASCRIPT_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "document-write",
-            "document.write() is a security risk and blocks rendering",
+            "document.write() is a security risk and blocks rendering",  # doji:ignore(xss-document-write)
             "Use DOM manipulation methods instead",
         ),
         # Prototype pollution

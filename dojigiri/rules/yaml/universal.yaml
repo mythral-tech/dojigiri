@@ -131,12 +131,6 @@ rules:
   pattern: (?<![\w.])(?:(?:[2-9]\d{2,}|1\d{3,}))(?![\w.])(?!\s*[;:=])
   severity: info
   suggestion: Extract to a named constant for clarity
-- category: bug
-  id: equality-type-coercion
-  message: Loose equality (==) may cause unexpected type coercion
-  pattern: (?<!=|!)={1,2}(?!=)
-  severity: info
-  suggestion: Use strict equality (=== / !==) in JavaScript/TypeScript
 - category: security
   id: hardcoded-jwt-secret
   message: Hardcoded JWT secret — signing key must not be in source

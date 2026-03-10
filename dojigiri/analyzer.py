@@ -642,7 +642,7 @@ def _git_run(args: list[str], cwd: str) -> subprocess.CompletedProcess:
     cwd_path = Path(cwd).resolve()
     if not cwd_path.is_dir():
         raise OSError(f"Invalid working directory: {cwd}")
-    result = subprocess.run(
+    result = subprocess.run(  # doji:ignore(taint-flow)
         args,
         capture_output=True,
         cwd=str(cwd_path),
