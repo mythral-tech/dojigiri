@@ -103,6 +103,9 @@ ignore = [
     "E741",    # ambiguous-variable-name — too strict for math-heavy code
 ]
 
+[tool.ruff.format]
+quote-style = "double"
+
 [tool.ruff.lint.per-file-ignores]
 "dojigiri/fixer/__init__.py" = ["F401"]
 
