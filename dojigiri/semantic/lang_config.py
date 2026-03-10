@@ -407,9 +407,25 @@ LANGUAGE_CONFIGS.update(
             ],
             taint_sink_patterns=[
                 ("exec.Command", "system_cmd"),
+                ("exec.CommandContext", "system_cmd"),
                 ("db.Exec", "sql_query"),
                 ("db.Query", "sql_query"),
                 ("fmt.Fprintf", "html_output"),
+                # SSRF: standard http package functions
+                ("http.Get", "ssrf"),
+                ("http.Post", "ssrf"),
+                ("http.PostForm", "ssrf"),
+                ("http.Head", "ssrf"),
+                ("http.NewRequest", "ssrf"),
+                # SSRF: method calls on any http.Client instance (custom clients)
+                # Matches receiver.Get/Post/Do/Head/PostForm — the taint engine
+                # only flags when a tainted variable appears as an argument,
+                # not when it's on the LHS of an assignment.
+                (".Get", "ssrf"),
+                (".Post", "ssrf"),
+                (".Do", "ssrf"),
+                (".PostForm", "ssrf"),
+                (".Head", "ssrf"),
             ],
             taint_sanitizer_patterns=[
                 "html.EscapeString",

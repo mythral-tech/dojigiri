@@ -31,6 +31,7 @@ _GENERIC_SINK_RULES: dict[str, str] = {
     "file_path": "path-traversal",
     "eval": "eval-usage",
     "html_output": "xss",
+    "ssrf": "ssrf",
 }
 _JAVA_SINK_RULES: dict[str, str] = {
     "sql_query": "java-sql-injection",
@@ -347,6 +348,18 @@ def _matches_pattern(text: str, pattern: str) -> bool:
     return pattern in text
 
 
+def _matches_sink_pattern(call_text: str, pattern: str) -> bool:
+    """Check if a call matches a sink pattern.
+
+    For method-only patterns starting with '.' (e.g. '.Get'), requires the
+    pattern to appear at the end of call_text — prevents '.Head' from
+    matching 'w.Header().Set' where 'Head' is just a substring.
+    """
+    if pattern.startswith("."):
+        return call_text.endswith(pattern)
+    return pattern in call_text
+
+
 def _find_taint_sources(
     semantics: FileSemantics,
     config: LanguageConfig,
@@ -477,6 +490,14 @@ def _find_taint_sinks(
     sinks = []
     lines = source_bytes.decode("utf-8", errors="replace").splitlines()
 
+    # Build set of (variable, line) pairs where the variable is being assigned
+    # (LHS), so we can exclude LHS matches from sink detection — a variable
+    # being assigned on a line is not being *passed* to a sink on that line.
+    assigned_on_line: set[tuple[str, int]] = set()
+    for asgn in semantics.assignments:
+        if asgn.scope_id in func_scope_ids and not asgn.is_parameter:
+            assigned_on_line.add((asgn.name, asgn.line))
+
     for call in semantics.function_calls:
         if call.scope_id not in func_scope_ids:
             continue
@@ -486,12 +507,24 @@ def _find_taint_sinks(
             call_text = f"{call.receiver}.{call.name}"
 
         for pattern, kind in config.taint_sink_patterns:
-            if _matches_pattern(call_text, pattern):
+            if _matches_sink_pattern(call_text, pattern):
                 # Check if any tainted variable appears on this line
                 line_idx = call.line - 1
                 if 0 <= line_idx < len(lines):
                     line_text = lines[line_idx]
                     for tvar in tainted_vars:
+                        # Skip if this variable is being assigned (LHS) on this line,
+                        # not passed as an argument
+                        if (tvar, call.line) in assigned_on_line:
+                            continue
+                        # For method-only patterns (e.g. ".Get"), skip if the
+                        # tainted var is the receiver — it must be in the args.
+                        # E.g., resp.Header.Get("...") where resp is tainted:
+                        # resp is the receiver chain, not an argument.
+                        if pattern.startswith(".") and call.receiver:
+                            receiver_root = call.receiver.split(".")[0].split("(")[0]
+                            if tvar == receiver_root:
+                                continue
                         if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
                             sinks.append(
                                 TaintSink(
@@ -763,7 +796,7 @@ def analyze_taint(
             if call.receiver:
                 call_text = f"{call.receiver}.{call.name}"
             for pattern, _kind in config.taint_sink_patterns:
-                if _matches_pattern(call_text, pattern):
+                if _matches_sink_pattern(call_text, pattern):
                     potential_sink_lines.add(call.line)
                     break
 
@@ -941,6 +974,12 @@ def analyze_taint_pathsensitive(
             if not changed:
                 break
 
+        # Build set of (variable, line) for LHS-assignment exclusion
+        ps_assigned_on_line: set[tuple[str, int]] = set()
+        for asgn in semantics.assignments:
+            if asgn.scope_id in func_scope_ids and not asgn.is_parameter:
+                ps_assigned_on_line.add((asgn.name, asgn.line))
+
         # 3. Scan for sinks with tainted arguments
         for block_id in rpo:
             block = cfg.blocks[block_id]
@@ -974,10 +1013,18 @@ def analyze_taint_pathsensitive(
                         call_text = f"{call.receiver}.{call.name}"
 
                     for pattern, sink_kind in config.taint_sink_patterns:
-                        if _matches_pattern(call_text, pattern):
+                        if _matches_sink_pattern(call_text, pattern):
                             if 0 <= line_idx < len(lines):
                                 line_text = lines[line_idx]
                                 for tvar in current_taint:
+                                    # Skip LHS assignments (var is being defined, not passed)
+                                    if (tvar, stmt.line) in ps_assigned_on_line:
+                                        continue
+                                    # For method-only patterns, skip if tainted var is receiver
+                                    if pattern.startswith(".") and call.receiver:
+                                        receiver_root = call.receiver.split(".")[0].split("(")[0]
+                                        if tvar == receiver_root:
+                                            continue
                                     if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
                                         src_line = source_lines.get(tvar, 0)
                                         key = (src_line, stmt.line)

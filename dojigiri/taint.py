@@ -67,6 +67,24 @@ TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
     ("yaml.load", "deserialization"),
     ("Template", "ssti"),
     ("render_template_string", "ssti"),
+    ("requests.get", "ssrf"),
+    ("requests.post", "ssrf"),
+    ("requests.put", "ssrf"),
+    ("requests.delete", "ssrf"),
+    ("requests.patch", "ssrf"),
+    ("requests.head", "ssrf"),
+    ("requests.request", "ssrf"),
+    ("httpx.get", "ssrf"),
+    ("httpx.post", "ssrf"),
+    ("httpx.put", "ssrf"),
+    ("httpx.delete", "ssrf"),
+    ("httpx.patch", "ssrf"),
+    ("httpx.head", "ssrf"),
+    ("httpx.request", "ssrf"),
+    ("urllib.request.urlopen", "ssrf"),
+    ("urlopen", "ssrf"),
+    ("aiohttp.ClientSession.get", "ssrf"),
+    ("aiohttp.ClientSession.post", "ssrf"),
 ]
 
 # Functions that sanitize tainted data
@@ -609,14 +627,29 @@ def _summarize_function_taint(
     returns_tainted = False
     returned_param_indices: set[int] = set()
 
-    # Walk the function body
+    # Walk the function body — check ALL calls for sinks, not just bare Expr statements.
+    # Sinks can appear in return statements (return httpx.get(url)), assignments
+    # (resp = httpx.get(url)), or bare expression statements.
     for stmt in ast.walk(func_node):
+        # Collect all Call nodes from any context within this statement
+        call_nodes: list[ast.Call] = []
         if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
-            call_name = _get_call_name(stmt.value)
+            call_nodes.append(stmt.value)
+        elif isinstance(stmt, ast.Return) and stmt.value is not None:
+            for node in ast.walk(stmt.value):
+                if isinstance(node, ast.Call):
+                    call_nodes.append(node)
+        elif isinstance(stmt, ast.Assign):
+            for node in ast.walk(stmt.value):
+                if isinstance(node, ast.Call):
+                    call_nodes.append(node)
+
+        for call_node in call_nodes:
+            call_name = _get_call_name(call_node)
             if call_name:
                 sink_kind = _call_is_sink(call_name)
                 if sink_kind:
-                    for arg in stmt.value.args:
+                    for arg in call_node.args:
                         tvar = _find_tainted_in_expr(arg, taint_map)
                         if tvar and tvar.source_kind == "parameter":
                             try:
@@ -624,6 +657,15 @@ def _summarize_function_taint(
                                 param_flows_to_sink[idx] = sink_kind
                             except ValueError:
                                 pass
+                    for kw in call_node.keywords:
+                        if kw.value:
+                            tvar = _find_tainted_in_expr(kw.value, taint_map)
+                            if tvar and tvar.source_kind == "parameter":
+                                try:
+                                    idx = params.index(tvar.name)
+                                    param_flows_to_sink[idx] = sink_kind
+                                except ValueError:
+                                    pass
 
         if isinstance(stmt, ast.Return) and stmt.value is not None:
             tvar = _find_tainted_in_expr(stmt.value, taint_map)
@@ -652,6 +694,150 @@ def _summarize_function_taint(
         returns_tainted_param=returns_tainted,
         returned_param_indices=returned_param_indices,
     )
+
+
+# ─── Intra-file transitive sink propagation ──────────────────────────
+
+
+def _propagate_intra_file_sinks(
+    tree: ast.Module,
+    summaries: dict[str, FunctionTaintSummary],
+) -> None:
+    """Propagate param_flows_to_sink transitively through local call chains.
+
+    If function A calls function B (same file) and B.param_flows_to_sink
+    records that B's param[j] flows to a sink, then for each of A's params
+    that flow into B's arg[j], mark A.param_flows_to_sink with the same
+    sink kind.
+
+    Mutates summaries in-place.  Iterates to a fixed point to handle
+    arbitrary call chain depth (fetch_json → fetch_url → httpx.get).
+    """
+    if not summaries:
+        return
+
+    # Build a map of function name → AST node for body inspection
+    func_nodes: dict[str, ast.FunctionDef | ast.AsyncFunctionDef] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if node.name in summaries:
+                func_nodes[node.name] = node
+
+    max_iters = 10
+    for _iteration in range(max_iters):
+        changed = False
+
+        for func_name, func_node in func_nodes.items():
+            summary = summaries[func_name]
+            params = summary.params
+
+            # Build taint map: param name → param index
+            param_idx_map = {p: i for i, p in enumerate(params)}
+
+            # Build a simple taint map tracking which variables hold which param
+            # (variable_name → set of param indices it's derived from)
+            var_to_params: dict[str, set[int]] = {}
+            for pname, pidx in param_idx_map.items():
+                var_to_params[pname] = {pidx}
+
+            # Walk the function body in order to track assignments
+            for stmt in ast.iter_child_nodes(func_node):
+                if not isinstance(stmt, ast.stmt):
+                    continue
+                _trace_param_flow_stmt(stmt, var_to_params, summaries, summary, params)
+                if isinstance(stmt, (ast.If, ast.For, ast.While, ast.With, ast.Try)):
+                    for child_stmt in ast.walk(stmt):
+                        if isinstance(child_stmt, ast.stmt) and child_stmt is not stmt:
+                            _trace_param_flow_stmt(child_stmt, var_to_params, summaries, summary, params)
+
+            # Check if summary was updated
+            if summary.param_flows_to_sink != summaries[func_name].param_flows_to_sink:
+                changed = True
+
+        if not changed:
+            break
+
+
+def _trace_param_flow_stmt(
+    stmt: ast.stmt,
+    var_to_params: dict[str, set[int]],
+    all_summaries: dict[str, FunctionTaintSummary],
+    current_summary: FunctionTaintSummary,
+    params: list[str],
+) -> None:
+    """Process a statement to trace parameter flow through local function calls."""
+    # Track assignments: if `resp = some_call(url)`, and url maps to param[0],
+    # then resp inherits those param associations
+    if isinstance(stmt, ast.Assign):
+        for target in stmt.targets:
+            if isinstance(target, ast.Name):
+                # Check which params the RHS references
+                referenced_params: set[int] = set()
+                for node in ast.walk(stmt.value):
+                    if isinstance(node, ast.Name) and node.id in var_to_params:
+                        referenced_params |= var_to_params[node.id]
+                if referenced_params:
+                    var_to_params[target.id] = referenced_params
+
+    # Find all calls in this statement (any context: bare, return, assign)
+    call_nodes: list[ast.Call] = []
+    if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+        call_nodes.append(stmt.value)
+    elif isinstance(stmt, ast.Return) and stmt.value is not None:
+        for node in ast.walk(stmt.value):
+            if isinstance(node, ast.Call):
+                call_nodes.append(node)
+    elif isinstance(stmt, ast.Assign):
+        for node in ast.walk(stmt.value):
+            if isinstance(node, ast.Call):
+                call_nodes.append(node)
+
+    for call_node in call_nodes:
+        call_name = _get_call_name(call_node)
+        if not call_name:
+            continue
+
+        # Check if this calls another function in the same file
+        callee_summary = all_summaries.get(call_name)
+        if callee_summary is None or not callee_summary.param_flows_to_sink:
+            continue
+
+        # For each callee parameter that flows to a sink, check if the caller
+        # passes one of its own parameters (or a variable derived from them)
+        for callee_param_idx, sink_kind in callee_summary.param_flows_to_sink.items():
+            if callee_param_idx < len(call_node.args):
+                arg = call_node.args[callee_param_idx]
+                # Find which of current function's params flow into this argument
+                caller_param_indices = _find_param_indices_in_expr(arg, var_to_params)
+                for caller_pidx in caller_param_indices:
+                    if caller_pidx not in current_summary.param_flows_to_sink:
+                        current_summary.param_flows_to_sink[caller_pidx] = sink_kind
+
+            # Also check keyword arguments
+            for kw in call_node.keywords:
+                if kw.arg and kw.value:
+                    # Match keyword to callee param index
+                    try:
+                        kw_idx = callee_summary.params.index(kw.arg)
+                    except ValueError:
+                        continue
+                    if kw_idx in callee_summary.param_flows_to_sink:
+                        caller_param_indices = _find_param_indices_in_expr(kw.value, var_to_params)
+                        for caller_pidx in caller_param_indices:
+                            if caller_pidx not in current_summary.param_flows_to_sink:
+                                current_summary.param_flows_to_sink[caller_pidx] = callee_summary.param_flows_to_sink[kw_idx]
+
+
+def _find_param_indices_in_expr(
+    expr: ast.expr,
+    var_to_params: dict[str, set[int]],
+) -> set[int]:
+    """Find which function parameter indices are referenced in an expression."""
+    result: set[int] = set()
+    for node in ast.walk(expr):
+        if isinstance(node, ast.Name) and node.id in var_to_params:
+            result |= var_to_params[node.id]
+    return result
 
 
 # ─── Cross-file taint analysis ───────────────────────────────────────
@@ -745,6 +931,15 @@ def analyze_taint_cross_file(
                 summaries[node.name] = summary
 
         func_summaries[filepath] = summaries
+
+    # Phase 2.5: Transitive sink propagation within each file.
+    # If function A calls function B (same file) and B has param_flows_to_sink,
+    # then A inherits that sink info for whichever of A's params flow into B's
+    # tainted argument position.  This handles wrapper chains like:
+    #   fetch_json(url) → fetch_url(url) → httpx.get(url)
+    for filepath, summaries in func_summaries.items():
+        tree = trees[filepath]
+        _propagate_intra_file_sinks(tree, summaries)
 
     # Phase 3: Build module → filepath mapping (for import resolution)
     # Try both full module name and partial matches

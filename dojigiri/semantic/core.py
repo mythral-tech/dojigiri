@@ -541,13 +541,14 @@ class _Extractor:
     def _handle_go_assignment(self, node: Any, is_augmented: bool) -> None:
         left, right = self._extract_lhs_rhs(node)
         if left:
-            rhs_type = right.type if right else ""
+            rhs_type, rhs_text = self._rhs_info(right)
             for child in left.children:
                 if child.type == "identifier":
                     self._record_assignment(
                         _get_text(child, self.src),
                         node,
                         rhs_type,
+                        rhs_text,
                         is_augmented=(is_augmented and node.type != "short_var_declaration"),
                     )
 
@@ -626,7 +627,8 @@ class _Extractor:
             name = _get_text(func_node, self.src)
         elif func_node.type in self._attr_types:
             # obj.method()
-            obj = func_node.child_by_field_name("object")
+            # Go uses "operand"/"field", others use "object"/"attribute"
+            obj = func_node.child_by_field_name("object") or func_node.child_by_field_name("operand")
             attr = func_node.child_by_field_name("attribute") or func_node.child_by_field_name("field")
             if obj:
                 receiver = _get_text(obj, self.src)
@@ -790,10 +792,11 @@ class _Extractor:
                 context = "call"
         if parent_type in self._attr_types:
             # Check if this identifier is the attribute (not the object) in obj.attr
-            attr_node = parent.child_by_field_name("attribute")
+            # Go uses "field"/"operand", others use "attribute"/"object"
+            attr_node = parent.child_by_field_name("attribute") or parent.child_by_field_name("field")
             if attr_node and attr_node.id == node.id:
                 context = "attribute_access"
-                obj_node = parent.child_by_field_name("object")
+                obj_node = parent.child_by_field_name("object") or parent.child_by_field_name("operand")
                 if obj_node and obj_node.type == "identifier":
                     receiver = _get_text(obj_node, self.src)
             else:
