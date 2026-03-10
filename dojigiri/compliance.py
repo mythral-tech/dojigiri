@@ -277,6 +277,8 @@ CWE_MAP: dict[str, str] = {
     # Java — Concurrency
     "java-double-checked-locking": "CWE-609",
     "java-non-atomic-check-then-act": "CWE-367",
+    "java-toctou-file-check-then-act": "CWE-367",
+    "java-async-file-operation": "CWE-367",
     "java-synchronized-on-boxed": "CWE-662",
     # Java — Android
     "java-android-exported-component": "CWE-926",
@@ -1080,6 +1082,8 @@ NIST_MAP: dict[str, list[str]] = {
     # Java — Concurrency
     "java-double-checked-locking": ["SA-11"],
     "java-non-atomic-check-then-act": ["SA-11"],
+    "java-toctou-file-check-then-act": ["SA-11"],
+    "java-async-file-operation": ["SA-11"],
     "java-synchronized-on-boxed": ["SA-11"],
     # Java — Android
     "java-android-exported-component": ["AC-3", "AC-6"],

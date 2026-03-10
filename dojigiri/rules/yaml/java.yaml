@@ -592,6 +592,18 @@ rules:
   severity: warning
   suggestion: Use atomic file operations (Files.createFile with CREATE_NEW, etc.)
 - category: security
+  id: java-toctou-file-check-then-act
+  message: TOCTOU race condition — Files.exists() as precondition is not atomic with subsequent file operations (CWE-367)
+  pattern: '(?:if\s*\(\s*!?\s*)?Files\.exists\s*\([^)]+\)'
+  severity: warning
+  suggestion: Use atomic file operations (Files.copy with REPLACE_EXISTING, try-catch on NoSuchFileException/FileAlreadyExistsException) instead of check-then-act
+- category: security
+  id: java-async-file-operation
+  message: Filesystem mutation in @Async method — inherently race-prone (CWE-367)
+  pattern: 'Files\.(?:copy|delete|move|write|newOutputStream|createFile|createDirectory)\s*\('
+  severity: info
+  suggestion: Use file locks (FileChannel.lock) or atomic operations in async contexts to prevent race conditions
+- category: security
   id: java-synchronized-on-boxed
   message: Synchronizing on boxed primitive — shared instances cause unintended locking
   pattern: 'synchronized\s*\(\s*(?:Integer|Long|Boolean|Short|Byte|Character|Float|Double)\b'

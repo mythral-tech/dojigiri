@@ -361,6 +361,14 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules=No
                     if "SafeLoader" in context or "safe_load" in context:
                         continue
 
+                # java-async-file-operation: suppress if @Async not in
+                # preceding 30 lines (method scope heuristic)
+                if rule_name == "java-async-file-operation":
+                    context_start = max(0, line_num - 30)
+                    context = "\n".join(lines[context_start:line_num - 1])
+                    if "@Async" not in context:
+                        continue
+
                 # Inline suppression: doji:ignore or doji:ignore(rule-name)
                 if _line_is_suppressed(rule_name):
                     continue
