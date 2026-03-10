@@ -47,7 +47,7 @@ from benchmarks.owasp_scorecard import (
 # CWEs where regex alone has ~100% FPR (flags everything).
 # For these, taint-gating is used: regex findings only count if taint confirms
 # a real source→sink data flow.
-TAINT_GATED_CWES = {22, 78, 89, 90, 501, 643}  # Path, Cmd, SQL, LDAP, Trust, XPath
+TAINT_GATED_CWES = {22, 78, 79, 89, 90, 501, 643}  # Path, Cmd, XSS, SQL, LDAP, Trust, XPath
 
 # Mapping from rule names to CWEs for taint-gating decisions
 _RULE_TO_CWE: dict[str, int] = {}
@@ -59,7 +59,7 @@ for _cwe, _rules in CWE_TO_DOJI_RULES.items():
 def scan_general_only(benchmark_dir: str) -> dict[str, set[str]]:
     """Scan all OWASP Benchmark Java files with general-only filters + taint gating.
 
-    For injection CWEs with ~100% regex FPR (SQL, LDAP, Trust Boundary, XPath),
+    For injection CWEs with ~100% regex FPR (SQL, XSS, LDAP, Trust Boundary, XPath),
     only flags a file if taint analysis confirms a source→sink data flow.
     Other categories use regex as-is.
 
@@ -121,9 +121,13 @@ def scan_general_only(benchmark_dir: str) -> dict[str, set[str]]:
             else:
                 detections[test_name].add(f.rule)
 
-        # Add taint-only findings (taint may catch things regex missed)
+        # Add taint-only findings for taint-gated CWEs (taint may catch
+        # things regex missed). Don't add for non-gated CWEs to avoid
+        # taint over-reporting on categories where regex is sufficient.
         for tr in taint_rules:
-            detections[test_name].add(tr)
+            tr_cwe = _RULE_TO_CWE.get(tr)
+            if tr_cwe in TAINT_GATED_CWES:
+                detections[test_name].add(tr)
 
     elapsed = time.perf_counter() - t0
     print(f"  Done in {elapsed:.1f}s — {len(detections)} files with security findings")

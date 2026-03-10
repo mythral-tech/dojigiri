@@ -652,8 +652,19 @@ LANGUAGE_CONFIGS.update(
                 ("new FileWriter(", "file_path"),
                 ("Paths.get", "file_path"),
                 ("Files.newInputStream", "file_path"),
-                # Note: XSS sinks (response.getWriter, etc.) intentionally omitted
-                # from taint — regex rules handle XSS better with lower FPR.
+                # XSS (CWE-79) — output sinks
+                ("response.getWriter", "http_response"),
+                ("response.getOutputStream", "http_response"),
+                ("PrintWriter.print", "http_response"),
+                ("PrintWriter.println", "http_response"),
+                ("PrintWriter.write", "http_response"),
+                ("PrintWriter.format", "http_response"),
+                ("PrintWriter.printf", "http_response"),
+                ("PrintWriter.append", "http_response"),
+                # HTTP headers and redirects
+                ("response.setHeader", "http_header"),
+                ("response.addHeader", "http_header"),
+                ("response.sendRedirect", "http_redirect"),
                 # Trust Boundary (CWE-501)
                 ("session.setAttribute", "trust_boundary"),
                 ("session.putValue", "trust_boundary"),

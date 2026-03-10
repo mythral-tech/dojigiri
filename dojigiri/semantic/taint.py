@@ -1,9 +1,14 @@
-"""Intra-procedural taint analysis: track tainted data from sources to sinks.
+"""Taint analysis: track tainted data from sources to sinks.
 
 Two modes:
 1. Flow-insensitive (v0.8.0): analyze_taint() — used as fallback when no CFG.
 2. Path-sensitive (v0.9.0): analyze_taint_pathsensitive() — uses CFG for
    precise dataflow, properly handles sanitization on conditional paths.
+
+Both modes support same-file inter-procedural analysis (v1.2.0): a pre-pass
+builds method summaries capturing whether each function propagates taint from
+parameters to return values.  Calls to methods that always return constants
+or don't propagate taint are resolved without false-positive taint flow.
 
 Operates on FileSemantics + source bytes for pattern matching.
 Returns [] when tree-sitter is not available.
@@ -79,6 +84,128 @@ class TaintPath:
     source: TaintSource
     sink: TaintSink
     through: list[tuple[str, int]]  # (variable_name, line) assignment chain
+
+
+@dataclass
+class TaintSummary:
+    """Summary of a method's taint behavior for inter-procedural analysis."""
+
+    propagates_taint: bool  # Does tainted param reach return?
+    sanitizes: bool  # Does the method apply sanitizers?
+    safe_return: bool  # Does it always return a constant/literal?
+
+
+# ─── Collection-aware taint tracking ─────────────────────────────────
+# Reduces false positives when tainted data enters a collection (Map/List)
+# under a specific key/index but is read back under a different key/index.
+
+# Regex patterns for Java Map operations
+_RE_MAP_PUT = re.compile(r"(\w+)\s*\.\s*put\s*\(\s*\"([^\"]+)\"")
+_RE_MAP_GET = re.compile(r"(\w+)\s*\.\s*get\s*\(\s*\"([^\"]+)\"")
+# Regex patterns for Java List operations
+_RE_LIST_ADD = re.compile(r"(\w+)\s*\.\s*add\s*\(")
+_RE_LIST_CLEAR = re.compile(r"(\w+)\s*\.\s*(?:clear|removeAll)\s*\(")
+
+
+@dataclass
+class _CollectionTaintState:
+    """Tracks per-key taint state for collections (Maps and Lists).
+
+    map_taint: {collection_var: {key: is_tainted}} for Map key tracking.
+    list_has_taint: {collection_var: True} for List taint tracking.
+    """
+    map_taint: dict[str, dict[str, bool]]
+    list_has_taint: dict[str, bool]
+
+    @staticmethod
+    def empty() -> _CollectionTaintState:
+        return _CollectionTaintState(map_taint={}, list_has_taint={})
+
+    def copy(self) -> _CollectionTaintState:
+        return _CollectionTaintState(
+            map_taint={k: dict(v) for k, v in self.map_taint.items()},
+            list_has_taint=dict(self.list_has_taint),
+        )
+
+    def merge(self, other: _CollectionTaintState) -> _CollectionTaintState:
+        """Union merge for CFG join points (conservative: any-tainted wins)."""
+        merged_map: dict[str, dict[str, bool]] = {}
+        for coll_var in set(self.map_taint) | set(other.map_taint):
+            keys_self = self.map_taint.get(coll_var, {})
+            keys_other = other.map_taint.get(coll_var, {})
+            merged_keys = dict(keys_self)
+            for k, v in keys_other.items():
+                merged_keys[k] = merged_keys.get(k, False) or v
+            merged_map[coll_var] = merged_keys
+        merged_list: dict[str, bool] = {}
+        for coll_var in set(self.list_has_taint) | set(other.list_has_taint):
+            merged_list[coll_var] = (
+                self.list_has_taint.get(coll_var, False)
+                or other.list_has_taint.get(coll_var, False)
+            )
+        return _CollectionTaintState(map_taint=merged_map, list_has_taint=merged_list)
+
+
+def _track_collection_put(
+    full_line: str,
+    tainted_vars: set[str],
+    coll_state: _CollectionTaintState,
+) -> None:
+    """Detect map.put/list.add and update collection taint state."""
+    for m in _RE_MAP_PUT.finditer(full_line):
+        coll_var = m.group(1)
+        key = m.group(2)
+        put_start = m.end()
+        remainder = full_line[put_start:]
+        is_value_tainted = any(
+            re.search(r"\b" + re.escape(tv) + r"\b", remainder)
+            for tv in tainted_vars
+        )
+        coll_state.map_taint.setdefault(coll_var, {})[key] = is_value_tainted
+
+    for m in _RE_LIST_ADD.finditer(full_line):
+        coll_var = m.group(1)
+        add_start = m.end()
+        depth = 1
+        end = add_start
+        while end < len(full_line) and depth > 0:
+            if full_line[end] == "(":
+                depth += 1
+            elif full_line[end] == ")":
+                depth -= 1
+            end += 1
+        arg_text = full_line[add_start:end]
+        if any(re.search(r"\b" + re.escape(tv) + r"\b", arg_text) for tv in tainted_vars):
+            coll_state.list_has_taint[coll_var] = True
+
+    for m in _RE_LIST_CLEAR.finditer(full_line):
+        coll_state.list_has_taint.pop(m.group(1), None)
+
+
+def _check_collection_get_taint(
+    rhs: str,
+    coll_state: _CollectionTaintState,
+) -> bool | None:
+    """Check if map.get/list.get in RHS refers to a tainted slot.
+
+    Returns True (tainted), False (not tainted), or None (no collection op found).
+    """
+    mg = _RE_MAP_GET.search(rhs)
+    if mg:
+        coll_var = mg.group(1)
+        key = mg.group(2)
+        if coll_var in coll_state.map_taint:
+            return coll_state.map_taint[coll_var].get(key, False)
+        return None
+
+    list_get_m = re.search(r"(\w+)\s*\.\s*get\s*\(", rhs)
+    if list_get_m:
+        coll_var = list_get_m.group(1)
+        if coll_var in coll_state.list_has_taint:
+            return coll_state.list_has_taint[coll_var]
+        return None
+
+    return None
 
 
 # ─── Branch sibling detection ─────────────────────────────────────────
@@ -340,6 +467,295 @@ def _is_in_conditional_body_not_containing_any(
     return False
 
 
+# ─── Constant propagation ─────────────────────────────────────────────
+
+# Ternary pattern: condition ? true_expr : false_expr
+_TERNARY_RE = re.compile(
+    r"^(.*?)\s*\?\s*(.*?)\s*:\s*(.*)$",
+)
+
+# Integer literal pattern
+_INT_LITERAL_RE = re.compile(r"^-?\d+$")
+
+# String literal pattern (double or single quoted)
+_STRING_LITERAL_RE = re.compile(r'^"[^"]*"$|^\'[^\']*\'$')
+
+# Arithmetic token pattern for safe evaluation
+_ARITH_TOKEN_RE = re.compile(r"(-?\d+|[+\-*/%()]|\s+)")
+
+
+def _safe_eval_arithmetic(expr: str) -> int | None:
+    """Safely evaluate a pure integer arithmetic expression.
+
+    Supports: +, -, *, /, %, parentheses, integer literals.
+    Returns None if the expression contains anything unexpected.
+    Uses regex tokenization -- never calls eval().
+    """
+    expr = expr.strip()
+    if not expr:
+        return None
+
+    # Tokenize and verify every character is accounted for
+    tokens = _ARITH_TOKEN_RE.findall(expr)
+    reconstructed = "".join(tokens)
+    if reconstructed.replace(" ", "") != expr.replace(" ", ""):
+        return None
+
+    meaningful = [t.strip() for t in tokens if t.strip()]
+    if not meaningful:
+        return None
+
+    try:
+        result, pos = _parse_expr(meaningful, 0)
+        if pos != len(meaningful):
+            return None
+        return result
+    except (ValueError, ZeroDivisionError, IndexError):
+        return None
+
+
+def _parse_expr(tokens: list[str], pos: int) -> tuple[int, int]:
+    """Parse additive expression: term ((+|-) term)*"""
+    left, pos = _parse_term(tokens, pos)
+    while pos < len(tokens) and tokens[pos] in ("+", "-"):
+        op = tokens[pos]
+        pos += 1
+        right, pos = _parse_term(tokens, pos)
+        if op == "+":
+            left = left + right
+        else:
+            left = left - right
+    return left, pos
+
+
+def _parse_term(tokens: list[str], pos: int) -> tuple[int, int]:
+    """Parse multiplicative expression: factor ((*|/|%) factor)*"""
+    left, pos = _parse_factor(tokens, pos)
+    while pos < len(tokens) and tokens[pos] in ("*", "/", "%"):
+        op = tokens[pos]
+        pos += 1
+        right, pos = _parse_factor(tokens, pos)
+        if op == "*":
+            left = left * right
+        elif op == "/":
+            if right == 0:
+                raise ZeroDivisionError
+            left = left // right
+        else:
+            if right == 0:
+                raise ZeroDivisionError
+            left = left % right
+    return left, pos
+
+
+def _parse_factor(tokens: list[str], pos: int) -> tuple[int, int]:
+    """Parse factor: integer | '(' expr ')' | unary minus"""
+    if pos >= len(tokens):
+        raise ValueError("unexpected end")
+
+    if tokens[pos] == "-":
+        pos += 1
+        val, pos = _parse_factor(tokens, pos)
+        return -val, pos
+
+    if tokens[pos] == "(":
+        pos += 1
+        val, pos = _parse_expr(tokens, pos)
+        if pos >= len(tokens) or tokens[pos] != ")":
+            raise ValueError("missing )")
+        return val, pos + 1
+
+    try:
+        return int(tokens[pos]), pos + 1
+    except ValueError:
+        raise ValueError(f"unexpected token: {tokens[pos]}")
+
+
+def _evaluate_constant_condition(
+    rhs: str,
+    assignments: list,
+    func_scope_ids: set[int],
+) -> bool | None:
+    """Try to evaluate a condition expression to a constant boolean.
+
+    Substitutes known constant variables into the expression, then
+    evaluates arithmetic and comparisons.
+
+    Returns True if always true, False if always false, None if unresolvable.
+    """
+    constants: dict[str, int] = {}
+    for asgn in assignments:
+        if asgn.scope_id not in func_scope_ids:
+            continue
+        if asgn.is_parameter:
+            continue
+        val_text = asgn.value_text.strip()
+        if _INT_LITERAL_RE.match(val_text):
+            constants[asgn.name] = int(val_text)
+
+    return _eval_condition_with_constants(rhs, constants)
+
+
+def _eval_condition_with_constants(
+    condition: str,
+    constants: dict[str, int],
+) -> bool | None:
+    """Evaluate a condition string given known integer constants.
+
+    Handles: arithmetic (+, -, *, /, %), comparisons (>, <, >=, <=, ==, !=).
+    Returns True/False if fully resolvable, None otherwise.
+    """
+    condition = condition.strip()
+    if not condition:
+        return None
+
+    # Strip outer parens if the whole expression is wrapped
+    if condition.startswith("(") and condition.endswith(")"):
+        depth = 0
+        all_wrapped = True
+        for i, ch in enumerate(condition):
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+            if depth == 0 and i < len(condition) - 1:
+                all_wrapped = False
+                break
+        if all_wrapped:
+            inner = _eval_condition_with_constants(condition[1:-1], constants)
+            if inner is not None:
+                return inner
+
+    comp_match = _find_toplevel_comparison(condition)
+    if comp_match is None:
+        return None
+
+    left_str, op, right_str = comp_match
+
+    left_str = _substitute_constants(left_str, constants)
+    right_str = _substitute_constants(right_str, constants)
+
+    left_val = _safe_eval_arithmetic(left_str)
+    right_val = _safe_eval_arithmetic(right_str)
+
+    if left_val is None or right_val is None:
+        return None
+
+    if op == ">":
+        return left_val > right_val
+    elif op == "<":
+        return left_val < right_val
+    elif op == ">=":
+        return left_val >= right_val
+    elif op == "<=":
+        return left_val <= right_val
+    elif op == "==":
+        return left_val == right_val
+    elif op == "!=":
+        return left_val != right_val
+
+    return None
+
+
+def _find_toplevel_comparison(expr: str) -> tuple[str, str, str] | None:
+    """Find a comparison operator at the top level (not inside parentheses)."""
+    depth = 0
+    i = 0
+    while i < len(expr):
+        ch = expr[i]
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        elif depth == 0:
+            two_char = expr[i:i + 2]
+            if two_char in (">=", "<=", "!=", "=="):
+                return (expr[:i].strip(), two_char, expr[i + 2:].strip())
+            if ch in (">", "<"):
+                if i + 1 < len(expr) and expr[i + 1] == "=":
+                    pass
+                else:
+                    return (expr[:i].strip(), ch, expr[i + 1:].strip())
+        i += 1
+    return None
+
+
+def _substitute_constants(expr: str, constants: dict[str, int]) -> str:
+    """Replace known constant variable names with their integer values."""
+    for name, value in constants.items():
+        expr = re.sub(r"\b" + re.escape(name) + r"\b", str(value), expr)
+    return expr
+
+
+def _extract_ternary(rhs: str) -> tuple[str, str, str] | None:
+    """Extract (condition, true_expr, false_expr) from a ternary expression.
+
+    Handles nested parens in the condition. Returns None if not a ternary.
+    Supports cast-wrapped ternary like: (type) (cond ? true : false)
+    """
+    text = rhs.strip()
+
+    # Strip a leading cast like "(int)" or "(String)"
+    cast_match = re.match(r"^\(\s*\w+\s*\)\s*", text)
+    if cast_match:
+        text = text[cast_match.end():]
+
+    # Try the regex first for simple cases
+    m = _TERNARY_RE.match(text)
+    if m:
+        cond, true_expr, false_expr = m.group(1), m.group(2), m.group(3)
+        depth = 0
+        for ch in cond:
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+        if depth == 0:
+            return (cond.strip(), true_expr.strip(), false_expr.strip())
+
+    # Manual parse for complex cases with nested parens
+    depth = 0
+    q_pos = -1
+    for i, ch in enumerate(text):
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        elif ch == "?" and depth == 0:
+            q_pos = i
+            break
+
+    if q_pos < 0:
+        return None
+
+    cond = text[:q_pos].strip()
+    rest = text[q_pos + 1:]
+
+    depth = 0
+    for i, ch in enumerate(rest):
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        elif ch == ":" and depth == 0:
+            true_expr = rest[:i].strip()
+            false_expr = rest[i + 1:].strip()
+            return (cond, true_expr, false_expr)
+
+    return None
+
+
+def _rhs_has_tainted_var(rhs: str, tainted_names: list[str]) -> str | None:
+    """Check if any tainted variable name appears in the RHS text.
+
+    Returns the first matching tainted variable name, or None.
+    """
+    for tainted_name in tainted_names:
+        if re.search(r"\b" + re.escape(tainted_name) + r"\b", rhs):
+            return tainted_name
+    return None
+
+
 # ─── Analysis ────────────────────────────────────────────────────────
 
 
@@ -398,6 +814,8 @@ def _propagate_taint(
     branch_groups: list[list[_BranchRange]] | None = None,
     conditional_bodies: list[_ConditionalBody] | None = None,
     sink_lines: set[int] | None = None,
+    source_bytes: bytes = b"",
+    method_summaries: dict[str, TaintSummary] | None = None,
 ) -> dict[str, list[tuple[str, int]]]:
     """Propagate taint through assignments within function scope.
 
@@ -414,6 +832,10 @@ def _propagate_taint(
     """
     tainted: dict[str, list[tuple[str, int]]] = {name: [] for name in initial_tainted}
 
+    # Collection-aware taint tracking: build source lines for put/get detection
+    coll_state = _CollectionTaintState.empty()
+    src_lines = source_bytes.decode("utf-8", errors="replace").splitlines() if source_bytes else []
+
     # Propagation with sanitization: if RHS contains a tainted variable, LHS
     # becomes tainted — UNLESS the RHS passes through a sanitizer, in which
     # case taint is removed (flow-sensitive reassignment).
@@ -424,6 +846,16 @@ def _propagate_taint(
         [a for a in semantics.assignments if a.scope_id in func_scope_ids and not a.is_parameter],
         key=lambda a: a.line,
     )
+
+    # Constant propagation: track variables assigned to integer literals
+    # within the function scope. Used to resolve ternary conditions like
+    # (7 * 18) + num > 200 ? "safe" : tainted_param
+    constant_vars: dict[str, int] = {}
+    for asgn in scoped_assignments:
+        val = asgn.value_text.strip()
+        if _INT_LITERAL_RE.match(val):
+            constant_vars[asgn.name] = int(val)
+
     changed = True
     max_iters = 10  # prevent infinite loops
     iteration = 0
@@ -469,9 +901,58 @@ def _propagate_taint(
             if asgn.name in tainted:
                 continue
 
+            # Constant propagation: check if RHS is a ternary expression
+            # with a resolvable condition. If so, only check the branch
+            # that actually executes for taint propagation.
+            ternary = _extract_ternary(rhs)
+            if ternary is not None:
+                cond, true_expr, false_expr = ternary
+                cond_result = _eval_condition_with_constants(cond, constant_vars)
+                if cond_result is True:
+                    # Condition always true -- only true_expr executes
+                    tainted_name = _rhs_has_tainted_var(true_expr, list(tainted.keys()))
+                    if tainted_name is not None:
+                        tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+                        changed = True
+                    continue
+                elif cond_result is False:
+                    # Condition always false -- only false_expr executes
+                    tainted_name = _rhs_has_tainted_var(false_expr, list(tainted.keys()))
+                    if tainted_name is not None:
+                        tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+                        changed = True
+                    continue
+                # cond_result is None -- can't resolve, fall through to normal check
+
+            # Collection-aware: track put/add operations on this line
+            line_idx = asgn.line - 1
+            if 0 <= line_idx < len(src_lines):
+                _track_collection_put(src_lines[line_idx], set(tainted.keys()), coll_state)
+
+            # Collection-aware: check if RHS is a collection.get("key") call
+            coll_result = _check_collection_get_taint(rhs, coll_state)
+            if coll_result is False:
+                # Collection read from an untainted key/slot -- skip propagation
+                continue
+            if coll_result is True:
+                # Collection read from a tainted key/slot -- propagate
+                for tainted_name in list(tainted.keys()):
+                    tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+                    changed = True
+                    break
+                continue
+
             for tainted_name in list(tainted.keys()):
                 # Check if tainted name appears in RHS
                 if re.search(r"\b" + re.escape(tainted_name) + r"\b", rhs):
+                    # Inter-procedural: if RHS is a call to a summarized method
+                    # that doesn't propagate taint, skip propagation
+                    if method_summaries:
+                        called = _extract_called_method(rhs)
+                        if called and called in method_summaries:
+                            summary = method_summaries[called]
+                            if summary.safe_return or not summary.propagates_taint:
+                                break
                     tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
                     changed = True
                     break
@@ -652,9 +1133,29 @@ def _process_assignment_taint(
     current_taint: set[str],
     source_vars: set[str] | None = None,
     source_lines: dict[str, int] | None = None,
+    coll_state: _CollectionTaintState | None = None,
+    src_lines: list[str] | None = None,
+    method_summaries: dict[str, TaintSummary] | None = None,
+    constant_vars: dict[str, int] | None = None,
 ) -> None:
-    """Process a single assignment for taint propagation/sanitization."""
+    """Process a single assignment for taint propagation/sanitization.
+
+    Constant propagation (v1.2): if the RHS is a ternary expression with a
+    resolvable condition, only check the branch that actually executes.
+    """
     rhs = asgn.value_text
+
+    # Track integer constants for constant propagation
+    if constant_vars is not None:
+        val = rhs.strip()
+        if _INT_LITERAL_RE.match(val):
+            constant_vars[asgn.name] = int(val)
+
+    # Collection-aware: track put/add on this line
+    if coll_state is not None and src_lines is not None:
+        line_idx = asgn.line - 1
+        if 0 <= line_idx < len(src_lines):
+            _track_collection_put(src_lines[line_idx], current_taint, coll_state)
 
     for pattern, kind in config.taint_source_patterns:
         if _matches_pattern(rhs, pattern):
@@ -665,11 +1166,45 @@ def _process_assignment_taint(
                     source_lines[asgn.name] = asgn.line
             break
     else:
-        for tvar in list(current_taint):
-            if re.search(r"\b" + re.escape(tvar) + r"\b", rhs):
-                current_taint.add(asgn.name)
-                break
+        # Constant propagation: check ternary before normal propagation
+        ternary_resolved = False
+        if constant_vars is not None:
+            ternary = _extract_ternary(rhs)
+            if ternary is not None:
+                cond, true_expr, false_expr = ternary
+                cond_result = _eval_condition_with_constants(cond, constant_vars)
+                if cond_result is True:
+                    ternary_resolved = True
+                    if _rhs_has_tainted_var(true_expr, list(current_taint)) is not None:
+                        current_taint.add(asgn.name)
+                elif cond_result is False:
+                    ternary_resolved = True
+                    if _rhs_has_tainted_var(false_expr, list(current_taint)) is not None:
+                        current_taint.add(asgn.name)
 
+        if not ternary_resolved:
+            # Collection-aware: check if RHS is a collection.get("key") call
+            coll_resolved = False
+            if coll_state is not None:
+                coll_result = _check_collection_get_taint(rhs, coll_state)
+                if coll_result is False:
+                    coll_resolved = True  # untainted key -- don't propagate
+                elif coll_result is True:
+                    coll_resolved = True
+                    current_taint.add(asgn.name)  # tainted key -- propagate
+
+            if not coll_resolved:
+                for tvar in list(current_taint):
+                    if re.search(r"\b" + re.escape(tvar) + r"\b", rhs):
+                        # Inter-procedural: check method summary before propagating
+                        if method_summaries:
+                            called = _extract_called_method(rhs)
+                            if called and called in method_summaries:
+                                summary = method_summaries[called]
+                                if summary.safe_return or not summary.propagates_taint:
+                                    break
+                        current_taint.add(asgn.name)
+                        break
     for sanitizer in config.taint_sanitizer_patterns:
         if sanitizer in rhs:
             current_taint.discard(asgn.name)
@@ -704,6 +1239,9 @@ def _update_stmt_taint(
     lines: list[str],
     source_vars: set[str] | None = None,
     source_lines: dict[str, int] | None = None,
+    coll_state: _CollectionTaintState | None = None,
+    constant_vars: dict[str, int] | None = None,
+    method_summaries: dict[str, TaintSummary] | None = None,
 ) -> None:
     """Update current_taint in-place for a single CFG statement.
 
@@ -717,7 +1255,9 @@ def _update_stmt_taint(
 
     for aidx in asgn_idxs:
         asgn = semantics.assignments[aidx]
-        _process_assignment_taint(asgn, config, current_taint, source_vars, source_lines)
+        _process_assignment_taint(asgn, config, current_taint, source_vars, source_lines,
+                                    coll_state=coll_state, src_lines=lines,
+                                    method_summaries=method_summaries, constant_vars=constant_vars)
 
     # Process all calls on this line (primary + extras)
     call_idxs = []
@@ -749,6 +1289,156 @@ def _get_all_children(sid: int, scope_children: dict[int, set[int]]) -> set[int]
     return result
 
 
+# ─── Inter-procedural method summaries ────────────────────────────────
+
+
+def _all_returns_are_literals(
+    semantics: FileSemantics,
+    func_scope_ids: set[int],
+    lines: list[str],
+    start_line: int,
+    end_line: int,
+) -> bool:
+    """Check if every return statement in the function returns a literal value."""
+    literal_return_re = re.compile(
+        r"""^\s*return\s+
+        (?:
+            "(?:[^"\\]|\\.)*"          # double-quoted string
+            |'(?:[^'\\]|\\.)*'         # single-quoted string
+            |-?\d+(?:\.\d+)?           # number
+            |true|false|null|none|nil  # boolean/null constants
+            |True|False|None           # Python capitalized
+        )\s*;?\s*$""",
+        re.VERBOSE | re.IGNORECASE,
+    )
+
+    found_any_return = False
+    for line_num in range(start_line, min(end_line + 1, len(lines) + 1)):
+        line_idx = line_num - 1
+        if 0 <= line_idx < len(lines):
+            line_text = lines[line_idx].strip()
+            if line_text.startswith("return ") or line_text in ("return;", "return"):
+                found_any_return = True
+                if line_text in ("return;", "return"):
+                    continue
+                if not literal_return_re.match(line_text):
+                    return False
+
+    return found_any_return
+
+
+def _taint_reaches_return(
+    semantics: FileSemantics,
+    tainted_vars: set[str],
+    func_scope_ids: set[int],
+    lines: list[str],
+    start_line: int,
+    end_line: int,
+) -> bool:
+    """Check if any tainted variable appears in a return statement."""
+    if not tainted_vars:
+        return False
+
+    for line_num in range(start_line, min(end_line + 1, len(lines) + 1)):
+        line_idx = line_num - 1
+        if 0 <= line_idx < len(lines):
+            line_text = lines[line_idx].strip()
+            if line_text.startswith("return "):
+                return_expr = line_text[len("return "):]
+                for tvar in tainted_vars:
+                    if re.search(r"\b" + re.escape(tvar) + r"\b", return_expr):
+                        return True
+
+    return False
+
+
+def _extract_called_method(rhs: str) -> str | None:
+    """Extract method name from a call expression.
+
+    'test.doSomething(request, param)' -> 'doSomething'
+    'obj.method(x)' -> 'method'
+    'doSomething(x)' -> 'doSomething'
+    """
+    m = re.search(r"\.(\w+)\s*\(", rhs)
+    if m:
+        return m.group(1)
+    m = re.search(r"\b(\w+)\s*\(", rhs)
+    if m:
+        name = m.group(1)
+        if name not in ("if", "for", "while", "switch", "catch", "new", "return", "typeof", "instanceof"):
+            return name
+    return None
+
+
+def _build_method_summaries(
+    semantics: FileSemantics,
+    config: LanguageConfig,
+    source_bytes: bytes,
+) -> dict[str, TaintSummary]:
+    """Pre-pass: summarize each function's taint behavior for inter-procedural analysis.
+
+    For each function in the file, determine whether tainted parameters flow
+    through to return values.  Only analyzes same-file methods.
+    """
+    summaries: dict[str, TaintSummary] = {}
+    lines = source_bytes.decode("utf-8", errors="replace").splitlines()
+
+    func_scopes = [s for s in semantics.scopes if s.kind == "function"]
+    scope_children = _build_scope_children(semantics)
+
+    for func_scope in func_scopes:
+        func_name = func_scope.name
+        if not func_name:
+            continue
+
+        func_scope_ids = _get_all_children(func_scope.scope_id, scope_children)
+
+        # Collect parameters for this function
+        params: set[str] = set()
+        for asgn in semantics.assignments:
+            if asgn.scope_id in func_scope_ids and asgn.is_parameter:
+                params.add(asgn.name)
+
+        if not params:
+            safe_ret = _all_returns_are_literals(
+                semantics, func_scope_ids, lines, func_scope.start_line, func_scope.end_line,
+            )
+            summaries[func_name] = TaintSummary(
+                propagates_taint=False, sanitizes=False, safe_return=safe_ret,
+            )
+            continue
+
+        # Run a mini taint propagation treating all params as tainted
+        initial_tainted = set(params)
+        taint_chains = _propagate_taint(
+            semantics, initial_tainted, func_scope_ids, config,
+        )
+        tainted_at_end = set(taint_chains.keys())
+
+        propagates = _taint_reaches_return(
+            semantics, tainted_at_end, func_scope_ids, lines,
+            func_scope.start_line, func_scope.end_line,
+        )
+
+        sanitizes = False
+        for asgn in semantics.assignments:
+            if asgn.scope_id not in func_scope_ids or asgn.is_parameter:
+                continue
+            if any(san in asgn.value_text for san in config.taint_sanitizer_patterns):
+                sanitizes = True
+                break
+
+        safe_ret = _all_returns_are_literals(
+            semantics, func_scope_ids, lines, func_scope.start_line, func_scope.end_line,
+        )
+
+        summaries[func_name] = TaintSummary(
+            propagates_taint=propagates, sanitizes=sanitizes, safe_return=safe_ret,
+        )
+
+    return summaries
+
+
 # ─── Entry point ─────────────────────────────────────────────────────
 
 
@@ -758,9 +1448,11 @@ def analyze_taint(
     config: LanguageConfig,
     filepath: str,
 ) -> list[Finding]:
-    """Run taint analysis on extracted semantics.
+    """Run taint analysis with inter-procedural method summaries.
 
-    Analyzes each function independently (intra-procedural).
+    Analyzes each function with same-file method summary resolution.
+    When a called method doesn't propagate taint (e.g., always returns
+    a literal), taint is not propagated through that call.
     Returns [] if no taint source/sink patterns configured.
     """
     if not config.taint_source_patterns or not config.taint_sink_patterns:
@@ -778,6 +1470,9 @@ def analyze_taint(
     tree_root = getattr(semantics, "_tree_root", None)
     branch_groups = _collect_branch_siblings(tree_root)
     conditional_bodies = _collect_conditional_bodies(tree_root)
+
+    # Inter-procedural: build method summaries for same-file call resolution
+    method_summaries = _build_method_summaries(semantics, config, source_bytes)
 
     for func_scope in func_scopes:
         func_scope_ids = _get_all_children(func_scope.scope_id, scope_children)
@@ -808,6 +1503,8 @@ def analyze_taint(
             branch_groups=branch_groups,
             conditional_bodies=conditional_bodies,
             sink_lines=potential_sink_lines,
+            source_bytes=source_bytes,
+            method_summaries=method_summaries,
         )
         tainted_vars = set(taint_chains.keys())
 
@@ -916,6 +1613,9 @@ def analyze_taint_pathsensitive(
     scope_children = _build_scope_children(semantics)
     func_scopes = [s for s in semantics.scopes if s.kind == "function"]
 
+    # Inter-procedural: build method summaries for same-file call resolution
+    method_summaries = _build_method_summaries(semantics, config, source_bytes)
+
     for func_scope in func_scopes:
         cfg = cfgs.get(func_scope.scope_id)
         if cfg is None:
@@ -931,9 +1631,17 @@ def analyze_taint_pathsensitive(
         source_vars = {s.variable for s in sources}
         source_lines = {s.variable: s.line for s in sources}
 
+        # Collection-aware taint state per block (for map/list key tracking)
+        block_coll_out: dict[int, _CollectionTaintState] = {
+            bid: _CollectionTaintState.empty() for bid in cfg.blocks
+        }
+
         # 2. Forward dataflow: taint sets per block
         # block_taint_out[block_id] = set of tainted variable names at block exit
         block_taint_out: dict[int, set[str]] = {bid: set() for bid in cfg.blocks}
+
+        # Constant propagation: track integer literals for ternary resolution
+        ps_constant_vars: dict[str, int] = {}
 
         rpo = get_reverse_postorder(cfg)
         max_iters = 20
@@ -947,13 +1655,18 @@ def analyze_taint_pathsensitive(
                 # Compute taint_in: union of all predecessor taint_outs
                 if block.is_entry:
                     taint_in: set[str] = set()
+                    coll_in = _CollectionTaintState.empty()
                 else:
                     taint_in = set()
+                    coll_in = _CollectionTaintState.empty()
                     for pred_id in block.predecessors:
                         taint_in |= block_taint_out.get(pred_id, set())
+                        coll_in = coll_in.merge(block_coll_out.get(
+                            pred_id, _CollectionTaintState.empty()))
 
                 # Process statements in order
                 current_taint = set(taint_in)
+                current_coll = coll_in.copy()
 
                 for stmt in block.statements:
                     _update_stmt_taint(
@@ -964,12 +1677,16 @@ def analyze_taint_pathsensitive(
                         lines,
                         source_vars=source_vars,
                         source_lines=source_lines,
+                        coll_state=current_coll,
+                        constant_vars=ps_constant_vars,
+                        method_summaries=method_summaries,
                     )
 
                 old_out = block_taint_out[block_id]
                 if current_taint != old_out:
                     block_taint_out[block_id] = current_taint
                     changed = True
+                block_coll_out[block_id] = current_coll
 
             if not changed:
                 break
@@ -987,18 +1704,25 @@ def analyze_taint_pathsensitive(
             # Compute taint_in for this block
             if block.is_entry:
                 taint_in = set()
+                coll_in = _CollectionTaintState.empty()
             else:
                 taint_in = set()
+                coll_in = _CollectionTaintState.empty()
                 for pred_id in block.predecessors:
                     taint_in |= block_taint_out.get(pred_id, set())
+                    coll_in = coll_in.merge(block_coll_out.get(
+                        pred_id, _CollectionTaintState.empty()))
 
             current_taint = set(taint_in)
+            current_coll = coll_in.copy()
 
             for stmt in block.statements:
                 line_idx = stmt.line - 1
 
                 # Update taint through this statement
-                _update_stmt_taint(stmt, semantics, config, current_taint, lines)
+                _update_stmt_taint(stmt, semantics, config, current_taint, lines,
+                                   coll_state=current_coll, constant_vars=ps_constant_vars,
+                                   method_summaries=method_summaries)
 
                 # Check for sinks (all calls on this line)
                 sink_call_idxs = []
