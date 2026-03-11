@@ -1,0 +1,14 @@
+# Benchmark fixtures — intentionally vulnerable code for accuracy testing
+benchmarks/
+
+# Generated documentation site (mkdocs output)
+site/
+
+# Demo file — intentionally vulnerable for demonstration
+demo.py
+
+# Documentation source (markdown, not production code)
+docs/
+
+# Test files — duplicate fixtures and __main__ imports are normal test patterns
+tests/

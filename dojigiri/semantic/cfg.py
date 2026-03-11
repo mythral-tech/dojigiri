@@ -172,21 +172,52 @@ class _CfgBuilder:
             line_to_block=self.line_to_block,
         )
 
+    def _dispatch_statement(
+        self, child, cur: BasicBlock, exit_block: BasicBlock,
+    ) -> list[int] | None:
+        """Dispatch a single statement node. Returns new tails, or None for regular statements."""
+        ntype = child.type
+
+        if ntype in self._if_types:
+            return self._process_if(child, cur, exit_block)
+        if ntype in self._for_types or ntype in self._while_types:
+            return self._process_loop(child, cur, exit_block)
+        if ntype in self._try_types:
+            return self._process_try(child, cur, exit_block)
+        if ntype in self._switch_types:
+            return self._process_switch(child, cur, exit_block)
+
+        if ntype in self._return_types or ntype in self._throw_types:
+            self._add_stmt(cur, child)
+            self._link(cur.id, exit_block.id)
+            return []
+
+        if ntype in self._break_types:
+            self._add_stmt(cur, child)
+            if self._loop_stack:
+                _, loop_exit = self._loop_stack[-1]
+                self._link(cur.id, loop_exit)
+            return []
+
+        if ntype in self._continue_types:
+            self._add_stmt(cur, child)
+            if self._loop_stack:
+                loop_header, _ = self._loop_stack[-1]
+                self._link(cur.id, loop_header)
+            return []
+
+        return None
+
     def _process_body(self, body_node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:
         """Process a sequence of statements. Returns list of block IDs that
         are the 'tails' (blocks that fall through to the next statement)."""
         tails = [current_block.id]
 
-        children = self._get_statement_children(body_node)
-
-        for child in children:
+        for child in self._get_statement_children(body_node):
             if not tails:
                 break  # unreachable code after return/break/continue
 
-            ntype = child.type
-
-            # Skip nested function definitions
-            if ntype in self._func_types:
+            if child.type in self._func_types:
                 continue
 
             # Merge tails into a single block if needed
@@ -196,48 +227,10 @@ class _CfgBuilder:
                     self._link(t, merge.id)
                 tails = [merge.id]
 
-            cur_id = tails[0]
-            cur = self.blocks[cur_id]
-
-            # ── If statement ─────────────────────────────────
-            if ntype in self._if_types:
-                tails = self._process_if(child, cur, exit_block)
-
-            # ── For / While loops ────────────────────────────
-            elif ntype in self._for_types or ntype in self._while_types:
-                tails = self._process_loop(child, cur, exit_block)
-
-            # ── Try/catch ────────────────────────────────────
-            elif ntype in self._try_types:
-                tails = self._process_try(child, cur, exit_block)
-
-            # ── Switch/match ─────────────────────────────────
-            elif ntype in self._switch_types:
-                tails = self._process_switch(child, cur, exit_block)
-
-            # ── Return/throw ─────────────────────────────────
-            elif ntype in self._return_types or ntype in self._throw_types:
-                self._add_stmt(cur, child)
-                self._link(cur.id, exit_block.id)
-                tails = []  # no fall-through
-
-            # ── Break ────────────────────────────────────────
-            elif ntype in self._break_types:
-                self._add_stmt(cur, child)
-                if self._loop_stack:
-                    _, loop_exit = self._loop_stack[-1]
-                    self._link(cur.id, loop_exit)
-                tails = []
-
-            # ── Continue ─────────────────────────────────────
-            elif ntype in self._continue_types:
-                self._add_stmt(cur, child)
-                if self._loop_stack:
-                    loop_header, _ = self._loop_stack[-1]
-                    self._link(cur.id, loop_header)
-                tails = []
-
-            # ── Regular statement ────────────────────────────
+            cur = self.blocks[tails[0]]
+            result = self._dispatch_statement(child, cur, exit_block)
+            if result is not None:
+                tails = result
             else:
                 self._add_stmt(cur, child)
                 tails = [cur.id]

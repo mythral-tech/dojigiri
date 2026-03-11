@@ -9,7 +9,7 @@ Calls into: llm_backend.py (AnthropicBackend check)
 Data in -> Data out: backend -> bool (supports tools), schema dicts
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from typing import TYPE_CHECKING
 

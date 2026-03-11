@@ -9,7 +9,7 @@ Calls into: deterministic.py, llm_fixes.py, cascade.py, helpers.py, config.py, d
 Data in -> Data out: ScanReport + file content -> FixReport (diffs + status)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import ast
 import logging
@@ -18,6 +18,7 @@ import re
 import shutil
 import sys
 import tempfile
+from dataclasses import dataclass
 
 from ..types import (
     Finding,
@@ -35,6 +36,119 @@ logger = logging.getLogger(__name__)
 
 
 # ─── Fix application ─────────────────────────────────────────────────
+
+
+def _apply_single_fix(
+    fix: Fix,
+    lines: list[str],
+    occupied_lines: set[int],
+    deleted_indices: set[int],
+    dry_run: bool,
+) -> None:
+    """Apply a single fix (deletion or replacement) to *lines* in-place.
+
+    Updates *occupied_lines* and *deleted_indices* as side-effects.
+    """
+    start_line = fix.line
+    end_line = fix.end_line if fix.end_line is not None else fix.line
+    fix_range = set(range(start_line, end_line + 1))
+
+    if fix_range & occupied_lines:
+        fix.status = FixStatus.SKIPPED
+        fix.fail_reason = "overlaps with another fix on the same line(s)"
+        return
+
+    line_idx = fix.line - 1  # 0-based
+    if line_idx < 0 or line_idx >= len(lines):
+        fix.status = FixStatus.FAILED
+        fix.fail_reason = f"line {fix.line} out of range (file has {len(lines)} lines)"
+        return
+
+    # Deletion fix (empty fixed_code)
+    if fix.original_code and not fix.fixed_code:
+        actual = lines[line_idx]
+        if fix.original_code.strip() and fix.original_code.strip() != actual.strip():
+            fix.status = FixStatus.FAILED
+            fix.fail_reason = "original code not found at this line (already fixed?)"
+            return
+        if not dry_run:
+            for li in range(line_idx, min(line_idx + (end_line - start_line + 1), len(lines))):
+                lines[li] = ""
+                deleted_indices.add(li)
+        fix.status = FixStatus.APPLIED
+        occupied_lines.update(fix_range)
+
+    elif fix.original_code and fix.fixed_code:
+        # Replacement fix
+        actual = lines[line_idx]
+        if fix.original_code.strip() and fix.original_code.strip() != actual.strip():
+            fix.status = FixStatus.FAILED
+            fix.fail_reason = "original code not found at this line (already fixed?)"
+            return
+        if not dry_run:
+            new_code = fix.fixed_code
+            if not new_code.endswith("\n") and actual.endswith("\n"):
+                new_code += "\n"
+            lines[line_idx] = new_code
+            for li in range(line_idx + 1, min(line_idx + (end_line - start_line + 1), len(lines))):
+                lines[li] = ""
+                deleted_indices.add(li)
+        fix.status = FixStatus.APPLIED
+        occupied_lines.update(fix_range)
+
+    else:
+        fix.status = FixStatus.FAILED
+        fix.fail_reason = "missing original or replacement code"
+
+
+def _write_fixed_content(
+    filepath: str,
+    lines: list[str],
+    deleted_indices: set[int],
+    fixes: list[Fix],
+    create_backup: bool,
+) -> None:
+    """Write fixed content to disk with backup and atomic rename."""
+    new_content = "".join(line for i, line in enumerate(lines) if i not in deleted_indices)
+
+    # Backup
+    if create_backup:
+        backup_path = filepath + ".doji.bak"
+        # SECURITY: Refuse to write backup if the path is a symlink.
+        if os.path.islink(backup_path):
+            logger.warning(
+                "Refusing to create backup — '%s' is a symlink (possible symlink attack)",
+                backup_path,
+            )
+        else:
+            try:
+                shutil.copy2(filepath, backup_path)
+            except OSError as e:
+                logger.warning("Could not create backup: %s", e)
+
+    # Atomic write: write to temp file, then rename
+    try:
+        dir_name = os.path.dirname(filepath) or "."
+        fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".doji.tmp")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(new_content)
+            if sys.platform == "win32" and os.path.exists(filepath):
+                os.replace(tmp_path, filepath)
+            else:
+                os.rename(tmp_path, filepath)
+        except (OSError, ValueError):
+            try:
+                os.unlink(tmp_path)
+            except OSError as e:
+                logger.debug("Failed to clean up temp file: %s", e)
+            raise
+    except OSError as e:
+        logger.warning("Error writing %s: %s", filepath, e)
+        for fix in fixes:
+            if fix.status == FixStatus.APPLIED:
+                fix.status = FixStatus.FAILED
+                fix.fail_reason = f"cannot write file: {e}"
 
 
 def apply_fixes(
@@ -66,112 +180,13 @@ def apply_fixes(
     indexed_fixes = sorted(enumerate(fixes), key=lambda x: x[1].line, reverse=True)
 
     occupied_lines: set[int] = set()
-    deleted_indices: set[int] = set()  # Track lines blanked by fixes (not original blank lines)
+    deleted_indices: set[int] = set()
 
-    for idx, fix in indexed_fixes:
-        # Determine the full line range this fix covers
-        start_line = fix.line
-        end_line = fix.end_line if fix.end_line is not None else fix.line
-        fix_range = set(range(start_line, end_line + 1))
-
-        if fix_range & occupied_lines:
-            fix.status = FixStatus.SKIPPED
-            fix.fail_reason = "overlaps with another fix on the same line(s)"
-            continue
-
-        # Validate: check that original_code matches the actual file content
-        line_idx = fix.line - 1  # 0-based
-        if line_idx < 0 or line_idx >= len(lines):
-            fix.status = FixStatus.FAILED
-            fix.fail_reason = f"line {fix.line} out of range (file has {len(lines)} lines)"
-            continue
-
-        # For deletion fixes (empty fixed_code), remove the line(s)
-        if fix.original_code and not fix.fixed_code:
-            # Verify original matches
-            actual = lines[line_idx]
-            if fix.original_code.strip() and fix.original_code.strip() != actual.strip():
-                fix.status = FixStatus.FAILED
-                fix.fail_reason = "original code not found at this line (already fixed?)"
-                continue
-            if not dry_run:
-                # Blank out all lines in the range
-                for li in range(line_idx, min(line_idx + (end_line - start_line + 1), len(lines))):
-                    lines[li] = ""
-                    deleted_indices.add(li)
-            fix.status = FixStatus.APPLIED
-            occupied_lines.update(fix_range)
-
-        elif fix.original_code and fix.fixed_code:
-            # Replacement fix -- verify original is present
-            actual = lines[line_idx]
-            if fix.original_code.strip() and fix.original_code.strip() != actual.strip():
-                fix.status = FixStatus.FAILED
-                fix.fail_reason = "original code not found at this line (already fixed?)"
-                continue
-            if not dry_run:
-                # Replace the first line with fixed_code
-                new_code = fix.fixed_code
-                if not new_code.endswith("\n") and actual.endswith("\n"):
-                    new_code += "\n"
-                lines[line_idx] = new_code
-                # Blank out remaining lines in range (line+1..end_line)
-                for li in range(line_idx + 1, min(line_idx + (end_line - start_line + 1), len(lines))):
-                    lines[li] = ""
-                    deleted_indices.add(li)
-            fix.status = FixStatus.APPLIED
-            occupied_lines.update(fix_range)
-
-        else:
-            fix.status = FixStatus.FAILED
-            fix.fail_reason = "missing original or replacement code"
+    for _idx, fix in indexed_fixes:
+        _apply_single_fix(fix, lines, occupied_lines, deleted_indices, dry_run)
 
     if not dry_run:
-        # Remove only lines that were blanked by fixes, not original blank lines
-        new_content = "".join(line for i, line in enumerate(lines) if i not in deleted_indices)
-
-        # Backup
-        if create_backup:
-            backup_path = filepath + ".doji.bak"
-            # SECURITY: Refuse to write backup if the path is a symlink.
-            # An attacker can plant a symlink (e.g. target.py.doji.bak -> /etc/passwd)
-            # and shutil.copy2 would follow it, overwriting the symlink target
-            # with the source file's content (arbitrary file overwrite).
-            if os.path.islink(backup_path):
-                logger.warning(
-                    "Refusing to create backup — '%s' is a symlink (possible symlink attack)",
-                    backup_path,
-                )
-            else:
-                try:
-                    shutil.copy2(filepath, backup_path)
-                except OSError as e:
-                    logger.warning("Could not create backup: %s", e)
-
-        # Atomic write: write to temp file, then rename
-        try:
-            dir_name = os.path.dirname(filepath) or "."
-            fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".doji.tmp")
-            try:
-                with os.fdopen(fd, "w", encoding="utf-8") as f:
-                    f.write(new_content)
-                # On Windows, we need to remove the target first
-                if sys.platform == "win32" and os.path.exists(filepath):
-                    os.replace(tmp_path, filepath)
-                else:
-                    os.rename(tmp_path, filepath)
-            except (OSError, ValueError):  # cleanup-and-reraise for temp file
-                try:
-                    os.unlink(tmp_path)
-                except OSError as e:
-                    logger.debug("Failed to clean up temp file: %s", e)
-                raise
-        except OSError as e:
-            logger.warning("Error writing %s: %s", filepath, e)
-            for fix in fixes:
-                if fix.status == FixStatus.APPLIED:
-                    fix.status = FixStatus.FAILED
-                    fix.fail_reason = f"cannot write file: {e}"
+        _write_fixed_content(filepath, lines, deleted_indices, fixes, create_backup)
 
     return fixes
 
@@ -183,7 +198,7 @@ def verify_fixes(
     filepath: str,
     language: str,
     pre_findings: list[Finding],
-    custom_rules=None,
+    custom_rules: list | None = None,
     allowed_cascades: set[str] | None = None,
 ) -> dict:
     """Re-scan a file after fixes and compare before/after.
@@ -428,54 +443,19 @@ def _rollback_from_backup(filepath: str, fixes: list[Fix], reason: str = "") -> 
 # ─── Main orchestrator ────────────────────────────────────────────────
 
 
-def fix_file(
-    filepath: str,
-    content: str,
-    language: str,
+def _generate_deterministic_fixes(
     findings: list[Finding],
-    use_llm: bool = False,
-    dry_run: bool = True,
-    create_backup: bool = True,
-    rules: list[str] | None = None,
-    cost_tracker=None,
-    verify: bool = True,
-    custom_rules=None,
-    semantics=None,
-    type_map=None,
-) -> FixReport:
-    """Generate and optionally apply fixes for all findings in a file.
-
-    Flow:
-    1. Filter findings to rules if specified
-    2. For each finding: check DETERMINISTIC_FIXERS first
-    3. Remaining findings: batch to generate_llm_fixes() if use_llm=True
-    4. Sort all fixes by line (descending)
-    5. Call apply_fixes() with dry_run flag
-    6. Return FixReport
-    """
-    # Filter by rules if specified
-    if rules:
-        rule_set = set(rules)
-        findings = [f for f in findings if f.rule in rule_set]  # doji:ignore(possibly-uninitialized)
-
-    if not findings:
-        return FixReport(
-            root=filepath,
-            files_fixed=0,
-            total_fixes=0,
-            applied=0,
-            skipped=0,
-            failed=0,  # doji:ignore(possibly-uninitialized)
-        )
-
-    lines = content.splitlines(keepends=True)
-    all_fixes: list[Fix] = []
-    remaining: list[Finding] = []
-
-    # Part 1: Deterministic fixes -- all fixers receive FixContext
+    lines: list[str],
+    content: str,
+    semantics: object | None,
+    type_map: object | None,
+    language: str,
+) -> tuple[list[Fix], list[Finding]]:
+    """Run deterministic fixers on each finding. Returns (fixes, remaining_findings)."""
     import time as _time
 
-    _fix_start = _time.perf_counter()
+    all_fixes: list[Fix] = []
+    remaining: list[Finding] = []
 
     for finding in findings:
         fixer = DETERMINISTIC_FIXERS.get(finding.rule)
@@ -509,44 +489,16 @@ def fix_file(
             _record_fix_metric(finding.rule, False, _dur_ms)
             remaining.append(finding)
 
-    # Part 2: LLM fixes for remaining findings
-    if use_llm and remaining:
-        from ..plugin import require_llm_plugin
+    return all_fixes, remaining
 
-        llm_mod = require_llm_plugin()
-        CostTracker = llm_mod.CostTracker
 
-        if cost_tracker is None:
-            cost_tracker = CostTracker()
-        llm_fixes = generate_llm_fixes(
-            filepath,
-            content,
-            language,
-            remaining,
-            cost_tracker,
-        )
-        all_fixes.extend(llm_fixes)
-
-    if not all_fixes:
-        return FixReport(
-            root=filepath,
-            files_fixed=0,
-            total_fixes=0,
-            applied=0,
-            skipped=0,
-            failed=0,
-        )
-
-    # Resolve conflicts between fixers that target the same lines.
-    #
-    # 1. If a variable is both hardcoded-secret AND unused-variable,
-    #    unused-variable wins (delete dead code, don't bother securing it).
-    # 2. Don't remove imports that surviving fixes still need.
+def _resolve_fix_conflicts(all_fixes: list[Fix]) -> list[Fix]:
+    """Resolve conflicts between fixers that target the same lines."""
+    # 1. unused-variable wins over hardcoded-secret on same line
     unused_var_lines = {fix.line for fix in all_fixes if fix.rule == "unused-variable"}
     all_fixes = [fix for fix in all_fixes if not (fix.rule == "hardcoded-secret" and fix.line in unused_var_lines)]
 
-    # 3. If both open-without-with and resource-leak target the same variable in
-    #    the same file, drop the resource-leak fix (the with block subsumes .close()).
+    # 2. open-without-with subsumes resource-leak for the same variable
     oww_vars: set[tuple[str, str]] = set()
     for fix in all_fixes:
         if fix.rule == "open-without-with" and fix.fixed_code:
@@ -564,7 +516,7 @@ def fix_file(
             )
         ]
 
-    # Check which modules surviving fixes still need
+    # 3. Don't remove imports that surviving fixes still need
     modules_needed: set[str] = set()
     for fix in all_fixes:
         if fix.rule != "unused-import" and fix.fixed_code:
@@ -587,45 +539,58 @@ def fix_file(
             )
         ]
 
-    # Apply fixes
-    all_fixes = apply_fixes(filepath, all_fixes, dry_run=dry_run, create_backup=create_backup)
+    return all_fixes
 
-    applied = sum(1 for f in all_fixes if f.status == FixStatus.APPLIED)
-    skipped = sum(1 for f in all_fixes if f.status == FixStatus.SKIPPED)
+
+@dataclass
+class PostFixConfig:
+    """Groups parameters for post-fix validation and verification."""
+
+    filepath: str
+    language: str
+    content: str
+    dry_run: bool
+    verify: bool
+    custom_rules: object = None
+    semantics: object = None
+
+
+def _postfix_validate_and_verify(
+    cfg: PostFixConfig,
+    all_fixes: list[Fix],
+    findings: list[Finding],
+    applied: int,
+) -> tuple[int, int, dict | None]:
+    """Run post-fix syntax validation and verification. Returns (applied, failed, verification)."""
     failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
+    verification = None
 
     # Post-fix syntax validation -- rollback if broken
-    if not dry_run and applied > 0:
+    if not cfg.dry_run and applied > 0:
         try:
-            with open(filepath, encoding="utf-8", errors="replace") as f:
+            with open(cfg.filepath, encoding="utf-8", errors="replace") as f:
                 fixed_content = f.read()
-            syntax_err = _validate_syntax(filepath, fixed_content, language)
+            syntax_err = _validate_syntax(cfg.filepath, fixed_content, cfg.language)
             if syntax_err:
                 logger.warning("Syntax validation failed after fix: %s -- rolling back", syntax_err)
-                _rollback_from_backup(filepath, all_fixes, reason=f"rolled back -- {syntax_err}")
+                _rollback_from_backup(cfg.filepath, all_fixes, reason=f"rolled back -- {syntax_err}")
                 applied = 0
                 failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
         except OSError as e:
             logger.debug("Failed to validate/rollback fix: %s", e)
 
-    llm_cost = 0.0
-    if cost_tracker:
-        llm_cost = cost_tracker.total_cost
-
     # Verify fixes if actually applied
-    verification = None
-    if verify and not dry_run and applied > 0:
-        # Derive expected cascades from AST analysis of original content + applied fixes
+    if cfg.verify and not cfg.dry_run and applied > 0:
         applied_fix_list = [f for f in all_fixes if f.status == FixStatus.APPLIED]
-        allowed_cascades = derive_expected_cascades(content, language, applied_fix_list, semantics=semantics)
+        allowed_cascades = derive_expected_cascades(cfg.content, cfg.language, applied_fix_list, semantics=cfg.semantics)
         verification = verify_fixes(
-            filepath, language, findings, custom_rules=custom_rules, allowed_cascades=allowed_cascades
+            cfg.filepath, cfg.language, findings, custom_rules=cfg.custom_rules, allowed_cascades=allowed_cascades
         )
         # Auto-rollback if fixes introduced new issues
         if verification and verification.get("new_issues", 0) > 0:
             logger.warning("Fixes introduced %d new issue(s) -- rolling back", verification["new_issues"])
             _rollback_from_backup(
-                filepath, all_fixes, reason=f"rolled back -- fixes introduced {verification['new_issues']} new issue(s)"
+                cfg.filepath, all_fixes, reason=f"rolled back -- fixes introduced {verification['new_issues']} new issue(s)"
             )
             applied = 0
             failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
@@ -634,8 +599,38 @@ def fix_file(
                 "reason": f"{verification.get('new_issues', 0)} new issue(s) introduced",
             }
 
-    # Record total fix duration in metrics
-    _fix_total_ms = (_time.perf_counter() - _fix_start) * 1000
+    return applied, failed, verification
+
+
+def _empty_fix_report(filepath: str) -> FixReport:
+    """Return a FixReport with zero counts."""
+    return FixReport(
+        root=filepath, files_fixed=0, total_fixes=0,
+        applied=0, skipped=0, failed=0,
+    )
+
+
+def _generate_llm_fixes_if_needed(
+    filepath: str, content: str, language: str,
+    remaining: list[Finding], use_llm: bool, cost_tracker: object | None,
+) -> tuple[list[Fix], object]:
+    """Generate LLM fixes for remaining findings if enabled."""
+    if not (use_llm and remaining):
+        return [], cost_tracker
+    from ..plugin import require_llm_plugin
+
+    llm_mod = require_llm_plugin()
+    if cost_tracker is None:
+        cost_tracker = llm_mod.CostTracker()
+    llm_fixes = generate_llm_fixes(filepath, content, language, remaining, cost_tracker)
+    return llm_fixes, cost_tracker
+
+
+def _record_fix_duration(start_time: float) -> None:
+    """Record total fix duration in metrics session."""
+    import time as _time
+
+    _fix_total_ms = (_time.perf_counter() - start_time) * 1000
     try:
         from ..metrics import get_session
 
@@ -645,6 +640,81 @@ def fix_file(
     except Exception as e:
         logger.debug("Failed to record fix duration metrics: %s", e)
 
+
+def fix_file(
+    filepath: str,
+    content: str,
+    language: str,
+    findings: list[Finding],
+    use_llm: bool = False,
+    dry_run: bool = True,
+    create_backup: bool = True,
+    rules: list[str] | None = None,
+    cost_tracker: object | None = None,
+    verify: bool = True,
+    custom_rules: list | None = None,
+    semantics: object | None = None,
+) -> FixReport:
+    """Generate and optionally apply fixes for all findings in a file.
+
+    Flow:
+    1. Filter findings to rules if specified
+    2. For each finding: check DETERMINISTIC_FIXERS first
+    3. Remaining findings: batch to generate_llm_fixes() if use_llm=True
+    4. Sort all fixes by line (descending)
+    5. Call apply_fixes() with dry_run flag
+    6. Return FixReport
+    """
+    # Support passing StaticAnalysisResult as semantics to bundle semantics + type_map
+    type_map = getattr(semantics, "type_map", None)
+    if hasattr(semantics, "semantics"):
+        # Caller passed a StaticAnalysisResult — unwrap it
+        semantics = semantics.semantics
+    if rules:
+        rule_set = set(rules)
+        findings = [f for f in findings if f.rule in rule_set]  # doji:ignore(possibly-uninitialized)
+
+    if not findings:
+        return _empty_fix_report(filepath)
+
+    import time as _time
+
+    _fix_start = _time.perf_counter()
+    lines = content.splitlines(keepends=True)
+
+    # Part 1: Deterministic fixes
+    all_fixes, remaining = _generate_deterministic_fixes(
+        findings, lines, content, semantics, type_map, language,
+    )
+
+    # Part 2: LLM fixes for remaining findings
+    llm_fixes, cost_tracker = _generate_llm_fixes_if_needed(
+        filepath, content, language, remaining, use_llm, cost_tracker,
+    )
+    all_fixes.extend(llm_fixes)
+
+    if not all_fixes:
+        return _empty_fix_report(filepath)
+
+    # Resolve conflicts and apply
+    all_fixes = _resolve_fix_conflicts(all_fixes)
+    all_fixes = apply_fixes(filepath, all_fixes, dry_run=dry_run, create_backup=create_backup)
+
+    applied = sum(1 for f in all_fixes if f.status == FixStatus.APPLIED)
+    skipped = sum(1 for f in all_fixes if f.status == FixStatus.SKIPPED)
+
+    # Post-fix validation and verification
+    postfix_cfg = PostFixConfig(
+        filepath=filepath, language=language, content=content,
+        dry_run=dry_run, verify=verify, custom_rules=custom_rules,
+        semantics=semantics,
+    )
+    applied, failed, verification = _postfix_validate_and_verify(
+        postfix_cfg, all_fixes, findings, applied,
+    )
+
+    _record_fix_duration(_fix_start)
+
     return FixReport(
         root=filepath,
         files_fixed=1 if applied > 0 else 0,
@@ -653,6 +723,6 @@ def fix_file(
         skipped=skipped,
         failed=failed,
         fixes=all_fixes,
-        llm_cost_usd=llm_cost,
+        llm_cost_usd=cost_tracker.total_cost if cost_tracker else 0.0,
         verification=verification,
     )

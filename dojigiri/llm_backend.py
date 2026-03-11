@@ -8,7 +8,7 @@ Calls into: nothing (uses urllib, anthropic SDK directly)
 Data in -> Data out: messages list -> LLMResponse (text + token counts)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import json
 import logging

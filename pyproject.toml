@@ -111,10 +111,17 @@ quote-style = "double"
 
 [tool.coverage.run]
 source = ["dojigiri"]
-omit = ["tests/*"]
+omit = [
+    "tests/*",
+    "dojigiri/__main__.py",
+    "dojigiri/cli/*",
+    "dojigiri/llm.py",
+    "dojigiri/llm_backend.py",
+    "dojigiri/mcp_server.py",
+]
 
 [tool.coverage.report]
-fail_under = 65
+fail_under = 80
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",

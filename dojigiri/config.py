@@ -8,7 +8,7 @@ Calls into: types.py (enums for custom rule compilation)
 Data in → Data out: .doji.toml files → config dicts; regex strings → compiled rules.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import logging
 import os
@@ -405,7 +405,7 @@ def _is_safe_regex(pattern_str: str) -> bool:
         compiled = re.compile(pattern_str)
         import concurrent.futures
 
-        def _test_regex():
+        def _test_regex() -> None:
             for test_str in ["a" * 10000, "b" * 10000, "ab" * 5000, "\x00" * 10000]:
                 compiled.search(test_str)
 

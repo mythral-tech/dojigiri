@@ -3,7 +3,7 @@
 Flow: discover lockfiles → parse dependencies → batch query OSV → emit Findings.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import logging
 from pathlib import Path

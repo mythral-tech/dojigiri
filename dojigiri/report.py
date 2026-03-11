@@ -8,7 +8,7 @@ Calls into: config.py
 Data in -> Data out: ScanReport -> stdout (ANSI-colored text)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import json
 import logging

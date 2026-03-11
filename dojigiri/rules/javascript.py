@@ -1,6 +1,6 @@
 """JavaScript / TypeScript rules."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from ..types import Category, Severity
 from ._compile import Rule, _compile

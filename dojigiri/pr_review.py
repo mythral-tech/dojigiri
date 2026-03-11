@@ -10,7 +10,7 @@ Calls into: analyzer.py (scan_diff, get_changed_files, get_changed_lines),
 Data in -> Data out: git diff (or PR number) -> PRReview structured result
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import json
 import logging
@@ -315,13 +315,75 @@ def _parse_review_response(text: str) -> dict | None:
 # ─── Review pipeline ─────────────────────────────────────────────────
 
 
+def _resolve_base_ref(pr_number: int | None, base_ref: str | None, git_root: Path) -> str | None:
+    """Resolve the git base ref, fetching from GH if a PR number is provided."""
+    if pr_number is None:
+        return base_ref
+    result = subprocess.run(  # doji:ignore(taint-flow)
+        ["gh", "pr", "view", str(pr_number), "--json", "baseRefName", "--jq", ".baseRefName"],
+        capture_output=True, cwd=str(git_root), encoding="utf-8", errors="replace",
+    )
+    if result.returncode == 0 and result.stdout.strip():
+        return result.stdout.strip()
+    return base_ref or "main"
+
+
+def _enrich_with_llm(
+    file_reviews: list[FileReview],
+    git_root: Path,
+    resolved_ref: str,
+    cost_tracker: object,
+) -> None:
+    """Enrich file reviews with LLM analysis (mutates file_reviews in place)."""
+    from .llm_backend import TIER_DEEP
+    from .plugin import require_llm_plugin
+
+    _llm = require_llm_plugin()
+    backend = _llm._get_backend(tier=TIER_DEEP)
+
+    for fr in file_reviews:
+        filepath = git_root / fr.path
+        if not filepath.is_file():
+            continue
+        diff = _get_file_diff(git_root, resolved_ref, filepath)
+        if not diff:
+            continue
+        user_msg = _build_review_prompt(fr.path, diff, fr.findings)
+        try:
+            response = _llm._api_call_with_retry(
+                backend,
+                system=_REVIEW_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_msg}],
+                max_tokens=LLM_REVIEW_MAX_TOKENS,
+                temperature=0.0,
+            )
+            cost_tracker.add_response(response, backend=backend)
+            parsed = _parse_review_response(response.text)
+            if parsed and "findings" in parsed:
+                fr.llm_analysis = [f for f in parsed["findings"] if not f.get("false_positive", False)]
+        except Exception as e:
+            logger.warning("LLM review error for %s: %s", fr.path, e)
+
+
+def _build_summary(file_reviews: list[FileReview]) -> str:
+    """Build a human-readable summary string from file reviews."""
+    total = sum(len(fr.findings) for fr in file_reviews)
+    counts = {
+        "critical": sum(fr.critical_count for fr in file_reviews),
+        "warning": sum(fr.warning_count for fr in file_reviews),
+        "info": sum(fr.info_count for fr in file_reviews),
+    }
+    parts = [f"{v} {k}" for k, v in counts.items() if v]
+    return f"{total} finding(s) ({', '.join(parts)})" if parts else "No findings"
+
+
 def review_diff(
     root: Path,
     base_ref: str | None = None,
     pr_number: int | None = None,
     use_llm: bool = False,
     language_filter: str | None = None,
-    custom_rules=None,
+    custom_rules: list | None = None,
 ) -> PRReview:
     """Run a PR-style security review on changed files.
 
@@ -340,118 +402,34 @@ def review_diff(
     if not git_root:
         raise ValueError("Not a git repository (or git is not installed).")
 
-    # Step 1: Get static findings via existing scan_diff
-    if pr_number is not None:
-        # For PR mode, we still use scan_diff against the PR's base
-        # gh pr view to get base ref
-        result = subprocess.run(  # doji:ignore(taint-flow)
-            ["gh", "pr", "view", str(pr_number), "--json", "baseRefName", "--jq", ".baseRefName"],
-            capture_output=True,
-            cwd=str(git_root),
-            encoding="utf-8",
-            errors="replace",
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            resolved_ref = result.stdout.strip()
-        else:
-            resolved_ref = base_ref or "main"
-    else:
-        resolved_ref = base_ref
+    resolved_ref = _resolve_base_ref(pr_number, base_ref, git_root)
 
-    # Run scan_diff for static analysis
     try:
         scan_report, resolved_ref = scan_diff(
-            root,
-            base_ref=resolved_ref,
-            language_filter=language_filter,
+            root, base_ref=resolved_ref, language_filter=language_filter,
             custom_rules=custom_rules,
         )
     except ValueError as e:
         raise ValueError(str(e)) from e
 
-    # Step 2: Build file reviews from static findings
     file_reviews = []
     for fa in scan_report.file_analyses:
         if fa.findings:
-            # Sort findings: critical first, then by line
             sorted_findings = sorted(fa.findings, key=lambda f: (SEVERITY_ORDER[f.severity], f.line))
             file_reviews.append(FileReview(path=fa.path, findings=sorted_findings))
 
-    # Step 3: Optionally enrich with LLM
     from .plugin import require_llm_plugin
-
     _llm = require_llm_plugin()
-    CostTracker = _llm.CostTracker
-    LLMError = _llm.LLMError
-    _api_call_with_retry = _llm._api_call_with_retry
-    _get_backend = _llm._get_backend
+    cost_tracker = _llm.CostTracker()
 
-    cost_tracker = CostTracker()
     if use_llm and file_reviews:
-        from .llm_backend import TIER_DEEP
-
-        backend = _get_backend(tier=TIER_DEEP)
-
-        for fr in file_reviews:
-            filepath = git_root / fr.path
-            if not filepath.is_file():
-                continue
-
-            # Get diff for this file
-            diff = _get_file_diff(git_root, resolved_ref, filepath)
-            if not diff:
-                continue
-
-            # Build and send prompt
-            user_msg = _build_review_prompt(fr.path, diff, fr.findings)
-
-            try:
-                response = _api_call_with_retry(
-                    backend,
-                    system=_REVIEW_SYSTEM_PROMPT,
-                    messages=[{"role": "user", "content": user_msg}],
-                    max_tokens=LLM_REVIEW_MAX_TOKENS,
-                    temperature=0.0,
-                )
-                cost_tracker.add_response(response, backend=backend)
-
-                parsed = _parse_review_response(response.text)
-                if parsed and "findings" in parsed:
-                    # Filter out false positives
-                    real_findings = [f for f in parsed["findings"] if not f.get("false_positive", False)]
-                    fr.llm_analysis = real_findings
-            except (LLMError, Exception) as e:
-                logger.warning("LLM review error for %s: %s", fr.path, e)
-
-    # Step 4: Assess overall risk
-    risk_level = _assess_risk(file_reviews)
-
-    # If LLM provided a risk assessment, prefer it
-    if use_llm and file_reviews:
-        for fr in file_reviews:
-            if fr.llm_analysis is not None:
-                break
-
-    # Build summary
-    total = sum(len(fr.findings) for fr in file_reviews)
-    critical = sum(fr.critical_count for fr in file_reviews)
-    warning = sum(fr.warning_count for fr in file_reviews)
-    info = sum(fr.info_count for fr in file_reviews)
-
-    parts = []
-    if critical:
-        parts.append(f"{critical} critical")
-    if warning:
-        parts.append(f"{warning} warning")
-    if info:
-        parts.append(f"{info} info")
-    summary = f"{total} finding(s) ({', '.join(parts)})" if parts else "No findings"
+        _enrich_with_llm(file_reviews, git_root, resolved_ref, cost_tracker)
 
     return PRReview(
         base_ref=resolved_ref,
-        risk_level=risk_level,
+        risk_level=_assess_risk(file_reviews),
         file_reviews=file_reviews,
-        summary=summary,
+        summary=_build_summary(file_reviews),
         llm_cost_usd=cost_tracker.total_cost,
     )
 

@@ -8,7 +8,7 @@ Calls into: config.py (report paths only).
 Data in → Data out: ScanReport / file paths in → JSON files + SHA-256 cache out.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import hashlib
 import json

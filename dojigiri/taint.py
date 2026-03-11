@@ -18,7 +18,7 @@ Data in → Data out:
   - dict[filepath, content] → list[CrossFileFinding] (cross-file taint)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import ast
 import logging
@@ -169,33 +169,50 @@ def _get_name(node: ast.expr) -> str | None:
     return None
 
 
+def _expr_contains_name_joinedstr(node: ast.JoinedStr, name: str) -> bool:
+    """Check if an f-string references a given variable name."""
+    for value in node.values:
+        if isinstance(value, ast.FormattedValue) and _expr_contains_name(value.value, name):
+            return True
+    return False
+
+
+def _expr_contains_name_call(node: ast.Call, name: str) -> bool:
+    """Check if a call expression references a given variable name (skipping sanitizers)."""
+    call_name = _get_call_name(node)
+    if call_name and call_name in SANITIZER_CALLS:
+        return False  # sanitized
+    for arg in node.args:
+        if _expr_contains_name(arg, name):
+            return True
+    for kw in node.keywords:
+        if kw.value and _expr_contains_name(kw.value, name):
+            return True
+    return False
+
+
+def _expr_contains_name_dict(node: ast.Dict, name: str) -> bool:
+    """Check if a dict literal references a given variable name in its values."""
+    for v in node.values:
+        if v and _expr_contains_name(v, name):
+            return True
+    return False
+
+
 def _expr_contains_name(node: ast.expr, name: str) -> bool:
     """Check if an expression references a given variable name."""
     if isinstance(node, ast.Name):
         return node.id == name
     if isinstance(node, ast.JoinedStr):
-        # f-string: check all values
-        for value in node.values:
-            if isinstance(value, ast.FormattedValue) and _expr_contains_name(value.value, name):
-                return True
+        return _expr_contains_name_joinedstr(node, name)
     if isinstance(node, ast.BinOp):
         return _expr_contains_name(node.left, name) or _expr_contains_name(node.right, name)
     if isinstance(node, ast.Call):
-        call_name = _get_call_name(node)
-        if call_name and call_name in SANITIZER_CALLS:
-            return False  # sanitized
-        for arg in node.args:
-            if _expr_contains_name(arg, name):
-                return True
-        for kw in node.keywords:
-            if kw.value and _expr_contains_name(kw.value, name):
-                return True
+        return _expr_contains_name_call(node, name)
     if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
         return any(_expr_contains_name(elt, name) for elt in node.elts)
     if isinstance(node, ast.Dict):
-        for v in node.values:
-            if v and _expr_contains_name(v, name):
-                return True
+        return _expr_contains_name_dict(node, name)
     if isinstance(node, ast.Subscript):
         return _expr_contains_name(node.value, name) or (
             isinstance(node.slice, ast.expr) and _expr_contains_name(node.slice, name)
@@ -604,6 +621,79 @@ def _find_tainted_in_expr(
 # ─── Function taint summarization (for cross-file) ───────────────────
 
 
+def _collect_call_nodes_from_stmt(stmt: ast.stmt) -> list[ast.Call]:
+    """Collect all Call nodes from a statement (bare expr, return, or assign)."""
+    call_nodes: list[ast.Call] = []
+    if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+        call_nodes.append(stmt.value)
+    elif isinstance(stmt, ast.Return) and stmt.value is not None:
+        for node in ast.walk(stmt.value):
+            if isinstance(node, ast.Call):
+                call_nodes.append(node)
+    elif isinstance(stmt, ast.Assign):
+        for node in ast.walk(stmt.value):
+            if isinstance(node, ast.Call):
+                call_nodes.append(node)
+    return call_nodes
+
+
+def _check_sink_flows(
+    call_nodes: list[ast.Call],
+    params: list[str],
+    taint_map: dict[str, TaintVar],
+    param_flows_to_sink: dict[int, str],
+) -> None:
+    """Check if any tainted parameters flow into sink calls, updating param_flows_to_sink."""
+    for call_node in call_nodes:
+        call_name = _get_call_name(call_node)
+        if not call_name:
+            continue
+        sink_kind = _call_is_sink(call_name)
+        if not sink_kind:
+            continue
+        for arg in call_node.args:
+            tvar = _find_tainted_in_expr(arg, taint_map)
+            if tvar and tvar.source_kind == "parameter":
+                try:
+                    idx = params.index(tvar.name)
+                    param_flows_to_sink[idx] = sink_kind
+                except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
+                    pass
+        for kw in call_node.keywords:
+            if kw.value:
+                tvar = _find_tainted_in_expr(kw.value, taint_map)
+                if tvar and tvar.source_kind == "parameter":
+                    try:
+                        idx = params.index(tvar.name)
+                        param_flows_to_sink[idx] = sink_kind
+                    except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
+                        pass
+
+
+def _check_return_taint(
+    stmt: ast.Return,
+    params: list[str],
+    taint_map: dict[str, TaintVar],
+    returned_param_indices: set[int],
+) -> bool:
+    """Check if a return statement returns tainted data. Returns True if tainted."""
+    if stmt.value is None:
+        return False
+    tvar = _find_tainted_in_expr(stmt.value, taint_map)
+    if tvar and tvar.source_kind == "parameter":
+        try:
+            idx = params.index(tvar.name)
+            returned_param_indices.add(idx)
+        except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
+            pass
+        return True
+    # Also check if the return value contains tainted data via propagation
+    for vname, vinfo in taint_map.items():
+        if vinfo.tainted and _expr_contains_name(stmt.value, vname):
+            return True
+    return False
+
+
 def _summarize_function_taint(
     func_node: ast.FunctionDef | ast.AsyncFunctionDef,
     filepath: str,
@@ -627,60 +717,13 @@ def _summarize_function_taint(
     returns_tainted = False
     returned_param_indices: set[int] = set()
 
-    # Walk the function body — check ALL calls for sinks, not just bare Expr statements.
-    # Sinks can appear in return statements (return httpx.get(url)), assignments
-    # (resp = httpx.get(url)), or bare expression statements.
     for stmt in ast.walk(func_node):
-        # Collect all Call nodes from any context within this statement
-        call_nodes: list[ast.Call] = []
-        if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
-            call_nodes.append(stmt.value)
-        elif isinstance(stmt, ast.Return) and stmt.value is not None:
-            for node in ast.walk(stmt.value):
-                if isinstance(node, ast.Call):
-                    call_nodes.append(node)
-        elif isinstance(stmt, ast.Assign):
-            for node in ast.walk(stmt.value):
-                if isinstance(node, ast.Call):
-                    call_nodes.append(node)
+        call_nodes = _collect_call_nodes_from_stmt(stmt)
+        _check_sink_flows(call_nodes, params, taint_map, param_flows_to_sink)
 
-        for call_node in call_nodes:
-            call_name = _get_call_name(call_node)
-            if call_name:
-                sink_kind = _call_is_sink(call_name)
-                if sink_kind:
-                    for arg in call_node.args:
-                        tvar = _find_tainted_in_expr(arg, taint_map)
-                        if tvar and tvar.source_kind == "parameter":
-                            try:
-                                idx = params.index(tvar.name)
-                                param_flows_to_sink[idx] = sink_kind
-                            except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
-                                pass
-                    for kw in call_node.keywords:
-                        if kw.value:
-                            tvar = _find_tainted_in_expr(kw.value, taint_map)
-                            if tvar and tvar.source_kind == "parameter":
-                                try:
-                                    idx = params.index(tvar.name)
-                                    param_flows_to_sink[idx] = sink_kind
-                                except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
-                                    pass
-
-        if isinstance(stmt, ast.Return) and stmt.value is not None:
-            tvar = _find_tainted_in_expr(stmt.value, taint_map)
-            if tvar and tvar.source_kind == "parameter":
+        if isinstance(stmt, ast.Return):
+            if _check_return_taint(stmt, params, taint_map, returned_param_indices):
                 returns_tainted = True
-                try:
-                    idx = params.index(tvar.name)
-                    returned_param_indices.add(idx)
-                except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
-                    pass
-            # Also check if the return value contains tainted data via propagation
-            for vname, vinfo in taint_map.items():
-                if vinfo.tainted and _expr_contains_name(stmt.value, vname):
-                    returns_tainted = True
-                    break
 
     qualified = f"{module_name}.{func_node.name}" if module_name else func_node.name
 
@@ -758,6 +801,50 @@ def _propagate_intra_file_sinks(
             break
 
 
+def _track_assignment_params(
+    stmt: ast.Assign,
+    var_to_params: dict[str, set[int]],
+) -> None:
+    """Track which params flow through assignments (e.g. resp = call(url))."""
+    for target in stmt.targets:
+        if isinstance(target, ast.Name):
+            referenced_params: set[int] = set()
+            for node in ast.walk(stmt.value):
+                if isinstance(node, ast.Name) and node.id in var_to_params:
+                    referenced_params |= var_to_params[node.id]
+            if referenced_params:
+                var_to_params[target.id] = referenced_params
+
+
+def _propagate_callee_sinks(
+    call_node: ast.Call,
+    callee_summary: FunctionTaintSummary,
+    var_to_params: dict[str, set[int]],
+    current_summary: FunctionTaintSummary,
+) -> None:
+    """Propagate sink flows from a callee back to the caller's parameters."""
+    for callee_param_idx, sink_kind in callee_summary.param_flows_to_sink.items():
+        if callee_param_idx < len(call_node.args):
+            arg = call_node.args[callee_param_idx]
+            caller_param_indices = _find_param_indices_in_expr(arg, var_to_params)
+            for caller_pidx in caller_param_indices:
+                if caller_pidx not in current_summary.param_flows_to_sink:
+                    current_summary.param_flows_to_sink[caller_pidx] = sink_kind
+
+        # Also check keyword arguments
+        for kw in call_node.keywords:
+            if kw.arg and kw.value:
+                try:
+                    kw_idx = callee_summary.params.index(kw.arg)
+                except ValueError:
+                    continue
+                if kw_idx in callee_summary.param_flows_to_sink:
+                    caller_param_indices = _find_param_indices_in_expr(kw.value, var_to_params)
+                    for caller_pidx in caller_param_indices:
+                        if caller_pidx not in current_summary.param_flows_to_sink:
+                            current_summary.param_flows_to_sink[caller_pidx] = callee_summary.param_flows_to_sink[kw_idx]
+
+
 def _trace_param_flow_stmt(
     stmt: ast.stmt,
     var_to_params: dict[str, set[int]],
@@ -766,66 +853,21 @@ def _trace_param_flow_stmt(
     params: list[str],
 ) -> None:
     """Process a statement to trace parameter flow through local function calls."""
-    # Track assignments: if `resp = some_call(url)`, and url maps to param[0],
-    # then resp inherits those param associations
     if isinstance(stmt, ast.Assign):
-        for target in stmt.targets:
-            if isinstance(target, ast.Name):
-                # Check which params the RHS references
-                referenced_params: set[int] = set()
-                for node in ast.walk(stmt.value):
-                    if isinstance(node, ast.Name) and node.id in var_to_params:
-                        referenced_params |= var_to_params[node.id]
-                if referenced_params:
-                    var_to_params[target.id] = referenced_params
+        _track_assignment_params(stmt, var_to_params)
 
-    # Find all calls in this statement (any context: bare, return, assign)
-    call_nodes: list[ast.Call] = []
-    if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
-        call_nodes.append(stmt.value)
-    elif isinstance(stmt, ast.Return) and stmt.value is not None:
-        for node in ast.walk(stmt.value):
-            if isinstance(node, ast.Call):
-                call_nodes.append(node)
-    elif isinstance(stmt, ast.Assign):
-        for node in ast.walk(stmt.value):
-            if isinstance(node, ast.Call):
-                call_nodes.append(node)
+    call_nodes = _collect_call_nodes_from_stmt(stmt)
 
     for call_node in call_nodes:
         call_name = _get_call_name(call_node)
         if not call_name:
             continue
 
-        # Check if this calls another function in the same file
         callee_summary = all_summaries.get(call_name)
         if callee_summary is None or not callee_summary.param_flows_to_sink:
             continue
 
-        # For each callee parameter that flows to a sink, check if the caller
-        # passes one of its own parameters (or a variable derived from them)
-        for callee_param_idx, sink_kind in callee_summary.param_flows_to_sink.items():
-            if callee_param_idx < len(call_node.args):
-                arg = call_node.args[callee_param_idx]
-                # Find which of current function's params flow into this argument
-                caller_param_indices = _find_param_indices_in_expr(arg, var_to_params)
-                for caller_pidx in caller_param_indices:
-                    if caller_pidx not in current_summary.param_flows_to_sink:
-                        current_summary.param_flows_to_sink[caller_pidx] = sink_kind
-
-            # Also check keyword arguments
-            for kw in call_node.keywords:
-                if kw.arg and kw.value:
-                    # Match keyword to callee param index
-                    try:
-                        kw_idx = callee_summary.params.index(kw.arg)
-                    except ValueError:
-                        continue
-                    if kw_idx in callee_summary.param_flows_to_sink:
-                        caller_param_indices = _find_param_indices_in_expr(kw.value, var_to_params)
-                        for caller_pidx in caller_param_indices:
-                            if caller_pidx not in current_summary.param_flows_to_sink:
-                                current_summary.param_flows_to_sink[caller_pidx] = callee_summary.param_flows_to_sink[kw_idx]
+        _propagate_callee_sinks(call_node, callee_summary, var_to_params, current_summary)
 
 
 def _find_param_indices_in_expr(
@@ -884,26 +926,8 @@ def _module_name_from_path(filepath: str) -> str:
     return ".".join(parts)
 
 
-def analyze_taint_cross_file(
-    file_contents: dict[str, str],
-) -> list[CrossFileFinding]:
-    """Analyze taint flows across file boundaries.
-
-    Takes a dict of {filepath: content} for all Python files in the project.
-    Returns CrossFileFindings for taint that flows across import boundaries.
-
-    Strategy:
-    1. Parse all files, extract function taint summaries
-    2. Build import graph
-    3. For each file, find calls to imported functions
-    4. If the imported function's return value is tainted, track it in the caller
-    5. If a tainted value from the caller flows through an imported function to a sink,
-       report it
-    """
-    findings: list[CrossFileFinding] = []
-    seen: set[tuple[str, int, str, int]] = set()  # (source_file, source_line, sink_file, sink_line)
-
-    # Phase 1: Parse all files
+def _parse_all_files(file_contents: dict[str, str]) -> dict[str, ast.Module]:
+    """Phase 1: Parse all Python files into ASTs."""
     trees: dict[str, ast.Module] = {}
     for filepath, content in file_contents.items():
         if not filepath.endswith(".py"):
@@ -912,13 +936,18 @@ def analyze_taint_cross_file(
             trees[filepath] = ast.parse(content, filename=filepath)
         except SyntaxError:
             continue
+    return trees
 
-    if len(trees) < 2:
-        return findings
 
-    # Phase 2: Build function taint summaries per file
-    func_summaries: dict[str, dict[str, FunctionTaintSummary]] = {}  # filepath → {func_name → summary}
-    module_names: dict[str, str] = {}  # filepath → module_name
+def _build_taint_summaries(
+    trees: dict[str, ast.Module],
+) -> tuple[dict[str, dict[str, FunctionTaintSummary]], dict[str, str]]:
+    """Phase 2: Build function taint summaries per file and propagate intra-file sinks.
+
+    Returns (func_summaries, module_names).
+    """
+    func_summaries: dict[str, dict[str, FunctionTaintSummary]] = {}
+    module_names: dict[str, str] = {}
 
     for filepath, tree in trees.items():
         mod_name = _module_name_from_path(filepath)
@@ -932,109 +961,154 @@ def analyze_taint_cross_file(
 
         func_summaries[filepath] = summaries
 
-    # Phase 2.5: Transitive sink propagation within each file.
-    # If function A calls function B (same file) and B has param_flows_to_sink,
-    # then A inherits that sink info for whichever of A's params flow into B's
-    # tainted argument position.  This handles wrapper chains like:
-    #   fetch_json(url) → fetch_url(url) → httpx.get(url)
+    # Transitive sink propagation within each file
     for filepath, summaries in func_summaries.items():
         tree = trees[filepath]
         _propagate_intra_file_sinks(tree, summaries)
 
-    # Phase 3: Build module → filepath mapping (for import resolution)
-    # Try both full module name and partial matches
+    return func_summaries, module_names
+
+
+def _build_module_map(module_names: dict[str, str]) -> dict[str, str]:
+    """Phase 3: Build module name → filepath mapping for import resolution."""
+    import os
+
     module_to_filepath: dict[str, str] = {}
     for filepath, mod_name in module_names.items():
         module_to_filepath[mod_name] = filepath
-        # Also register by filename stem (e.g. "utils" for "utils.py")
-        import os
-
         stem = os.path.splitext(os.path.basename(filepath))[0]
         if stem not in module_to_filepath:
             module_to_filepath[stem] = filepath
+    return module_to_filepath
 
-    # Phase 4: For each file, check imported function calls
+
+def _resolve_import_source(imp: ImportInfo, module_to_filepath: dict[str, str], caller_path: str) -> str | None:
+    """Resolve an import to its source file path, or None if unresolvable."""
+    source_path = module_to_filepath.get(imp.module)
+    if source_path is None:
+        parts = imp.module.split(".")
+        for i in range(len(parts)):
+            partial = ".".join(parts[i:])
+            if partial in module_to_filepath:
+                source_path = module_to_filepath[partial]
+                break
+    if source_path is None or source_path == caller_path:
+        return None
+    return source_path
+
+
+def _check_tainted_arg_to_sink(
+    node: ast.Call,
+    func_summary: FunctionTaintSummary,
+    caller_tree: ast.Module,
+    caller_path: str,
+    source_path: str,
+    findings: list[CrossFileFinding],
+    seen: set[tuple[str, int, str, int]],
+) -> None:
+    """Case 1: Check if caller passes tainted args to a function with param->sink flows."""
+    caller_taint = _get_caller_taint_at_line(caller_tree, node.lineno, caller_path)
+    for param_idx, sink_kind in func_summary.param_flows_to_sink.items():
+        if param_idx >= len(node.args):
+            continue
+        arg = node.args[param_idx]
+        tvar = _find_tainted_in_expr(arg, caller_taint)
+        if not tvar:
+            continue
+        key = (caller_path, node.lineno, source_path, func_summary.line)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        findings.append(
+            CrossFileFinding(
+                source_file=caller_path,
+                target_file=source_path,
+                line=node.lineno,
+                target_line=func_summary.line,
+                severity=Severity.WARNING,
+                category=Category.SECURITY,
+                rule="taint-flow-cross-file",
+                message=(
+                    f"Tainted data '{tvar.name}' ({tvar.source_kind}) "
+                    f"flows from {_basename(caller_path)}:{node.lineno} "
+                    f"into '{func_summary.name}()' in "
+                    f"{_basename(source_path)}:{func_summary.line} "
+                    f"which passes parameter '{func_summary.params[param_idx]}' "
+                    f"to a {sink_kind} sink"
+                ),
+                suggestion=(
+                    f"Sanitize the argument before passing to "
+                    f"'{func_summary.name}()', or add input validation "
+                    f"inside '{func_summary.name}()'"
+                ),
+            )
+        )
+
+
+def _check_cross_file_calls(
+    caller_path: str,
+    caller_tree: ast.Module,
+    imports: list[ImportInfo],
+    func_summaries: dict[str, dict[str, FunctionTaintSummary]],
+    module_to_filepath: dict[str, str],
+    findings: list[CrossFileFinding],
+    seen: set[tuple[str, int, str, int]],
+) -> None:
+    """Phase 4 per-file: Check all imported function calls for cross-file taint."""
+    for imp in imports:
+        source_path = _resolve_import_source(imp, module_to_filepath, caller_path)
+        if source_path is None:
+            continue
+
+        source_summaries = func_summaries.get(source_path, {})
+        func_summary = source_summaries.get(imp.original_name)
+        if func_summary is None:
+            continue
+
+        for node in ast.walk(caller_tree):
+            if not isinstance(node, ast.Call):
+                continue
+            call_name = _get_call_name(node)
+            if call_name != imp.local_name:
+                continue
+
+            if func_summary.param_flows_to_sink:
+                _check_tainted_arg_to_sink(
+                    node, func_summary, caller_tree, caller_path, source_path, findings, seen,
+                )
+
+            if func_summary.returns_tainted_param:
+                _check_return_taint_usage(
+                    caller_tree, node, func_summary, imp,
+                    caller_path, source_path, findings, seen,
+                )
+
+
+def analyze_taint_cross_file(
+    file_contents: dict[str, str],
+) -> list[CrossFileFinding]:
+    """Analyze taint flows across file boundaries.
+
+    Takes a dict of {filepath: content} for all Python files in the project.
+    Returns CrossFileFindings for taint that flows across import boundaries.
+    """
+    findings: list[CrossFileFinding] = []
+    seen: set[tuple[str, int, str, int]] = set()
+
+    trees = _parse_all_files(file_contents)
+    if len(trees) < 2:
+        return findings
+
+    func_summaries, module_names = _build_taint_summaries(trees)
+    module_to_filepath = _build_module_map(module_names)
+
     for caller_path, caller_tree in trees.items():
         imports = _extract_imports(caller_tree)
-
-        for imp in imports:
-            # Resolve import to a source file
-            source_path = module_to_filepath.get(imp.module)
-            if source_path is None:
-                # Try partial match: "mypackage.utils" → check if "utils" matches
-                parts = imp.module.split(".")
-                for i in range(len(parts)):
-                    partial = ".".join(parts[i:])
-                    if partial in module_to_filepath:
-                        source_path = module_to_filepath[partial]
-                        break
-            if source_path is None or source_path == caller_path:
-                continue
-
-            source_summaries = func_summaries.get(source_path, {})
-
-            # Check if the imported name is a function we analyzed
-            func_summary = source_summaries.get(imp.original_name)
-            if func_summary is None:
-                continue
-
-            # Find all calls to this imported function in the caller
-            for node in ast.walk(caller_tree):
-                if not isinstance(node, ast.Call):
-                    continue
-
-                call_name = _get_call_name(node)
-                if call_name != imp.local_name:
-                    continue
-
-                # Case 1: Caller passes tainted args to a function that has param→sink flows
-                if func_summary.param_flows_to_sink:
-                    # Check if the caller passes tainted data
-                    caller_taint = _get_caller_taint_at_line(
-                        caller_tree, node.lineno, caller_path
-                    )
-                    for param_idx, sink_kind in func_summary.param_flows_to_sink.items():
-                        if param_idx < len(node.args):
-                            arg = node.args[param_idx]
-                            tvar = _find_tainted_in_expr(arg, caller_taint)
-                            if tvar:
-                                key = (caller_path, node.lineno, source_path, func_summary.line)
-                                if key in seen:
-                                    continue
-                                seen.add(key)
-
-                                findings.append(
-                                    CrossFileFinding(
-                                        source_file=caller_path,
-                                        target_file=source_path,
-                                        line=node.lineno,
-                                        target_line=func_summary.line,
-                                        severity=Severity.WARNING,
-                                        category=Category.SECURITY,
-                                        rule="taint-flow-cross-file",
-                                        message=(
-                                            f"Tainted data '{tvar.name}' ({tvar.source_kind}) "
-                                            f"flows from {_basename(caller_path)}:{node.lineno} "
-                                            f"into '{func_summary.name}()' in "
-                                            f"{_basename(source_path)}:{func_summary.line} "
-                                            f"which passes parameter '{func_summary.params[param_idx]}' "
-                                            f"to a {sink_kind} sink"
-                                        ),
-                                        suggestion=(
-                                            f"Sanitize the argument before passing to "
-                                            f"'{func_summary.name}()', or add input validation "
-                                            f"inside '{func_summary.name}()'"
-                                        ),
-                                    )
-                                )
-
-                # Case 2: Function returns tainted data → caller uses it in a sink
-                if func_summary.returns_tainted_param:
-                    # Check if the return value is assigned and then used in a sink
-                    _check_return_taint_usage(
-                        caller_tree, node, func_summary, imp,
-                        caller_path, source_path, findings, seen,
-                    )
+        _check_cross_file_calls(
+            caller_path, caller_tree, imports, func_summaries,
+            module_to_filepath, findings, seen,
+        )
 
     return findings
 
@@ -1101,6 +1175,36 @@ def _get_caller_taint_at_line(
     return taint_map
 
 
+def _find_assigned_vars_at_line(caller_tree: ast.Module, lineno: int) -> list[str]:
+    """Find variable names assigned at a specific line number."""
+    var_names = []
+    for node in ast.walk(caller_tree):
+        if isinstance(node, ast.Assign) and node.lineno == lineno:
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    var_names.append(target.id)
+    return var_names
+
+
+def _find_sink_usages(caller_tree: ast.Module, var_name: str, after_line: int) -> list[tuple[str, int, str]]:
+    """Find sink calls that use var_name as an argument after a given line."""
+    results = []
+    for sink_node in ast.walk(caller_tree):
+        if not isinstance(sink_node, ast.Call) or sink_node.lineno <= after_line:
+            continue
+        sink_call_name = _get_call_name(sink_node)
+        if not sink_call_name:
+            continue
+        sink_kind = _call_is_sink(sink_call_name)
+        if not sink_kind:
+            continue
+        for arg in sink_node.args:
+            if isinstance(arg, ast.Name) and arg.id == var_name:
+                results.append((sink_node, sink_call_name, sink_kind))
+                break
+    return results
+
+
 def _check_return_taint_usage(
     caller_tree: ast.Module,
     call_node: ast.Call,
@@ -1112,51 +1216,37 @@ def _check_return_taint_usage(
     seen: set[tuple[str, int, str, int]],
 ) -> None:
     """Check if the return value of a taint-returning function is used in a sink."""
-    # Find the assignment that captures this call's return value
-    for node in ast.walk(caller_tree):
-        if isinstance(node, ast.Assign) and node.lineno == call_node.lineno:
-            for target in node.targets:
-                if isinstance(target, ast.Name):
-                    var_name = target.id
-                    # Now look for this variable being used in a sink
-                    for sink_node in ast.walk(caller_tree):
-                        if (
-                            isinstance(sink_node, ast.Call)
-                            and sink_node.lineno > call_node.lineno
-                        ):
-                            sink_call_name = _get_call_name(sink_node)
-                            if sink_call_name:
-                                sink_kind = _call_is_sink(sink_call_name)
-                                if sink_kind:
-                                    for arg in sink_node.args:
-                                        if isinstance(arg, ast.Name) and arg.id == var_name:
-                                            key = (caller_path, call_node.lineno, source_path, func_summary.line)
-                                            if key in seen:
-                                                continue
-                                            seen.add(key)
+    var_names = _find_assigned_vars_at_line(caller_tree, call_node.lineno)
 
-                                            findings.append(
-                                                CrossFileFinding(
-                                                    source_file=source_path,
-                                                    target_file=caller_path,
-                                                    line=func_summary.line,
-                                                    target_line=sink_node.lineno,
-                                                    severity=Severity.WARNING,
-                                                    category=Category.SECURITY,
-                                                    rule="taint-flow-cross-file",
-                                                    message=(
-                                                        f"Function '{func_summary.name}()' in "
-                                                        f"{_basename(source_path)} returns "
-                                                        f"potentially tainted data → assigned to "
-                                                        f"'{var_name}' at "
-                                                        f"{_basename(caller_path)}:{call_node.lineno} "
-                                                        f"→ reaches sink '{sink_call_name}' "
-                                                        f"({sink_kind}) at line {sink_node.lineno}"
-                                                    ),
-                                                    suggestion=(
-                                                        f"Sanitize the return value of "
-                                                        f"'{func_summary.name}()' before passing "
-                                                        f"to '{sink_call_name}()'"
-                                                    ),
-                                                )
-                                            )
+    for var_name in var_names:
+        for sink_node, sink_call_name, sink_kind in _find_sink_usages(caller_tree, var_name, call_node.lineno):
+            key = (caller_path, call_node.lineno, source_path, func_summary.line)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            findings.append(
+                CrossFileFinding(
+                    source_file=source_path,
+                    target_file=caller_path,
+                    line=func_summary.line,
+                    target_line=sink_node.lineno,
+                    severity=Severity.WARNING,
+                    category=Category.SECURITY,
+                    rule="taint-flow-cross-file",
+                    message=(
+                        f"Function '{func_summary.name}()' in "
+                        f"{_basename(source_path)} returns "
+                        f"potentially tainted data → assigned to "
+                        f"'{var_name}' at "
+                        f"{_basename(caller_path)}:{call_node.lineno} "
+                        f"→ reaches sink '{sink_call_name}' "
+                        f"({sink_kind}) at line {sink_node.lineno}"
+                    ),
+                    suggestion=(
+                        f"Sanitize the return value of "
+                        f"'{func_summary.name}()' before passing "
+                        f"to '{sink_call_name}()'"
+                    ),
+                )
+            )

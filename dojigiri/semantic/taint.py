@@ -95,6 +95,19 @@ class TaintSummary:
     safe_return: bool  # Does it always return a constant/literal?
 
 
+@dataclass
+class TaintContext:
+    """Shared context for taint analysis functions, reducing parameter passing."""
+
+    semantics: FileSemantics
+    config: LanguageConfig
+    lines: list[str]
+    filepath: str
+    method_summaries: dict[str, TaintSummary] | None = None
+    source_vars: set[str] | None = None
+    source_lines: dict[str, int] | None = None
+
+
 # ─── Collection-aware taint tracking ─────────────────────────────────
 # Reduces false positives when tainted data enters a collection (Map/List)
 # under a specific key/index but is read back under a different key/index.
@@ -239,7 +252,7 @@ def _collect_branch_siblings(tree_root) -> list[list[_BranchRange]]:
 
     groups: list[list[_BranchRange]] = []
 
-    def _walk(node):
+    def _walk(node: object) -> None:
         # Python: if_statement has consequence (block) and alternative (elif/else)
         # JS: if_statement has consequence (statement_block) and alternative
         if node.type == "if_statement":
@@ -254,7 +267,7 @@ def _collect_branch_siblings(tree_root) -> list[list[_BranchRange]]:
             if child.type not in ("elif_clause", "else_clause"):
                 _walk(child)
 
-    def _collect_if_branches(node, branches: list[_BranchRange]):
+    def _collect_if_branches(node: object, branches: list[_BranchRange]) -> None:
         """Recursively collect all branches of an if/elif/else chain."""
         # Find the consequence block (the "then" body)
         consequence = node.child_by_field_name("consequence")
@@ -296,6 +309,53 @@ def _collect_branch_siblings(tree_root) -> list[list[_BranchRange]]:
     return groups
 
 
+def _collect_else_body(alternative, bodies: list[_ConditionalBody]) -> None:
+    """Collect an else clause body as a conditional branch."""
+    body = alternative.child_by_field_name("body") or alternative.child_by_field_name("consequence")
+    if body:
+        bodies.append(_ConditionalBody(
+            start_line=body.start_point[0] + 1,
+            end_line=body.end_point[0] + 1,
+            kind="branch",
+        ))
+        return
+    for child in alternative.children:
+        if child.type in ("block", "statement_block"):
+            bodies.append(_ConditionalBody(
+                start_line=child.start_point[0] + 1,
+                end_line=child.end_point[0] + 1,
+                kind="branch",
+            ))
+            break
+
+
+def _collect_if_body(node, bodies: list[_ConditionalBody], walk_elif_fn) -> None:
+    """Collect if-statement consequence and alternative bodies."""
+    consequence = node.child_by_field_name("consequence")
+    if consequence:
+        bodies.append(_ConditionalBody(
+            start_line=consequence.start_point[0] + 1,
+            end_line=consequence.end_point[0] + 1,
+            kind="branch",
+        ))
+    alternative = node.child_by_field_name("alternative")
+    if alternative and alternative.type == "elif_clause":
+        walk_elif_fn(alternative)
+    elif alternative and alternative.type in ("else_clause", "else"):
+        _collect_else_body(alternative, bodies)
+
+
+def _collect_body_as(node, bodies: list[_ConditionalBody], kind: str) -> None:
+    """Collect a node's body field as a conditional body of the given kind."""
+    body = node.child_by_field_name("body")
+    if body:
+        bodies.append(_ConditionalBody(
+            start_line=body.start_point[0] + 1,
+            end_line=body.end_point[0] + 1,
+            kind=kind,
+        ))
+
+
 def _collect_conditional_bodies(tree_root) -> list[_ConditionalBody]:
     """Walk the AST and collect ALL conditional bodies: if-branches, loop bodies, try bodies.
 
@@ -313,65 +373,7 @@ def _collect_conditional_bodies(tree_root) -> list[_ConditionalBody]:
 
     bodies: list[_ConditionalBody] = []
 
-    def _walk(node):
-        if node.type == "if_statement":
-            # Collect the consequence (then-body) as conditional
-            consequence = node.child_by_field_name("consequence")
-            if consequence:
-                bodies.append(_ConditionalBody(
-                    start_line=consequence.start_point[0] + 1,
-                    end_line=consequence.end_point[0] + 1,
-                    kind="branch",
-                ))
-            # Collect elif bodies
-            alternative = node.child_by_field_name("alternative")
-            if alternative and alternative.type == "elif_clause":
-                _walk_elif(alternative)
-            elif alternative and alternative.type in ("else_clause", "else"):
-                # else body is also conditional (only runs if all prior conditions false)
-                body = alternative.child_by_field_name("body") or alternative.child_by_field_name("consequence")
-                if body:
-                    bodies.append(_ConditionalBody(
-                        start_line=body.start_point[0] + 1,
-                        end_line=body.end_point[0] + 1,
-                        kind="branch",
-                    ))
-                else:
-                    for child in alternative.children:
-                        if child.type in ("block", "statement_block"):
-                            bodies.append(_ConditionalBody(
-                                start_line=child.start_point[0] + 1,
-                                end_line=child.end_point[0] + 1,
-                                kind="branch",
-                            ))
-                            break
-
-        elif node.type in ("for_statement", "while_statement"):
-            # Loop bodies may execute 0 times
-            body = node.child_by_field_name("body")
-            if body:
-                bodies.append(_ConditionalBody(
-                    start_line=body.start_point[0] + 1,
-                    end_line=body.end_point[0] + 1,
-                    kind="loop",
-                ))
-
-        elif node.type == "try_statement":
-            # Try body: a sanitizer in a try block might throw before completing,
-            # and control transfers to the except handler. Treat the try body as
-            # conditional — the sanitizer line may not have fully executed.
-            body = node.child_by_field_name("body")
-            if body:
-                bodies.append(_ConditionalBody(
-                    start_line=body.start_point[0] + 1,
-                    end_line=body.end_point[0] + 1,
-                    kind="try",
-                ))
-
-        for child in node.children:
-            _walk(child)
-
-    def _walk_elif(node):
+    def _walk_elif(node: object) -> None:
         """Process elif clause bodies."""
         consequence = node.child_by_field_name("consequence")
         if consequence:
@@ -384,13 +386,18 @@ def _collect_conditional_bodies(tree_root) -> list[_ConditionalBody]:
         if alternative and alternative.type == "elif_clause":
             _walk_elif(alternative)
         elif alternative and alternative.type in ("else_clause", "else"):
-            body = alternative.child_by_field_name("body") or alternative.child_by_field_name("consequence")
-            if body:
-                bodies.append(_ConditionalBody(
-                    start_line=body.start_point[0] + 1,
-                    end_line=body.end_point[0] + 1,
-                    kind="branch",
-                ))
+            _collect_else_body(alternative, bodies)
+
+    def _walk(node: object) -> None:
+        if node.type == "if_statement":
+            _collect_if_body(node, bodies, _walk_elif)
+        elif node.type in ("for_statement", "while_statement"):
+            _collect_body_as(node, bodies, "loop")
+        elif node.type == "try_statement":
+            _collect_body_as(node, bodies, "try")
+
+        for child in node.children:
+            _walk(child)
 
     _walk(tree_root)
     return bodies
@@ -568,7 +575,7 @@ def _parse_factor(tokens: list[str], pos: int) -> tuple[int, int]:
     try:
         return int(tokens[pos]), pos + 1
     except ValueError:
-        raise ValueError(f"unexpected token: {tokens[pos]}")
+        raise ValueError(f"unexpected token: {tokens[pos]}")  # noqa — not a secret
 
 
 def _evaluate_constant_condition(
@@ -806,6 +813,101 @@ def _find_taint_sources(
     return sources
 
 
+def _handle_sanitizer_in_propagation(
+    asgn,
+    tainted: dict[str, list[tuple[str, int]]],
+    branch_groups: list[list[_BranchRange]] | None,
+    conditional_bodies: list[_ConditionalBody] | None,
+    sink_lines: set[int] | None,
+) -> bool:
+    """Handle sanitizer logic during taint propagation. Returns True if taint was cleared."""
+    in_conditional_excluding_sinks = False
+    if conditional_bodies:
+        in_conditional_excluding_sinks = _is_in_conditional_body_not_containing_any(
+            asgn.line, sink_lines or set(), conditional_bodies,
+        )
+    # Fallback to legacy branch_groups check
+    if not in_conditional_excluding_sinks and not conditional_bodies and branch_groups:
+        for group in branch_groups:
+            for br in group:
+                if br.start_line <= asgn.line <= br.end_line:
+                    in_conditional_excluding_sinks = True
+                    break
+            if in_conditional_excluding_sinks:
+                break
+    if not in_conditional_excluding_sinks:
+        if asgn.name in tainted:
+            del tainted[asgn.name]
+            return True
+    return False
+
+
+def _try_ternary_propagation(
+    asgn,
+    rhs: str,
+    tainted: dict[str, list[tuple[str, int]]],
+    constant_vars: dict[str, int],
+) -> bool | None:
+    """Try constant-propagation ternary resolution. Returns True/False if handled, None if not."""
+    ternary = _extract_ternary(rhs)
+    if ternary is None:
+        return None
+
+    cond, true_expr, false_expr = ternary
+    cond_result = _eval_condition_with_constants(cond, constant_vars)
+    if cond_result is True:
+        tainted_name = _rhs_has_tainted_var(true_expr, list(tainted.keys()))
+        if tainted_name is not None:
+            tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+            return True
+        return False
+    elif cond_result is False:
+        tainted_name = _rhs_has_tainted_var(false_expr, list(tainted.keys()))
+        if tainted_name is not None:
+            tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+            return True
+        return False
+    return None
+
+
+def _try_rhs_propagation(
+    asgn,
+    rhs: str,
+    tainted: dict[str, list[tuple[str, int]]],
+    src_lines: list[str],
+    coll_state: _CollectionTaintState,
+    method_summaries: dict[str, TaintSummary] | None,
+) -> bool:
+    """Try collection-aware and direct RHS taint propagation. Returns True if taint changed."""
+    # Collection-aware: track put/add operations on this line
+    line_idx = asgn.line - 1
+    if 0 <= line_idx < len(src_lines):
+        _track_collection_put(src_lines[line_idx], set(tainted.keys()), coll_state)
+
+    # Collection-aware: check if RHS is a collection.get("key") call
+    coll_result = _check_collection_get_taint(rhs, coll_state)
+    if coll_result is False:
+        return False
+    if coll_result is True:
+        for tainted_name in list(tainted.keys()):
+            tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+            return True
+        return False
+
+    for tainted_name in list(tainted.keys()):
+        if re.search(r"\b" + re.escape(tainted_name) + r"\b", rhs):
+            if method_summaries:
+                called = _extract_called_method(rhs)
+                if called and called in method_summaries:
+                    summary = method_summaries[called]
+                    if summary.safe_return or not summary.propagates_taint:
+                        break
+            tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+            return True
+
+    return False
+
+
 def _propagate_taint(
     semantics: FileSemantics,
     initial_tainted: set[str],
@@ -832,24 +934,14 @@ def _propagate_taint(
     """
     tainted: dict[str, list[tuple[str, int]]] = {name: [] for name in initial_tainted}
 
-    # Collection-aware taint tracking: build source lines for put/get detection
     coll_state = _CollectionTaintState.empty()
     src_lines = source_bytes.decode("utf-8", errors="replace").splitlines() if source_bytes else []
 
-    # Propagation with sanitization: if RHS contains a tainted variable, LHS
-    # becomes tainted — UNLESS the RHS passes through a sanitizer, in which
-    # case taint is removed (flow-sensitive reassignment).
-    # Sort by line to ensure source-order propagation (assignments may not
-    # be in source order in the semantics list).
-    # Iterate until fixed-point.
     scoped_assignments = sorted(
         [a for a in semantics.assignments if a.scope_id in func_scope_ids and not a.is_parameter],
         key=lambda a: a.line,
     )
 
-    # Constant propagation: track variables assigned to integer literals
-    # within the function scope. Used to resolve ternary conditions like
-    # (7 * 18) + num > 200 ? "safe" : tainted_param
     constant_vars: dict[str, int] = {}
     for asgn in scoped_assignments:
         val = asgn.value_text.strip()
@@ -857,7 +949,7 @@ def _propagate_taint(
             constant_vars[asgn.name] = int(val)
 
     changed = True
-    max_iters = 10  # prevent infinite loops
+    max_iters = 10
     iteration = 0
 
     while changed and iteration < max_iters:
@@ -871,91 +963,25 @@ def _propagate_taint(
             is_sanitized = any(sanitizer in rhs for sanitizer in config.taint_sanitizer_patterns)
 
             if is_sanitized:
-                # Branch/loop-aware: only refuse to clear taint if the sanitizer
-                # is in a conditional body that does NOT contain the sink.
-                # If the sanitizer and sink are in the SAME conditional body,
-                # the sanitizer IS guaranteed to run before the sink on that path.
-                in_conditional_excluding_sinks = False
-                if conditional_bodies:
-                    in_conditional_excluding_sinks = _is_in_conditional_body_not_containing_any(
-                        asgn.line, sink_lines or set(), conditional_bodies,
-                    )
-                # Fallback to legacy branch_groups check (only if not already flagged)
-                if not in_conditional_excluding_sinks and not conditional_bodies and branch_groups:
-                    for group in branch_groups:
-                        for br in group:
-                            if br.start_line <= asgn.line <= br.end_line:
-                                in_conditional_excluding_sinks = True
-                                break
-                        if in_conditional_excluding_sinks:
-                            break
-                if not in_conditional_excluding_sinks:
-                    # Sanitizer guaranteed to run before sinks — clears taint
-                    if asgn.name in tainted:
-                        del tainted[asgn.name]
-                        changed = True
-                # If sanitizer is in a conditional body excluding sinks, don't clear taint globally.
+                if _handle_sanitizer_in_propagation(
+                    asgn, tainted, branch_groups, conditional_bodies, sink_lines,
+                ):
+                    changed = True
                 continue
 
-            # Skip already-tainted vars for propagation (no new info)
             if asgn.name in tainted:
                 continue
 
-            # Constant propagation: check if RHS is a ternary expression
-            # with a resolvable condition. If so, only check the branch
-            # that actually executes for taint propagation.
-            ternary = _extract_ternary(rhs)
-            if ternary is not None:
-                cond, true_expr, false_expr = ternary
-                cond_result = _eval_condition_with_constants(cond, constant_vars)
-                if cond_result is True:
-                    # Condition always true -- only true_expr executes
-                    tainted_name = _rhs_has_tainted_var(true_expr, list(tainted.keys()))
-                    if tainted_name is not None:
-                        tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
-                        changed = True
-                    continue
-                elif cond_result is False:
-                    # Condition always false -- only false_expr executes
-                    tainted_name = _rhs_has_tainted_var(false_expr, list(tainted.keys()))
-                    if tainted_name is not None:
-                        tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
-                        changed = True
-                    continue
-                # cond_result is None -- can't resolve, fall through to normal check
-
-            # Collection-aware: track put/add operations on this line
-            line_idx = asgn.line - 1
-            if 0 <= line_idx < len(src_lines):
-                _track_collection_put(src_lines[line_idx], set(tainted.keys()), coll_state)
-
-            # Collection-aware: check if RHS is a collection.get("key") call
-            coll_result = _check_collection_get_taint(rhs, coll_state)
-            if coll_result is False:
-                # Collection read from an untainted key/slot -- skip propagation
-                continue
-            if coll_result is True:
-                # Collection read from a tainted key/slot -- propagate
-                for tainted_name in list(tainted.keys()):
-                    tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
+            # Constant propagation: ternary resolution
+            ternary_result = _try_ternary_propagation(asgn, rhs, tainted, constant_vars)
+            if ternary_result is not None:
+                if ternary_result:
                     changed = True
-                    break
                 continue
 
-            for tainted_name in list(tainted.keys()):
-                # Check if tainted name appears in RHS
-                if re.search(r"\b" + re.escape(tainted_name) + r"\b", rhs):
-                    # Inter-procedural: if RHS is a call to a summarized method
-                    # that doesn't propagate taint, skip propagation
-                    if method_summaries:
-                        called = _extract_called_method(rhs)
-                        if called and called in method_summaries:
-                            summary = method_summaries[called]
-                            if summary.safe_return or not summary.propagates_taint:
-                                break
-                    tainted[asgn.name] = tainted.get(tainted_name, []) + [(tainted_name, asgn.line)]
-                    changed = True
-                    break
+            # Collection-aware and direct RHS propagation
+            if _try_rhs_propagation(asgn, rhs, tainted, src_lines, coll_state, method_summaries):
+                changed = True
 
     return tainted
 
@@ -987,39 +1013,45 @@ def _find_taint_sinks(
         if call.receiver:
             call_text = f"{call.receiver}.{call.name}"
 
-        for pattern, kind in config.taint_sink_patterns:
-            if _matches_sink_pattern(call_text, pattern):
-                # Check if any tainted variable appears on this line
-                line_idx = call.line - 1
-                if 0 <= line_idx < len(lines):
-                    line_text = lines[line_idx]
-                    for tvar in tainted_vars:
-                        # Skip if this variable is being assigned (LHS) on this line,
-                        # not passed as an argument
-                        if (tvar, call.line) in assigned_on_line:
-                            continue
-                        # For method-only patterns (e.g. ".Get"), skip if the
-                        # tainted var is the receiver — it must be in the args.
-                        # E.g., resp.Header.Get("...") where resp is tainted:
-                        # resp is the receiver chain, not an argument.
-                        if pattern.startswith(".") and call.receiver:
-                            receiver_root = call.receiver.split(".")[0].split("(")[0]
-                            if tvar == receiver_root:
-                                continue
-                        if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
-                            sinks.append(
-                                TaintSink(
-                                    variable=tvar,
-                                    line=call.line,
-                                    kind=kind,
-                                    function_name=call_text,
-                                    scope_id=call.scope_id,
-                                )
-                            )
-                            break
-                break
+        _match_call_to_sink(call, call_text, config, lines, tainted_vars, assigned_on_line, sinks)
 
     return sinks
+
+
+def _match_call_to_sink(call: object, call_text: str, config: object, lines: list[str], tainted_vars: list[str], assigned_on_line: set, sinks: list) -> None:
+    """Check if a function call matches any sink pattern with tainted args."""
+    for pattern, kind in config.taint_sink_patterns:
+        if not _matches_sink_pattern(call_text, pattern):
+            continue
+
+        line_idx = call.line - 1
+        if not (0 <= line_idx < len(lines)):
+            break
+
+        line_text = lines[line_idx]
+        tvar = _find_tainted_arg_at_sink(
+            tainted_vars, call, pattern, line_text, assigned_on_line,
+        )
+        if tvar is not None:
+            sinks.append(TaintSink(
+                variable=tvar, line=call.line, kind=kind,
+                function_name=call_text, scope_id=call.scope_id,
+            ))
+        break
+
+
+def _find_tainted_arg_at_sink(tainted_vars: list[str], call: object, pattern: str, line_text: str, assigned_on_line: set) -> str | None:
+    """Find the first tainted variable that appears as an argument at a sink call."""
+    for tvar in tainted_vars:
+        if (tvar, call.line) in assigned_on_line:
+            continue
+        if pattern.startswith(".") and call.receiver:
+            receiver_root = call.receiver.split(".")[0].split("(")[0]
+            if tvar == receiver_root:
+                continue
+        if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
+            return tvar
+    return None
 
 
 def _is_ancestor_scope(
@@ -1046,6 +1078,30 @@ def _is_ancestor_scope(
 def _build_scope_map(semantics: FileSemantics) -> dict[int, ScopeInfo]:
     """Build scope_id → ScopeInfo lookup."""
     return {s.scope_id: s for s in semantics.scopes}
+
+
+def _sanitizer_dominates_sink(
+    sanitizer_line: int,
+    sanitizer_scope_id: int,
+    sink_line: int,
+    sink_scope_id: int | None,
+    scope_map: dict[int, ScopeInfo] | None,
+    branch_groups: list[list[_BranchRange]] | None,
+    conditional_bodies: list[_ConditionalBody] | None,
+) -> bool:
+    """Return True if a sanitizer at the given location dominates the sink (guaranteed to run before it)."""
+    if sink_line and sanitizer_line >= sink_line:
+        return False
+    if sink_scope_id is not None and scope_map is not None:
+        if not _is_ancestor_scope(sanitizer_scope_id, sink_scope_id, scope_map):
+            return False
+    if branch_groups and sink_line:
+        if _are_in_sibling_branches(sanitizer_line, sink_line, branch_groups):
+            return False
+    if conditional_bodies and sink_line:
+        if _is_in_conditional_body_not_containing(sanitizer_line, sink_line, conditional_bodies):
+            return False
+    return True
 
 
 def _is_sanitized(
@@ -1075,48 +1131,30 @@ def _is_sanitized(
     - Sanitizers inside for/while loops (0 iterations possible)
     - Sanitizers in nested branches (if A: if B: sanitize)
     """
+    # Check assignment-based sanitizers
     for asgn in semantics.assignments:
         if asgn.scope_id not in func_scope_ids:
             continue
         if asgn.name != tainted_var:
             continue
-        if sink_line and asgn.line >= sink_line:
+        if not _sanitizer_dominates_sink(
+            asgn.line, asgn.scope_id, sink_line, sink_scope_id,
+            scope_map, branch_groups, conditional_bodies,
+        ):
             continue
-        # Scope dominance check (block-scoped languages like JS/Go/Rust)
-        if sink_scope_id is not None and scope_map is not None:
-            if not _is_ancestor_scope(asgn.scope_id, sink_scope_id, scope_map):
-                continue
-        # Branch sibling check (all languages, especially Python)
-        if branch_groups and sink_line:
-            if _are_in_sibling_branches(asgn.line, sink_line, branch_groups):
-                continue
-        # Conditional body check: sanitizer in a branch/loop body that the
-        # sink is NOT in → sanitizer may not have executed
-        if conditional_bodies and sink_line:
-            if _is_in_conditional_body_not_containing(asgn.line, sink_line, conditional_bodies):
-                continue
         for sanitizer in config.taint_sanitizer_patterns:
             if sanitizer in asgn.value_text:
                 return True
 
-    # Also check if sanitizer is called on the variable in any call
+    # Check call-based sanitizers
     for call in semantics.function_calls:
         if call.scope_id not in func_scope_ids:
             continue
-        if sink_line and call.line >= sink_line:
+        if not _sanitizer_dominates_sink(
+            call.line, call.scope_id, sink_line, sink_scope_id,
+            scope_map, branch_groups, conditional_bodies,
+        ):
             continue
-        # Scope dominance check for call-based sanitizers
-        if sink_scope_id is not None and scope_map is not None:
-            if not _is_ancestor_scope(call.scope_id, sink_scope_id, scope_map):
-                continue
-        # Branch sibling check for call-based sanitizers
-        if branch_groups and sink_line:
-            if _are_in_sibling_branches(call.line, sink_line, branch_groups):
-                continue
-        # Conditional body check for call-based sanitizers
-        if conditional_bodies and sink_line:
-            if _is_in_conditional_body_not_containing(call.line, sink_line, conditional_bodies):
-                continue
         call_text = call.name
         if call.receiver:
             call_text = f"{call.receiver}.{call.name}"
@@ -1125,6 +1163,72 @@ def _is_sanitized(
                 return True
 
     return False
+
+
+def _check_taint_source_match(
+    asgn,
+    rhs: str,
+    config: LanguageConfig,
+    current_taint: set[str],
+    source_vars: set[str] | None,
+    source_lines: dict[str, int] | None,
+) -> bool:
+    """Check if RHS matches a taint source pattern. Returns True if matched."""
+    for pattern, kind in config.taint_source_patterns:
+        if _matches_pattern(rhs, pattern):
+            current_taint.add(asgn.name)
+            if source_vars is not None and asgn.name not in source_vars:
+                source_vars.add(asgn.name)
+                if source_lines is not None:
+                    source_lines[asgn.name] = asgn.line
+            return True
+    return False
+
+
+def _propagate_taint_through_rhs(
+    asgn,
+    rhs: str,
+    current_taint: set[str],
+    coll_state: _CollectionTaintState | None,
+    constant_vars: dict[str, int] | None,
+    method_summaries: dict[str, TaintSummary] | None,
+) -> None:
+    """Propagate taint through ternary, collection, or direct RHS references."""
+    # Constant propagation: check ternary before normal propagation
+    if constant_vars is not None:
+        ternary = _extract_ternary(rhs)
+        if ternary is not None:
+            cond, true_expr, false_expr = ternary
+            cond_result = _eval_condition_with_constants(cond, constant_vars)
+            if cond_result is True:
+                if _rhs_has_tainted_var(true_expr, list(current_taint)) is not None:
+                    current_taint.add(asgn.name)
+                return
+            elif cond_result is False:
+                if _rhs_has_tainted_var(false_expr, list(current_taint)) is not None:
+                    current_taint.add(asgn.name)
+                return
+
+    # Collection-aware: check if RHS is a collection.get("key") call
+    if coll_state is not None:
+        coll_result = _check_collection_get_taint(rhs, coll_state)
+        if coll_result is False:
+            return  # untainted key -- don't propagate
+        elif coll_result is True:
+            current_taint.add(asgn.name)
+            return
+
+    # Direct RHS variable reference
+    for tvar in list(current_taint):
+        if re.search(r"\b" + re.escape(tvar) + r"\b", rhs):
+            if method_summaries:
+                called = _extract_called_method(rhs)
+                if called and called in method_summaries:
+                    summary = method_summaries[called]
+                    if summary.safe_return or not summary.propagates_taint:
+                        break
+            current_taint.add(asgn.name)
+            break
 
 
 def _process_assignment_taint(
@@ -1157,54 +1261,9 @@ def _process_assignment_taint(
         if 0 <= line_idx < len(src_lines):
             _track_collection_put(src_lines[line_idx], current_taint, coll_state)
 
-    for pattern, kind in config.taint_source_patterns:
-        if _matches_pattern(rhs, pattern):
-            current_taint.add(asgn.name)
-            if source_vars is not None and asgn.name not in source_vars:
-                source_vars.add(asgn.name)
-                if source_lines is not None:
-                    source_lines[asgn.name] = asgn.line
-            break
-    else:
-        # Constant propagation: check ternary before normal propagation
-        ternary_resolved = False
-        if constant_vars is not None:
-            ternary = _extract_ternary(rhs)
-            if ternary is not None:
-                cond, true_expr, false_expr = ternary
-                cond_result = _eval_condition_with_constants(cond, constant_vars)
-                if cond_result is True:
-                    ternary_resolved = True
-                    if _rhs_has_tainted_var(true_expr, list(current_taint)) is not None:
-                        current_taint.add(asgn.name)
-                elif cond_result is False:
-                    ternary_resolved = True
-                    if _rhs_has_tainted_var(false_expr, list(current_taint)) is not None:
-                        current_taint.add(asgn.name)
+    if not _check_taint_source_match(asgn, rhs, config, current_taint, source_vars, source_lines):
+        _propagate_taint_through_rhs(asgn, rhs, current_taint, coll_state, constant_vars, method_summaries)
 
-        if not ternary_resolved:
-            # Collection-aware: check if RHS is a collection.get("key") call
-            coll_resolved = False
-            if coll_state is not None:
-                coll_result = _check_collection_get_taint(rhs, coll_state)
-                if coll_result is False:
-                    coll_resolved = True  # untainted key -- don't propagate
-                elif coll_result is True:
-                    coll_resolved = True
-                    current_taint.add(asgn.name)  # tainted key -- propagate
-
-            if not coll_resolved:
-                for tvar in list(current_taint):
-                    if re.search(r"\b" + re.escape(tvar) + r"\b", rhs):
-                        # Inter-procedural: check method summary before propagating
-                        if method_summaries:
-                            called = _extract_called_method(rhs)
-                            if called and called in method_summaries:
-                                summary = method_summaries[called]
-                                if summary.safe_return or not summary.propagates_taint:
-                                    break
-                        current_taint.add(asgn.name)
-                        break
     for sanitizer in config.taint_sanitizer_patterns:
         if sanitizer in rhs:
             current_taint.discard(asgn.name)
@@ -1233,15 +1292,10 @@ def _process_call_taint(
 
 def _update_stmt_taint(
     stmt,
-    semantics: FileSemantics,
-    config: LanguageConfig,
+    ctx: TaintContext,
     current_taint: set[str],
-    lines: list[str],
-    source_vars: set[str] | None = None,
-    source_lines: dict[str, int] | None = None,
     coll_state: _CollectionTaintState | None = None,
     constant_vars: dict[str, int] | None = None,
-    method_summaries: dict[str, TaintSummary] | None = None,
 ) -> None:
     """Update current_taint in-place for a single CFG statement.
 
@@ -1254,10 +1308,10 @@ def _update_stmt_taint(
     asgn_idxs.extend(getattr(stmt, "extra_assignment_idxs", []))
 
     for aidx in asgn_idxs:
-        asgn = semantics.assignments[aidx]
-        _process_assignment_taint(asgn, config, current_taint, source_vars, source_lines,
-                                    coll_state=coll_state, src_lines=lines,
-                                    method_summaries=method_summaries, constant_vars=constant_vars)
+        asgn = ctx.semantics.assignments[aidx]
+        _process_assignment_taint(asgn, ctx.config, current_taint, ctx.source_vars, ctx.source_lines,
+                                    coll_state=coll_state, src_lines=ctx.lines,
+                                    method_summaries=ctx.method_summaries, constant_vars=constant_vars)
 
     # Process all calls on this line (primary + extras)
     call_idxs = []
@@ -1267,8 +1321,8 @@ def _update_stmt_taint(
 
     line_idx = stmt.line - 1
     for cidx in call_idxs:
-        call = semantics.function_calls[cidx]
-        _process_call_taint(call, config, current_taint, line_idx, lines)
+        call = ctx.semantics.function_calls[cidx]
+        _process_call_taint(call, ctx.config, current_taint, line_idx, ctx.lines)
 
 
 def _build_scope_children(semantics: FileSemantics) -> dict[int, set[int]]:
@@ -1442,6 +1496,79 @@ def _build_method_summaries(
 # ─── Entry point ─────────────────────────────────────────────────────
 
 
+def _collect_potential_sink_lines(
+    semantics: FileSemantics,
+    config: LanguageConfig,
+    func_scope_ids: set[int],
+) -> set[int]:
+    """Collect line numbers of potential taint sinks in the given scopes."""
+    sink_lines: set[int] = set()
+    for call in semantics.function_calls:
+        if call.scope_id not in func_scope_ids:
+            continue
+        call_text = call.name
+        if call.receiver:
+            call_text = f"{call.receiver}.{call.name}"
+        for pattern, _kind in config.taint_sink_patterns:
+            if _matches_sink_pattern(call_text, pattern):
+                sink_lines.add(call.line)
+                break
+    return sink_lines
+
+
+def _resolve_sink_source(
+    sink: TaintSink,
+    sources: list[TaintSource],
+    initial_tainted: set[str],
+    taint_chains: dict[str, list[tuple[str, int]]],
+) -> TaintSource | None:
+    """Find the originating taint source for a sink variable."""
+    if sink.variable in initial_tainted:
+        for s in sources:
+            if s.variable == sink.variable:
+                return s
+        return None
+    chain = taint_chains.get(sink.variable, [])
+    for src in sources:
+        if src.variable in {c[0] for c in chain} | {sink.variable}:
+            return src
+    return sources[0] if sources else None
+
+
+def _build_taint_finding(
+    sink: TaintSink,
+    source: TaintSource,
+    taint_chains: dict[str, list[tuple[str, int]]],
+    config: LanguageConfig,
+    filepath: str,
+) -> Finding:
+    """Build a Finding from a confirmed taint flow."""
+    chain = taint_chains.get(sink.variable, [])
+    chain_desc = ""
+    if chain:
+        chain_names = [c[0] for c in chain]
+        chain_desc = f" (through: {' → '.join(chain_names)})"
+
+    rule_name = _resolve_taint_rule(sink.kind, config.ts_language_name)
+    return Finding(
+        file=filepath,
+        line=sink.line,
+        severity=Severity.WARNING,
+        category=Category.SECURITY,
+        source=Source.AST,
+        rule=rule_name,
+        message=(
+            f"Tainted data from '{source.variable}' ({source.kind}, line {source.line}) "
+            f"reaches sink '{sink.function_name}' ({sink.kind}){chain_desc} — "
+            "verify sanitization"
+        ),
+        suggestion=(
+            f"Sanitize '{sink.variable}' before passing to '{sink.function_name}', "
+            "or use parameterized queries/safe APIs"
+        ),
+    )
+
+
 def analyze_taint(
     semantics: FileSemantics,
     source_bytes: bytes,
@@ -1459,44 +1586,26 @@ def analyze_taint(
         return []
 
     findings = []
-    seen = set()  # (source_line, sink_line) to deduplicate
+    seen: set[tuple[int, int]] = set()
 
-    # Analyze each function scope independently
     func_scopes = [s for s in semantics.scopes if s.kind == "function"]
     scope_children = _build_scope_children(semantics)
     scope_map = _build_scope_map(semantics)
 
-    # Build branch sibling ranges from the AST for scope-aware sanitization
     tree_root = getattr(semantics, "_tree_root", None)
     branch_groups = _collect_branch_siblings(tree_root)
     conditional_bodies = _collect_conditional_bodies(tree_root)
-
-    # Inter-procedural: build method summaries for same-file call resolution
     method_summaries = _build_method_summaries(semantics, config, source_bytes)
 
     for func_scope in func_scopes:
         func_scope_ids = _get_all_children(func_scope.scope_id, scope_children)
 
-        # 1. Find sources
         sources = _find_taint_sources(semantics, config, source_bytes, func_scope_ids)
         if not sources:
             continue
 
-        # Collect potential sink lines in this function scope
-        potential_sink_lines: set[int] = set()
-        for call in semantics.function_calls:
-            if call.scope_id not in func_scope_ids:
-                continue
-            call_text = call.name
-            if call.receiver:
-                call_text = f"{call.receiver}.{call.name}"
-            for pattern, _kind in config.taint_sink_patterns:
-                if _matches_sink_pattern(call_text, pattern):
-                    potential_sink_lines.add(call.line)
-                    break
+        potential_sink_lines = _collect_potential_sink_lines(semantics, config, func_scope_ids)
 
-        # 2. Propagate taint (branch-aware: sanitizers in conditional branches
-        #    don't clear taint globally)
         initial_tainted = {s.variable for s in sources}
         taint_chains = _propagate_taint(
             semantics, initial_tainted, func_scope_ids, config,
@@ -1507,16 +1616,12 @@ def analyze_taint(
             method_summaries=method_summaries,
         )
         tainted_vars = set(taint_chains.keys())
-
         if not tainted_vars:
             continue
 
-        # 3. Find sinks
         sinks = _find_taint_sinks(semantics, config, tainted_vars, func_scope_ids, source_bytes)
 
-        # 4. Build findings
         for sink in sinks:
-            # Check sanitization (scope-aware: sanitizer must dominate sink scope)
             if _is_sanitized(
                 semantics, config, sink.variable, func_scope_ids,
                 sink_line=sink.line, sink_scope_id=sink.scope_id,
@@ -1525,23 +1630,7 @@ def analyze_taint(
             ):
                 continue
 
-            # Find the source for this tainted variable
-            source = None
-            if sink.variable in initial_tainted:
-                for s in sources:
-                    if s.variable == sink.variable:
-                        source = s
-                        break
-            else:
-                # Follow chain back
-                chain = taint_chains.get(sink.variable, [])
-                for src in sources:
-                    if src.variable in {c[0] for c in chain} | {sink.variable}:
-                        source = src
-                        break
-                if not source and sources:
-                    source = sources[0]
-
+            source = _resolve_sink_source(sink, sources, initial_tainted, taint_chains)
             if source is None:
                 continue
 
@@ -1550,37 +1639,184 @@ def analyze_taint(
                 continue
             seen.add(key)
 
-            chain = taint_chains.get(sink.variable, [])
-            chain_desc = ""
-            if chain:
-                chain_names = [c[0] for c in chain]
-                chain_desc = f" (through: {' → '.join(chain_names)})"
-
-            rule_name = _resolve_taint_rule(sink.kind, config.ts_language_name)
-            findings.append(
-                Finding(
-                    file=filepath,
-                    line=sink.line,
-                    severity=Severity.WARNING,
-                    category=Category.SECURITY,
-                    source=Source.AST,
-                    rule=rule_name,
-                    message=(
-                        f"Tainted data from '{source.variable}' ({source.kind}, line {source.line}) "
-                        f"reaches sink '{sink.function_name}' ({sink.kind}){chain_desc} — "
-                        "verify sanitization"
-                    ),
-                    suggestion=(
-                        f"Sanitize '{sink.variable}' before passing to '{sink.function_name}', "
-                        "or use parameterized queries/safe APIs"
-                    ),
-                )
-            )
+            findings.append(_build_taint_finding(sink, source, taint_chains, config, filepath))
 
     return findings
 
 
 # ─── Path-sensitive taint analysis (v0.9.0) ──────────────────────────
+
+
+def _compute_block_taint_in(
+    block,
+    block_taint_out: dict[int, set[str]],
+    block_coll_out: dict[int, _CollectionTaintState],
+) -> tuple[set[str], _CollectionTaintState]:
+    """Compute taint_in and coll_in for a block by unioning predecessor outputs."""
+    if block.is_entry:
+        return set(), _CollectionTaintState.empty()
+    taint_in: set[str] = set()
+    coll_in = _CollectionTaintState.empty()
+    for pred_id in block.predecessors:
+        taint_in |= block_taint_out.get(pred_id, set())
+        coll_in = coll_in.merge(block_coll_out.get(pred_id, _CollectionTaintState.empty()))
+    return taint_in, coll_in
+
+
+def _run_forward_dataflow(
+    cfg,
+    rpo: list[int],
+    ctx: TaintContext,
+) -> tuple[dict[int, set[str]], dict[int, _CollectionTaintState], dict[str, int]]:
+    """Run forward dataflow to compute per-block taint sets. Returns (block_taint_out, block_coll_out, constant_vars)."""
+    block_coll_out: dict[int, _CollectionTaintState] = {
+        bid: _CollectionTaintState.empty() for bid in cfg.blocks
+    }
+    block_taint_out: dict[int, set[str]] = {bid: set() for bid in cfg.blocks}
+    ps_constant_vars: dict[str, int] = {}
+
+    max_iters = 20
+    for _iteration in range(max_iters):
+        changed = False
+
+        for block_id in rpo:
+            block = cfg.blocks[block_id]
+            taint_in, coll_in = _compute_block_taint_in(block, block_taint_out, block_coll_out)
+
+            current_taint = set(taint_in)
+            current_coll = coll_in.copy()
+
+            for stmt in block.statements:
+                _update_stmt_taint(
+                    stmt, ctx, current_taint,
+                    coll_state=current_coll, constant_vars=ps_constant_vars,
+                )
+
+            old_out = block_taint_out[block_id]
+            if current_taint != old_out:
+                block_taint_out[block_id] = current_taint
+                changed = True
+            block_coll_out[block_id] = current_coll
+
+        if not changed:
+            break
+
+    return block_taint_out, block_coll_out, ps_constant_vars
+
+
+def _find_source_info(sources: list[TaintSource], tvar: str) -> TaintSource | None:
+    """Find the taint source info for a variable, falling back to first source."""
+    for s in sources:
+        if s.variable == tvar:
+            return s
+    return sources[0] if sources else None
+
+
+def _check_tainted_var_at_sink(
+    tvar: str, stmt, call_text: str, sink_kind: str, pattern: str,
+    line_text: str, sources: list[TaintSource],
+    ps_assigned_on_line: set[tuple[str, int]], call_receiver: str | None,
+    seen: set, ctx: TaintContext,
+) -> Finding | None:
+    """Check if a tainted variable reaches a sink on this line. Returns Finding or None."""
+    if (tvar, stmt.line) in ps_assigned_on_line:
+        return None
+    if pattern.startswith(".") and call_receiver:
+        receiver_root = call_receiver.split(".")[0].split("(")[0]
+        if tvar == receiver_root:
+            return None
+    if not re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
+        return None
+
+    source_lines = ctx.source_lines or {}
+    src_line = source_lines.get(tvar, 0)
+    key = (src_line, stmt.line)
+    if key in seen:
+        return None
+    seen.add(key)
+
+    source_info = _find_source_info(sources, tvar)
+    src_kind = source_info.kind if source_info else "unknown"
+    src_var = source_info.variable if source_info else tvar
+    ps_rule = _resolve_taint_rule(sink_kind, ctx.config.ts_language_name)
+
+    return Finding(
+        file=ctx.filepath,
+        line=stmt.line,
+        severity=Severity.WARNING,
+        category=Category.SECURITY,
+        source=Source.AST,
+        rule=ps_rule,
+        message=(
+            f"Tainted data from '{src_var}' "
+            f"({src_kind}, line {src_line}) "
+            f"reaches sink '{call_text}' ({sink_kind}) "
+            "— path-sensitive analysis"
+        ),
+        suggestion=(
+            f"Sanitize '{tvar}' before passing to "
+            f"'{call_text}', or use parameterized "
+            "queries/safe APIs"
+        ),
+    )
+
+
+def _scan_blocks_for_sinks(
+    cfg,
+    rpo: list[int],
+    ctx: TaintContext,
+    sources: list[TaintSource],
+    block_taint_out: dict[int, set[str]],
+    block_coll_out: dict[int, _CollectionTaintState],
+    ps_constant_vars: dict[str, int],
+    ps_assigned_on_line: set[tuple[str, int]],
+    seen: set,
+) -> list[Finding]:
+    """Scan CFG blocks for taint sinks with tainted arguments."""
+    findings = []
+
+    for block_id in rpo:
+        block = cfg.blocks[block_id]
+        taint_in, coll_in = _compute_block_taint_in(block, block_taint_out, block_coll_out)
+
+        current_taint = set(taint_in)
+        current_coll = coll_in.copy()
+
+        for stmt in block.statements:
+            line_idx = stmt.line - 1
+
+            _update_stmt_taint(stmt, ctx, current_taint,
+                               coll_state=current_coll, constant_vars=ps_constant_vars)
+
+            sink_call_idxs = []
+            if stmt.call_idx is not None:
+                sink_call_idxs.append(stmt.call_idx)
+            sink_call_idxs.extend(getattr(stmt, "extra_call_idxs", []))
+
+            for _cidx in sink_call_idxs:
+                call = ctx.semantics.function_calls[_cidx]
+                call_text = f"{call.receiver}.{call.name}" if call.receiver else call.name
+
+                for pattern, sink_kind in ctx.config.taint_sink_patterns:
+                    if not _matches_sink_pattern(call_text, pattern):
+                        continue
+                    if not (0 <= line_idx < len(ctx.lines)):
+                        break
+
+                    line_text = ctx.lines[line_idx]
+                    for tvar in current_taint:
+                        f = _check_tainted_var_at_sink(
+                            tvar, stmt, call_text, sink_kind, pattern,
+                            line_text, sources,
+                            ps_assigned_on_line, call.receiver,
+                            seen, ctx,
+                        )
+                        if f:
+                            findings.append(f)
+                            break
+                    break
+
+    return findings
 
 
 def analyze_taint_pathsensitive(
@@ -1613,7 +1849,6 @@ def analyze_taint_pathsensitive(
     scope_children = _build_scope_children(semantics)
     func_scopes = [s for s in semantics.scopes if s.kind == "function"]
 
-    # Inter-procedural: build method summaries for same-file call resolution
     method_summaries = _build_method_summaries(semantics, config, source_bytes)
 
     for func_scope in func_scopes:
@@ -1623,173 +1858,38 @@ def analyze_taint_pathsensitive(
 
         func_scope_ids = _get_all_children(func_scope.scope_id, scope_children)
 
-        # 1. Find taint sources in this function
+        # 1. Find taint sources
         sources = _find_taint_sources(semantics, config, source_bytes, func_scope_ids)
         if not sources:
             continue
 
         source_vars = {s.variable for s in sources}
-        source_lines = {s.variable: s.line for s in sources}
+        source_lines_map = {s.variable: s.line for s in sources}
 
-        # Collection-aware taint state per block (for map/list key tracking)
-        block_coll_out: dict[int, _CollectionTaintState] = {
-            bid: _CollectionTaintState.empty() for bid in cfg.blocks
-        }
-
-        # 2. Forward dataflow: taint sets per block
-        # block_taint_out[block_id] = set of tainted variable names at block exit
-        block_taint_out: dict[int, set[str]] = {bid: set() for bid in cfg.blocks}
-
-        # Constant propagation: track integer literals for ternary resolution
-        ps_constant_vars: dict[str, int] = {}
+        ctx = TaintContext(
+            semantics=semantics, config=config, lines=lines, filepath=filepath,
+            method_summaries=method_summaries, source_vars=source_vars,
+            source_lines=source_lines_map,
+        )
 
         rpo = get_reverse_postorder(cfg)
-        max_iters = 20
 
-        for _iteration in range(max_iters):
-            changed = False
+        # 2. Forward dataflow
+        block_taint_out, block_coll_out, ps_constant_vars = _run_forward_dataflow(
+            cfg, rpo, ctx,
+        )
 
-            for block_id in rpo:
-                block = cfg.blocks[block_id]
-
-                # Compute taint_in: union of all predecessor taint_outs
-                if block.is_entry:
-                    taint_in: set[str] = set()
-                    coll_in = _CollectionTaintState.empty()
-                else:
-                    taint_in = set()
-                    coll_in = _CollectionTaintState.empty()
-                    for pred_id in block.predecessors:
-                        taint_in |= block_taint_out.get(pred_id, set())
-                        coll_in = coll_in.merge(block_coll_out.get(
-                            pred_id, _CollectionTaintState.empty()))
-
-                # Process statements in order
-                current_taint = set(taint_in)
-                current_coll = coll_in.copy()
-
-                for stmt in block.statements:
-                    _update_stmt_taint(
-                        stmt,
-                        semantics,
-                        config,
-                        current_taint,
-                        lines,
-                        source_vars=source_vars,
-                        source_lines=source_lines,
-                        coll_state=current_coll,
-                        constant_vars=ps_constant_vars,
-                        method_summaries=method_summaries,
-                    )
-
-                old_out = block_taint_out[block_id]
-                if current_taint != old_out:
-                    block_taint_out[block_id] = current_taint
-                    changed = True
-                block_coll_out[block_id] = current_coll
-
-            if not changed:
-                break
-
-        # Build set of (variable, line) for LHS-assignment exclusion
+        # Build LHS-assignment exclusion set
         ps_assigned_on_line: set[tuple[str, int]] = set()
         for asgn in semantics.assignments:
             if asgn.scope_id in func_scope_ids and not asgn.is_parameter:
                 ps_assigned_on_line.add((asgn.name, asgn.line))
 
-        # 3. Scan for sinks with tainted arguments
-        for block_id in rpo:
-            block = cfg.blocks[block_id]
-
-            # Compute taint_in for this block
-            if block.is_entry:
-                taint_in = set()
-                coll_in = _CollectionTaintState.empty()
-            else:
-                taint_in = set()
-                coll_in = _CollectionTaintState.empty()
-                for pred_id in block.predecessors:
-                    taint_in |= block_taint_out.get(pred_id, set())
-                    coll_in = coll_in.merge(block_coll_out.get(
-                        pred_id, _CollectionTaintState.empty()))
-
-            current_taint = set(taint_in)
-            current_coll = coll_in.copy()
-
-            for stmt in block.statements:
-                line_idx = stmt.line - 1
-
-                # Update taint through this statement
-                _update_stmt_taint(stmt, semantics, config, current_taint, lines,
-                                   coll_state=current_coll, constant_vars=ps_constant_vars,
-                                   method_summaries=method_summaries)
-
-                # Check for sinks (all calls on this line)
-                sink_call_idxs = []
-                if stmt.call_idx is not None:
-                    sink_call_idxs.append(stmt.call_idx)
-                sink_call_idxs.extend(getattr(stmt, "extra_call_idxs", []))
-
-                for _cidx in sink_call_idxs:
-                    call = semantics.function_calls[_cidx]
-                    call_text = call.name
-                    if call.receiver:
-                        call_text = f"{call.receiver}.{call.name}"
-
-                    for pattern, sink_kind in config.taint_sink_patterns:
-                        if _matches_sink_pattern(call_text, pattern):
-                            if 0 <= line_idx < len(lines):
-                                line_text = lines[line_idx]
-                                for tvar in current_taint:
-                                    # Skip LHS assignments (var is being defined, not passed)
-                                    if (tvar, stmt.line) in ps_assigned_on_line:
-                                        continue
-                                    # For method-only patterns, skip if tainted var is receiver
-                                    if pattern.startswith(".") and call.receiver:
-                                        receiver_root = call.receiver.split(".")[0].split("(")[0]
-                                        if tvar == receiver_root:
-                                            continue
-                                    if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
-                                        src_line = source_lines.get(tvar, 0)
-                                        key = (src_line, stmt.line)
-                                        if key not in seen:
-                                            seen.add(key)
-
-                                            # Find original source info
-                                            source_info = None
-                                            for s in sources:
-                                                if s.variable == tvar:
-                                                    source_info = s
-                                                    break
-                                            if not source_info and sources:
-                                                source_info = sources[0]
-
-                                            src_kind = source_info.kind if source_info else "unknown"
-                                            src_var = source_info.variable if source_info else tvar
-
-                                            ps_rule = _resolve_taint_rule(sink_kind, config.ts_language_name)
-                                            findings.append(
-                                                Finding(
-                                                    file=filepath,
-                                                    line=stmt.line,
-                                                    severity=Severity.WARNING,
-                                                    category=Category.SECURITY,
-                                                    source=Source.AST,
-                                                    rule=ps_rule,
-                                                    message=(
-                                                        f"Tainted data from '{src_var}' "
-                                                        f"({src_kind}, line {src_line}) "
-                                                        f"reaches sink '{call_text}' ({sink_kind}) "
-                                                        "— path-sensitive analysis"
-                                                    ),
-                                                    suggestion=(
-                                                        f"Sanitize '{tvar}' before passing to "
-                                                        f"'{call_text}', or use parameterized "
-                                                        "queries/safe APIs"
-                                                    ),
-                                                )
-                                            )
-                                        break
-                            break
+        # 3. Scan for sinks
+        findings.extend(_scan_blocks_for_sinks(
+            cfg, rpo, ctx, sources,
+            block_taint_out, block_coll_out, ps_constant_vars,
+            ps_assigned_on_line, seen,
+        ))
 
     return findings

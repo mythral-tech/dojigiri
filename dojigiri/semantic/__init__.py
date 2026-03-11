@@ -1,4 +1,8 @@
-"""dojigiri.semantic — Tree-sitter based semantic analysis subsystem."""
+"""dojigiri.semantic — Tree-sitter based semantic analysis subsystem.
+
+Package with intentionally high coupling — re-exports all semantic analysis
+modules as a unified public API.
+"""
 
 from .cfg import BasicBlock, CfgStatement, FunctionCFG, build_cfg, get_reverse_postorder  # doji:ignore(unused-import)
 from .checks import (  # doji:ignore(unused-import)

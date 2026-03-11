@@ -9,7 +9,7 @@ Calls into: nothing (standalone utility)
 Data in → Data out: tree-sitter Node → text string or line number
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 
 def _get_text(node, source_bytes: bytes) -> str:

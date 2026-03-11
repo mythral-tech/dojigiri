@@ -11,9 +11,13 @@ production Java code.
 Called by: detector.py (post-regex-check filtering for Java files)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .types import Finding
 
 # ─── Arithmetic Patterns ─────────────────────────────────────────────
 
@@ -410,8 +414,8 @@ def _has_safe_dataflow(content: str) -> bool:
 
 
 def filter_java_fps(
-    findings: list, content: str, *, skip_benchmark_filters: bool = False,
-) -> list:
+    findings: list[Finding], content: str, *, skip_benchmark_filters: bool = False,
+) -> list[Finding]:
     """Filter out likely false positive injection findings from Java files
     when sanitization patterns are detected.
 

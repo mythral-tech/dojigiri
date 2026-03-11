@@ -20,7 +20,7 @@ def generate_llm_fixes(
     content: str,
     language: str,
     findings: list[Finding],
-    cost_tracker=None,
+    cost_tracker: object | None = None,
 ) -> list[Fix]:
     """Send findings to LLM, get back structured fixes.
 

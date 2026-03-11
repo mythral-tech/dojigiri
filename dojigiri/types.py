@@ -9,7 +9,7 @@ Calls into: compliance.py (lazy import in Finding.to_dict only)
 Data in → Data out: no I/O; provides shared types.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import logging
 from dataclasses import dataclass, field

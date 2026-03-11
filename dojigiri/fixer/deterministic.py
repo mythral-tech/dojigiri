@@ -51,6 +51,73 @@ class FixerFn(Protocol):
 # Each takes (line, finding, full_content) and returns Fix | None.
 
 
+def _is_import_in_try_block(node: ast.AST, content: str) -> bool:
+    """Check if an import AST node is inside a try block (optional import pattern)."""
+    try:
+        tree = ast.parse(content)
+        for parent in ast.walk(tree):
+            for child in ast.iter_child_nodes(parent):
+                if child is node and isinstance(parent, ast.Try):
+                    return True
+    except SyntaxError as e:
+        logger.debug("Failed to parse AST for import check: %s", e)
+    return False
+
+
+def _fix_multi_name_import(node: ast.AST, unused_name: str, finding: Finding, content: str) -> Fix | None:
+    """Handle removing a single name from a multi-name 'from X import a, b, c' statement."""
+    if not (isinstance(node, ast.ImportFrom) and len(node.names) > 1):
+        return None
+    remaining = [a for a in node.names if a.name != unused_name]
+    if not remaining or len(remaining) == len(node.names):
+        return None
+    remaining_strs = [f"{a.name} as {a.asname}" if a.asname else a.name for a in remaining]
+    lines_list = content.splitlines(keepends=True)
+    start = node.lineno - 1
+    end = node.end_lineno if node.end_lineno else node.lineno
+    original_text = "".join(lines_list[start:end])
+    indent = re.match(r"^(\s*)", lines_list[start]).group(1)
+    module = node.module or ""
+    new_text = f"{indent}from {module} import {', '.join(remaining_strs)}\n"
+    return Fix(
+        file=finding.file,
+        line=finding.line,
+        rule=finding.rule,
+        original_code=original_text,
+        fixed_code=new_text,
+        explanation=f"Removed unused '{unused_name}' from import",
+        source=FixSource.DETERMINISTIC,
+        end_line=end,
+    )
+
+
+def _fix_single_import_ast(node: ast.AST, unused_name: str, line: str, finding: Finding) -> Fix | None:
+    """Handle removing a single-name import or from-import via AST."""
+    if isinstance(node, ast.Import):
+        names = [a.name for a in node.names]
+        if unused_name in names and len(names) == 1:
+            return Fix(
+                file=finding.file,
+                line=finding.line,
+                rule=finding.rule,
+                original_code=line,
+                fixed_code="",
+                explanation=f"Removed unused import: {unused_name}",
+                source=FixSource.DETERMINISTIC,
+            )
+    elif isinstance(node, ast.ImportFrom) and len(node.names) == 1:
+        return Fix(
+            file=finding.file,
+            line=finding.line,
+            rule=finding.rule,
+            original_code=line,
+            fixed_code="",
+            explanation=f"Removed unused import: {line.strip()}",
+            source=FixSource.DETERMINISTIC,
+        )
+    return None
+
+
 def _fix_unused_import(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
     """Remove an unused import. AST-first: handles multiline from...import correctly.
 
@@ -74,62 +141,16 @@ def _fix_unused_import(line: str, finding: Finding, content: str, ctx: FixContex
     if finding.file.endswith(".py") and unused_name:
         node = _find_ast_node(content, finding.line, (ast.Import, ast.ImportFrom))
         if node:
-            # Skip if inside a try block (optional import pattern)
-            try:
-                tree = ast.parse(content)
-                for parent in ast.walk(tree):
-                    for child in ast.iter_child_nodes(parent):
-                        if child is node and isinstance(parent, ast.Try):
-                            return None
-            except SyntaxError as e:
-                logger.debug("Failed to parse AST for import check: %s", e)
+            if _is_import_in_try_block(node, content):
+                return None
 
-            if isinstance(node, ast.ImportFrom) and len(node.names) > 1:
-                # Multi-name import: remove only the unused name, keep the rest
-                remaining = [a for a in node.names if a.name != unused_name]
-                if remaining and len(remaining) < len(node.names):
-                    remaining_strs = [f"{a.name} as {a.asname}" if a.asname else a.name for a in remaining]
-                    lines_list = content.splitlines(keepends=True)
-                    start = node.lineno - 1
-                    end = node.end_lineno if node.end_lineno else node.lineno
-                    original_text = "".join(lines_list[start:end])
-                    indent = re.match(r"^(\s*)", lines_list[start]).group(1)
-                    module = node.module or ""
-                    new_text = f"{indent}from {module} import {', '.join(remaining_strs)}\n"
-                    return Fix(
-                        file=finding.file,
-                        line=finding.line,
-                        rule=finding.rule,
-                        original_code=original_text,
-                        fixed_code=new_text,
-                        explanation=f"Removed unused '{unused_name}' from import",
-                        source=FixSource.DETERMINISTIC,
-                        end_line=end,
-                    )
+            fix = _fix_multi_name_import(node, unused_name, finding, content)
+            if fix:
+                return fix
 
-            # Single import or all names unused: delete the whole statement
-            if isinstance(node, ast.Import):
-                names = [a.name for a in node.names]
-                if unused_name in names and len(names) == 1:
-                    return Fix(
-                        file=finding.file,
-                        line=finding.line,
-                        rule=finding.rule,
-                        original_code=line,
-                        fixed_code="",
-                        explanation=f"Removed unused import: {unused_name}",
-                        source=FixSource.DETERMINISTIC,
-                    )
-            elif isinstance(node, ast.ImportFrom) and len(node.names) == 1:
-                return Fix(
-                    file=finding.file,
-                    line=finding.line,
-                    rule=finding.rule,
-                    original_code=line,
-                    fixed_code="",
-                    explanation=f"Removed unused import: {line.strip()}",
-                    source=FixSource.DETERMINISTIC,
-                )
+            fix = _fix_single_import_ast(node, unused_name, line, finding)
+            if fix:
+                return fix
 
     # Regex fallback for non-Python or parse failure
     stripped = line.strip()
@@ -222,12 +243,28 @@ def _fix_loose_equality(line: str, finding: Finding, content: str, ctx: FixConte
     return None
 
 
+def _rebuild_none_comparison(node: ast.AST, content: str) -> str:
+    """Rebuild an ast.Compare node replacing ==/!= None with is/is not None."""
+    parts = [ast.get_source_segment(content, node.left) or ast.unparse(node.left)]
+    for op, comp in zip(node.ops, node.comparators):
+        if isinstance(comp, ast.Constant) and comp.value is None:
+            if isinstance(op, ast.Eq):
+                parts.append("is None")
+            elif isinstance(op, ast.NotEq):
+                parts.append("is not None")
+            else:
+                parts.append(f"{_op_str(op)} {ast.get_source_segment(content, comp) or ast.unparse(comp)}")
+        else:
+            parts.append(f"{_op_str(op)} {ast.get_source_segment(content, comp) or ast.unparse(comp)}")
+    return " ".join(parts)
+
+
 def _fix_none_comparison(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
     """Replace ``x == None`` / ``x != None`` with identity checks. AST-first."""  # doji:ignore(none-comparison)
     # AST approach: structurally rebuild the comparison
     if finding.file.endswith(".py"):
 
-        def _is_none_eq(node):
+        def _is_none_eq(node: ast.AST) -> bool:
             return isinstance(node, ast.Compare) and any(
                 isinstance(comp, ast.Constant) and comp.value is None and isinstance(op, (ast.Eq, ast.NotEq))
                 for op, comp in zip(node.ops, node.comparators)
@@ -235,21 +272,7 @@ def _fix_none_comparison(line: str, finding: Finding, content: str, ctx: FixCont
 
         node = _find_ast_node(content, finding.line, ast.Compare, _is_none_eq)
         if node and node.end_lineno and node.end_col_offset is not None:
-            # Rebuild the comparison expression with `is`/`is not`
-            # Use ast.unparse for the non-None parts, manually construct the ops
-            parts = [ast.get_source_segment(content, node.left) or ast.unparse(node.left)]
-            for op, comp in zip(node.ops, node.comparators):
-                if isinstance(comp, ast.Constant) and comp.value is None:
-                    if isinstance(op, ast.Eq):
-                        parts.append("is None")
-                    elif isinstance(op, ast.NotEq):
-                        parts.append("is not None")
-                    else:
-                        parts.append(f"{_op_str(op)} {ast.get_source_segment(content, comp) or ast.unparse(comp)}")
-                else:
-                    parts.append(f"{_op_str(op)} {ast.get_source_segment(content, comp) or ast.unparse(comp)}")
-
-            new_expr = " ".join(parts)
+            new_expr = _rebuild_none_comparison(node, content)
             new_content = _replace_node_source(content, node, new_expr)
             new_lines = new_content.splitlines(keepends=True)
             lines = content.splitlines(keepends=True)
@@ -270,8 +293,7 @@ def _fix_none_comparison(line: str, finding: Finding, content: str, ctx: FixCont
         return None
     if _in_multiline_string(content, finding.line):
         return None
-    new_line = line
-    new_line = _sub_outside_strings(new_line, r"!=\s*None\b", "is not None")
+    new_line = _sub_outside_strings(line, r"!=\s*None\b", "is not None")
     new_line = _sub_outside_strings(new_line, r"==\s*None\b", "is None")
     if new_line != line:
         return Fix(
@@ -291,7 +313,7 @@ def _fix_type_comparison(line: str, finding: Finding, content: str, ctx: FixCont
     # AST approach
     if finding.file.endswith(".py"):
 
-        def _is_type_compare(node):
+        def _is_type_compare(node: ast.AST) -> bool:
             return (
                 isinstance(node, ast.Compare)
                 and len(node.ops) == 1
@@ -445,49 +467,37 @@ def _fix_hardcoded_secret(line: str, finding: Finding, content: str, ctx: FixCon
     )
 
 
-def _fix_open_without_with(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
-    """Wrap `x = open(...)` in a `with` statement."""
-    m = re.match(r"^(\s*)(\w+)\s*=\s*open\((.+)\)\s*$", line.rstrip("\n"))
-    if not m:
-        return None
-    indent = m.group(1)
-    var_name = m.group(2)
-    open_args = m.group(3)
+def _collect_open_body(lines: list[str], line_idx: int, indent: str, var_name: str) -> list[str]:
+    """Collect the body lines that use `var_name` after an open() assignment.
 
-    # Find subsequent lines that belong to the body of this open() usage.
-    # Collect all lines at same-or-deeper indent until we hit a scope boundary.
-    # Then trim from the end: drop lines after the last use of the variable.
-    lines = content.splitlines(keepends=True)
-    line_idx = finding.line - 1
-    candidate_lines = []
-    # Match variable name as a word, but exclude f-string prefixes (f"...", f'...')
+    Gathers lines at same-or-deeper indent, trims to last variable use,
+    extends block headers, strips blank edges, and removes explicit .close() calls.
+    """
     var_pat = re.compile(r"\b" + re.escape(var_name) + r'\b(?!["\'])')
     indent_len = len(indent)
+    candidate_lines = []
+
     for i in range(line_idx + 1, len(lines)):
         subsequent = lines[i]
         stripped = subsequent.strip()
-        # Stop on def/class boundaries
         if stripped.startswith("def ") or stripped.startswith("class "):
             break
-        # Blank lines are collected
         if not stripped:
             candidate_lines.append(subsequent)
             continue
-        # Check indentation
         cur_indent = len(subsequent) - len(subsequent.lstrip())
         if cur_indent < indent_len:
-            break  # shallower indent -- left the scope
+            break
         candidate_lines.append(subsequent)
 
-    # Trim from the end: find the last line that uses the variable
+    # Trim to last variable use
     last_var_use = -1
     for j, cl in enumerate(candidate_lines):
         if var_pat.search(cl):
             last_var_use = j
     body_lines = candidate_lines[: last_var_use + 1] if last_var_use >= 0 else []
 
-    # If the last var-use line is a block header (for/if/while/with ending with ':'),
-    # extend to include its indented body -- otherwise we'd leave a headless block.
+    # Extend block headers to include their body
     if body_lines and body_lines[-1].rstrip().endswith(":"):
         header_indent = len(body_lines[-1]) - len(body_lines[-1].lstrip())
         extend_from = last_var_use + 1
@@ -498,24 +508,33 @@ def _fix_open_without_with(line: str, finding: Finding, content: str, ctx: FixCo
                 body_lines.append(ext_line)
                 extend_from += 1
                 continue
-            ext_indent = len(ext_line) - len(ext_line.lstrip())
-            if ext_indent <= header_indent:
+            if len(ext_line) - len(ext_line.lstrip()) <= header_indent:
                 break
             body_lines.append(ext_line)
             extend_from += 1
 
-    # Strip leading and trailing blank lines from collected body
+    # Strip blank edges and remove .close() calls
     while body_lines and not body_lines[0].strip():
         body_lines.pop(0)
     while body_lines and not body_lines[-1].strip():
         body_lines.pop()
-
-    # Remove explicit .close() calls on the variable -- the with block handles it
     close_pat = re.compile(r"^\s*" + re.escape(var_name) + r"\.close\(\)\s*$")
-    body_lines = [bl for bl in body_lines if not close_pat.match(bl)]
+    return [bl for bl in body_lines if not close_pat.match(bl)]
+
+
+def _fix_open_without_with(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
+    """Wrap `x = open(...)` in a `with` statement."""
+    m = re.match(r"^(\s*)(\w+)\s*=\s*open\((.+)\)\s*$", line.rstrip("\n"))
+    if not m:
+        return None
+    indent = m.group(1)
+    var_name = m.group(2)
+    open_args = m.group(3)
+
+    lines = content.splitlines(keepends=True)
+    body_lines = _collect_open_body(lines, finding.line - 1, indent, var_name)
 
     if not body_lines:
-        # No body found -- emit with ... as f:\n    pass
         new_code = f"{indent}with open({open_args}) as {var_name}:\n{indent}    pass\n"  # doji:ignore(resource-leak)
         return Fix(
             file=finding.file,
@@ -527,22 +546,17 @@ def _fix_open_without_with(line: str, finding: Finding, content: str, ctx: FixCo
             source=FixSource.DETERMINISTIC,
         )
 
-    # Build the with block with re-indented body (preserve relative indentation)
+    # Build the with block with re-indented body
     open_stmt = f"open({open_args})"  # doji:ignore(resource-leak)
     code_lines = [f"{indent}with {open_stmt} as {var_name}:\n"]
     for bl in body_lines:
         if bl.strip():
-            # Preserve indentation relative to the original indent level
-            if bl.startswith(indent):
-                relative = bl[len(indent) :]
-            else:
-                relative = bl.lstrip()
+            relative = bl[len(indent):] if bl.startswith(indent) else bl.lstrip()
             code_lines.append(indent + "    " + relative)
         else:
             code_lines.append(bl)
     new_code = "".join(code_lines)
 
-    # Set end_line so apply_fixes blanks out the original body lines
     last_body_line = finding.line + len(body_lines)
     return Fix(
         file=finding.file,
@@ -630,7 +644,7 @@ def _fix_mutable_default(line: str, finding: Finding, content: str, ctx: FixCont
     return _mutable_default_regex(line, finding, content)
 
 
-def _mutable_default_ast(node, finding: Finding, content: str) -> Fix | None:
+def _mutable_default_ast(node: ast.AST, finding: Finding, content: str) -> Fix | None:
     """AST-based mutable default fix: uses node structure for correct parameter identification."""
     lines = content.splitlines(keepends=True)
     indent = re.match(r"^(\s*)", lines[node.lineno - 1]).group(1)
@@ -788,6 +802,74 @@ def _mutable_default_regex(line: str, finding: Finding, content: str) -> Fix | N
     )
 
 
+def _semantic_guard_unused_var(finding: Finding, ctx: FixContext | None) -> bool:
+    """Check if semantic data says the variable is actually used. Returns True to abort fix."""
+    if not (ctx and ctx.semantics):
+        return False
+    var_name = _extract_name_from_message(finding.message)
+    if not var_name:
+        return False
+    assign_scope = None
+    for assign in ctx.semantics.assignments:
+        if assign.name == var_name and assign.line == finding.line:
+            assign_scope = assign.scope_id
+            break
+    if assign_scope is not None:
+        if _semantic_var_is_used_in_child_scope(var_name, assign_scope, ctx.semantics):
+            return True
+    if _semantic_var_in_all_export(var_name, ctx.semantics):
+        return True
+    return False
+
+
+def _is_sole_block_statement(content: str, line_idx: int) -> bool:
+    """Check if line_idx is the only statement in a block (between { and })."""
+    lines = content.splitlines()
+    if not (0 <= line_idx < len(lines)):
+        return False
+    prev_code = ""
+    for i in range(line_idx - 1, -1, -1):
+        s = lines[i].strip()
+        if s:
+            prev_code = s
+            break
+    next_code = ""
+    for i in range(line_idx + 1, len(lines)):
+        s = lines[i].strip()
+        if s:
+            next_code = s
+            break
+    return prev_code.endswith("{") and next_code == "}"
+
+
+_NOT_JS = object()  # sentinel: line is not a JS variable declaration
+
+
+def _fix_unused_var_js(stripped: str, line: str, finding: Finding) -> Fix | None | object:
+    """Handle JS/TS unused variable removal (const/let/var).
+
+    Returns _NOT_JS sentinel if the line isn't a JS variable declaration,
+    None if it matches but can't be safely removed, or a Fix on success.
+    """
+    js_m = re.match(r"^(const|let|var)\s+(\w+)\s*=\s*(.+?);?\s*$", stripped)
+    if not js_m:
+        return _NOT_JS
+    var_name = js_m.group(2)
+    rhs = js_m.group(3).strip()
+    if re.search(r"\w+\s*\(", rhs) and not re.match(r'^["\'\d\[\{(]', rhs):
+        if "require(" not in rhs:
+            return None
+    return Fix(
+        file=finding.file,
+        line=finding.line,
+        rule=finding.rule,
+        original_code=line,
+        fixed_code="",
+        explanation=f"Removed unused variable: {var_name}",
+        source=FixSource.DETERMINISTIC,
+    )
+
+
 def _fix_unused_variable(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
     """Remove an unused variable assignment.
 
@@ -796,62 +878,16 @@ def _fix_unused_variable(line: str, finding: Finding, content: str, ctx: FixCont
     """
     stripped = line.strip()
 
-    # Semantic guards: check if variable is actually used in ways the detector missed
-    if ctx and ctx.semantics:
-        var_name = _extract_name_from_message(finding.message)
-        if var_name:
-            # Find the assignment's scope_id
-            assign_scope = None
-            for assign in ctx.semantics.assignments:
-                if assign.name == var_name and assign.line == finding.line:
-                    assign_scope = assign.scope_id
-                    break
-            if assign_scope is not None:
-                # Check child-scope references (closures, nested functions)
-                if _semantic_var_is_used_in_child_scope(var_name, assign_scope, ctx.semantics):
-                    return None
-            # Check __all__ re-export
-            if _semantic_var_in_all_export(var_name, ctx.semantics):
-                return None
+    if _semantic_guard_unused_var(finding, ctx):
+        return None
 
-    # Don't remove if it's the only statement in a block (would create empty-exception-handler etc.)
-    lines = content.splitlines()
-    line_idx = finding.line - 1
-    if 0 <= line_idx < len(lines):
-        # Look backward for block opener, forward for block closer
-        prev_code = ""
-        for i in range(line_idx - 1, -1, -1):
-            s = lines[i].strip()
-            if s:
-                prev_code = s
-                break
-        next_code = ""
-        for i in range(line_idx + 1, len(lines)):
-            s = lines[i].strip()
-            if s:
-                next_code = s
-                break
-        if prev_code.endswith("{") and next_code == "}":
-            return None  # sole statement in block -- removal would leave empty block
+    if _is_sole_block_statement(content, finding.line - 1):
+        return None
 
-    # JS/TS: const x = ...; / let x = ...; / var x = ...;
-    js_m = re.match(r"^(const|let|var)\s+(\w+)\s*=\s*(.+?);?\s*$", stripped)
-    if js_m:
-        var_name = js_m.group(2)
-        rhs = js_m.group(3).strip()
-        # Skip if RHS has side effects (function calls other than safe constructors)
-        if re.search(r"\w+\s*\(", rhs) and not re.match(r'^["\'\d\[\{(]', rhs):
-            if "require(" not in rhs:  # require() is an import, safe to remove
-                return None
-        return Fix(
-            file=finding.file,
-            line=finding.line,
-            rule=finding.rule,
-            original_code=line,
-            fixed_code="",
-            explanation=f"Removed unused variable: {var_name}",
-            source=FixSource.DETERMINISTIC,
-        )
+    # JS/TS path
+    js_fix = _fix_unused_var_js(stripped, line, finding)
+    if js_fix is not _NOT_JS:
+        return js_fix  # type: ignore[return-value]  # Fix | None
 
     # Python: x = <value>
     if not re.match(r"^\w+\s*=\s*", stripped):
@@ -870,11 +906,9 @@ def _fix_unused_variable(line: str, finding: Finding, content: str, ctx: FixCont
             return None
 
     # Handle multi-line assignments (triple-quoted strings, multiline containers)
-    # Use AST to find the full span if the assignment continues past this line
     if finding.file.endswith(".py"):
         node = _find_ast_node(content, finding.line, ast.Assign)
         if node and node.end_lineno and node.end_lineno > node.lineno:
-            # Multi-line assignment -- need to blank all lines
             all_lines = content.splitlines(keepends=True)
             orig_text = "".join(all_lines[node.lineno - 1 : node.end_lineno])
             return Fix(
@@ -919,61 +953,80 @@ def _fix_os_system(line: str, finding: Finding, content: str, ctx: FixContext | 
         source=FixSource.DETERMINISTIC,
     )
 
-    # Ensure 'import subprocess' and 'import shlex' exist -- without them, the
-    # fixed code raises NameError at runtime and silently breaks functionality.
+    # Ensure required imports exist
     import_fixes = []
-    content_lines = content.splitlines(keepends=True)
-    last_import_idx = -1
-    for i, cl in enumerate(content_lines):
-        if re.match(r"^(import |from \S+ import )", cl):
-            last_import_idx = i
-
     for mod in ("subprocess", "shlex"):
-        if not re.search(rf"^\s*import\s+{mod}\b", content, re.MULTILINE) and not re.search(
-            rf"^\s*from\s+{mod}\s+import\b", content, re.MULTILINE
-        ):
-            if last_import_idx >= 0:
-                anchor_line = content_lines[last_import_idx]
-                import_fix = Fix(
-                    file=finding.file,
-                    line=last_import_idx + 1,
-                    rule=finding.rule,
-                    original_code=anchor_line,
-                    fixed_code=anchor_line.rstrip("\n") + f"\nimport {mod}\n",
-                    explanation=f"Added 'import {mod}' required by subprocess.run(shlex.split(...))",
-                    source=FixSource.DETERMINISTIC,
-                )
-            else:
-                insert_idx = 0
-                if content_lines:
-                    first_stripped = content_lines[0].strip()
-                    for tq in ('"""', "'''"):
-                        if first_stripped.startswith(tq):
-                            if first_stripped.count(tq) >= 2:
-                                insert_idx = 1
-                            else:
-                                for j in range(1, len(content_lines)):
-                                    if tq in content_lines[j]:
-                                        insert_idx = j + 1
-                                        break
-                            break
-                target_line = content_lines[insert_idx] if insert_idx < len(content_lines) else "\n"
-                import_fix = Fix(
-                    file=finding.file,
-                    line=insert_idx + 1,
-                    rule=finding.rule,
-                    original_code=target_line,
-                    fixed_code=f"import {mod}\n" + target_line,
-                    explanation=f"Added 'import {mod}' required by subprocess.run(shlex.split(...))",
-                    source=FixSource.DETERMINISTIC,
-                )
-            import_fixes.append(import_fix)
-            # Bump last_import_idx so the next import goes after this one
-            last_import_idx = max(last_import_idx, 0)
+        if re.search(rf"^\s*import\s+{mod}\b", content, re.MULTILINE):
+            continue
+        if re.search(rf"^\s*from\s+{mod}\s+import\b", content, re.MULTILINE):
+            continue
+        import_fixes.append(
+            _make_import_fix(mod, content, finding, f"Added 'import {mod}' required by subprocess.run(shlex.split(...))")
+        )
 
     if import_fixes:
         return import_fixes + [os_fix]
     return os_fix
+
+
+def _find_import_insert_point(content_lines: list[str]) -> tuple[int, bool]:
+    """Find where to insert a new import statement.
+
+    Returns (index, after_existing) where:
+    - If after_existing=True, index is the last import line (append after it)
+    - If after_existing=False, index is the insertion point (prepend before it)
+    """
+    last_import_idx = -1
+    for i, cl in enumerate(content_lines):
+        if re.match(r"^(import |from \S+ import )", cl):
+            last_import_idx = i
+    if last_import_idx >= 0:
+        return last_import_idx, True
+
+    # No imports -- insert after module docstring or at line 0
+    insert_idx = 0
+    if content_lines:
+        first_stripped = content_lines[0].strip()
+        for tq in ('"""', "'''"):
+            if first_stripped.startswith(tq):
+                if first_stripped.count(tq) >= 2:
+                    insert_idx = 1
+                else:
+                    for j in range(1, len(content_lines)):
+                        if tq in content_lines[j]:
+                            insert_idx = j + 1
+                            break
+                break
+    return insert_idx, False
+
+
+def _make_import_fix(mod: str, content: str, finding: Finding, explanation: str) -> Fix:
+    """Create a Fix that adds `import <mod>` at the right location."""
+    content_lines = content.splitlines(keepends=True)
+    idx, after_existing = _find_import_insert_point(content_lines)
+
+    if after_existing:
+        anchor_line = content_lines[idx]
+        return Fix(
+            file=finding.file,
+            line=idx + 1,
+            rule=finding.rule,
+            original_code=anchor_line,
+            fixed_code=anchor_line.rstrip("\n") + f"\nimport {mod}\n",
+            explanation=explanation,
+            source=FixSource.DETERMINISTIC,
+        )
+
+    target_line = content_lines[idx] if idx < len(content_lines) else "\n"
+    return Fix(
+        file=finding.file,
+        line=idx + 1,
+        rule=finding.rule,
+        original_code=target_line,
+        fixed_code=f"import {mod}\n" + target_line,
+        explanation=explanation,
+        source=FixSource.DETERMINISTIC,
+    )
 
 
 def _fix_eval_usage(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | list[Fix] | None:
@@ -982,17 +1035,14 @@ def _fix_eval_usage(line: str, finding: Finding, content: str, ctx: FixContext |
     if finding.file.endswith(".py"):
         try:
             tree = ast.parse(content)
-            found_eval = False
-            for node in ast.walk(tree):
-                if (
-                    isinstance(node, ast.Call)
-                    and hasattr(node, "lineno")
-                    and node.lineno == finding.line
-                    and isinstance(node.func, ast.Name)
-                    and node.func.id == "eval"
-                ):
-                    found_eval = True
-                    break
+            found_eval = any(
+                isinstance(node, ast.Call)
+                and hasattr(node, "lineno")
+                and node.lineno == finding.line
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "eval"
+                for node in ast.walk(tree)
+            )
             if not found_eval:
                 return None  # AST says no eval here -- false positive  # doji:ignore(eval-usage)
         except SyntaxError as e:
@@ -1006,68 +1056,20 @@ def _fix_eval_usage(line: str, finding: Finding, content: str, ctx: FixContext |
     if finding.file.endswith(".py"):
         replacement = f"ast.literal_eval({eval_arg})"
         new_line = line[: m.start()] + replacement + line[m.end() :]
-        # Add inline warning if not already commented
         if "#" not in new_line:
             new_line = new_line.rstrip("\n") + "  # NOTE: only works for literal expressions\n"
         eval_fix = Fix(
-            file=finding.file,
-            line=finding.line,
-            rule=finding.rule,
-            original_code=line,
-            fixed_code=new_line,
+            file=finding.file, line=finding.line, rule=finding.rule,
+            original_code=line, fixed_code=new_line,
             explanation="Replaced eval() with ast.literal_eval() (safe for literals, rejects arbitrary code)",
             source=FixSource.DETERMINISTIC,
         )
-        # Ensure 'import ast' exists -- if not, add it after the last existing import
         if not re.search(r"^\s*import\s+ast\b", content, re.MULTILINE):
-            content_lines = content.splitlines(keepends=True)
-            # Find last top-level import line
-            last_import_idx = -1
-            for i, cl in enumerate(content_lines):
-                if re.match(r"^(import |from \S+ import )", cl):
-                    last_import_idx = i
-            if last_import_idx >= 0:
-                import_line = content_lines[last_import_idx]
-                import_fix = Fix(
-                    file=finding.file,
-                    line=last_import_idx + 1,
-                    rule=finding.rule,
-                    original_code=import_line,
-                    fixed_code=import_line.rstrip("\n") + "\nimport ast\n",
-                    explanation="Added 'import ast' required by ast.literal_eval()",
-                    source=FixSource.DETERMINISTIC,
-                )
-            else:
-                # No imports found -- insert after module docstring or at line 1
-                insert_idx = 0
-                if content_lines:
-                    first_stripped = content_lines[0].strip()
-                    for tq in ('"""', "'''"):
-                        if first_stripped.startswith(tq):
-                            # Find closing triple-quote
-                            if first_stripped.count(tq) >= 2:
-                                insert_idx = 1  # single-line docstring
-                            else:
-                                for j in range(1, len(content_lines)):
-                                    if tq in content_lines[j]:
-                                        insert_idx = j + 1
-                                        break
-                            break
-                target_line = content_lines[insert_idx] if insert_idx < len(content_lines) else "\n"
-                import_fix = Fix(
-                    file=finding.file,
-                    line=insert_idx + 1,
-                    rule=finding.rule,
-                    original_code=target_line,
-                    fixed_code="import ast\n" + target_line,
-                    explanation="Added 'import ast' required by ast.literal_eval()",
-                    source=FixSource.DETERMINISTIC,
-                )
+            import_fix = _make_import_fix("ast", content, finding, "Added 'import ast' required by ast.literal_eval()")
             return [import_fix, eval_fix]
         return eval_fix
 
     if finding.file.endswith((".js", ".ts", ".jsx", ".tsx")):
-        # Strip the eval-idiom parens wrapper: eval("(" + x + ")") -> JSON.parse(x)
         stripped_arg = re.sub(
             r'^(["\'])\(\1\s*\+\s*(.+?)\s*\+\s*(["\'])\)\3$',
             r"\2",
@@ -1075,11 +1077,8 @@ def _fix_eval_usage(line: str, finding: Finding, content: str, ctx: FixContext |
         )
         new_line = line[: m.start()] + f"JSON.parse({stripped_arg})" + line[m.end() :]
         return Fix(
-            file=finding.file,
-            line=finding.line,
-            rule=finding.rule,
-            original_code=line,
-            fixed_code=new_line,
+            file=finding.file, line=finding.line, rule=finding.rule,
+            original_code=line, fixed_code=new_line,
             explanation="Replaced eval() with JSON.parse() (safe -- rejects arbitrary code execution)",
             source=FixSource.DETERMINISTIC,
         )
@@ -1144,6 +1143,20 @@ def _fix_sql_injection(line: str, finding: Finding, content: str, ctx: FixContex
     return None
 
 
+def _scan_function_body(lines: list[str], line_idx: int, func_indent: str) -> list[tuple[int, str]]:
+    """Scan forward from line_idx to collect (index, stripped) pairs in the function body."""
+    body_lines = []
+    for i in range(line_idx + 1, len(lines)):
+        stripped = lines[i].strip()
+        if not stripped:
+            continue
+        cur_indent = len(lines[i]) - len(lines[i].lstrip())
+        if cur_indent <= len(func_indent) and stripped:
+            break
+        body_lines.append((i, stripped))
+    return body_lines
+
+
 def _fix_resource_leak(line: str, finding: Finding, content: str, ctx: FixContext | None = None) -> Fix | None:
     """Add .close() for unclosed resources (connections, cursors, file handles)."""
     if not finding.file.endswith(".py"):
@@ -1154,12 +1167,11 @@ def _fix_resource_leak(line: str, finding: Finding, content: str, ctx: FixContex
     if line_idx < 0 or line_idx >= len(lines):
         return None
 
-    # Extract the variable name and its indentation from the source line: var = something(...)
     src = lines[line_idx]
     m = re.match(r"^(\s*)(\w+)\s*=\s*", src)
     if not m:
         return None
-    creation_indent = m.group(1)  # actual indent where the resource is created
+    creation_indent = m.group(1)
     var_name = m.group(2)
 
     # Find the containing function
@@ -1172,52 +1184,32 @@ def _fix_resource_leak(line: str, finding: Finding, content: str, ctx: FixContex
     if func_indent is None:
         return None
 
-    body_indent = creation_indent  # use the indent of where the resource was created
-
-    # Scan forward to find the function body lines and the last return
-    body_lines = []  # (index, stripped) for lines in this function body
-    for i in range(line_idx + 1, len(lines)):
-        stripped = lines[i].strip()
-        if not stripped:
-            continue
-        cur_indent = len(lines[i]) - len(lines[i].lstrip())
-        # Stop at anything at function-level indent or less: decorators, defs, classes, module code
-        if cur_indent <= len(func_indent) and stripped:
-            break
-        body_lines.append((i, stripped))
-
+    body_lines = _scan_function_body(lines, line_idx, func_indent)
     if not body_lines:
         return None
 
-    # Check if the variable is returned -- if so, can't close it
-    for idx, stripped in body_lines:
-        if stripped.startswith("return") and var_name in stripped:
-            return None
-
-    # Skip functions with multiple returns or try/except (too complex for safe fix)
-    return_count = sum(1 for _, s in body_lines if s.startswith("return") or s == "return")
-    has_try = any(s.startswith("try:") for _, s in body_lines)
-    if return_count > 1 or has_try:
+    # Check if the variable is returned -- can't close it
+    if any(s.startswith("return") and var_name in s for _, s in body_lines):
         return None
 
-    # Find the last return in the function body
+    # Skip functions with multiple returns or try/except (too complex)
+    return_count = sum(1 for _, s in body_lines if s.startswith("return") or s == "return")
+    if return_count > 1 or any(s.startswith("try:") for _, s in body_lines):
+        return None
+
+    # Find the last return
     last_return_idx = None
     for idx, stripped in body_lines:
         if stripped.startswith("return") or stripped == "return":
             last_return_idx = idx
 
     if last_return_idx is not None:
-        # Insert .close() BEFORE the return -- use the return line's indentation
         return_line = lines[last_return_idx]
         return_indent = re.match(r"^(\s*)", return_line).group(1)
         close_line = f"{return_indent}{var_name}.close()\n"
-        new_code = close_line + return_line
         return Fix(
-            file=finding.file,
-            line=last_return_idx + 1,
-            rule=finding.rule,
-            original_code=return_line,
-            fixed_code=new_code,
+            file=finding.file, line=last_return_idx + 1, rule=finding.rule,
+            original_code=return_line, fixed_code=close_line + return_line,
             explanation=f"Added {var_name}.close() before return to prevent resource leak",
             source=FixSource.DETERMINISTIC,
         )
@@ -1225,14 +1217,10 @@ def _fix_resource_leak(line: str, finding: Finding, content: str, ctx: FixContex
     # No return -- add .close() after the last body line
     last_idx = body_lines[-1][0]
     last_line = lines[last_idx]
-    close_line = f"{body_indent}{var_name}.close()\n"
-    new_code = last_line.rstrip("\n") + "\n" + close_line
+    close_line = f"{creation_indent}{var_name}.close()\n"
     return Fix(
-        file=finding.file,
-        line=last_idx + 1,
-        rule=finding.rule,
-        original_code=last_line,
-        fixed_code=new_code,
+        file=finding.file, line=last_idx + 1, rule=finding.rule,
+        original_code=last_line, fixed_code=last_line.rstrip("\n") + "\n" + close_line,
         explanation=f"Added {var_name}.close() to prevent resource leak",
         source=FixSource.DETERMINISTIC,
     )

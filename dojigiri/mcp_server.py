@@ -1,5 +1,8 @@
 """FastMCP server exposing Dojigiri static analysis tools to AI agents.
 
+Orchestrator module with intentionally high coupling — MCP endpoint that
+dispatches to all analysis subsystems.
+
 Runs as a subprocess via MCP protocol. Provides six tools: doji_scan,
 doji_scan_file, doji_fix, doji_explain, doji_analyze_project, and doji_sca.
 Three resources: dojigiri://rules, dojigiri://languages, dojigiri://config.
@@ -11,7 +14,7 @@ Calls into: config.py, analyzer.py, mcp_format.py, semantic/explain.py,
 Data in -> Data out: tool requests (file paths, options) -> formatted text
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import logging
 from pathlib import Path

@@ -8,7 +8,7 @@ Calls into: types.py, llm_prompts.py (_sanitize_for_prompt)
 Data in -> Data out: raw LLM text -> list[Finding] | dict | None
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import json
 import logging

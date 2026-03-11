@@ -58,7 +58,74 @@ def run_python_ast_checks(content: str, filepath: str) -> list[Finding]:
     return findings
 
 
-def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding], content: str = ""):
+def _import_has_noqa(node: ast.AST, source_lines: list[str]) -> bool:
+    """Check if any line of this import node has a # noqa or # type: comment."""
+    start = getattr(node, "lineno", 0)
+    end = getattr(node, "end_lineno", start) or start
+    for ln in range(start, end + 1):
+        if 0 < ln <= len(source_lines):
+            line_text = source_lines[ln - 1]
+            if "# noqa" in line_text or "# type:" in line_text:
+                return True
+    return False
+
+
+def _collect_imports(
+    tree: ast.AST, source_lines: list[str], type_checking_lines: set[int],
+) -> tuple[dict[str, int], set[str]]:
+    """Walk the AST and collect imported names and re-exported names.
+
+    Returns (imported_names, re_exported_names) where imported_names maps
+    name -> line number and re_exported_names is the set of identity-aliased names.
+    """
+    imported_names: dict[str, int] = {}
+    re_exported_names: set[str] = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if _import_has_noqa(node, source_lines):
+                continue
+            for alias in node.names:
+                if alias.asname and alias.asname == alias.name:
+                    re_exported_names.add(alias.name)
+                    continue
+                name = alias.asname or alias.name
+                imported_names[name] = node.lineno
+        elif isinstance(node, ast.ImportFrom):
+            if node.module == "__future__":
+                continue
+            if node.lineno in type_checking_lines:
+                continue
+            if _import_has_noqa(node, source_lines):
+                continue
+            for alias in node.names:
+                if alias.name == "*":
+                    continue
+                if alias.asname and alias.asname == alias.name:
+                    re_exported_names.add(alias.name)
+                    continue
+                name = alias.asname or alias.name
+                imported_names[name] = node.lineno
+
+    return imported_names, re_exported_names
+
+
+def _collect_used_names(tree: ast.AST) -> set[str]:
+    """Walk the AST and collect all referenced names (Name nodes and attribute roots)."""
+    used_names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name):
+            used_names.add(node.id)
+        elif isinstance(node, ast.Attribute):
+            root = node
+            while isinstance(root, ast.Attribute):
+                root = root.value  # type: ignore[assignment]  # narrowing through loop
+            if isinstance(root, ast.Name):
+                used_names.add(root.id)
+    return used_names
+
+
+def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding], content: str = "") -> None:
     """Check for unused imports.
 
     Skips:
@@ -75,67 +142,9 @@ def _check_imports(tree: ast.AST, filepath: str, findings: list[Finding], conten
         return
 
     source_lines = content.splitlines() if content else []
-
-    imported_names = {}  # name -> line number
-    re_exported_names = set()  # names explicitly re-exported via `as X` identity alias
-    used_names = set()
-
-    # Detect TYPE_CHECKING-guarded import lines
     type_checking_lines = _find_type_checking_lines(tree)
-
-    def _import_has_noqa(node: ast.AST) -> bool:
-        """Check if any line of this import node has a # noqa or # type: comment."""
-        start = getattr(node, "lineno", 0)
-        end = getattr(node, "end_lineno", start) or start
-        for ln in range(start, end + 1):
-            if 0 < ln <= len(source_lines):
-                line_text = source_lines[ln - 1]
-                if "# noqa" in line_text or "# type:" in line_text:
-                    return True
-        return False
-
-    for node in ast.walk(tree):
-        # Track imports
-        if isinstance(node, ast.Import):
-            # Skip imports with # noqa or # type: comments
-            if _import_has_noqa(node):
-                continue
-            for alias in node.names:
-                # Explicit re-export: `import X as X`
-                if alias.asname and alias.asname == alias.name:
-                    re_exported_names.add(alias.name)
-                    continue
-                name = alias.asname or alias.name
-                imported_names[name] = node.lineno
-        elif isinstance(node, ast.ImportFrom):
-            # Skip __future__ imports entirely (directives, not symbols)
-            if node.module == "__future__":
-                continue
-            # Skip TYPE_CHECKING-guarded imports
-            if node.lineno in type_checking_lines:
-                continue
-            # Skip imports with # noqa or # type: comments
-            if _import_has_noqa(node):
-                continue
-            for alias in node.names:
-                if alias.name == "*":
-                    continue
-                # Explicit re-export: `from X import Y as Y`
-                if alias.asname and alias.asname == alias.name:
-                    re_exported_names.add(alias.name)
-                    continue
-                name = alias.asname or alias.name
-                imported_names[name] = node.lineno
-        # Track name usage
-        elif isinstance(node, ast.Name):
-            used_names.add(node.id)
-        elif isinstance(node, ast.Attribute):
-            # Track the root of attribute chains (e.g., 'os' in 'os.path.join')
-            root = node
-            while isinstance(root, ast.Attribute):
-                root = root.value  # type: ignore[assignment]  # narrowing through loop
-            if isinstance(root, ast.Name):
-                used_names.add(root.id)
+    imported_names, _re_exported = _collect_imports(tree, source_lines, type_checking_lines)
+    used_names = _collect_used_names(tree)
 
     # Report unused imports
     for name, lineno in imported_names.items():
@@ -182,7 +191,7 @@ def _find_type_checking_lines(tree: ast.AST) -> set[int]:
     return lines
 
 
-def _check_functions(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_functions(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Check all functions for common issues."""
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -330,9 +339,76 @@ def _is_stop_iteration_pattern(handler: ast.ExceptHandler) -> bool:
     return False
 
 
+def _report_swallowed_pass(
+    node: ast.ExceptHandler, filepath: str, findings: list[Finding], source_lines: list[str],
+) -> None:
+    """Report a swallowed exception with pass, adjusting severity based on comment presence."""
+    has_comment = _has_explanatory_comment(node, source_lines)
+    if has_comment:
+        findings.append(
+            Finding(
+                file=filepath, line=node.lineno,
+                severity=Severity.INFO, category=Category.BUG, source=Source.AST,
+                rule="exception-swallowed",
+                message="Exception caught and silently ignored (except: pass) — comment explains intent",
+                suggestion="Acknowledged via comment; consider logging for observability",
+            )
+        )
+    else:
+        findings.append(
+            Finding(
+                file=filepath, line=node.lineno,
+                severity=Severity.WARNING, category=Category.BUG, source=Source.AST,
+                rule="exception-swallowed",
+                message="Exception caught and silently ignored (except: pass)",
+                suggestion="Log the exception or handle it explicitly",
+            )
+        )
+
+
+def _continue_msg_suffix(has_comment: bool, is_specific: bool) -> str:
+    """Compute the message suffix for swallowed-continue findings."""
+    if has_comment and is_specific:
+        return " — specific exception with comment"
+    if has_comment:
+        return " — comment explains intent"
+    if is_specific:
+        return " — specific exception in fallback pattern"
+    return ""
+
+
+def _report_swallowed_continue(
+    node: ast.ExceptHandler, filepath: str, findings: list[Finding], source_lines: list[str],
+) -> None:
+    """Report a swallowed exception with continue, adjusting severity based on context."""
+    has_comment = _has_explanatory_comment(node, source_lines)
+    is_specific = not _is_broad_exception(node)
+    if has_comment or is_specific:
+        msg_suffix = _continue_msg_suffix(has_comment, is_specific)
+        findings.append(
+            Finding(
+                file=filepath, line=node.lineno,
+                severity=Severity.INFO, category=Category.BUG, source=Source.AST,
+                rule="exception-swallowed-continue",
+                message=f"Exception caught and silently continued (except: continue){msg_suffix}",
+                suggestion="Acknowledged; consider logging for observability",
+            )
+        )
+    else:
+        findings.append(
+            Finding(
+                file=filepath, line=node.lineno,
+                severity=Severity.WARNING, category=Category.BUG, source=Source.AST,
+                rule="exception-swallowed-continue",
+                message="Exception caught and silently continued (except: continue)",
+                suggestion="Log the exception before continuing, or handle it explicitly",
+            )
+        )
+
+
 def _check_exception_handling(
     tree: ast.AST, filepath: str, findings: list[Finding], content: str = ""
-):
+) -> None:
     """Check for swallowed exceptions (except: pass/continue).
 
     When the except body contains an explanatory comment (inline ``#`` comment
@@ -348,81 +424,18 @@ def _check_exception_handling(
     source_lines = content.splitlines() if content else []
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.ExceptHandler):
-            # Skip idiomatic patterns that are universally accepted:
-            # - except ImportError: pass  (optional imports)
-            # - except (ImportError, AttributeError): pass  (optional import + fallback)
-            # - except StopIteration: pass  (iterator consumption)
-            if _is_optional_import_pattern(node) or _is_stop_iteration_pattern(node):
-                continue
+        if not isinstance(node, ast.ExceptHandler):
+            continue
+        if _is_optional_import_pattern(node) or _is_stop_iteration_pattern(node):
+            continue
 
-            is_empty_pass = _is_empty_except(node, ast.Pass)
-            is_empty_continue = (not is_empty_pass) and _is_empty_except(node, ast.Continue)
+        is_empty_pass = _is_empty_except(node, ast.Pass)
+        is_empty_continue = (not is_empty_pass) and _is_empty_except(node, ast.Continue)
 
-            if is_empty_pass:
-                has_comment = _has_explanatory_comment(node, source_lines)
-                if has_comment:
-                    findings.append(
-                        Finding(
-                            file=filepath,
-                            line=node.lineno,
-                            severity=Severity.INFO,
-                            category=Category.BUG,
-                            source=Source.AST,
-                            rule="exception-swallowed",
-                            message="Exception caught and silently ignored (except: pass) — comment explains intent",
-                            suggestion="Acknowledged via comment; consider logging for observability",
-                        )
-                    )
-                else:
-                    findings.append(
-                        Finding(
-                            file=filepath,
-                            line=node.lineno,
-                            severity=Severity.WARNING,
-                            category=Category.BUG,
-                            source=Source.AST,
-                            rule="exception-swallowed",
-                            message="Exception caught and silently ignored (except: pass)",
-                            suggestion="Log the exception or handle it explicitly",
-                        )
-                    )
-            elif is_empty_continue:
-                has_comment = _has_explanatory_comment(node, source_lines)
-                is_specific = not _is_broad_exception(node)
-                if has_comment or is_specific:
-                    msg_suffix = ""
-                    if has_comment and is_specific:
-                        msg_suffix = " — specific exception with comment"
-                    elif has_comment:
-                        msg_suffix = " — comment explains intent"
-                    elif is_specific:
-                        msg_suffix = " — specific exception in fallback pattern"
-                    findings.append(
-                        Finding(
-                            file=filepath,
-                            line=node.lineno,
-                            severity=Severity.INFO,
-                            category=Category.BUG,
-                            source=Source.AST,
-                            rule="exception-swallowed-continue",
-                            message=f"Exception caught and silently continued (except: continue){msg_suffix}",
-                            suggestion="Acknowledged; consider logging for observability",
-                        )
-                    )
-                else:
-                    findings.append(
-                        Finding(
-                            file=filepath,
-                            line=node.lineno,
-                            severity=Severity.WARNING,
-                            category=Category.BUG,
-                            source=Source.AST,
-                            rule="exception-swallowed-continue",
-                            message="Exception caught and silently continued (except: continue)",
-                            suggestion="Log the exception before continuing, or handle it explicitly",
-                        )
-                    )
+        if is_empty_pass:
+            _report_swallowed_pass(node, filepath, findings, source_lines)
+        elif is_empty_continue:
+            _report_swallowed_continue(node, filepath, findings, source_lines)
 
 
 # Builtins that should not be shadowed by variables or parameters
@@ -452,7 +465,7 @@ _SHADOW_BUILTINS = {
 }
 
 
-def _check_shadowed_builtins(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_shadowed_builtins(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Check for variables that shadow Python builtins."""
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
@@ -472,7 +485,7 @@ def _check_shadowed_builtins(tree: ast.AST, filepath: str, findings: list[Findin
                     )
 
 
-def _check_type_comparisons(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_type_comparisons(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Check for type() == comparison instead of isinstance()."""
     for node in ast.walk(tree):
         if isinstance(node, ast.Compare):
@@ -498,7 +511,7 @@ def _check_type_comparisons(tree: ast.AST, filepath: str, findings: list[Finding
                         break
 
 
-def _check_global_usage(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_global_usage(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Check for global keyword usage."""
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -518,7 +531,7 @@ def _check_global_usage(tree: ast.AST, filepath: str, findings: list[Finding]):
                     )
 
 
-def _check_mutable_defaults(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_mutable_defaults(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Check for mutable default arguments via AST (handles multiline defs)."""
     _MUTABLE_TYPES = (ast.List, ast.Dict, ast.Set)
 
@@ -554,7 +567,7 @@ def _check_mutable_defaults(tree: ast.AST, filepath: str, findings: list[Finding
                 break  # One report per function is enough
 
 
-def _check_shadowed_builtin_params(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_shadowed_builtin_params(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Check for function parameters that shadow Python builtins."""
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -661,7 +674,42 @@ _DANGEROUS_CALLS: dict[str, tuple[str, Severity, Category, str, str]] = {
 }
 
 
-def _check_aliased_dangerous_calls(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _build_import_alias_map(tree: ast.AST) -> dict[str, str]:
+    """Build alias → canonical module name map from import statements."""
+    alias_map: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.asname and alias.asname != alias.name:
+                    alias_map[alias.asname] = alias.name
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            for alias in node.names:
+                if alias.asname and alias.asname != alias.name:
+                    alias_map[alias.asname] = f"{node.module}.{alias.name}"
+    return alias_map
+
+
+def _resolve_aliased_call(func: ast.expr, alias_map: dict[str, str]) -> tuple[str, str] | None:
+    """Resolve a call's function node to (canonical_name, display_alias) via alias map.
+
+    Returns None if the call doesn't use an alias or doesn't resolve to a dangerous call.
+    """
+    # Case 1: alias.method() — e.g. pkl.loads()
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        alias = func.value.id
+        if alias in alias_map:
+            canonical = f"{alias_map[alias]}.{func.attr}"
+            if canonical in _DANGEROUS_CALLS:
+                return canonical, alias
+    # Case 2: bare alias() — e.g. xml_parse()
+    elif isinstance(func, ast.Name) and func.id in alias_map:
+        canonical = alias_map[func.id]
+        if canonical in _DANGEROUS_CALLS:
+            return canonical, func.id
+    return None
+
+
+def _check_aliased_dangerous_calls(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Detect dangerous function calls through import aliases.
 
     Builds a map of alias → canonical module name from import statements,
@@ -669,62 +717,25 @@ def _check_aliased_dangerous_calls(tree: ast.AST, filepath: str, findings: list[
     Only fires for calls using non-canonical names (aliases), since the regex
     engine already catches canonical names like pickle.loads().
     """
-    # Build alias → canonical module map
-    alias_map: dict[str, str] = {}  # e.g. {"pkl": "pickle", "sp": "subprocess"}
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.asname and alias.asname != alias.name:
-                    # import pickle as pkl → pkl → pickle
-                    alias_map[alias.asname] = alias.name
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                for alias in node.names:
-                    if alias.asname and alias.asname != alias.name:
-                        # from xml.dom import minidom as mdom → mdom → xml.dom.minidom
-                        alias_map[alias.asname] = f"{node.module}.{alias.name}"
-
+    alias_map = _build_import_alias_map(tree)
     if not alias_map:
         return  # No aliases, regex covers everything
 
-    # Walk call nodes looking for aliased dangerous calls
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
-
-        func = node.func
-
-        # Case 1: alias.method() — e.g. pkl.loads()
-        if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
-            alias = func.value.id
-            attr = func.attr
-            if alias in alias_map:
-                canonical = f"{alias_map[alias]}.{attr}"
-                if canonical in _DANGEROUS_CALLS:
-                    rule, sev, cat, msg, sug = _DANGEROUS_CALLS[canonical]
-                    findings.append(Finding(
-                        file=filepath, line=node.lineno,
-                        severity=sev, category=cat, source=Source.AST,
-                        rule=rule,
-                        message=f"{msg} (via alias '{alias}')",
-                        suggestion=sug,
-                    ))
-
-        # Case 2: bare alias() — e.g. xml_parse() from "from X import parse as xml_parse"
-        elif isinstance(func, ast.Name):
-            name = func.id
-            if name in alias_map:
-                canonical = alias_map[name]
-                if canonical in _DANGEROUS_CALLS:
-                    rule, sev, cat, msg, sug = _DANGEROUS_CALLS[canonical]
-                    findings.append(Finding(
-                        file=filepath, line=node.lineno,
-                        severity=sev, category=cat, source=Source.AST,
-                        rule=rule,
-                        message=f"{msg} (via alias '{name}')",
-                        suggestion=sug,
-                    ))
+        resolved = _resolve_aliased_call(node.func, alias_map)
+        if resolved is None:
+            continue
+        canonical, display_alias = resolved
+        rule, sev, cat, msg, sug = _DANGEROUS_CALLS[canonical]
+        findings.append(Finding(
+            file=filepath, line=node.lineno,
+            severity=sev, category=cat, source=Source.AST,
+            rule=rule,
+            message=f"{msg} (via alias '{display_alias}')",
+            suggestion=sug,
+        ))
 
 
 # ── Multiline shell=True detection (AST) ────────────────────────────────
@@ -732,7 +743,7 @@ def _check_aliased_dangerous_calls(tree: ast.AST, filepath: str, findings: list[
 _SUBPROCESS_FUNCS = frozenset({"run", "Popen", "call", "check_call", "check_output"})
 
 
-def _check_multiline_shell_true(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_multiline_shell_true(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Detect subprocess calls with shell=True across multiple lines.
 
     The regex engine catches shell=True on the same line as the function call.
@@ -783,7 +794,7 @@ _GETATTR_DANGEROUS: dict[tuple[str, str], tuple[str, Severity, Category, str, st
 }
 
 
-def _check_getattr_dangerous(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_getattr_dangerous(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Detect getattr(module, 'dangerous_func') patterns."""
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -813,7 +824,7 @@ def _check_getattr_dangerous(tree: ast.AST, filepath: str, findings: list[Findin
 
 # ── asyncio.create_subprocess_shell detection (AST) ─────────────────────
 
-def _check_async_shell(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_async_shell(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Detect asyncio.create_subprocess_shell — equivalent to shell=True."""
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -847,7 +858,7 @@ _SQL_EXECUTE_METHODS = frozenset({"execute", "executemany", "executescript", "ra
 _SQL_KEYWORDS_RE = re.compile(r"(?i)\b(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b")
 
 
-def _check_sql_fstring(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_sql_fstring(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Detect SQL injection via f-strings passed to execute/executemany.
 
     Catches the multiline pattern:
@@ -899,7 +910,7 @@ _SECRET_PLACEHOLDER_RE = re.compile(
 )
 
 
-def _check_hardcoded_secret_defaults(tree: ast.AST, filepath: str, findings: list[Finding]):
+def _check_hardcoded_secret_defaults(tree: ast.AST, filepath: str, findings: list[Finding]) -> None:
     """Detect hardcoded secrets as default values in function parameters and class fields."""
     for node in ast.walk(tree):
         # Case 1: Function/method parameters with secret defaults
@@ -954,7 +965,7 @@ def _count_branches(node: ast.AST) -> int:
     return count
 
 
-def _check_function(node: ast.FunctionDef, filepath: str, findings: list[Finding]):
+def _check_function(node: ast.FunctionDef, filepath: str, findings: list[Finding]) -> None:
     """Check a function for common issues."""
     # Unreachable code after return/raise/break/continue
     for i, stmt in enumerate(node.body):

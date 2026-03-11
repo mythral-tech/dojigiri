@@ -9,7 +9,7 @@ Calls into: compliance.py (CWE lookups), types.py
 Data in -> Data out: ScanReport -> SARIF dict
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import hashlib
 from datetime import datetime, timezone
@@ -86,38 +86,31 @@ def _build_rule(finding_or_cf: object, rules_map: dict[str, dict]) -> int:
     return len(rules_map) - 1
 
 
-def to_sarif(report: ScanReport) -> dict:
-    """Convert a ScanReport to a SARIF 2.1.0 document (as a dict).
+def _add_cwe_taxa(rule: str, result: dict, cwe_taxa: dict[str, dict]) -> None:
+    """Add CWE taxa reference to a SARIF result if applicable."""
+    cwe = get_cwe(rule)
+    if cwe:
+        cwe_num = cwe.replace("CWE-", "")
+        result["taxa"] = [{"id": cwe_num, "toolComponent": {"name": "cwe"}}]
+        if cwe_num not in cwe_taxa:
+            cwe_taxa[cwe_num] = {"id": cwe_num, "guid": cwe}
 
-    The returned dict is JSON-serializable and conforms to the SARIF 2.1.0
-    schema including tool metadata, rules with CWE tags, results with
-    locations, taxa references, artifacts, invocations, CWE taxonomy
-    declarations, cross-file findings, and content-based fingerprints.
-    """
-    rules_map: dict[str, dict] = {}
-    results: list[dict] = []
-    artifacts_map: dict[str, int] = {}  # uri -> index
-    cwe_taxa: dict[str, dict] = {}  # cwe_num -> taxon
 
-    def _ensure_artifact(uri: str) -> int:
-        """Register an artifact and return its index."""
-        if uri not in artifacts_map:
-            artifacts_map[uri] = len(artifacts_map)
-        return artifacts_map[uri]
-
-    # ── Per-file findings ────────────────────────────────────────────
+def _build_per_file_results(
+    report: ScanReport, rules_map: dict[str, dict],
+    artifacts_map: dict[str, int], cwe_taxa: dict[str, dict],
+) -> list[dict]:
+    """Build SARIF results from per-file findings."""
+    results = []
     for fa in report.file_analyses:
         uri = _to_uri(fa.path)
-        artifact_idx = _ensure_artifact(uri)
+        if uri not in artifacts_map:
+            artifacts_map[uri] = len(artifacts_map)
+        artifact_idx = artifacts_map[uri]
 
         for f in fa.findings:
             rule_idx = _build_rule(f, rules_map)
-
-            message_text = f.message
-            if f.suggestion:
-                message_text = f"{f.message} — {f.suggestion}"
-
-            # Snippet (secrets redacted via to_dict)
+            message_text = f"{f.message} — {f.suggestion}" if f.suggestion else f.message
             snippet = f.to_dict()["snippet"]
 
             region: dict = {"startLine": f.line, "startColumn": 1}
@@ -129,167 +122,110 @@ def to_sarif(report: ScanReport) -> dict:
                 "ruleIndex": rule_idx,
                 "level": _SEVERITY_TO_LEVEL[f.severity],
                 "message": {"text": message_text},
-                "locations": [
-                    {
-                        "physicalLocation": {
-                            "artifactLocation": {
-                                "uri": uri,
-                                "uriBaseId": "%SRCROOT%",
-                                "index": artifact_idx,
-                            },
-                            "region": region,
-                        }
+                "locations": [{
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": uri, "uriBaseId": "%SRCROOT%", "index": artifact_idx},
+                        "region": region,
                     }
-                ],
-                "partialFingerprints": {
-                    "primaryLocationLineHash": _fingerprint(uri, f.rule, snippet),
-                },
+                }],
+                "partialFingerprints": {"primaryLocationLineHash": _fingerprint(uri, f.rule, snippet)},
             }
-
-            # Suggestion as SARIF fix
             if f.suggestion:
                 result["fixes"] = [{"description": {"text": f.suggestion}}]
-
-            # CWE taxa reference on the result
-            cwe = get_cwe(f.rule)
-            if cwe:
-                cwe_num = cwe.replace("CWE-", "")
-                result["taxa"] = [
-                    {
-                        "id": cwe_num,
-                        "toolComponent": {"name": "cwe"},
-                    }
-                ]
-                if cwe_num not in cwe_taxa:
-                    cwe_taxa[cwe_num] = {"id": cwe_num, "guid": cwe}
-
-            # Confidence (LLM findings only)
+            _add_cwe_taxa(f.rule, result, cwe_taxa)
             if f.confidence:
                 result.setdefault("properties", {})["confidence"] = f.confidence.value
-
             results.append(result)
+    return results
 
-    # ── Cross-file findings ──────────────────────────────────────────
+
+def _build_cross_file_results(
+    report: ScanReport, rules_map: dict[str, dict],
+    artifacts_map: dict[str, int], cwe_taxa: dict[str, dict],
+) -> list[dict]:
+    """Build SARIF results from cross-file findings."""
+    results = []
     for cf in report.cross_file_findings:
         rule_idx = _build_rule(cf, rules_map)
         source_uri = _to_uri(cf.source_file)
         target_uri = _to_uri(cf.target_file)
-        source_artifact = _ensure_artifact(source_uri)
-        _ensure_artifact(target_uri)
+        if source_uri not in artifacts_map:
+            artifacts_map[source_uri] = len(artifacts_map)
+        source_artifact = artifacts_map[source_uri]
+        if target_uri not in artifacts_map:
+            artifacts_map[target_uri] = len(artifacts_map)
 
-        result = {
+        result: dict = {
             "ruleId": cf.rule,
             "ruleIndex": rule_idx,
             "level": _SEVERITY_TO_LEVEL[cf.severity],
             "message": {"text": cf.message},
-            "locations": [
-                {
-                    "physicalLocation": {
-                        "artifactLocation": {
-                            "uri": source_uri,
-                            "uriBaseId": "%SRCROOT%",
-                            "index": source_artifact,
-                        },
-                        "region": {"startLine": cf.line, "startColumn": 1},
-                    }
+            "locations": [{
+                "physicalLocation": {
+                    "artifactLocation": {"uri": source_uri, "uriBaseId": "%SRCROOT%", "index": source_artifact},
+                    "region": {"startLine": cf.line, "startColumn": 1},
                 }
-            ],
-            "partialFingerprints": {
-                "primaryLocationLineHash": _fingerprint(
-                    source_uri, cf.rule, None
-                ),
-            },
+            }],
+            "partialFingerprints": {"primaryLocationLineHash": _fingerprint(source_uri, cf.rule, None)},
         }
 
-        # Related location: the target file
         related: dict = {
             "id": 0,
             "message": {"text": f"Related location in {cf.target_file}"},
-            "physicalLocation": {
-                "artifactLocation": {
-                    "uri": target_uri,
-                    "uriBaseId": "%SRCROOT%",
-                },
-            },
+            "physicalLocation": {"artifactLocation": {"uri": target_uri, "uriBaseId": "%SRCROOT%"}},
         }
         if cf.target_line is not None:
-            related["physicalLocation"]["region"] = {
-                "startLine": cf.target_line,
-                "startColumn": 1,
-            }
+            related["physicalLocation"]["region"] = {"startLine": cf.target_line, "startColumn": 1}
         result["relatedLocations"] = [related]
 
         if cf.suggestion:
             result["fixes"] = [{"description": {"text": cf.suggestion}}]
-
-        cwe = get_cwe(cf.rule)
-        if cwe:
-            cwe_num = cwe.replace("CWE-", "")
-            result["taxa"] = [
-                {"id": cwe_num, "toolComponent": {"name": "cwe"}}
-            ]
-            if cwe_num not in cwe_taxa:
-                cwe_taxa[cwe_num] = {"id": cwe_num, "guid": cwe}
-
+        _add_cwe_taxa(cf.rule, result, cwe_taxa)
         if cf.confidence:
             result.setdefault("properties", {})["confidence"] = cf.confidence.value
-
         results.append(result)
+    return results
 
-    # ── Artifacts ────────────────────────────────────────────────────
-    artifacts = [
-        {"location": {"uri": uri, "uriBaseId": "%SRCROOT%"}}
-        for uri in artifacts_map
-    ]
 
-    # ── CWE taxonomy extension ───────────────────────────────────────
+def to_sarif(report: ScanReport) -> dict:
+    """Convert a ScanReport to a SARIF 2.1.0 document (as a dict).
+
+    The returned dict is JSON-serializable and conforms to the SARIF 2.1.0
+    schema including tool metadata, rules with CWE tags, results with
+    locations, taxa references, artifacts, invocations, CWE taxonomy
+    declarations, cross-file findings, and content-based fingerprints.
+    """
+    rules_map: dict[str, dict] = {}
+    artifacts_map: dict[str, int] = {}
+    cwe_taxa: dict[str, dict] = {}
+
+    results = _build_per_file_results(report, rules_map, artifacts_map, cwe_taxa)
+    results.extend(_build_cross_file_results(report, rules_map, artifacts_map, cwe_taxa))
+
+    artifacts = [{"location": {"uri": uri, "uriBaseId": "%SRCROOT%"}} for uri in artifacts_map]
+
     extensions = []
     if cwe_taxa:
         extensions.append({
-            "name": "cwe",
-            "version": "4.15",
-            "informationUri": CWE_TAXONOMY_URI,
-            "organization": "MITRE",
-            "shortDescription": {"text": "Common Weakness Enumeration"},
+            "name": "cwe", "version": "4.15", "informationUri": CWE_TAXONOMY_URI,
+            "organization": "MITRE", "shortDescription": {"text": "Common Weakness Enumeration"},
             "taxa": list(cwe_taxa.values()),
         })
 
-    # ── Invocation ───────────────────────────────────────────────────
     now = report.timestamp or datetime.now(timezone.utc).isoformat(timespec="seconds")
-    invocation: dict = {
-        "executionSuccessful": True,
-        "endTimeUtc": now,
-        "properties": {
-            "mode": report.mode,
-        },
-    }
+    invocation: dict = {"executionSuccessful": True, "endTimeUtc": now, "properties": {"mode": report.mode}}
 
-    # ── Assemble run ─────────────────────────────────────────────────
     driver: dict = {
-        "name": "dojigiri",
-        "semanticVersion": __version__,
-        "informationUri": DOJIGIRI_URI,
-        "rules": list(rules_map.values()),
+        "name": "dojigiri", "semanticVersion": __version__,
+        "informationUri": DOJIGIRI_URI, "rules": list(rules_map.values()),
     }
-
     run: dict = {
-        "tool": {"driver": driver},
-        "invocations": [invocation],
-        "artifacts": artifacts,
-        "results": results,
-        "properties": {
-            "mode": report.mode,
-            "filesScanned": report.files_scanned,
-            "filesSkipped": report.files_skipped,
-        },
+        "tool": {"driver": driver}, "invocations": [invocation],
+        "artifacts": artifacts, "results": results,
+        "properties": {"mode": report.mode, "filesScanned": report.files_scanned, "filesSkipped": report.files_skipped},
     }
-
     if extensions:
         run["tool"]["extensions"] = extensions
         run["taxonomies"] = extensions
 
-    return {
-        "version": "2.1.0",
-        "$schema": SARIF_SCHEMA,
-        "runs": [run],
-    }
+    return {"version": "2.1.0", "$schema": SARIF_SCHEMA, "runs": [run]}

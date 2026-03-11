@@ -9,7 +9,7 @@ Calls into: semantic/core.py, semantic/types.py, config.py, compliance.py
 Data in → Data out: (source content, filepath, language) → FileExplanation
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from dataclasses import dataclass, field
 
@@ -177,106 +177,101 @@ _PATTERN_DESCRIPTIONS: dict[str, tuple[str, str]] = {
 }
 
 
+def _detect_factory_patterns(semantics: FileSemantics, lines: list[str]) -> list[ExplainSection]:
+    """Detect factory pattern: functions with factory-like names and multiple returns."""
+    patterns = []
+    _FACTORY_KEYWORDS = ("create", "make", "build", "factory", "get_instance")
+    for fdef in semantics.function_defs:
+        if not any(kw in fdef.name.lower() for kw in _FACTORY_KEYWORDS):
+            continue
+        returns_in_func = sum(
+            1 for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))
+            if lines[i].strip().startswith("return ")
+        )
+        if returns_in_func >= 2:
+            name, desc = _PATTERN_DESCRIPTIONS["factory"]
+            patterns.append(ExplainSection(
+                title=name, content=f"Function '{fdef.name}' appears to be a factory. {desc}",
+            ))
+    return patterns
+
+
+def _detect_decorator_patterns(semantics: FileSemantics, lines: list[str]) -> list[ExplainSection]:
+    """Detect decorator pattern: functions wrapping inner functions."""
+    patterns = []
+    _WRAPPER_NAMES = ("def wrapper", "def inner", "def decorated")
+    for fdef in semantics.function_defs:
+        if fdef.name.startswith("_"):
+            continue
+        func_lines = [lines[i].strip() for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))]
+        func_text = " ".join(func_lines)
+        if any(w in func_text for w in _WRAPPER_NAMES):
+            name, desc = _PATTERN_DESCRIPTIONS["decorator"]
+            patterns.append(ExplainSection(
+                title=name, content=f"Function '{fdef.name}' appears to be a decorator. {desc}",
+            ))
+    return patterns
+
+
+def _detect_class_patterns(semantics: FileSemantics, lines: list[str]) -> list[ExplainSection]:
+    """Detect singleton, builder, observer, and iterator patterns on classes."""
+    patterns = []
+    _OBSERVER_KEYWORDS = ("subscribe", "register", "on_", "emit", "notify", "publish")
+
+    for cdef in semantics.class_defs:
+        class_lines = [lines[i] for i in range(cdef.line - 1, min(cdef.end_line, len(lines)))]
+        class_text = "\n".join(class_lines)
+
+        # Singleton
+        if "_instance" in class_text or "__new__" in class_text:
+            name, desc = _PATTERN_DESCRIPTIONS["singleton"]
+            patterns.append(ExplainSection(
+                title=name, content=f"Class '{cdef.name}' appears to be a singleton. {desc}",
+            ))
+
+        # Builder: method chaining via return self
+        return_self_count = sum(1 for ln in class_lines if ln.strip() == "return self")
+        if return_self_count >= 3:
+            name, desc = _PATTERN_DESCRIPTIONS["builder"]
+            patterns.append(ExplainSection(
+                title=name, content=f"Class '{cdef.name}' appears to use the builder pattern. {desc}",
+            ))
+
+        # Observer
+        observer_methods = sum(
+            1 for fd in semantics.function_defs
+            if fd.parent_class == cdef.name
+            and any(kw in fd.name.lower() for kw in _OBSERVER_KEYWORDS)
+        )
+        if observer_methods >= 2:
+            name, desc = _PATTERN_DESCRIPTIONS["observer"]
+            patterns.append(ExplainSection(
+                title=name, content=f"Class '{cdef.name}' appears to use the observer pattern. {desc}",
+            ))
+
+        # Iterator
+        has_iter = any(
+            fd.name in ("__iter__", "__next__")
+            for fd in semantics.function_defs if fd.parent_class == cdef.name
+        )
+        if has_iter:
+            name, desc = _PATTERN_DESCRIPTIONS["iterator"]
+            patterns.append(ExplainSection(
+                title=name, content=f"Class '{cdef.name}' implements the iterator pattern. {desc}",
+            ))
+
+    return patterns
+
+
 def _detect_patterns(
     semantics: FileSemantics,
     lines: list[str],
 ) -> list[ExplainSection]:
     """Detect common design patterns using heuristic analysis."""
     patterns = []
-
-    # Factory: function that returns different types based on condition
-    for fdef in semantics.function_defs:
-        if any(kw in fdef.name.lower() for kw in ("create", "make", "build", "factory", "get_instance")):
-            # Count different return values
-            returns_in_func = sum(
-                1
-                for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))
-                if lines[i].strip().startswith("return ")
-            )
-            if returns_in_func >= 2:
-                name, desc = _PATTERN_DESCRIPTIONS["factory"]
-                patterns.append(
-                    ExplainSection(
-                        title=name,
-                        content=f"Function '{fdef.name}' appears to be a factory. {desc}",
-                    )
-                )
-
-    # Singleton: class with __new__ or _instance pattern
-    for cdef in semantics.class_defs:
-        class_lines = [lines[i] for i in range(cdef.line - 1, min(cdef.end_line, len(lines)))]
-        class_text = "\n".join(class_lines)
-        if "_instance" in class_text or "__new__" in class_text:
-            name, desc = _PATTERN_DESCRIPTIONS["singleton"]
-            patterns.append(
-                ExplainSection(
-                    title=name,
-                    content=f"Class '{cdef.name}' appears to be a singleton. {desc}",
-                )
-            )
-
-    # Decorator: function that takes a function and returns a function
-    for fdef in semantics.function_defs:
-        if fdef.name.startswith("_"):
-            continue
-        # Check if it returns a nested function
-        func_lines = [lines[i].strip() for i in range(fdef.line - 1, min(fdef.end_line, len(lines)))]
-        func_text = " ".join(func_lines)
-        if "def wrapper" in func_text or "def inner" in func_text or "def decorated" in func_text:
-            name, desc = _PATTERN_DESCRIPTIONS["decorator"]
-            patterns.append(
-                ExplainSection(
-                    title=name,
-                    content=f"Function '{fdef.name}' appears to be a decorator. {desc}",
-                )
-            )
-
-    # Builder: class with method chaining (returns self)
-    for cdef in semantics.class_defs:
-        return_self_count = 0
-        for i in range(cdef.line - 1, min(cdef.end_line, len(lines))):
-            if lines[i].strip() == "return self":
-                return_self_count += 1
-        if return_self_count >= 3:
-            name, desc = _PATTERN_DESCRIPTIONS["builder"]
-            patterns.append(
-                ExplainSection(
-                    title=name,
-                    content=f"Class '{cdef.name}' appears to use the builder pattern. {desc}",
-                )
-            )
-
-    # Observer: class with subscribe/register/on_ methods
-    for cdef in semantics.class_defs:
-        observer_methods = sum(
-            1
-            for fd in semantics.function_defs
-            if fd.parent_class == cdef.name
-            and any(kw in fd.name.lower() for kw in ("subscribe", "register", "on_", "emit", "notify", "publish"))
-        )
-        if observer_methods >= 2:
-            name, desc = _PATTERN_DESCRIPTIONS["observer"]
-            patterns.append(
-                ExplainSection(
-                    title=name,
-                    content=f"Class '{cdef.name}' appears to use the observer pattern. {desc}",
-                )
-            )
-
-    # Iterator: class with __iter__ and __next__
-    for cdef in semantics.class_defs:
-        has_iter = any(
-            fd.name in ("__iter__", "__next__") for fd in semantics.function_defs if fd.parent_class == cdef.name
-        )
-        if has_iter:
-            name, desc = _PATTERN_DESCRIPTIONS["iterator"]
-            patterns.append(
-                ExplainSection(
-                    title=name,
-                    content=f"Class '{cdef.name}' implements the iterator pattern. {desc}",
-                )
-            )
-
+    patterns.extend(_detect_factory_patterns(semantics, lines))
+    patterns.extend(_detect_class_patterns(semantics, lines))
+    patterns.extend(_detect_decorator_patterns(semantics, lines))
     return patterns
 
 

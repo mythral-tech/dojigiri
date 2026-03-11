@@ -8,7 +8,7 @@ Calls into: nothing (pure data, no dojigiri imports)
 Data in -> Data out: rule name string -> CWE/NIST identifier strings
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 # CWE (Common Weakness Enumeration) mappings
 # Maps rule names to CWE IDs

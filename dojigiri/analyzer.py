@@ -10,7 +10,7 @@ Calls into: discovery.py, config.py, detector.py, chunker.py, llm.py,
 Data in → Data out: Path (file or directory) in → ScanReport out.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import logging
 import os
@@ -41,7 +41,7 @@ from .types import (
 )
 
 
-def _safe_enum(enum_cls, value):
+def _safe_enum(enum_cls: type, value: str) -> object | None:
     """Safely instantiate an enum, returning None for invalid values."""
     try:
         return enum_cls(value)
@@ -54,7 +54,7 @@ def _analyze_single_file(
     cache: dict,
     use_cache: bool,
     cache_lock: threading.Lock | None = None,
-    custom_rules=None,
+    custom_rules: list | None = None,
 ) -> tuple[FileAnalysis | None, str | None, bool]:
     """Analyze a single file.
 
@@ -96,12 +96,121 @@ def _analyze_single_file(
     return fa, current_hash, False
 
 
+def _scan_files_sequential(files: list[Path], cache: dict, use_cache: bool, custom_rules: list | None) -> tuple[list[FileAnalysis], int]:
+    """Scan files sequentially. Returns (analyses, errors_count)."""
+    analyses = []
+    errors = 0
+    for filepath in files:
+        fa, updated_hash, is_error = _analyze_single_file(filepath, cache, use_cache, custom_rules=custom_rules)
+        if fa:
+            analyses.append(fa)
+            if use_cache and updated_hash:
+                cache[str(filepath)] = updated_hash
+        elif is_error:
+            errors += 1
+    return analyses, errors
+
+
+def _scan_files_parallel(files: list[Path], cache: dict, use_cache: bool, max_workers: int, custom_rules: list | None) -> tuple[list[FileAnalysis], int]:
+    """Scan files in parallel with thread-safe cache access. Returns (analyses, errors_count)."""
+    analyses = []
+    errors = 0
+    cache_lock = threading.Lock()
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_file = {
+            executor.submit(
+                _analyze_single_file, filepath, cache, use_cache, cache_lock, custom_rules=custom_rules
+            ): filepath
+            for filepath in files
+        }
+        for future in as_completed(future_to_file):
+            filepath = future_to_file[future]
+            try:
+                fa, updated_hash, is_error = future.result()
+                if fa:
+                    analyses.append(fa)
+                    if use_cache and updated_hash:
+                        with cache_lock:
+                            cache[str(filepath)] = updated_hash
+                elif is_error:
+                    errors += 1
+            except Exception as e:  # future.result() — any worker error must be caught
+                logger.warning("Error analyzing %s: %s", filepath, e)
+                errors += 1
+    return analyses, errors
+
+
+def _detect_semantic_clones(analyses: list[FileAnalysis]) -> list[CrossFileFinding]:
+    """Run cross-file semantic clone detection. Returns cross-file findings and mutates intra-file."""
+    cross_file_findings: list[CrossFileFinding] = []
+    semantics_by_file = {fa.path: fa.semantics for fa in analyses if fa.semantics is not None}
+    if len(semantics_by_file) < 2:
+        return cross_file_findings
+
+    from .semantic.smells import find_semantic_clone_pairs
+
+    clone_pairs = find_semantic_clone_pairs(semantics_by_file)
+    analysis_by_path = {fa.path: fa for fa in analyses}
+    for p in clone_pairs:
+        if p.file_a != p.file_b:
+            cross_file_findings.append(
+                CrossFileFinding(
+                    source_file=p.file_a, target_file=p.file_b,
+                    line=p.func_a_line, target_line=p.func_b_line,
+                    severity=Severity.INFO, category=Category.STYLE,
+                    rule="semantic-clone",
+                    message=(
+                        f"Function '{p.func_a_name}' is semantically similar "
+                        f"({p.similarity:.0%}) to '{p.func_b_name}'"
+                    ),
+                    suggestion="Consider extracting shared logic into a common function",
+                )
+            )
+        else:
+            fa = analysis_by_path.get(p.file_a)
+            if fa:
+                fa.findings.append(
+                    Finding(
+                        file=p.file_a, line=p.func_a_line,
+                        severity=Severity.INFO, category=Category.STYLE,
+                        source=Source.AST, rule="semantic-clone",
+                        message=(
+                            f"Function '{p.func_a_name}' is semantically similar "
+                            f"({p.similarity:.0%}) to '{p.func_b_name}' "
+                            f"at line {p.func_b_line}"
+                        ),
+                        suggestion="Consider extracting shared logic into a common function",
+                    )
+                )
+    return cross_file_findings
+
+
+def _detect_cross_file_taint(analyses: list[FileAnalysis]) -> list[CrossFileFinding]:
+    """Run cross-file taint analysis on Python files. Returns findings."""
+    python_files: dict[str, str] = {}
+    for fa in analyses:
+        if fa.language == "python":
+            try:
+                content = Path(fa.path).read_text(encoding="utf-8", errors="replace")
+                python_files[fa.path] = content
+            except OSError:
+                pass
+    if len(python_files) < 2:
+        return []
+    try:
+        from .taint import analyze_taint_cross_file
+        return list(analyze_taint_cross_file(python_files))
+    except Exception as e:
+        logger.debug("Cross-file taint analysis skipped: %s", e)
+        return []
+
+
 def scan_quick(
     root: Path,
     language_filter: str | None = None,
     use_cache: bool = True,
     max_workers: int = 4,
-    custom_rules=None,
+    custom_rules: list | None = None,
 ) -> ScanReport:
     """Quick scan — static analysis only (free, instant).
 
@@ -114,116 +223,18 @@ def scan_quick(
     """
     files, skipped = collect_files(root, language_filter)
     cache = load_cache() if use_cache else {}
-    analyses = []
 
     if max_workers == 1:
-        # Sequential processing
-        for filepath in files:
-            fa, updated_hash, is_error = _analyze_single_file(filepath, cache, use_cache, custom_rules=custom_rules)
-            if fa:
-                analyses.append(fa)
-                if use_cache and updated_hash:
-                    cache[str(filepath)] = updated_hash
-            elif is_error:
-                skipped += 1
+        analyses, errors = _scan_files_sequential(files, cache, use_cache, custom_rules)
     else:
-        # Parallel processing with thread-safe cache access
-        cache_lock = threading.Lock()
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_file = {
-                executor.submit(
-                    _analyze_single_file, filepath, cache, use_cache, cache_lock, custom_rules=custom_rules
-                ): filepath
-                for filepath in files
-            }
-
-            for future in as_completed(future_to_file):
-                filepath = future_to_file[future]
-                try:
-                    fa, updated_hash, is_error = future.result()
-                    if fa:
-                        analyses.append(fa)
-                        if use_cache and updated_hash:
-                            with cache_lock:
-                                cache[str(filepath)] = updated_hash
-                    elif is_error:
-                        skipped += 1
-                except Exception as e:  # future.result() — any worker error must be caught
-                    logger.warning("Error analyzing %s: %s", filepath, e)
-                    skipped += 1
+        analyses, errors = _scan_files_parallel(files, cache, use_cache, max_workers, custom_rules)
+    skipped += errors
 
     if use_cache:
         save_cache(cache)
 
-    # Cross-file semantic clone detection
-    cross_file_findings: list[CrossFileFinding] = []
-    semantics_by_file = {}
-    for fa in analyses:
-        if fa.semantics is not None:
-            semantics_by_file[fa.path] = fa.semantics
-    if len(semantics_by_file) >= 2:
-        from .semantic.smells import find_semantic_clone_pairs
-
-        clone_pairs = find_semantic_clone_pairs(semantics_by_file)
-        # Dict lookup for intra-file clone insertion (O(1) vs O(N) scan)
-        analysis_by_path = {fa.path: fa for fa in analyses}
-        for p in clone_pairs:
-            if p.file_a != p.file_b:
-                # Cross-file clone → structured CrossFileFinding
-                cross_file_findings.append(
-                    CrossFileFinding(
-                        source_file=p.file_a,
-                        target_file=p.file_b,
-                        line=p.func_a_line,
-                        target_line=p.func_b_line,
-                        severity=Severity.INFO,
-                        category=Category.STYLE,
-                        rule="semantic-clone",
-                        message=(
-                            f"Function '{p.func_a_name}' is semantically similar "
-                            f"({p.similarity:.0%}) to '{p.func_b_name}'"
-                        ),
-                        suggestion="Consider extracting shared logic into a common function",
-                    )
-                )
-            else:
-                # Intra-file clone → regular Finding on the file
-                fa = analysis_by_path.get(p.file_a)
-                if fa:
-                    fa.findings.append(
-                        Finding(
-                            file=p.file_a,
-                            line=p.func_a_line,
-                            severity=Severity.INFO,
-                            category=Category.STYLE,
-                            source=Source.AST,
-                            rule="semantic-clone",
-                            message=(
-                                f"Function '{p.func_a_name}' is semantically similar "
-                                f"({p.similarity:.0%}) to '{p.func_b_name}' "
-                                f"at line {p.func_b_line}"
-                            ),
-                            suggestion="Consider extracting shared logic into a common function",
-                        )
-                    )
-
-    # Cross-file taint analysis (Python files only)
-    python_files: dict[str, str] = {}
-    for fa in analyses:
-        if fa.language == "python":
-            try:
-                content = Path(fa.path).read_text(encoding="utf-8", errors="replace")
-                python_files[fa.path] = content
-            except OSError:
-                pass
-    if len(python_files) >= 2:
-        try:
-            from .taint import analyze_taint_cross_file
-
-            xfile_taint = analyze_taint_cross_file(python_files)
-            cross_file_findings.extend(xfile_taint)
-        except Exception as e:
-            logger.debug("Cross-file taint analysis skipped: %s", e)
+    cross_file_findings = _detect_semantic_clones(analyses)
+    cross_file_findings.extend(_detect_cross_file_taint(analyses))
 
     # Clear semantics references to free memory (not needed after this point)
     for fa in analyses:
@@ -242,12 +253,204 @@ def scan_quick(
     return report_obj
 
 
+def _reconstruct_cached_analysis(fp_str: str, lang: str, fhash: str, cached_data: dict[str, object]) -> FileAnalysis:
+    """Reconstruct a FileAnalysis from cached data."""
+    cached_findings = [
+        Finding(
+            file=f["file"],
+            line=f["line"],
+            severity=Severity(f["severity"]),
+            category=Category(f["category"]),
+            source=Source(f["source"]),
+            rule=f["rule"],
+            message=f["message"],
+            suggestion=f.get("suggestion"),
+            snippet=f.get("snippet"),
+            confidence=_safe_enum(Confidence, f["confidence"]) if f.get("confidence") else None,
+        )
+        for f in cached_data.get("findings", [])
+    ]
+    return FileAnalysis(
+        path=fp_str,
+        language=cached_data.get("language", lang),
+        lines=cached_data.get("lines", 0),
+        findings=cached_findings,
+        file_hash=fhash,
+    )
+
+
+def _collect_file_data(files: list[Path], skipped: int, cache: dict, use_cache: bool, custom_rules: list | None) -> tuple[list[tuple], list[FileAnalysis], int]:
+    """Phase 1 of deep scan: static analysis and cache check.
+
+    Returns (file_data, cached_analyses, skipped) where file_data is a list of
+    tuples for files needing LLM analysis, and cached_analyses are FileAnalysis
+    objects reconstructed from cache hits.
+    """
+    file_data = []  # list of (fp_str, lang, content, line_count, static_findings, fhash)
+    cached_analyses = []  # FileAnalyses loaded from cache
+
+    for filepath in files:
+        fp_str = str(filepath)
+        lang = detect_language(filepath)
+
+        try:
+            fhash = file_hash(fp_str)
+        except OSError:
+            skipped += 1
+            continue
+
+        # Check cache - if file unchanged, skip LLM analysis
+        if use_cache and fp_str in cache and isinstance(cache[fp_str], dict):
+            cached_data = cache[fp_str]
+            if cached_data.get("hash") == fhash:
+                cached_analyses.append(
+                    _reconstruct_cached_analysis(fp_str, lang, fhash, cached_data)
+                )
+                continue
+
+        # Cache miss or disabled - need to analyze
+        try:
+            content = filepath.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            skipped += 1
+            continue
+        line_count = content.count("\n") + 1
+        static_result = analyze_file_static(fp_str, content, lang or "", custom_rules=custom_rules)
+        file_data.append((fp_str, lang, content, line_count, static_result.findings, fhash))
+
+    return file_data, cached_analyses, skipped
+
+
+def _run_llm_on_chunks(content: str, fp_str: str, lang: str, static_findings: list[Finding], cost_tracker: object,
+                       analyze_chunk: object, CostLimitExceeded: type, LLMError: type, print_lock: threading.Lock) -> list[Finding]:
+    """Run LLM analysis on file chunks. Returns list of LLM findings."""
+    llm_findings = []
+    try:
+        chunks = chunk_file(content, fp_str, lang)
+        for chunk in chunks:
+            if cost_tracker.limit_exceeded:
+                break
+            chunk_findings = analyze_chunk(chunk, cost_tracker, static_findings=static_findings)
+            llm_findings.extend(chunk_findings)
+            if len(chunks) > 1:
+                with print_lock:
+                    sys.stdout.write(".")
+                    sys.stdout.flush()
+        if len(chunks) > 1:
+            with print_lock:
+                print()
+    except CostLimitExceeded:
+        with print_lock:
+            print(
+                f"\n  Cost limit reached (${cost_tracker.total_cost:.4f}). "
+                "Remaining files will use static analysis only.",
+                flush=True,
+            )
+    except LLMError as e:
+        with print_lock:
+            logger.warning("LLM error for %s: %s", fp_str, e)
+    return llm_findings
+
+
+def _store_analysis(fa: FileAnalysis, fp_str: str, fhash: str, lang: str, line_count: int, findings: list[Finding],
+                    analyses: list[FileAnalysis], analyses_lock: threading.Lock, cache: dict, cache_write_lock: threading.Lock, use_cache: bool) -> None:
+    """Thread-safe storage of a file analysis result + cache update."""
+    with analyses_lock:
+        analyses.append(fa)
+    if use_cache:
+        with cache_write_lock:
+            cache[fp_str] = {
+                "hash": fhash,
+                "language": lang,
+                "lines": line_count,
+                "findings": [f.to_dict() for f in findings],
+            }
+
+
+def _run_llm_enrichment(file_data: list[tuple], cached_analyses: list[FileAnalysis], cache: dict, use_cache: bool, max_workers: int,
+                        cost_tracker: object, analyze_chunk: object, CostLimitExceeded: type, LLMError: type) -> tuple[list[FileAnalysis], int]:
+    """Phase 2 of deep scan: LLM enrichment with parallel workers.
+
+    Returns (analyses, skipped_clean_count).
+    """
+    from .config import LLM_SKIP_CLEAN_FILES
+
+    analyses = cached_analyses.copy()
+    analyses_lock = threading.Lock()
+    cache_write_lock = threading.Lock()
+    print_lock = threading.Lock()
+
+    skip_clean = LLM_SKIP_CLEAN_FILES and not os.environ.get("DOJI_LLM_FISH_CLEAN")
+    skipped_clean_count = 0
+
+    def _analyze_file_deep(index: int, fp_str: str, lang: str, content: str, line_count: int, static_findings: list[Finding], fhash: str) -> None:
+        """Per-file LLM analysis — runs in a thread."""
+        nonlocal skipped_clean_count
+
+        if skip_clean and not static_findings:
+            with print_lock:
+                print(
+                    f"  [{index + 1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines) [clean — skipped LLM]",
+                    flush=True,
+                )
+            fa = FileAnalysis(path=fp_str, language=lang, lines=line_count, findings=[], file_hash=fhash)
+            with analyses_lock:
+                analyses.append(fa)
+                skipped_clean_count += 1
+            if use_cache:
+                with cache_write_lock:
+                    cache[fp_str] = {"hash": fhash, "language": lang, "lines": line_count, "findings": []}
+            return
+
+        if cost_tracker.limit_exceeded:
+            with print_lock:
+                print(f"  [{index + 1}/{len(file_data)}] {fp_str} (static only — cost limit)", flush=True)
+            llm_findings = []
+        else:
+            with print_lock:
+                print(f"  [{index + 1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
+            llm_findings = _run_llm_on_chunks(
+                content, fp_str, lang, static_findings, cost_tracker,
+                analyze_chunk, CostLimitExceeded, LLMError, print_lock,
+            )
+
+        merged = _merge_findings(static_findings, llm_findings)
+        fa = FileAnalysis(path=fp_str, language=lang, lines=line_count, findings=merged, file_hash=fhash)
+        _store_analysis(fa, fp_str, fhash, lang, line_count, merged,
+                        analyses, analyses_lock, cache, cache_write_lock, use_cache)
+
+    if max_workers == 1 or len(file_data) <= 1:
+        for i, (fp_str, lang, content, line_count, static_findings, fhash) in enumerate(file_data):
+            _analyze_file_deep(i, fp_str, lang, content, line_count, static_findings, fhash)
+    else:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
+            for i, (fp_str, lang, content, line_count, static_findings, fhash) in enumerate(file_data):
+                futures.append(
+                    executor.submit(_analyze_file_deep, i, fp_str, lang, content, line_count, static_findings, fhash)
+                )
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:  # future.result() — any worker error must be caught
+                    logger.warning("Worker error: %s", e)
+
+    if skipped_clean_count:
+        print(
+            f"  Skipped LLM for {skipped_clean_count}/{len(file_data)} statically-clean files "
+            f"(override with DOJI_LLM_FISH_CLEAN=1)",
+            flush=True,
+        )
+
+    return analyses, skipped_clean_count
+
+
 def scan_deep(
     root: Path,
     language_filter: str | None = None,
     use_cache: bool = True,
     max_workers: int = 4,
-    custom_rules=None,
+    custom_rules: list | None = None,
     max_cost: float | None = None,
 ) -> ScanReport:
     """Deep scan — static + Claude API analysis.
@@ -277,188 +480,16 @@ def scan_deep(
     cache = load_cache() if use_cache else {}
 
     # Phase 1: Static analysis and cache check
-    file_data = []  # list of (fp_str, lang, content, line_count, static_findings, fhash, from_cache)
-    cached_analyses = []  # FileAnalyses loaded from cache
+    file_data, cached_analyses, skipped = _collect_file_data(
+        files, skipped, cache, use_cache, custom_rules,
+    )
 
-    for filepath in files:
-        fp_str = str(filepath)
-        lang = detect_language(filepath)
+    # Phase 2: LLM enrichment
+    analyses, _clean_count = _run_llm_enrichment(
+        file_data, cached_analyses, cache, use_cache, max_workers,
+        cost_tracker, analyze_chunk, CostLimitExceeded, LLMError,
+    )
 
-        # Compute hash first
-        try:
-            fhash = file_hash(fp_str)
-        except OSError:
-            skipped += 1
-            continue
-
-        # Check cache - if file unchanged, skip LLM analysis
-        if use_cache and fp_str in cache and isinstance(cache[fp_str], dict):
-            cached_data = cache[fp_str]
-            if cached_data.get("hash") == fhash:
-                # Cache hit - reconstruct FileAnalysis from cached data
-                cached_findings = [
-                    Finding(
-                        file=f["file"],
-                        line=f["line"],
-                        severity=Severity(f["severity"]),
-                        category=Category(f["category"]),
-                        source=Source(f["source"]),
-                        rule=f["rule"],
-                        message=f["message"],
-                        suggestion=f.get("suggestion"),
-                        snippet=f.get("snippet"),
-                        confidence=_safe_enum(Confidence, f["confidence"]) if f.get("confidence") else None,
-                    )
-                    for f in cached_data.get("findings", [])
-                ]
-                fa = FileAnalysis(
-                    path=fp_str,
-                    language=cached_data.get("language", lang),
-                    lines=cached_data.get("lines", 0),
-                    findings=cached_findings,
-                    file_hash=fhash,
-                )
-                cached_analyses.append(fa)
-                continue
-
-        # Cache miss or disabled - need to analyze
-        try:
-            content = filepath.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            skipped += 1
-            continue
-        line_count = content.count("\n") + 1
-        static_result = analyze_file_static(fp_str, content, lang or "", custom_rules=custom_rules)
-        file_data.append((fp_str, lang, content, line_count, static_result.findings, fhash))
-
-    # Phase 2: LLM enrichment with parallel workers
-    analyses = cached_analyses.copy()  # Start with cached results
-    analyses_lock = threading.Lock()
-    cache_write_lock = threading.Lock()
-    print_lock = threading.Lock()
-
-    # Resolve skip-clean-files setting: config flag + env override
-    from .config import LLM_SKIP_CLEAN_FILES
-
-    skip_clean = LLM_SKIP_CLEAN_FILES and not os.environ.get("DOJI_LLM_FISH_CLEAN")
-    skipped_clean_count = 0
-
-    def _analyze_file_deep(index, fp_str, lang, content, line_count, static_findings, fhash):
-        """Per-file LLM analysis — runs in a thread."""
-        nonlocal skipped_clean_count
-
-        # Skip LLM for statically-clean files — the "fishing" path has low yield
-        # and high cost. Files with 0 static findings rarely produce LLM findings
-        # worth the API call. Users can override with DOJI_LLM_FISH_CLEAN=1.
-        if skip_clean and not static_findings:
-            with print_lock:
-                print(
-                    f"  [{index + 1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines) [clean — skipped LLM]",
-                    flush=True,
-                )
-            fa = FileAnalysis(
-                path=fp_str,
-                language=lang,
-                lines=line_count,
-                findings=[],
-                file_hash=fhash,
-            )
-            with analyses_lock:
-                analyses.append(fa)
-                skipped_clean_count += 1
-            if use_cache:
-                with cache_write_lock:
-                    cache[fp_str] = {
-                        "hash": fhash,
-                        "language": lang,
-                        "lines": line_count,
-                        "findings": [],
-                    }
-            return
-
-        # Check cost limit flag *before* making any API calls — prevents
-        # parallel workers from spending money after another thread hit the limit.
-        if cost_tracker.limit_exceeded:
-            with print_lock:
-                print(f"  [{index + 1}/{len(file_data)}] {fp_str} (static only — cost limit)", flush=True)
-            llm_findings = []
-        else:
-            with print_lock:
-                print(f"  [{index + 1}/{len(file_data)}] {fp_str} ({lang}, {line_count} lines)", flush=True)
-
-            llm_findings = []
-            try:
-                chunks = chunk_file(content, fp_str, lang)
-                for chunk in chunks:
-                    # Re-check between chunks for multi-chunk files
-                    if cost_tracker.limit_exceeded:
-                        break
-                    chunk_findings = analyze_chunk(chunk, cost_tracker, static_findings=static_findings)
-                    llm_findings.extend(chunk_findings)
-                    if len(chunks) > 1:
-                        with print_lock:
-                            sys.stdout.write(".")
-                            sys.stdout.flush()
-                if len(chunks) > 1:
-                    with print_lock:
-                        print()
-            except CostLimitExceeded:
-                with print_lock:
-                    print(
-                        f"\n  Cost limit reached (${cost_tracker.total_cost:.4f}). "
-                        "Remaining files will use static analysis only.",
-                        flush=True,
-                    )
-            except LLMError as e:
-                with print_lock:
-                    logger.warning("LLM error for %s: %s", fp_str, e)
-
-        merged = _merge_findings(static_findings, llm_findings)
-
-        fa = FileAnalysis(
-            path=fp_str,
-            language=lang,
-            lines=line_count,
-            findings=merged,
-            file_hash=fhash,
-        )
-        with analyses_lock:
-            analyses.append(fa)
-
-        if use_cache:
-            with cache_write_lock:
-                cache[fp_str] = {
-                    "hash": fhash,
-                    "language": lang,
-                    "lines": line_count,
-                    "findings": [f.to_dict() for f in merged],
-                }
-
-    if max_workers == 1 or len(file_data) <= 1:
-        for i, (fp_str, lang, content, line_count, static_findings, fhash) in enumerate(file_data):
-            _analyze_file_deep(i, fp_str, lang, content, line_count, static_findings, fhash)
-    else:
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = []
-            for i, (fp_str, lang, content, line_count, static_findings, fhash) in enumerate(file_data):
-                futures.append(
-                    executor.submit(_analyze_file_deep, i, fp_str, lang, content, line_count, static_findings, fhash)
-                )
-            for future in as_completed(futures):
-                try:
-                    future.result()
-                except Exception as e:  # future.result() — any worker error must be caught
-                    logger.warning("Worker error: %s", e)
-
-    # Report clean-file savings
-    if skipped_clean_count:
-        print(
-            f"  Skipped LLM for {skipped_clean_count}/{len(file_data)} statically-clean files "
-            f"(override with DOJI_LLM_FISH_CLEAN=1)",
-            flush=True,
-        )
-
-    # Save cache with updated analyses
     if use_cache:
         save_cache(cache)
 
@@ -766,11 +797,71 @@ def get_changed_lines(git_root: Path, base_ref: str, filepath: Path) -> set[int]
     return changed
 
 
+def _should_skip_diff_file(
+    filepath: Path, git_root: Path, ignore_patterns: list[str],
+    language_filter: str | None,
+) -> tuple[bool, str | None]:
+    """Check if a file should be skipped in diff scan. Returns (should_skip, lang)."""
+    import fnmatch as _fnmatch
+
+    if not filepath.is_file():
+        return True, None
+
+    if ignore_patterns:
+        try:
+            rel = str(filepath.relative_to(git_root))
+        except ValueError:
+            rel = filepath.name
+        if any(_fnmatch.fnmatch(rel, pat) or _fnmatch.fnmatch(filepath.name, pat) for pat in ignore_patterns):
+            return True, None
+
+    lang = detect_language(filepath)
+    if not lang:
+        return True, None
+    if language_filter and lang != language_filter:
+        return True, None
+
+    return False, lang
+
+
+def _filter_findings_to_changed_lines(findings: list[Finding], changed_lines: set[int]) -> list[Finding]:
+    """Filter findings to only those on changed lines (+-2 tolerance). Empty set keeps all."""
+    if not changed_lines:
+        return findings
+    return [f for f in findings if any(abs(f.line - cl) <= 2 for cl in changed_lines)]
+
+
+def _analyze_diff_file(
+    filepath: Path, git_root: Path, ref: str, lang: str, custom_rules: list | None,
+) -> FileAnalysis | None:
+    """Analyze a single file for diff scan. Returns FileAnalysis or None."""
+    try:
+        content = filepath.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+
+    changed_lines = get_changed_lines(git_root, ref, filepath)
+    findings = analyze_file_static(str(filepath), content, lang, custom_rules=custom_rules).findings
+    findings = _filter_findings_to_changed_lines(findings, changed_lines)
+
+    if not findings:
+        return None
+
+    try:
+        rel_path = str(filepath.relative_to(git_root))
+    except ValueError:
+        rel_path = str(filepath)
+    return FileAnalysis(
+        path=rel_path, language=lang,
+        lines=content.count("\n") + 1, findings=findings,
+    )
+
+
 def scan_diff(
     root: Path,
     base_ref: str | None = None,
     language_filter: str | None = None,
-    custom_rules=None,
+    custom_rules: list | None = None,
 ) -> tuple[ScanReport, str]:
     """Scan only files changed vs a git base ref, filtering to changed lines.
 
@@ -795,73 +886,25 @@ def scan_diff(
             timestamp=datetime.now().isoformat(timespec="seconds"),
         ), ref
 
+    from .config import load_ignore_patterns
+    ignore_patterns = load_ignore_patterns(git_root)
+
     file_analyses = []
     skipped = 0
 
-    # Load .doji-ignore patterns for diff scan (matches discovery.py behavior)
-    import fnmatch as _fnmatch
-
-    from .config import load_ignore_patterns
-
-    ignore_root = git_root
-    ignore_patterns = load_ignore_patterns(ignore_root)
-
     for filepath in changed_files:
-        if not filepath.is_file():
+        skip, lang = _should_skip_diff_file(filepath, git_root, ignore_patterns, language_filter)
+        if skip:
             skipped += 1
             continue
 
-        # Respect .doji-ignore in diff mode
-        if ignore_patterns:
-            try:
-                rel = str(filepath.relative_to(git_root))
-            except ValueError:
-                rel = filepath.name
-            if any(_fnmatch.fnmatch(rel, pat) or _fnmatch.fnmatch(filepath.name, pat) for pat in ignore_patterns):
+        fa = _analyze_diff_file(filepath, git_root, ref, lang, custom_rules)
+        if fa is None:
+            # Could be OSError (count as skip) or no findings (not a skip)
+            if not filepath.is_file():
                 skipped += 1
-                continue
-
-        lang = detect_language(filepath)
-        if not lang:
-            skipped += 1
             continue
-        if language_filter and lang != language_filter:
-            skipped += 1
-            continue
-
-        try:
-            content = filepath.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            skipped += 1
-            continue
-
-        changed_lines = get_changed_lines(git_root, ref, filepath)
-
-        findings = analyze_file_static(str(filepath), content, lang, custom_rules=custom_rules).findings
-
-        # Filter to only findings on changed lines (±2 line tolerance)
-        # Empty changed_lines means untracked file — keep all findings
-        if changed_lines:
-            filtered = []
-            for f in findings:
-                if any(abs(f.line - cl) <= 2 for cl in changed_lines):
-                    filtered.append(f)
-            findings = filtered
-
-        if findings:
-            lines_count = content.count("\n") + 1
-            try:
-                rel_path = str(filepath.relative_to(git_root))
-            except ValueError:
-                rel_path = str(filepath)
-            file_analyses.append(
-                FileAnalysis(
-                    path=rel_path,
-                    language=lang,
-                    lines=lines_count,
-                    findings=findings,
-                )
-            )
+        file_analyses.append(fa)
 
     report = ScanReport(
         root=str(root),

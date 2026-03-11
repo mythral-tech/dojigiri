@@ -9,7 +9,7 @@ Calls into: semantic/core.py (FileSemantics), config.py
 Data in → Data out: FileSemantics → list[Finding] (unused vars, shadowing, uninitialized)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from ..types import Category, Finding, Severity, Source
 from .core import FileSemantics, ScopeInfo
@@ -163,6 +163,56 @@ _TYPE_DEFINITION_CALLS = (
 )
 
 
+def _should_skip_assignment(
+    asgn: object,
+    class_scope_ids: set[int],
+    module_scope_ids: set[int],
+    all_names: set[str],
+    filepath: str,
+) -> bool:
+    """Return True if this assignment should not be checked for unused status."""
+    if asgn.is_parameter or asgn.is_augmented:
+        return True
+    if any(asgn.name.startswith(p) for p in _IGNORE_PREFIXES):
+        return True
+    if asgn.value_node_type == "self_attr":
+        return True
+    if asgn.scope_id in class_scope_ids:
+        return True
+
+    # All module-scope checks grouped together
+    if asgn.scope_id in module_scope_ids:
+        # Type definitions (TypeVar, NewType, etc.)
+        if asgn.value_text and any(asgn.value_text.startswith(p) for p in _TYPE_DEFINITION_CALLS):
+            return True
+        # Public module-level names (likely public API)
+        if not asgn.name.startswith("_"):
+            return True
+        # __init__.py names (almost always re-exports)
+        if _is_init_file(filepath):
+            return True
+        # Names listed in __all__
+        if asgn.name in all_names:
+            return True
+
+    return False
+
+
+def _is_name_used(
+    name: str,
+    visible_scopes: set[int],
+    semantics: FileSemantics,
+) -> bool:
+    """Check if a name is referenced or called in the given scopes."""
+    for ref in semantics.references:
+        if ref.name == name and ref.scope_id in visible_scopes:
+            return True
+    for call in semantics.function_calls:
+        if call.name == name and call.scope_id in visible_scopes:
+            return True
+    return False
+
+
 def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Finding]:
     """Find variables that are assigned but never read in the same or child scope.
 
@@ -171,66 +221,16 @@ def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Find
     module-scope type definitions (TypeVar, NewType, etc.).
     """
     findings = []
-
-    # Build set of class scope IDs to skip class-level attribute declarations
-    # (Pydantic fields, dataclass fields, TypeVars, typed annotations, etc.)
     class_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "class"}
-
-    # Build set of module scope IDs
     module_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "module"}
-
-    # Extract names from __all__ for public API check
     all_names = _extract_all_names(semantics)
 
     for asgn in semantics.assignments:
-        # Skip parameters (handled differently), augmented, and _ prefixed
-        if asgn.is_parameter:
-            continue
-        if asgn.is_augmented:
-            continue
-        if any(asgn.name.startswith(p) for p in _IGNORE_PREFIXES):
-            continue
-        # Skip self.attr assignments
-        if asgn.value_node_type == "self_attr":
-            continue
-        # Skip class-scope assignments — these are attribute declarations,
-        # not unused local variables (Pydantic fields, TypeVars, etc.)
-        if asgn.scope_id in class_scope_ids:
-            continue
-        # Skip module-scope type definitions (TypeVar, NewType, NamedTuple, etc.)
-        # These are consumed by type checkers or imported by other modules.
-        if asgn.scope_id in module_scope_ids and asgn.value_text:
-            if any(asgn.value_text.startswith(p) for p in _TYPE_DEFINITION_CALLS):
-                continue
-
-        # Skip public module-level names — these are likely public API intended
-        # for import by consumers (e.g. flask.session, requests.compat.basestring).
-        if asgn.scope_id in module_scope_ids and not asgn.name.startswith("_"):
-            continue
-        # Skip all module-level names in __init__.py (almost always re-exports)
-        if asgn.scope_id in module_scope_ids and _is_init_file(filepath):
-            continue
-        # Skip names listed in __all__ (explicit public API declaration)
-        if asgn.scope_id in module_scope_ids and asgn.name in all_names:
+        if _should_skip_assignment(asgn, class_scope_ids, module_scope_ids, all_names, filepath):
             continue
 
-        # Check if name is referenced in this scope or any child scope
         visible_scopes = _scope_and_children(semantics.scopes, asgn.scope_id)
-
-        used = False
-        for ref in semantics.references:
-            if ref.name == asgn.name and ref.scope_id in visible_scopes:
-                used = True
-                break
-
-        # Also check if used as a function call target
-        if not used:
-            for call in semantics.function_calls:
-                if call.name == asgn.name and call.scope_id in visible_scopes:
-                    used = True
-                    break
-
-        if not used:
+        if not _is_name_used(asgn.name, visible_scopes, semantics):
             findings.append(
                 Finding(
                     file=filepath,

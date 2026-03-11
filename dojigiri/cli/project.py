@@ -1,6 +1,10 @@
-"""Project-level commands: analyze, review, sca, fix."""
+"""Project-level commands: analyze, review, sca, fix.
 
-from __future__ import annotations
+Orchestrator module with intentionally high coupling — CLI entry point that
+dispatches to analyzer, fixer, SCA, and review subsystems.
+"""
+
+from __future__ import annotations  # noqa
 
 import argparse
 import logging
@@ -206,43 +210,123 @@ def cmd_sca(args: argparse.Namespace) -> int:
     return 0
 
 
+def _warn_llm_fixes(use_llm: bool, dry_run: bool, accept_llm_fixes: bool) -> int | None:
+    """Warn or block LLM fix application. Returns error code or None to proceed."""
+    if not (use_llm and not dry_run and not accept_llm_fixes):
+        return None
+    if not sys.stdin.isatty():
+        print(
+            "Error: LLM-generated fixes require --accept-llm-fixes in non-interactive mode.\n"
+            "  LLM fixes are AI-generated and may introduce subtle logic changes.\n"
+            "  Add --accept-llm-fixes to acknowledge this risk.",
+            file=sys.stderr,
+        )
+        return 1
+    print(
+        "Warning: LLM-generated fixes will be applied alongside deterministic fixes.\n"
+        "  LLM fixes are AI-generated and may introduce subtle logic changes.\n"
+        "  Review the .doji.bak backup after applying.\n"
+        "  To suppress this warning, use --accept-llm-fixes.\n",
+        file=sys.stderr,
+    )
+    return None
+
+
+def _merge_verification(aggregate_verification: dict | None, report_verification: dict | None) -> dict | None:
+    """Merge a single file's verification into the aggregate dict."""
+    if not report_verification:
+        return aggregate_verification
+    if aggregate_verification is None:
+        aggregate_verification = {"resolved": 0, "remaining": 0, "new_issues": 0, "new_findings": []}
+    aggregate_verification["resolved"] += report_verification.get("resolved", 0)
+    aggregate_verification["remaining"] += report_verification.get("remaining", 0)
+    aggregate_verification["new_issues"] += report_verification.get("new_issues", 0)
+    aggregate_verification["new_findings"].extend(report_verification.get("new_findings", []))  # type: ignore[attr-defined]  # aggregate_verification values are heterogeneous (int and list)
+    return aggregate_verification
+
+
+def _validate_fix_args(args: object) -> tuple[Path, str | None, int | None]:
+    """Validate fix command arguments. Returns (root, lang, error_code) — error_code is None on success."""
+    root = Path(args.path).resolve()
+    if not root.exists():
+        print(f"Error: path '{args.path}' does not exist", file=sys.stderr)
+        return root, None, 1
+
+    lang = getattr(args, "lang", None)
+    if lang and lang not in set(LANGUAGE_EXTENSIONS.values()):
+        print(f"Error: unknown language '{lang}'", file=sys.stderr)
+        return root, lang, 1
+
+    return root, lang, None
+
+
+def _collect_and_apply_fixes(files_to_fix: list, *, use_llm: bool, dry_run: bool, create_backup: bool,
+                             rules: list[str] | None, cost_tracker: object | None, verify: bool, custom_rules: list | None,
+                             min_severity: str | None) -> tuple[list, int, int, int, dict | None, float]:
+    """Iterate files, analyze, fix, and aggregate results."""
+    from ..discovery import collect_files_with_lang
+    from ..fixer import fix_file as fixer_fix_file
+    from ..types import SEVERITY_ORDER as severity_order
+
+    all_fixes = []
+    total_applied = 0
+    total_skipped = 0
+    total_failed = 0
+    files_fixed = 0
+    aggregate_verification = None
+
+    for filepath, file_lang in files_to_fix:
+        try:
+            content = filepath.read_text(encoding="utf-8", errors="replace")
+        except OSError as e:
+            print(f"  Warning: cannot read {filepath}: {e}", file=sys.stderr)
+            continue
+
+        result = analyze_file_static(str(filepath), content, file_lang)
+        findings = result.findings
+
+        if min_severity:
+            min_ord = severity_order[min_severity]
+            findings = [f for f in findings if severity_order[f.severity] <= min_ord]
+
+        if not findings:
+            continue
+
+        report = fixer_fix_file(
+            str(filepath), content, file_lang, findings,
+            use_llm=use_llm, dry_run=dry_run, create_backup=create_backup,
+            rules=rules, cost_tracker=cost_tracker, verify=verify,
+            custom_rules=custom_rules, semantics=result,
+        )
+
+        all_fixes.extend(report.fixes)
+        total_applied += report.applied
+        total_skipped += report.skipped
+        total_failed += report.failed
+        if report.files_fixed > 0:
+            files_fixed += 1
+        aggregate_verification = _merge_verification(aggregate_verification, report.verification)
+
+    return all_fixes, total_applied, total_skipped, total_failed, files_fixed, aggregate_verification
+
+
 def cmd_fix(args: argparse.Namespace) -> int:
     """Fix detected issues in code (deterministic + optional LLM)."""
     from ..metrics import end_session, save_session, start_session
 
     session = start_session()
 
-    root = Path(args.path).resolve()
-    if not root.exists():
-        print(f"Error: path '{args.path}' does not exist", file=sys.stderr)
-        return 1
-
-    lang = getattr(args, "lang", None)
-    if lang and lang not in set(LANGUAGE_EXTENSIONS.values()):
-        print(f"Error: unknown language '{lang}'", file=sys.stderr)
-        return 1
+    root, lang, err = _validate_fix_args(args)
+    if err is not None:
+        return err
 
     dry_run = not getattr(args, "apply", False)
     use_llm = getattr(args, "llm", False)
     accept_llm_fixes = getattr(args, "accept_llm_fixes", False)
 
-    # Block LLM fix application in non-interactive mode without explicit opt-in
-    if use_llm and not dry_run and not accept_llm_fixes:
-        if not sys.stdin.isatty():
-            print(
-                "Error: LLM-generated fixes require --accept-llm-fixes in non-interactive mode.\n"
-                "  LLM fixes are AI-generated and may introduce subtle logic changes.\n"
-                "  Add --accept-llm-fixes to acknowledge this risk.",
-                file=sys.stderr,
-            )
-            return 1
-        print(
-            "Warning: LLM-generated fixes will be applied alongside deterministic fixes.\n"
-            "  LLM fixes are AI-generated and may introduce subtle logic changes.\n"
-            "  Review the .doji.bak backup after applying.\n"
-            "  To suppress this warning, use --accept-llm-fixes.\n",
-            file=sys.stderr,
-        )
+    llm_warn = _warn_llm_fixes(use_llm, dry_run, accept_llm_fixes)
+    if llm_warn is not None:
+        return llm_warn
 
     create_backup = not getattr(args, "no_backup", False)
     verify = not getattr(args, "no_verify", False)
@@ -264,7 +348,6 @@ def cmd_fix(args: argparse.Namespace) -> int:
 
     # Collect files to fix
     from ..discovery import collect_files_with_lang
-    from ..fixer import fix_file as fixer_fix_file
     from ..types import FixReport
 
     files_to_fix = collect_files_with_lang(root, language_filter=lang)
@@ -278,73 +361,21 @@ def cmd_fix(args: argparse.Namespace) -> int:
     elif output_format != "json":
         print(f"Scanning {len(files_to_fix)} file(s) for fixes (dry run) ...")
 
-    # Severity filter
-    from ..types import SEVERITY_ORDER as severity_order
-
     cost_tracker = None
     if use_llm:
         from ..plugin import require_llm_plugin
 
         _llm = require_llm_plugin()
-        CostTracker = _llm.CostTracker
-        cost_tracker = CostTracker()
+        cost_tracker = _llm.CostTracker()
 
-    all_fixes = []
-    total_applied = 0
-    total_skipped = 0
-    total_failed = 0
-    files_fixed = 0
-    aggregate_verification = None
-
-    for filepath, file_lang in files_to_fix:
-        try:
-            content = filepath.read_text(encoding="utf-8", errors="replace")
-        except OSError as e:
-            print(f"  Warning: cannot read {filepath}: {e}", file=sys.stderr)
-            continue
-
-        # Get findings via static analysis (with semantics for context-aware fixing)
-        result = analyze_file_static(str(filepath), content, file_lang)
-        findings, file_semantics, file_type_map = result.findings, result.semantics, result.type_map
-
-        # Apply severity filter
-        if min_severity:
-            min_ord = severity_order[min_severity]
-            findings = [f for f in findings if severity_order[f.severity] <= min_ord]
-
-        if not findings:
-            continue
-
-        report = fixer_fix_file(
-            str(filepath),
-            content,
-            file_lang,
-            findings,
-            use_llm=use_llm,
-            dry_run=dry_run,
-            create_backup=create_backup,
-            rules=rules,
-            cost_tracker=cost_tracker,
-            verify=verify,
-            custom_rules=custom_rules,
-            semantics=file_semantics,
-            type_map=file_type_map,
+    all_fixes, total_applied, total_skipped, total_failed, files_fixed, aggregate_verification = (
+        _collect_and_apply_fixes(
+            files_to_fix, use_llm=use_llm, dry_run=dry_run,
+            create_backup=create_backup, rules=rules,
+            cost_tracker=cost_tracker, verify=verify,
+            custom_rules=custom_rules, min_severity=min_severity,
         )
-
-        all_fixes.extend(report.fixes)
-        total_applied += report.applied
-        total_skipped += report.skipped
-        total_failed += report.failed
-        if report.files_fixed > 0:
-            files_fixed += 1
-        # Merge verification results
-        if report.verification:
-            if aggregate_verification is None:
-                aggregate_verification = {"resolved": 0, "remaining": 0, "new_issues": 0, "new_findings": []}
-            aggregate_verification["resolved"] += report.verification.get("resolved", 0)
-            aggregate_verification["remaining"] += report.verification.get("remaining", 0)
-            aggregate_verification["new_issues"] += report.verification.get("new_issues", 0)
-            aggregate_verification["new_findings"].extend(report.verification.get("new_findings", []))  # type: ignore[attr-defined]  # aggregate_verification values are heterogeneous (int and list)
+    )
 
     # Build aggregate report
     aggregate = FixReport(

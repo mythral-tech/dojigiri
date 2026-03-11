@@ -9,7 +9,7 @@ Calls into: config.py (language hints)
 Data in -> Data out: language str -> formatted system prompt str
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import re
 

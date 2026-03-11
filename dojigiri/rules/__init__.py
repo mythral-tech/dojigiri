@@ -4,7 +4,7 @@ Loads rules from YAML files (primary) with Python module fallback.
 Re-exports all rule lists and the Rule type for backward compatibility.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import logging
 

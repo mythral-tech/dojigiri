@@ -9,7 +9,7 @@ Calls into: config.py (LANGUAGE_EXTENSIONS)
 Data in -> Data out: source directory -> DepGraph, CallGraph, GraphMetrics
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import ast as ast_mod
 import logging
@@ -233,6 +233,35 @@ def _detect_language(filepath: str) -> str | None:
     return LANGUAGE_EXTENSIONS.get(suffix)
 
 
+def _resolve_import_node(node, root_path: Path, file_dir: Path, resolved: set[str]) -> None:
+    """Resolve a single import AST node to project file paths."""
+    if isinstance(node, ast_mod.Import):
+        for alias in node.names:
+            _try_resolve_dotted(alias.name.split("."), root_path, resolved)
+        return
+
+    if not isinstance(node, ast_mod.ImportFrom):
+        return
+
+    if node.level == 0 and node.module:
+        _try_resolve_dotted(node.module.split("."), root_path, resolved)
+        return
+
+    if node.level <= 0:
+        return
+
+    # Relative import
+    base = file_dir
+    for _ in range(node.level - 1):
+        base = base.parent
+
+    if node.module:
+        _try_resolve_dotted(node.module.split("."), root_path, resolved, base=base)
+    elif node.names:
+        for alias in node.names:
+            _try_resolve_dotted([alias.name], root_path, resolved, base=base)
+
+
 def _resolve_python_imports(filepath: str, content: str, project_root: str) -> set[str]:
     """Parse Python AST for imports. Resolve to local project files only."""
     try:
@@ -241,33 +270,11 @@ def _resolve_python_imports(filepath: str, content: str, project_root: str) -> s
         return set()
 
     root_path = Path(project_root)
-    file_path = Path(filepath)
-    file_dir = file_path.parent
+    file_dir = Path(filepath).parent
     resolved: set[str] = set()
 
     for node in ast_mod.walk(tree):
-        if isinstance(node, ast_mod.Import):
-            for alias in node.names:
-                parts = alias.name.split(".")
-                _try_resolve_dotted(parts, root_path, resolved)
-
-        elif isinstance(node, ast_mod.ImportFrom):
-            if node.level == 0 and node.module:
-                # Absolute import: from foo.bar import X
-                parts = node.module.split(".")
-                _try_resolve_dotted(parts, root_path, resolved)
-            elif node.level > 0:
-                # Relative import: from . import X, from ..models import Y
-                base = file_dir
-                for _ in range(node.level - 1):
-                    base = base.parent
-                if node.module:
-                    parts = node.module.split(".")
-                    _try_resolve_dotted(parts, root_path, resolved, base=base)
-                elif node.names:
-                    # from . import utils → look for utils.py in same dir
-                    for alias in node.names:
-                        _try_resolve_dotted([alias.name], root_path, resolved, base=base)
+        _resolve_import_node(node, root_path, file_dir, resolved)
 
     # Normalize to relative paths from project root
     normalized = set()
@@ -492,6 +499,43 @@ class CallGraph:
     unresolved_calls: list[tuple[str, str, int]] = field(default_factory=list)  # (caller, call_name, line)
 
 
+def _link_caller_callee(cg: CallGraph, caller_qname: str, target_qname: str) -> None:
+    """Add caller/callee edges if both nodes exist."""
+    if caller_qname in cg.functions:
+        cg.functions[caller_qname].callees.add(target_qname)
+    if target_qname in cg.functions:
+        cg.functions[target_qname].callers.add(caller_qname)
+
+
+def _resolve_call(
+    cg: CallGraph,
+    dep_graph: DepGraph,
+    name_to_qnames: dict[str, list[str]],
+    rel_path: str,
+    caller_qname: str,
+    call_name: str,
+) -> bool:
+    """Resolve a single function call to its definition(s). Returns True if resolved."""
+    # Same-file resolution
+    same_file = [qn for qn in name_to_qnames.get(call_name, []) if qn.startswith(f"{rel_path}:")]
+    if same_file:
+        for target_qname in same_file:
+            _link_caller_callee(cg, caller_qname, target_qname)
+        return True
+
+    # Cross-file resolution via dep graph imports
+    deps = dep_graph.nodes.get(rel_path)
+    if not deps:
+        return False
+    resolved = False
+    for imp_file in deps.imports:
+        cross = [qn for qn in name_to_qnames.get(call_name, []) if qn.startswith(f"{imp_file}:")]
+        for target_qname in cross:
+            _link_caller_callee(cg, caller_qname, target_qname)
+            resolved = True
+    return resolved
+
+
 def build_call_graph(
     dep_graph: DepGraph,
     semantics_by_file: dict,
@@ -528,49 +572,17 @@ def build_call_graph(
     # 3. Resolve calls
     for rel_path, sem in semantics_by_file.items():
         for call in sem.function_calls:
-            caller_qnames = []
-            # Find which function this call is inside
-            for fdef in sem.function_defs:
-                if fdef.line <= call.line <= fdef.end_line:
-                    caller_qnames.append(f"{rel_path}:{fdef.qualified_name}")
+            # Find innermost enclosing function
+            caller_qnames = [
+                f"{rel_path}:{fdef.qualified_name}"
+                for fdef in sem.function_defs
+                if fdef.line <= call.line <= fdef.end_line
+            ]
+            caller_qname = caller_qnames[-1] if caller_qnames else f"{rel_path}:<module>"
 
-            if not caller_qnames:
-                caller_qname = f"{rel_path}:<module>"
-            else:
-                # Pick innermost (last match by line range)
-                caller_qname = caller_qnames[-1]
-
-            # Resolve callee: try same-file first
-            call_name = call.name
-            resolved = False
-
-            # Same-file resolution
-            same_file_candidates = [qn for qn in name_to_qnames.get(call_name, []) if qn.startswith(f"{rel_path}:")]
-            if same_file_candidates:
-                for target_qname in same_file_candidates:
-                    if caller_qname in cg.functions:
-                        cg.functions[caller_qname].callees.add(target_qname)
-                    if target_qname in cg.functions:
-                        cg.functions[target_qname].callers.add(caller_qname)
-                resolved = True
-
-            # Cross-file resolution via dep graph imports
-            if not resolved:
-                deps = dep_graph.nodes.get(rel_path)
-                if deps:
-                    for imp_file in deps.imports:
-                        cross_candidates = [
-                            qn for qn in name_to_qnames.get(call_name, []) if qn.startswith(f"{imp_file}:")
-                        ]
-                        for target_qname in cross_candidates:
-                            if caller_qname in cg.functions:
-                                cg.functions[caller_qname].callees.add(target_qname)
-                            if target_qname in cg.functions:
-                                cg.functions[target_qname].callers.add(caller_qname)
-                            resolved = True
-
-            if not resolved and call_name:
-                cg.unresolved_calls.append((caller_qname, call_name, call.line))
+            if not _resolve_call(cg, dep_graph, name_to_qnames, rel_path, caller_qname, call.name):
+                if call.name:
+                    cg.unresolved_calls.append((caller_qname, call.name, call.line))
 
     return cg
 

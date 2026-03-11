@@ -10,7 +10,7 @@ group, or falls back to the built-in llm modules if present.
 Called by: analyzer.py, cli/scan.py, cli/common.py, fixer/engine.py, graph/project.py
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import importlib
 import logging

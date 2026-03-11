@@ -8,7 +8,7 @@ Calls into: config.py, compliance.py
 Data in -> Data out: ScanReport -> HTML string
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import html
 from datetime import datetime
@@ -30,25 +30,9 @@ _SEVERITY_BG = {
 }
 
 
-def render_html(
-    report: ScanReport,
-    classification: str | None = None,
-    project_name: str | None = None,
-) -> str:
-    """Render a self-contained HTML report with inline CSS.
-
-    Returns the full HTML document as a string.
-    """
-    title = project_name or report.root
-    timestamp = report.timestamp or datetime.now().isoformat(timespec="seconds")
-    cls_banner = ""
-    cls_footer = ""
-    if classification:
-        cls_banner = f"""<div class="classification-banner">{html.escape(classification)}</div>"""
-        cls_footer = f"""<div class="classification-banner">{html.escape(classification)}</div>"""
-
-    # Build findings table rows
-    findings_rows = []
+def _render_findings_table(report: ScanReport) -> str:
+    """Build the HTML findings table rows."""
+    rows = []
     for fa in report.file_analyses:
         for f in fa.findings:
             sev = f.severity.value
@@ -65,7 +49,7 @@ def render_html(
             if source_label == "llm" and f.confidence:
                 conf_badge = f' <span class="confidence-badge">{html.escape(f.confidence.value)}</span>'
 
-            findings_rows.append(f"""<tr style="background:{bg}">
+            rows.append(f"""<tr style="background:{bg}">
   <td style="color:{color};font-weight:bold">{html.escape(sev.upper())}</td>
   <td><code>{source_label}</code>{conf_badge}</td>
   <td>{html.escape(f.file)}:{f.line}</td>
@@ -76,11 +60,12 @@ def render_html(
   <td>{suggestion}</td>
   <td>{html.escape(nist)}</td>
 </tr>""")
+    return "\n".join(rows) if rows else "<tr><td colspan='9'>No findings</td></tr>"
 
-    findings_html = "\n".join(findings_rows) if findings_rows else "<tr><td colspan='9'>No findings</td></tr>"
 
-    # Per-file breakdown
-    file_sections = []
+def _render_file_sections(report: ScanReport) -> str:
+    """Build per-file breakdown HTML sections."""
+    sections = []
     for fa in report.file_analyses:
         if not fa.findings:
             continue
@@ -98,14 +83,80 @@ def render_html(
                 f"{'<br><em>' + html.escape(f.suggestion) + '</em>' if f.suggestion else ''}"
                 "</div>"
             )
-        file_sections.append(
+        sections.append(
             '<div class="file-section">'
             f'<h3>{html.escape(fa.path)} <span class="dim">({fa.language}, {fa.lines} lines)</span></h3>'
             f"{''.join(file_findings)}"
             "</div>"
         )
+    return "\n".join(sections) if sections else "<p>No files with findings.</p>"
 
-    files_html = "\n".join(file_sections) if file_sections else "<p>No files with findings.</p>"
+
+def _render_css() -> str:
+    """Return the inline CSS stylesheet for the HTML report."""
+    return """<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         color: #1a1a1a; line-height: 1.5; padding: 20px; max-width: 1200px; margin: 0 auto; }
+  .classification-banner {
+    background: #dc2626; color: white; text-align: center;
+    font-weight: bold; font-size: 14px; padding: 6px 0;
+    letter-spacing: 2px; margin-bottom: 20px;
+  }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  h2 { font-size: 18px; margin: 24px 0 12px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+  h3 { font-size: 14px; margin: 16px 0 8px; }
+  .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin: 16px 0;
+  }
+  .summary-card {
+    background: #f8f8f8; border-radius: 8px; padding: 12px; text-align: center;
+  }
+  .summary-card .number { font-size: 28px; font-weight: bold; }
+  .summary-card .label { font-size: 12px; color: #666; text-transform: uppercase; }
+  .crit .number { color: #dc2626; }
+  .warn .number { color: #d97706; }
+  .info-card .number { color: #2563eb; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  th { background: #1a1a1a; color: white; padding: 8px 10px; text-align: left; font-size: 12px; }
+  td { padding: 6px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  code { background: #f0f0f0; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+  .mono { font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; }
+  .dim { color: #888; font-weight: normal; }
+  .cwe-tag { background: #e0e7ff; color: #3730a3; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+  .confidence-badge { background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px; font-size: 10px; margin-left: 4px; }
+  .file-section { margin: 12px 0; padding: 12px; background: #fafafa; border-radius: 6px; }
+  @media print {
+    .classification-banner { break-inside: avoid; }
+    body { font-size: 11px; padding: 10px; }
+    .summary-grid { grid-template-columns: repeat(4, 1fr); }
+    table { font-size: 11px; }
+  }
+</style>"""
+
+
+def render_html(
+    report: ScanReport,
+    classification: str | None = None,
+    project_name: str | None = None,
+) -> str:
+    """Render a self-contained HTML report with inline CSS.
+
+    Returns the full HTML document as a string.
+    """
+    title = project_name or report.root
+    timestamp = report.timestamp or datetime.now().isoformat(timespec="seconds")
+    cls_banner = ""
+    cls_footer = ""
+    if classification:
+        cls_banner = f"""<div class="classification-banner">{html.escape(classification)}</div>"""
+        cls_footer = f"""<div class="classification-banner">{html.escape(classification)}</div>"""
+
+    findings_html = _render_findings_table(report)
+    files_html = _render_file_sections(report)
+    css = _render_css()
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -114,47 +165,7 @@ def render_html(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><!-- doji:ignore(crypto-static-iv) -->
 <title>Dojigiri Report — {html.escape(title)}</title>
-<style>
-  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-         color: #1a1a1a; line-height: 1.5; padding: 20px; max-width: 1200px; margin: 0 auto; }}
-  .classification-banner {{
-    background: #dc2626; color: white; text-align: center;
-    font-weight: bold; font-size: 14px; padding: 6px 0;
-    letter-spacing: 2px; margin-bottom: 20px;
-  }}
-  h1 {{ font-size: 24px; margin-bottom: 4px; }}
-  h2 {{ font-size: 18px; margin: 24px 0 12px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }}
-  h3 {{ font-size: 14px; margin: 16px 0 8px; }}
-  .meta {{ color: #666; font-size: 13px; margin-bottom: 20px; }}
-  .summary-grid {{
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px; margin: 16px 0;
-  }}
-  .summary-card {{
-    background: #f8f8f8; border-radius: 8px; padding: 12px; text-align: center;
-  }}
-  .summary-card .number {{ font-size: 28px; font-weight: bold; }}
-  .summary-card .label {{ font-size: 12px; color: #666; text-transform: uppercase; }}
-  .crit .number {{ color: #dc2626; }}
-  .warn .number {{ color: #d97706; }}
-  .info-card .number {{ color: #2563eb; }}
-  table {{ width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }}
-  th {{ background: #1a1a1a; color: white; padding: 8px 10px; text-align: left; font-size: 12px; }}
-  td {{ padding: 6px 10px; border-bottom: 1px solid #eee; vertical-align: top; }}
-  code {{ background: #f0f0f0; padding: 1px 4px; border-radius: 3px; font-size: 12px; }}
-  .mono {{ font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; }}
-  .dim {{ color: #888; font-weight: normal; }}
-  .cwe-tag {{ background: #e0e7ff; color: #3730a3; padding: 1px 5px; border-radius: 3px; font-size: 11px; }}
-  .confidence-badge {{ background: #fef3c7; color: #92400e; padding: 1px 5px; border-radius: 3px; font-size: 10px; margin-left: 4px; }}
-  .file-section {{ margin: 12px 0; padding: 12px; background: #fafafa; border-radius: 6px; }}
-  @media print {{
-    .classification-banner {{ break-inside: avoid; }}
-    body {{ font-size: 11px; padding: 10px; }}
-    .summary-grid {{ grid-template-columns: repeat(4, 1fr); }}
-    table {{ font-size: 11px; }}
-  }}
-</style>
+{css}
 </head>
 <body>
 {cls_banner}

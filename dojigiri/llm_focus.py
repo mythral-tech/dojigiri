@@ -9,7 +9,7 @@ Calls into: nothing
 Data in -> Data out: list[Finding] + code -> list[MicroQuery]
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from dataclasses import dataclass
 
@@ -17,7 +17,7 @@ from .llm_prompts import _sanitize_for_prompt
 from .types import Finding
 
 
-def _get_sanitizer():
+def _get_sanitizer() -> object:
     return _sanitize_for_prompt
 
 
@@ -40,7 +40,7 @@ class MicroQuery:
 def build_micro_queries(
     findings: list[Finding],
     content: str,
-    semantics=None,
+    semantics: object | None = None,
     max_queries: int = 5,
 ) -> list[MicroQuery]:
     """Build targeted micro-queries from findings — send snippets not whole files.

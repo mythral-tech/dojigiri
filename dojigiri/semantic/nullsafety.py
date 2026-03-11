@@ -14,7 +14,7 @@ Calls into: semantic/lang_config.py, semantic/core.py, semantic/types.py, semant
 Data in → Data out: FileSemantics + FileTypeMap → list[Finding]
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import re
 
@@ -105,6 +105,95 @@ _ASSIGNMENT_LHS_PATTERNS = [
 ]
 
 
+def _guard_var(guarded: dict[str, set[int]], var_name: str, lineno: int) -> None:
+    """Mark a variable as guarded on a specific line."""
+    guarded.setdefault(var_name, set()).add(lineno)
+
+
+def _check_inline_and_lhs_guards(
+    stripped: str, lineno: int, guarded: dict[str, set[int]],
+) -> None:
+    """Check inline guard patterns and assignment LHS patterns for same-line suppression."""
+    for pattern in _INLINE_GUARD_RE:
+        m = pattern.search(stripped)
+        if m:
+            _guard_var(guarded, m.group(1), lineno)
+
+    for pattern in _ASSIGNMENT_LHS_PATTERNS:
+        m = pattern.search(stripped)
+        if m:
+            _guard_var(guarded, m.group(1), lineno)
+
+
+def _check_reassignment_guards(
+    stripped: str, lineno: int, guarded: dict[str, set[int]],
+    assert_guarded_from: dict[str, int],
+) -> None:
+    """Detect reassignment to non-None values — guards all subsequent lines."""
+    for pattern in _REASSIGN_PATTERNS:
+        m = pattern.match(stripped)
+        if m:
+            var_name = m.group(1)
+            assert_guarded_from.setdefault(var_name, lineno)
+            _guard_var(guarded, var_name, lineno)
+            break
+
+
+def _check_assert_guards(
+    stripped: str, lineno: int, assert_guarded_from: dict[str, int],
+) -> None:
+    """Detect assert guards — all lines after assert are guarded."""
+    if not stripped.startswith("assert "):
+        return
+    for pattern in _ASSERT_PATTERNS:
+        m = pattern.match(stripped)
+        if m:
+            assert_guarded_from.setdefault(m.group(1), lineno + 1)
+            break
+
+
+def _check_early_exit_guards(
+    stripped: str, indent: int, lineno: int, guarded: dict[str, set[int]],
+    early_exit_guards: list[tuple[str, int, int, bool]],
+    assert_guarded_from: dict[str, int],
+) -> None:
+    """Detect early-exit patterns: `if x is None: raise/return`."""
+    for pattern in _EARLY_EXIT_PATTERNS:
+        m = pattern.match(stripped)
+        if not m:
+            continue
+
+        var_name = m.group(1)
+        _guard_var(guarded, var_name, lineno)
+        early_exit_guards.append((var_name, indent, lineno, False))
+
+        # Single-line early exit: `if x is None: raise ValueError`
+        after_colon = stripped.split(":", 1)
+        if len(after_colon) > 1:
+            body = after_colon[1].strip()
+            if body.startswith(("raise", "return", "continue", "break", "throw")):
+                assert_guarded_from.setdefault(var_name, lineno + 1)
+                early_exit_guards[:] = [
+                    (v, g, s, h) for v, g, s, h in early_exit_guards
+                    if not (v == var_name and s == lineno)
+                ]
+        break
+
+
+def _check_block_guards(
+    stripped: str, indent: int, lineno: int, guarded: dict[str, set[int]],
+    active_guards: list[tuple[str, int, int]],
+) -> None:
+    """Detect block guard patterns: `if x is not None:`."""
+    for pattern in _GUARD_PATTERNS:
+        m = pattern.match(stripped)
+        if m:
+            var_name = m.group(1)
+            active_guards.append((var_name, indent, lineno))
+            _guard_var(guarded, var_name, lineno)
+            break
+
+
 def _find_guarded_lines(
     source_bytes: bytes,
     language: str,
@@ -112,30 +201,13 @@ def _find_guarded_lines(
     """Find lines where a variable is guarded by a None check.
 
     Returns {variable_name: {set of guarded line numbers}}.
-
-    Detects patterns:
-    1. Block guards: `if x is not None:` / `if (x !== null)` / `if x:` —
-       the guard line itself AND all indented lines inside the block are guarded.
-    2. Early-exit guards: `if x is None: raise/return` — all lines AFTER
-       the block are guarded (None eliminated on continuation path).
-    3. Assert guards: `assert x is not None` / `assert isinstance(x, T)` —
-       all lines after the assert are guarded.
-    4. Inline guards: `x and x.attr` (short-circuit), `x if x else d` (ternary)
-       — suppress findings on the same line.
-    5. Reassignment: `x = x or default` or `x = <non-None value>` — all lines
-       after the reassignment are guarded.
-    6. Assignment LHS: `self.x = ...` — the guard line suppresses the attribute
-       name on the left-hand side.
     """
     lines = source_bytes.decode("utf-8", errors="replace").splitlines()
     guarded: dict[str, set[int]] = {}
 
-    # Track if/guard blocks by variable
-    active_guards: list[tuple[str, int, int]] = []  # (var_name, guard_indent, start_line)
-    # Track early-exit guards: after the if-block ends, all subsequent lines are guarded
-    early_exit_guards: list[tuple[str, int, int, bool]] = []  # (var_name, guard_indent, start_line, has_exit)
-    # Track assert-based guards: all lines after assert are guarded
-    assert_guarded_from: dict[str, int] = {}  # var_name -> line number
+    active_guards: list[tuple[str, int, int]] = []
+    early_exit_guards: list[tuple[str, int, int, bool]] = []
+    assert_guarded_from: dict[str, int] = {}
 
     for i, line in enumerate(lines):
         stripped = line.lstrip()
@@ -144,21 +216,17 @@ def _find_guarded_lines(
 
         # Close any guards that have ended (dedent)
         active_guards = [
-            (var, gi, sl)
-            for var, gi, sl in active_guards
-            if indent > gi or not stripped  # blank lines don't end blocks
+            (var, gi, sl) for var, gi, sl in active_guards
+            if indent > gi or not stripped
         ]
 
-        # Check if early-exit guards have finished their block — if so,
-        # all subsequent lines are guarded (None eliminated by early exit)
+        # Process early-exit guard block endings
         new_early_exits = []
         for var, gi, sl, has_exit in early_exit_guards:
             if indent <= gi and stripped:
-                # Block ended — only guard if body contained an exit statement
                 if has_exit:
                     assert_guarded_from.setdefault(var, lineno)
             else:
-                # Still inside the block — check if this line has an exit
                 if not has_exit and stripped.startswith(("raise", "return", "continue", "break", "throw")):
                     has_exit = True
                 new_early_exits.append((var, gi, sl, has_exit))
@@ -166,82 +234,19 @@ def _find_guarded_lines(
 
         # Mark current line as guarded for active block guards
         for var_name, _, _ in active_guards:
-            guarded.setdefault(var_name, set()).add(lineno)
+            _guard_var(guarded, var_name, lineno)
 
         # Mark current line as guarded for assert/early-exit continuation
         for var_name, from_line in assert_guarded_from.items():
             if lineno >= from_line:
-                guarded.setdefault(var_name, set()).add(lineno)
+                _guard_var(guarded, var_name, lineno)
 
-        # Check inline guard patterns (same-line suppression)
-        for pattern in _INLINE_GUARD_RE:
-            m = pattern.search(stripped)
-            if m:
-                var_name = m.group(1)
-                guarded.setdefault(var_name, set()).add(lineno)
-
-        # Detect assignment LHS: `self.x = ...` — suppress the attr name
-        # on the assignment line (it's not a dereference)
-        for pattern in _ASSIGNMENT_LHS_PATTERNS:
-            m = pattern.search(stripped)
-            if m:
-                var_name = m.group(1)
-                guarded.setdefault(var_name, set()).add(lineno)
-
-        # Detect reassignment to non-None values: `x = x or default`
-        for pattern in _REASSIGN_PATTERNS:
-            m = pattern.match(stripped)
-            if m:
-                var_name = m.group(1)
-                # All lines from this point forward are guarded (nullability cleared)
-                assert_guarded_from.setdefault(var_name, lineno)
-                # Also guard the reassignment line itself
-                guarded.setdefault(var_name, set()).add(lineno)
-                break
-
-        # Detect assert guards
-        if stripped.startswith("assert "):
-            for pattern in _ASSERT_PATTERNS:
-                m = pattern.match(stripped)
-                if m:
-                    var_name = m.group(1)
-                    # All lines after this assert are guarded
-                    assert_guarded_from.setdefault(var_name, lineno + 1)
-                    break
-
-        # Detect early-exit patterns: if x is None: raise/return
-        for pattern in _EARLY_EXIT_PATTERNS:
-            m = pattern.match(stripped)
-            if m:
-                var_name = m.group(1)
-                # Guard the if-line itself — `self.x` in `if self.x is None:`
-                # is a comparison, not a dereference
-                guarded.setdefault(var_name, set()).add(lineno)
-                # Track as potential early-exit; body must contain raise/return
-                early_exit_guards.append((var_name, indent, lineno, False))
-                # Also look for single-line: `if x is None: raise ValueError`
-                after_colon = stripped.split(":", 1)
-                if len(after_colon) > 1:
-                    body = after_colon[1].strip()
-                    if body.startswith(("raise", "return", "continue", "break", "throw")):
-                        # Single-line early exit — everything after is guarded
-                        assert_guarded_from.setdefault(var_name, lineno + 1)
-                        # Remove from early_exit_guards since it's handled
-                        early_exit_guards = [
-                            (v, g, s, h) for v, g, s, h in early_exit_guards if not (v == var_name and s == lineno)
-                        ]
-                break
-
-        # Detect block guard patterns (if x is not None:)
-        for pattern in _GUARD_PATTERNS:
-            m = pattern.match(stripped)
-            if m:
-                var_name = m.group(1)
-                active_guards.append((var_name, indent, lineno))
-                # Also guard the if-line itself — accessing x in `if x is not None:`
-                # is a comparison, not a dereference
-                guarded.setdefault(var_name, set()).add(lineno)
-                break
+        # Run all guard detectors
+        _check_inline_and_lhs_guards(stripped, lineno, guarded)
+        _check_reassignment_guards(stripped, lineno, guarded, assert_guarded_from)
+        _check_assert_guards(stripped, lineno, assert_guarded_from)
+        _check_early_exit_guards(stripped, indent, lineno, guarded, early_exit_guards, assert_guarded_from)
+        _check_block_guards(stripped, indent, lineno, guarded, active_guards)
 
     return guarded
 
@@ -276,50 +281,20 @@ def _resolve_nullable_in_scope(
 # ─── Null safety check ───────────────────────────────────────────────
 
 
-def check_null_safety(
+def _find_self_assigned_attrs(
     semantics: FileSemantics,
-    type_map: FileTypeMap,
-    config: LanguageConfig,
-    filepath: str,
-    cfgs: dict | None = None,
-) -> list[Finding]:
-    """Check for attribute/method access on nullable values.
-
-    Checks:
-    1. Attribute access on nullable: `x = dict.get(k); x.strip()`
-    2. Method call on nullable return: `m = re.match(...); m.group(1)`
-    3. Missing None check before use
-
-    Suppresses findings within None-guard blocks (conditional narrowing).
-    """
-    if not type_map.types:
-        return []
-
-    findings = []
-    seen = set()
-
-    # Collect nullable variables
-    nullable_vars: dict[tuple[str, int], TypeInfo] = {}
-    for key, tinfo in type_map.types.items():
-        if tinfo.nullable or tinfo.inferred_type in (InferredType.NONE, InferredType.OPTIONAL):
-            nullable_vars[key] = tinfo
-
-    if not nullable_vars:
-        return []
-
-    # Build a set of nullable vars that were assigned via `self.attr = None`
-    # (as opposed to bare `attr = None`).  For each nullable (name, scope_id),
-    # check whether the assignment line also has an attribute_access reference
-    # with receiver="self"/"this" — that means it was `self.attr = None`.
+    nullable_vars: dict[tuple[str, int], TypeInfo],
+) -> set[tuple[str, int]]:
+    """Identify nullable vars assigned via self/this/cls attribute access (e.g. `self.x = None`)."""
     _self_keywords = {"self", "this", "cls"}
     self_assigned_attrs: set[tuple[str, int]] = set()
-    # Index lines where a variable is assigned a nullable value (e.g., `= None`)
-    # Only these lines matter for checking if the assignment was `self.x = None`
+
     _nullable_assign_lines: dict[tuple[str, int], set[int]] = {}
     for a in semantics.assignments:
         vt = getattr(a, "value_text", "")
         if vt == "None" or vt == "null" or vt == "nil":
             _nullable_assign_lines.setdefault((a.name, a.scope_id), set()).add(a.line)
+
     for key in nullable_vars:
         name, scope_id = key
         alines = _nullable_assign_lines.get(key, set())
@@ -336,58 +311,73 @@ def check_null_safety(
                 self_assigned_attrs.add(key)
                 break
 
-    # We need source bytes for narrowing detection — reconstruct from file
-    try:
-        with open(filepath, encoding="utf-8", errors="replace") as f:
-            source_bytes = f.read().encode("utf-8")
-    except OSError:
-        return []
+    return self_assigned_attrs
 
-    # Find guarded lines
-    guarded_lines = _find_guarded_lines(source_bytes, semantics.language)
 
-    # Check each reference to a nullable variable
+def _resolve_key_in_scope_chain(
+    name: str,
+    scope_id: int,
+    nullable_vars: dict[tuple[str, int], TypeInfo],
+    semantics: FileSemantics,
+) -> tuple[str, int] | None:
+    """Resolve a (name, scope_id) key by walking up the scope chain."""
+    if (name, scope_id) in nullable_vars:
+        return (name, scope_id)
+    for scope in semantics.scopes:
+        if scope.scope_id != scope_id:
+            continue
+        parent = scope.parent_id
+        while parent is not None:
+            if (name, parent) in nullable_vars:
+                return (name, parent)
+            for s in semantics.scopes:
+                if s.scope_id == parent:
+                    parent = s.parent_id
+                    break
+            else:
+                break
+        break
+    return None
+
+
+def _source_description(tinfo: TypeInfo) -> str:
+    """Build a human-readable source description for a nullable type."""
+    if tinfo.source == "return_type":
+        return " (from nullable return value)"
+    if tinfo.source == "literal" and tinfo.inferred_type == InferredType.NONE:
+        return " (assigned None)"
+    if tinfo.source == "annotation":
+        return " (typed as Optional)"
+    return ""
+
+
+def _check_nullable_attr_refs(
+    semantics: FileSemantics,
+    nullable_vars: dict[tuple[str, int], TypeInfo],
+    self_assigned_attrs: set[tuple[str, int]],
+    guarded_lines: dict,
+    filepath: str,
+    seen: set,
+) -> list[Finding]:
+    """Check attribute-access references on nullable variables."""
+    findings = []
+
     for ref in semantics.references:
         if ref.context != "attribute_access":
             continue
 
-        # Skip attribute accesses on objects when the nullable var is a local
-        # variable, not a self/this attribute.  `obj.attr` should not match a
-        # local `attr = None` — they are different names in different namespaces.
+        # If there's a receiver, check if this is a non-self-assigned attr
         if ref.receiver is not None:
-            # Find which nullable key would be resolved
-            resolved_key = None
-            for sid in [ref.scope_id]:
-                if (ref.name, sid) in nullable_vars:
-                    resolved_key = (ref.name, sid)
-                    break
-            if resolved_key is None:
-                # Walk parent scopes
-                for scope in semantics.scopes:
-                    if scope.scope_id == ref.scope_id:
-                        parent = scope.parent_id
-                        while parent is not None:
-                            if (ref.name, parent) in nullable_vars:
-                                resolved_key = (ref.name, parent)
-                                break
-                            for s in semantics.scopes:
-                                if s.scope_id == parent:
-                                    parent = s.parent_id
-                                    break
-                            else:
-                                break
-                        break
+            resolved_key = _resolve_key_in_scope_chain(
+                ref.name, ref.scope_id, nullable_vars, semantics,
+            )
             if resolved_key is not None and resolved_key not in self_assigned_attrs:
-                # The nullable var is a local variable (e.g., `x = None`), but
-                # the reference is an attribute access (e.g., `self.x` or `obj.x`).
-                # These are different things — skip.
                 continue
 
         tinfo = _resolve_nullable_in_scope(ref.name, ref.scope_id, nullable_vars, semantics)  # type: ignore[assignment]  # None handled on next line
         if tinfo is None:
             continue
 
-        # Check if this line is guarded
         if ref.name in guarded_lines and ref.line in guarded_lines[ref.name]:
             continue
 
@@ -396,15 +386,7 @@ def check_null_safety(
             continue
         seen.add(dedup_key)
 
-        # Determine what pattern caused nullability
-        source_desc = ""
-        if tinfo.source == "return_type":
-            source_desc = " (from nullable return value)"
-        elif tinfo.source == "literal" and tinfo.inferred_type == InferredType.NONE:
-            source_desc = " (assigned None)"
-        elif tinfo.source == "annotation":
-            source_desc = " (typed as Optional)"
-
+        source_desc = _source_description(tinfo)
         findings.append(
             Finding(
                 file=filepath,
@@ -420,7 +402,19 @@ def check_null_safety(
             )
         )
 
-    # Also check function calls on nullable variables
+    return findings
+
+
+def _check_nullable_call_refs(
+    semantics: FileSemantics,
+    nullable_vars: dict[tuple[str, int], TypeInfo],
+    guarded_lines: dict,
+    filepath: str,
+    seen: set,
+) -> list[Finding]:
+    """Check method calls on nullable receiver variables."""
+    findings = []
+
     for call in semantics.function_calls:
         if call.receiver is None:
             continue
@@ -429,7 +423,6 @@ def check_null_safety(
         if tinfo is None:
             continue
 
-        # Check if this line is guarded
         if call.receiver in guarded_lines and call.line in guarded_lines[call.receiver]:
             continue
 
@@ -453,5 +446,55 @@ def check_null_safety(
                 ),
             )
         )
+
+    return findings
+
+
+def check_null_safety(
+    semantics: FileSemantics,
+    type_map: FileTypeMap,
+    config: LanguageConfig,
+    filepath: str,
+    cfgs: dict | None = None,
+) -> list[Finding]:
+    """Check for attribute/method access on nullable values.
+
+    Checks:
+    1. Attribute access on nullable: `x = dict.get(k); x.strip()`
+    2. Method call on nullable return: `m = re.match(...); m.group(1)`
+    3. Missing None check before use
+
+    Suppresses findings within None-guard blocks (conditional narrowing).
+    """
+    if not type_map.types:
+        return []
+
+    # Collect nullable variables
+    nullable_vars: dict[tuple[str, int], TypeInfo] = {}
+    for key, tinfo in type_map.types.items():
+        if tinfo.nullable or tinfo.inferred_type in (InferredType.NONE, InferredType.OPTIONAL):
+            nullable_vars[key] = tinfo
+
+    if not nullable_vars:
+        return []
+
+    self_assigned_attrs = _find_self_assigned_attrs(semantics, nullable_vars)
+
+    # We need source bytes for narrowing detection — reconstruct from file
+    try:
+        with open(filepath, encoding="utf-8", errors="replace") as f:
+            source_bytes = f.read().encode("utf-8")
+    except OSError:
+        return []
+
+    guarded_lines = _find_guarded_lines(source_bytes, semantics.language)
+    seen: set = set()
+
+    findings = _check_nullable_attr_refs(
+        semantics, nullable_vars, self_assigned_attrs, guarded_lines, filepath, seen,
+    )
+    findings.extend(_check_nullable_call_refs(
+        semantics, nullable_vars, guarded_lines, filepath, seen,
+    ))
 
     return findings

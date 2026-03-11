@@ -9,7 +9,7 @@ Calls into: graph/depgraph.py (CallGraph, DepGraph), config.py (Finding, Severit
 Data in -> Data out: CallGraph + DepGraph -> list[Finding]
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from pathlib import Path
 

@@ -9,7 +9,7 @@ Calls into: semantic/lang_config.py, semantic/core.py, semantic/cfg.py
 Data in → Data out: FileSemantics → FileTypeMap
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import re
 from dataclasses import dataclass, field
@@ -276,6 +276,83 @@ def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes
 # ─── Main entry points ───────────────────────────────────────────────
 
 
+def _infer_assignment_type(asgn, config: LanguageConfig, semantics: FileSemantics) -> TypeInfo | None:
+    """Try all assignment-based inference rules (none literal, literal, constructor, nullable call)."""
+    tinfo = _infer_none_literal(asgn.value_text, asgn.value_node_type)
+    if tinfo:
+        return tinfo
+    tinfo = _infer_from_literal(asgn.value_node_type, config)
+    if tinfo:
+        return tinfo
+    tinfo = _infer_from_constructor(asgn.value_text, semantics)
+    if tinfo:
+        return tinfo
+    return _infer_nullable_from_call(asgn.value_text, config)
+
+
+def _apply_annotations(
+    type_map: FileTypeMap,
+    annotations: dict[tuple[str, int], str],
+    semantics: FileSemantics,
+) -> None:
+    """Apply annotation-based types to the type map (highest priority)."""
+    scope_by_id = {s.scope_id: s for s in semantics.scopes}
+    fdef_by_qname = {fd.qualified_name: fd for fd in semantics.function_defs}
+
+    for (name, scope_id), ann_text in annotations.items():
+        if name == "__return__":
+            scope = scope_by_id.get(scope_id)
+            fdef = fdef_by_qname.get(scope.name) if scope and scope.kind == "function" else None  # type: ignore[arg-type]
+            if fdef:
+                tinfo = _infer_from_annotation(ann_text, semantics.language)
+                if tinfo:
+                    type_map.return_types[fdef.qualified_name] = tinfo
+        else:
+            tinfo = _infer_from_annotation(ann_text, semantics.language)
+            if tinfo:
+                type_map.types[(name, scope_id)] = tinfo
+
+
+def _propagate_types(type_map: FileTypeMap, semantics: FileSemantics) -> None:
+    """Rule 6: Propagate types through simple identifier assignments (y = x)."""
+    for asgn in semantics.assignments:
+        key = (asgn.name, asgn.scope_id)
+        if key in type_map.types or asgn.is_parameter or asgn.is_augmented:
+            continue
+        rhs = asgn.value_text.strip()
+        if rhs.isidentifier():
+            source_key = (rhs, asgn.scope_id)
+            if source_key in type_map.types:
+                src_type = type_map.types[source_key]
+                type_map.types[key] = TypeInfo(
+                    inferred_type=src_type.inferred_type,
+                    class_name=src_type.class_name,
+                    nullable=src_type.nullable,
+                    source="propagated",
+                )
+
+
+def _infer_return_types(type_map: FileTypeMap, semantics: FileSemantics, lines: list[str]) -> None:
+    """Infer function return types from return statements."""
+    for fdef in semantics.function_defs:
+        if fdef.qualified_name in type_map.return_types:
+            continue
+        has_none_return = False
+        has_value_return = False
+        for i in range(fdef.line - 1, min(fdef.end_line, len(lines))):
+            line = lines[i].strip()
+            if line == "return None" or line == "return":
+                has_none_return = True
+            elif line.startswith("return "):
+                has_value_return = True
+        if has_none_return and has_value_return:
+            type_map.return_types[fdef.qualified_name] = TypeInfo(
+                inferred_type=InferredType.OPTIONAL,
+                nullable=True,
+                source="return_type",
+            )
+
+
 def infer_types(
     semantics: FileSemantics,
     source_bytes: bytes,
@@ -294,107 +371,22 @@ def infer_types(
     """
     type_map = FileTypeMap()
 
-    # Extract annotations
     annotations = _extract_annotations_from_tree(semantics, source_bytes)
-
-    # Pre-compute lookup dicts for O(1) annotation resolution
-    scope_by_id = {s.scope_id: s for s in semantics.scopes}
-    fdef_by_qname = {fd.qualified_name: fd for fd in semantics.function_defs}
-
-    # Apply annotation-based types first (highest priority)
-    for (name, scope_id), ann_text in annotations.items():
-        if name == "__return__":
-            # Return type annotation — look up scope then function
-            scope = scope_by_id.get(scope_id)
-            fdef = fdef_by_qname.get(scope.name) if scope and scope.kind == "function" else None  # type: ignore[arg-type]  # scope.name is str when kind == "function"
-            if fdef:
-                tinfo = _infer_from_annotation(ann_text, semantics.language)
-                if tinfo:
-                    type_map.return_types[fdef.qualified_name] = tinfo
-        else:
-            tinfo = _infer_from_annotation(ann_text, semantics.language)
-            if tinfo:
-                type_map.types[(name, scope_id)] = tinfo
+    _apply_annotations(type_map, annotations, semantics)
 
     # Infer from assignments (rules 1-5)
     for asgn in semantics.assignments:
         key = (asgn.name, asgn.scope_id)
-        if key in type_map.types:
-            continue  # annotation takes priority
-
-        if asgn.is_parameter:
+        if key in type_map.types or asgn.is_parameter:
             continue
-
-        # None/null literal (check before regular literals to preserve nullable flag)
-        tinfo = _infer_none_literal(asgn.value_text, asgn.value_node_type)
+        tinfo = _infer_assignment_type(asgn, config, semantics)
         if tinfo:
             type_map.types[key] = tinfo
-            continue
 
-        # Rule 1: Literal
-        tinfo = _infer_from_literal(asgn.value_node_type, config)
-        if tinfo:
-            type_map.types[key] = tinfo
-            continue
+    _propagate_types(type_map, semantics)
 
-        # Rule 2: Constructor
-        tinfo = _infer_from_constructor(asgn.value_text, semantics)
-        if tinfo:
-            type_map.types[key] = tinfo
-            continue
-
-        # Rule 5: Nullable return
-        tinfo = _infer_nullable_from_call(asgn.value_text, config)
-        if tinfo:
-            type_map.types[key] = tinfo
-            continue
-
-    # Rule 6: Propagation (y = x → y gets x's type)
-    # Simple single-pass propagation
-    for asgn in semantics.assignments:
-        key = (asgn.name, asgn.scope_id)
-        if key in type_map.types:
-            continue
-        if asgn.is_parameter or asgn.is_augmented:
-            continue
-
-        # Check if RHS is a single identifier
-        rhs = asgn.value_text.strip()
-        if rhs.isidentifier():
-            # Look up the source variable's type in same or parent scope
-            source_key = (rhs, asgn.scope_id)
-            if source_key in type_map.types:
-                src_type = type_map.types[source_key]
-                type_map.types[key] = TypeInfo(
-                    inferred_type=src_type.inferred_type,
-                    class_name=src_type.class_name,
-                    nullable=src_type.nullable,
-                    source="propagated",
-                )
-
-    # Infer function return types from return statements
-    for fdef in semantics.function_defs:
-        if fdef.qualified_name in type_map.return_types:
-            continue  # annotation takes priority
-
-        has_none_return = False
-        has_value_return = False
-
-        # Check source lines for return statements
-        lines = source_bytes.decode("utf-8", errors="replace").splitlines()
-        for i in range(fdef.line - 1, min(fdef.end_line, len(lines))):
-            line = lines[i].strip()
-            if line == "return None" or line == "return":
-                has_none_return = True
-            elif line.startswith("return "):
-                has_value_return = True
-
-        if has_none_return and has_value_return:
-            type_map.return_types[fdef.qualified_name] = TypeInfo(
-                inferred_type=InferredType.OPTIONAL,
-                nullable=True,
-                source="return_type",
-            )
+    lines = source_bytes.decode("utf-8", errors="replace").splitlines()
+    _infer_return_types(type_map, semantics, lines)
 
     return type_map
 

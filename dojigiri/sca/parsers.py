@@ -44,6 +44,19 @@ ECOSYSTEM_MAP = {
 }
 
 
+_LOCKFILE_PARSER_DISPATCH: dict[str, object] = {
+    "poetry.lock": lambda c, e: _parse_poetry_lock(c, e),
+    "Pipfile.lock": lambda c, e: _parse_pipfile_lock(c, e),
+    "package-lock.json": lambda c, e: _parse_package_lock_json(c, e),
+    "yarn.lock": lambda c, e: _parse_yarn_lock(c, e),
+    "pnpm-lock.yaml": lambda c, e: _parse_pnpm_lock(c, e),
+    "Cargo.lock": lambda c, e: _parse_cargo_lock(c, e),
+    "go.sum": lambda c, e: _parse_go_sum(c, e),
+    "Gemfile.lock": lambda c, e: _parse_gemfile_lock(c, e),
+    "composer.lock": lambda c, e: _parse_composer_lock(c, e),
+}
+
+
 def parse_lockfile(path: Path) -> list[Dependency]:
     """Parse a lockfile and return dependencies. Dispatches by filename."""
     name = path.name
@@ -59,26 +72,13 @@ def parse_lockfile(path: Path) -> list[Dependency]:
     ecosystem = LOCKFILE_PARSERS[name]
     osv_ecosystem = ECOSYSTEM_MAP.get(ecosystem, ecosystem)
 
-    if name == "requirements.txt" or name.startswith("requirements"):
+    # Requirements files use prefix matching
+    if name.startswith("requirements"):
         return _parse_requirements_txt(content, osv_ecosystem)
-    elif name == "poetry.lock":
-        return _parse_poetry_lock(content, osv_ecosystem)
-    elif name == "Pipfile.lock":
-        return _parse_pipfile_lock(content, osv_ecosystem)
-    elif name == "package-lock.json":
-        return _parse_package_lock_json(content, osv_ecosystem)
-    elif name == "yarn.lock":
-        return _parse_yarn_lock(content, osv_ecosystem)
-    elif name == "pnpm-lock.yaml":
-        return _parse_pnpm_lock(content, osv_ecosystem)
-    elif name == "Cargo.lock":
-        return _parse_cargo_lock(content, osv_ecosystem)
-    elif name == "go.sum":
-        return _parse_go_sum(content, osv_ecosystem)
-    elif name == "Gemfile.lock":
-        return _parse_gemfile_lock(content, osv_ecosystem)
-    elif name == "composer.lock":
-        return _parse_composer_lock(content, osv_ecosystem)
+
+    parser_fn = _LOCKFILE_PARSER_DISPATCH.get(name)
+    if parser_fn:
+        return parser_fn(content, osv_ecosystem)
     return []
 
 

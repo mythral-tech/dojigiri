@@ -125,150 +125,189 @@ def check_unused_imports(tree, source_bytes: bytes, config: LanguageConfig, file
     return findings
 
 
+def _extract_aliased_import_name(child, source_bytes: bytes) -> str | None:
+    """Extract the effective name from an aliased_import node.
+
+    Returns None if this is an explicit re-export (import X as X).
+    """
+    alias = child.child_by_field_name("alias")
+    name_node = child.child_by_field_name("name")
+    if alias and name_node:
+        alias_text = _get_node_text(alias, source_bytes)
+        name_text = _get_node_text(name_node, source_bytes)
+        # `import X as X` is an explicit re-export (PEP 484) — skip
+        if alias_text == name_text:
+            return None
+        return alias_text
+    if alias:
+        return _get_node_text(alias, source_bytes)
+    if name_node:
+        return _get_node_text(name_node, source_bytes)
+    return None
+
+
+def _extract_python_import_statement_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from a Python `import X` statement."""
+    names = []
+    for child in node.children:
+        if child.type == "dotted_name":
+            text = _get_node_text(child, source_bytes)
+            names.append(text.split(".")[0])
+        elif child.type == "aliased_import":
+            name = _extract_aliased_import_name(child, source_bytes)
+            if name is not None:
+                # For top-level import, split dotted names
+                if child.child_by_field_name("alias") is None and child.child_by_field_name("name"):
+                    names.append(name.split(".")[0])
+                else:
+                    names.append(name)
+    return names
+
+
+def _extract_python_import_from_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from a Python `from X import Y` statement."""
+    names = []
+    module_node = node.child_by_field_name("module_name")
+    for child in node.children:
+        if child.type in ("from", "import", ","):
+            continue
+        if module_node and child.id == module_node.id:
+            continue
+        if child.type == "dotted_name":
+            text = _get_node_text(child, source_bytes)
+            if text != "*":
+                names.append(text.split(".")[-1])
+        elif child.type == "identifier":
+            text = _get_node_text(child, source_bytes)
+            if text != "*":
+                names.append(text)
+        elif child.type == "aliased_import":
+            name = _extract_aliased_import_name(child, source_bytes)
+            if name is not None:
+                names.append(name)
+    return names
+
+
+def _extract_python_import_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from Python import/import-from statements."""
+    if node.type == "import_statement":
+        return _extract_python_import_statement_names(node, source_bytes)
+    if node.type == "import_from_statement":
+        return _extract_python_import_from_names(node, source_bytes)
+    return []
+
+
+def _extract_js_ts_import_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from JavaScript/TypeScript import statements."""
+    names = []
+    for child in _walk_tree(node):
+        if child.type == "import_specifier":
+            alias = child.child_by_field_name("alias")
+            if alias:
+                names.append(_get_node_text(alias, source_bytes))
+            else:
+                name_node = child.child_by_field_name("name")
+                if name_node:
+                    names.append(_get_node_text(name_node, source_bytes))
+        elif child.type == "identifier" and child.parent.type == "import_clause":
+            names.append(_get_node_text(child, source_bytes))
+        elif child.type == "namespace_import":
+            for sub in child.children:
+                if sub.type == "identifier":
+                    names.append(_get_node_text(sub, source_bytes))
+    return names
+
+
+def _extract_go_import_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from Go import statements."""
+    names = []
+    for child in _walk_tree(node):
+        if child.type == "import_spec":
+            name_node = child.child_by_field_name("name")
+            path_node = child.child_by_field_name("path")
+            if name_node:
+                text = _get_node_text(name_node, source_bytes)
+                if text != "." and text != "_":
+                    names.append(text)
+            elif path_node:
+                path_text = _get_node_text(path_node, source_bytes).strip('"')
+                pkg_name = path_text.rsplit("/", 1)[-1]
+                names.append(pkg_name)
+    return names
+
+
+def _extract_java_import_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from Java import statements."""
+    names = []
+    for child in _walk_tree(node):
+        if child.type == "scoped_identifier" and child.parent.type == "import_declaration":
+            text = _get_node_text(child, source_bytes)
+            names.append(text.rsplit(".", 1)[-1])
+            break
+        elif child.type == "identifier" and child.parent.type == "import_declaration":
+            names.append(_get_node_text(child, source_bytes))
+    return names
+
+
+def _extract_csharp_import_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from C# using directives."""
+    names = []
+    for child in _walk_tree(node):
+        if child.type in ("qualified_name", "identifier") and child.parent.type == "using_directive":
+            text = _get_node_text(child, source_bytes)
+            names.append(text.rsplit(".", 1)[-1])
+            break
+    return names
+
+
+def _extract_rust_import_names(node, source_bytes: bytes) -> list[str]:
+    """Extract names from Rust use declarations."""
+    names = []
+    for child in _walk_tree(node):
+        if child.type == "use_as_clause":
+            alias = child.child_by_field_name("alias")
+            if alias:
+                names.append(_get_node_text(alias, source_bytes))
+                break
+        elif (
+            child.type == "identifier"
+            and child.parent
+            and child.parent.type
+            in (
+                "use_declaration",
+                "scoped_identifier",
+                "use_list",
+            )
+        ):
+            pass
+    # Simpler approach: get the full use path and extract the last component
+    if not names:
+        text = _get_node_text(node, source_bytes)
+        if "::" in text and "{" not in text:
+            last = text.rstrip(";").rsplit("::", 1)[-1].strip()
+            if last and last != "*":
+                names.append(last)
+    return names
+
+
 def _extract_import_names(node, source_bytes: bytes, config: LanguageConfig) -> list[str]:
     """Extract the names introduced by an import statement."""
-    names = []
     lang = config.ts_language_name
 
     if lang == "python":
-        if node.type == "import_statement":
-            # `import os` / `import os, sys` / `import os as alias`
-            for child in node.children:
-                if child.type == "dotted_name":
-                    text = _get_node_text(child, source_bytes)
-                    names.append(text.split(".")[0])
-                elif child.type == "aliased_import":
-                    alias = child.child_by_field_name("alias")
-                    name_node = child.child_by_field_name("name")
-                    if alias and name_node:
-                        alias_text = _get_node_text(alias, source_bytes)
-                        name_text = _get_node_text(name_node, source_bytes)
-                        # `import X as X` is an explicit re-export (PEP 484) — skip
-                        if alias_text == name_text:
-                            continue
-                        names.append(alias_text)
-                    elif alias:
-                        names.append(_get_node_text(alias, source_bytes))
-                    elif name_node:
-                        names.append(_get_node_text(name_node, source_bytes).split(".")[0])
-        elif node.type == "import_from_statement":
-            # `from M import X, Y` / `from M import X as Z`
-            module_node = node.child_by_field_name("module_name")
-            for child in node.children:
-                # Skip module name and keywords
-                if child.type in ("from", "import", ","):
-                    continue
-                if module_node and child.id == module_node.id:
-                    continue
-                if child.type == "dotted_name":
-                    text = _get_node_text(child, source_bytes)
-                    if text != "*":
-                        names.append(text.split(".")[-1])
-                elif child.type == "identifier":
-                    text = _get_node_text(child, source_bytes)
-                    if text != "*":
-                        names.append(text)
-                elif child.type == "aliased_import":
-                    alias = child.child_by_field_name("alias")
-                    name_node = child.child_by_field_name("name")
-                    if alias and name_node:
-                        alias_text = _get_node_text(alias, source_bytes)
-                        name_text = _get_node_text(name_node, source_bytes)
-                        # `from X import Y as Y` is an explicit re-export (PEP 484) — skip
-                        if alias_text == name_text:
-                            continue
-                        names.append(alias_text)
-                    elif alias:
-                        names.append(_get_node_text(alias, source_bytes))
-                    elif name_node:
-                        names.append(_get_node_text(name_node, source_bytes))
-
+        return _extract_python_import_names(node, source_bytes)
     elif lang in ("javascript", "typescript"):
-        # import { X, Y } from "module"  or  import X from "module"
-        for child in _walk_tree(node):
-            if child.type == "import_specifier":
-                alias = child.child_by_field_name("alias")
-                if alias:
-                    names.append(_get_node_text(alias, source_bytes))
-                else:
-                    name_node = child.child_by_field_name("name")
-                    if name_node:
-                        names.append(_get_node_text(name_node, source_bytes))
-            elif child.type == "identifier" and child.parent.type == "import_clause":
-                names.append(_get_node_text(child, source_bytes))
-            elif child.type == "namespace_import":
-                # import * as X
-                for sub in child.children:
-                    if sub.type == "identifier":
-                        names.append(_get_node_text(sub, source_bytes))
-
+        return _extract_js_ts_import_names(node, source_bytes)
     elif lang == "go":
-        # import "pkg" or import ( "pkg1"; "pkg2" )
-        for child in _walk_tree(node):
-            if child.type == "import_spec":
-                # Check for alias
-                name_node = child.child_by_field_name("name")
-                path_node = child.child_by_field_name("path")
-                if name_node:
-                    text = _get_node_text(name_node, source_bytes)
-                    if text != "." and text != "_":
-                        names.append(text)
-                elif path_node:
-                    # Extract package name from path: "fmt" → fmt, "net/http" → http
-                    path_text = _get_node_text(path_node, source_bytes).strip('"')
-                    pkg_name = path_text.rsplit("/", 1)[-1]
-                    names.append(pkg_name)
-
+        return _extract_go_import_names(node, source_bytes)
     elif lang == "java":
-        # import com.example.Foo;
-        for child in _walk_tree(node):
-            if child.type == "scoped_identifier" and child.parent.type == "import_declaration":
-                text = _get_node_text(child, source_bytes)
-                # Use the last component: com.example.Foo → Foo
-                names.append(text.rsplit(".", 1)[-1])
-                break
-            elif child.type == "identifier" and child.parent.type == "import_declaration":
-                names.append(_get_node_text(child, source_bytes))
-
+        return _extract_java_import_names(node, source_bytes)
     elif lang == "c_sharp":
-        # using System.Linq;
-        for child in _walk_tree(node):
-            if child.type in ("qualified_name", "identifier") and child.parent.type == "using_directive":
-                text = _get_node_text(child, source_bytes)
-                names.append(text.rsplit(".", 1)[-1])
-                break
-
+        return _extract_csharp_import_names(node, source_bytes)
     elif lang == "rust":
-        # use std::collections::HashMap;
-        for child in _walk_tree(node):
-            if child.type == "use_as_clause":
-                alias = child.child_by_field_name("alias")
-                if alias:
-                    names.append(_get_node_text(alias, source_bytes))
-                    break
-            elif (
-                child.type == "identifier"
-                and child.parent
-                and child.parent.type
-                in (
-                    "use_declaration",
-                    "scoped_identifier",
-                    "use_list",
-                )
-            ):
-                # Get the last identifier in the path
-                pass
-        # Simpler approach: get the full use path and extract the last component
-        if not names:
-            text = _get_node_text(node, source_bytes)
-            # use std::collections::HashMap; → HashMap
-            # use std::io::{Read, Write}; → harder, skip multi-imports for now
-            if "::" in text and "{" not in text:
-                last = text.rstrip(";").rsplit("::", 1)[-1].strip()
-                if last and last != "*":
-                    names.append(last)
+        return _extract_rust_import_names(node, source_bytes)
 
-    return names
+    return []
 
 
 # ─── Check: Unreachable Code ──────────────────────────────────────────────
@@ -576,6 +615,19 @@ def _get_function_name(node, source_bytes: bytes) -> str:
     return "<anonymous>"
 
 
+# Parent types where an identifier is a parameter name (direct child)
+_PARAM_LIST_PARENTS = frozenset(("parameters", "formal_parameters", "parameter_list"))
+
+# Parent types where the identifier might be a name field (needs field check)
+_TYPED_PARAM_PARENTS = frozenset((
+    "typed_parameter", "typed_default_parameter",
+    "parameter", "formal_parameter", "required_parameter",
+))
+
+# All parent types where an identifier can be a parameter
+_ALL_PARAM_PARENTS = _PARAM_LIST_PARENTS | _TYPED_PARAM_PARENTS | frozenset(("default_parameter",))
+
+
 def _get_parameter_names(node, source_bytes: bytes, config: LanguageConfig) -> list[tuple[str, int]]:
     """Extract (param_name, line_number) pairs from a function's parameter list."""
     params = []
@@ -586,40 +638,24 @@ def _get_parameter_names(node, source_bytes: bytes, config: LanguageConfig) -> l
             continue
 
         for param in _walk_tree(child):
-            # Python: identifier nodes that are direct children of parameters,
-            #         or inside typed_parameter, default_parameter, etc.
-            if param.type == "identifier":
-                parent_type = param.parent.type if param.parent else ""
-                if parent_type in (
-                    "parameters",
-                    "formal_parameters",
-                    "parameter_list",
-                    "typed_parameter",
-                    "default_parameter",
-                    "typed_default_parameter",
-                    "parameter",
-                    "formal_parameter",
-                    "required_parameter",
-                    # Also handle the case where identifier is the name field
-                ):
-                    name = _get_node_text(param, source_bytes)
-                    # Avoid grabbing type annotations as parameter names
-                    if (
-                        param.parent
-                        and param.parent.type in ("typed_parameter", "typed_default_parameter")
-                        or param.parent
-                        and param.parent.type in ("parameter", "formal_parameter", "required_parameter")
-                    ):
-                        name_field = param.parent.child_by_field_name("name")
-                        if name_field and param.id == name_field.id:
-                            params.append((name, _node_line(param)))
-                    elif parent_type in ("parameters", "formal_parameters", "parameter_list"):
-                        # Direct child identifier = simple parameter name
-                        params.append((name, _node_line(param)))
-                    elif parent_type == "default_parameter":
-                        name_field = param.parent.child_by_field_name("name")
-                        if name_field and param.id == name_field.id:
-                            params.append((name, _node_line(param)))
+            if param.type != "identifier":
+                continue
+            parent_type = param.parent.type if param.parent else ""
+            if parent_type not in _ALL_PARAM_PARENTS:
+                continue
+
+            name = _get_node_text(param, source_bytes)
+
+            # Direct child of parameter list — simple parameter name
+            if parent_type in _PARAM_LIST_PARENTS:
+                params.append((name, _node_line(param)))
+                continue
+
+            # Typed or compound parameter — must be the 'name' field, not a type annotation
+            if parent_type in _TYPED_PARAM_PARENTS or parent_type == "default_parameter":
+                name_field = param.parent.child_by_field_name("name")
+                if name_field and param.id == name_field.id:
+                    params.append((name, _node_line(param)))
 
     return params
 

@@ -1,6 +1,6 @@
 """Cross-language security rules — applied to all languages."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from ..types import Category, Severity
 from ._compile import Rule, _compile

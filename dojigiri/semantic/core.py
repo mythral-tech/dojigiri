@@ -19,6 +19,10 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# tree-sitter Node has no public type stubs; alias keeps the single Any import
+# contained and documents intent throughout the module.
+TSNode = Any  # noqa: Any — tree-sitter node (no stubs available)
+
 from .lang_config import LanguageConfig, get_config
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -160,13 +164,13 @@ class _Extractor:
         if self._scope_stack:
             self._scope_stack.pop()
 
-    def extract(self, root_node: Any) -> None:
+    def extract(self, root_node: TSNode) -> None:
         # Module scope
         self._push_scope("module", root_node, name=self.filepath)
         self._walk(root_node)
         self._pop_scope()
 
-    def _walk(self, node: Any) -> None:
+    def _walk(self, node: TSNode) -> None:
         ntype = node.type
 
         # ── Function definitions ──────────────────────────────────
@@ -219,7 +223,7 @@ class _Extractor:
         for child in node.children:
             self._walk(child)
 
-    def _handle_function(self, node: Any) -> None:
+    def _handle_function(self, node: TSNode) -> None:
         name_node = node.child_by_field_name("name")
         name = _get_text(name_node, self.src) if name_node else "<anonymous>"
 
@@ -283,7 +287,7 @@ class _Extractor:
 
         self._pop_scope()
 
-    def _handle_class(self, node: Any) -> None:
+    def _handle_class(self, node: TSNode) -> None:
         name_node = node.child_by_field_name("name")
         name = _get_text(name_node, self.src) if name_node else "<anonymous>"
 
@@ -327,7 +331,7 @@ class _Extractor:
         self._pop_scope()
         self._current_class = prev_class
 
-    def _handle_assignment(self, node: Any) -> None:
+    def _handle_assignment(self, node: TSNode) -> None:
         is_augmented = "augmented" in node.type or "compound" in node.type
         lang = self.language
 
@@ -344,7 +348,7 @@ class _Extractor:
         elif lang == "csharp":
             self._handle_csharp_assignment(node, is_augmented)
 
-    def _handle_for_loop_var(self, node: Any) -> None:
+    def _handle_for_loop_var(self, node: TSNode) -> None:
         """Extract for-loop target variable as an assignment.
 
         Python: for item in items → 'left' field is the loop variable
@@ -396,7 +400,7 @@ class _Extractor:
                         )
                     )
 
-    def _handle_with_statement(self, node: Any) -> None:
+    def _handle_with_statement(self, node: TSNode) -> None:
         """Extract 'with X as Y' targets as assignments.
 
         Python tree-sitter: with_statement has with_clause children,
@@ -439,7 +443,7 @@ class _Extractor:
                                     value_node_type="with_clause",
                                 )
 
-    def _handle_nonlocal(self, node: Any) -> None:
+    def _handle_nonlocal(self, node: TSNode) -> None:
         """Track nonlocal declarations: nonlocal x, y → record names per scope."""
         scope_id = self._current_scope
         for child in node.children:
@@ -450,7 +454,7 @@ class _Extractor:
     def _record_assignment(
         self,
         name: str,
-        node: Any,
+        node: TSNode,
         rhs_type: str = "",
         rhs_text: str = "",
         is_augmented: bool = False,
@@ -469,19 +473,19 @@ class _Extractor:
             )
         )
 
-    def _extract_lhs_rhs(self, node: Any) -> tuple[Any | None, Any | None]:
+    def _extract_lhs_rhs(self, node: TSNode) -> tuple[TSNode | None, TSNode | None]:
         """Extract left/right children from an assignment node."""
         left = node.child_by_field_name("left")
         right = node.child_by_field_name("right")
         return left, right
 
-    def _rhs_info(self, right: Any) -> tuple[str, str]:
+    def _rhs_info(self, right: TSNode) -> tuple[str, str]:
         """Extract type and text from an RHS node."""
         rhs_type = right.type if right else ""
         rhs_text = _get_text(right, self.src)[:500] if right else ""
         return rhs_type, rhs_text
 
-    def _handle_python_assignment(self, node: Any, is_augmented: bool) -> None:
+    def _handle_python_assignment(self, node: TSNode, is_augmented: bool) -> None:
         if is_augmented:
             left, _ = self._extract_lhs_rhs(node)
             if left and left.type == "identifier":
@@ -525,7 +529,7 @@ class _Extractor:
                     if child.type == "identifier":
                         self._record_assignment(_get_text(child, self.src), node, rhs_type, rhs_text)
 
-    def _handle_js_assignment(self, node: Any, is_augmented: bool) -> None:
+    def _handle_js_assignment(self, node: TSNode, is_augmented: bool) -> None:
         if node.type == "variable_declarator":
             name_node = node.child_by_field_name("name")
             value_node = node.child_by_field_name("value")
@@ -538,7 +542,7 @@ class _Extractor:
                 rhs_type, rhs_text = self._rhs_info(right)
                 self._record_assignment(_get_text(left, self.src), node, rhs_type, rhs_text, is_augmented)
 
-    def _handle_go_assignment(self, node: Any, is_augmented: bool) -> None:
+    def _handle_go_assignment(self, node: TSNode, is_augmented: bool) -> None:
         left, right = self._extract_lhs_rhs(node)
         if left:
             rhs_type, rhs_text = self._rhs_info(right)
@@ -552,7 +556,7 @@ class _Extractor:
                         is_augmented=(is_augmented and node.type != "short_var_declaration"),
                     )
 
-    def _handle_rust_assignment(self, node: Any, is_augmented: bool) -> None:
+    def _handle_rust_assignment(self, node: TSNode, is_augmented: bool) -> None:
         if node.type == "let_declaration":
             pat = node.child_by_field_name("pattern")
             value = node.child_by_field_name("value")
@@ -564,7 +568,7 @@ class _Extractor:
             if left and left.type == "identifier":
                 self._record_assignment(_get_text(left, self.src), node, is_augmented=is_augmented)
 
-    def _handle_java_assignment(self, node: Any, is_augmented: bool) -> None:
+    def _handle_java_assignment(self, node: TSNode, is_augmented: bool) -> None:
         if node.type == "local_variable_declaration":
             for child in node.children:
                 if child.type == "variable_declarator":
@@ -584,7 +588,7 @@ class _Extractor:
                     is_augmented=is_augmented,
                 )
 
-    def _handle_csharp_assignment(self, node: Any, is_augmented: bool) -> None:
+    def _handle_csharp_assignment(self, node: TSNode, is_augmented: bool) -> None:
         if node.type == "variable_declarator":
             name_node = node.child_by_field_name("name") or (
                 node.children[0] if node.children and node.children[0].type == "identifier" else None
@@ -606,7 +610,7 @@ class _Extractor:
                     is_augmented=is_augmented,
                 )
 
-    def _handle_call(self, node: Any) -> None:
+    def _handle_call(self, node: TSNode) -> None:
         # Handle Java/C# constructor calls: new Foo(...)
         if node.type == "object_creation_expression":
             self._handle_constructor_call(node)
@@ -663,7 +667,7 @@ class _Extractor:
             )
         )
 
-    def _handle_constructor_call(self, node: Any) -> None:
+    def _handle_constructor_call(self, node: TSNode) -> None:
         """Handle Java/C# constructor calls: new Foo(...) or new pkg.Foo(...)."""
         # Extract class name from the type child
         type_node = node.child_by_field_name("type")
@@ -701,98 +705,103 @@ class _Extractor:
             )
         )
 
-    def _handle_identifier(self, node: Any) -> None:
-        parent = node.parent
-        if parent is None:
-            return
+    # Parent types where the identifier is part of a declaration/import
+    _SKIP_PARENTS = frozenset((
+        "import_statement",
+        "import_from_statement",
+        "import_specifier",
+        "import_clause",
+        "dotted_name",
+        "aliased_import",
+        "import_declaration",
+        "import_spec",
+        "use_declaration",
+        "using_directive",
+    ))
 
-        # Skip identifiers that are part of declarations / import names
-        # (those are handled by their parent node handlers)
+    # Parent types where the identifier is a parameter name
+    _PARAM_PARENTS = frozenset((
+        "parameters",
+        "formal_parameters",
+        "parameter_list",
+        "typed_parameter",
+        "default_parameter",
+        "typed_default_parameter",
+        "parameter",
+        "formal_parameter",
+        "required_parameter",
+    ))
+
+    # Parent types where the identifier is the "name" field and should be skipped
+    _NAME_FIELD_SKIP_PARENTS = frozenset((
+        "keyword_argument",
+        "variable_declarator",
+    ))
+
+    def _should_skip_identifier(self, node: TSNode, parent: TSNode) -> bool:
+        """Return True if this identifier is a declaration/LHS that should not be recorded."""
         parent_type = parent.type
-        skip_parents = {
-            "import_statement",
-            "import_from_statement",
-            "import_specifier",
-            "import_clause",
-            "dotted_name",
-            "aliased_import",
-            "import_declaration",
-            "import_spec",
-            "use_declaration",
-            "using_directive",
-        }
-        if parent_type in skip_parents:
-            return
 
-        # Skip if this is the "name" field of a function/class definition
+        if parent_type in self._SKIP_PARENTS:
+            return True
+
+        if parent_type in self._PARAM_PARENTS:
+            return True
+
+        # Name field of function/class definition
         if parent_type in self._func_types or parent_type in self._class_types:
-            name_field = parent.child_by_field_name("name")
-            if name_field and name_field.id == node.id:
-                return
+            return self._is_name_field(node, parent)
 
-        # Skip if this is the LHS of an assignment (handled by assignment handler)
+        # LHS of assignment
         if parent_type in self._assignment_types:
-            left = parent.child_by_field_name("left")
-            if left and left.id == node.id:
-                return
-            # Python assignment: check positional children
-            children = [c for c in parent.children if c.is_named]
-            if children and children[0].id == node.id and parent_type in ("assignment",):
-                return
+            return self._is_assignment_lhs(node, parent)
 
-        # Skip parameter names
-        param_parents = {
-            "parameters",
-            "formal_parameters",
-            "parameter_list",
-            "typed_parameter",
-            "default_parameter",
-            "typed_default_parameter",
-            "parameter",
-            "formal_parameter",
-            "required_parameter",
-        }
-        if parent_type in param_parents:
-            return
+        # Parent types where we check the "name" field
+        if parent_type in self._NAME_FIELD_SKIP_PARENTS:
+            return self._is_name_field(node, parent)
 
-        # Skip keyword argument names (e.g. `foo(value=x)` — 'value' is not a variable read)
-        if parent_type == "keyword_argument":
-            name_field = parent.child_by_field_name("name")
-            if name_field and name_field.id == node.id:
-                return
-
-        # Skip variable declarator name fields
-        if parent_type == "variable_declarator":
-            name_field = parent.child_by_field_name("name")
-            if name_field and name_field.id == node.id:
-                return
-
-        # Skip let_declaration pattern fields
+        # let_declaration pattern
         if parent_type == "let_declaration":
             pat = parent.child_by_field_name("pattern")
-            if pat and pat.id == node.id:
-                return
+            return pat is not None and pat.id == node.id
 
-        # Skip short_var_declaration left side
+        # short_var_declaration left side
         if parent_type == "short_var_declaration":
             left = parent.child_by_field_name("left")
             if left:
-                for child in left.children:
-                    if child.id == node.id:
-                        return
+                return any(child.id == node.id for child in left.children)
 
-        name = _get_text(node, self.src)
+        return False
 
-        # Determine context
+    @staticmethod
+    def _is_name_field(node: TSNode, parent: TSNode) -> bool:
+        """Check if node is the 'name' field of its parent."""
+        name_field = parent.child_by_field_name("name")
+        return name_field is not None and name_field.id == node.id
+
+    def _is_assignment_lhs(self, node: TSNode, parent: TSNode) -> bool:
+        """Check if node is the left-hand side of an assignment."""
+        left = parent.child_by_field_name("left")
+        if left and left.id == node.id:
+            return True
+        if parent.type == "assignment":
+            children = [c for c in parent.children if c.is_named]
+            if children and children[0].id == node.id:
+                return True
+        return False
+
+    def _resolve_identifier_context(self, node: TSNode, parent: TSNode) -> tuple[str, str | None]:
+        """Determine context ('read', 'call', 'attribute_access') and receiver for an identifier."""
+        parent_type = parent.type
         context = "read"
         receiver: str | None = None
+
         if parent_type in self._call_types:
             func = parent.child_by_field_name("function")
             if func and func.id == node.id:
                 context = "call"
+
         if parent_type in self._attr_types:
-            # Check if this identifier is the attribute (not the object) in obj.attr
-            # Go uses "field"/"operand", others use "attribute"/"object"
             attr_node = parent.child_by_field_name("attribute") or parent.child_by_field_name("field")
             if attr_node and attr_node.id == node.id:
                 context = "attribute_access"
@@ -800,8 +809,20 @@ class _Extractor:
                 if obj_node and obj_node.type == "identifier":
                     receiver = _get_text(obj_node, self.src)
             else:
-                # This is the object side (e.g. "self" in self.foo) — record as read
                 context = "read"
+
+        return context, receiver
+
+    def _handle_identifier(self, node: TSNode) -> None:
+        parent = node.parent
+        if parent is None:
+            return
+
+        if self._should_skip_identifier(node, parent):
+            return
+
+        name = _get_text(node, self.src)
+        context, receiver = self._resolve_identifier_context(node, parent)
 
         self.result.references.append(
             NameReference(
@@ -832,41 +853,52 @@ class _Extractor:
         "required_parameter",
     ))
 
-    def _collect_param_names(self, param_list: Any, params: list[str]) -> None:
+    # Splat/rest pattern types where we extract the identifier child
+    _SPLAT_PARAM_TYPES = frozenset((
+        "list_splat_pattern", "dictionary_splat_pattern", "rest_pattern",
+    ))
+
+    def _collect_param_names(self, param_list: TSNode, params: list[str]) -> None:
         """Recursively collect parameter names."""
         for child in param_list.children:
-            if child.type == "identifier":
-                parent_type = child.parent.type if child.parent else ""
-                # Check this is the name, not a type annotation
-                if parent_type in ("parameters", "formal_parameters", "parameter_list"):
-                    params.append(_get_text(child, self.src))
-                elif parent_type in self._COMPOUND_PARAM_TYPES:
-                    # Try named field first; fall back to first-identifier heuristic
-                    # (tree-sitter Python doesn't tag the name field for typed_parameter)
-                    name_field = child.parent.child_by_field_name("name")
-                    if name_field is not None:
-                        if name_field.id == child.id:
-                            params.append(_get_text(child, self.src))
-                    else:
-                        # First identifier that is NOT inside a 'type' node is the name
-                        first_id = next(
-                            (c for c in child.parent.children if c.type == "identifier"),
-                            None,
-                        )
-                        if first_id is not None and first_id.id == child.id:
-                            params.append(_get_text(child, self.src))
-            elif child.type in self._COMPOUND_PARAM_TYPES:
+            if child.type in self._COMPOUND_PARAM_TYPES:
                 self._collect_param_names(child, params)
-            elif child.type == "list_splat_pattern" or child.type == "dictionary_splat_pattern":
-                # *args, **kwargs in Python
+                continue
+
+            if child.type in self._SPLAT_PARAM_TYPES:
+                # *args, **kwargs in Python / ...rest in JS
                 for sub in child.children:
                     if sub.type == "identifier":
                         params.append(_get_text(sub, self.src))
-            elif child.type == "rest_pattern":
-                # ...rest in JS
-                for sub in child.children:
-                    if sub.type == "identifier":
-                        params.append(_get_text(sub, self.src))
+                continue
+
+            if child.type != "identifier":
+                continue
+
+            parent_type = child.parent.type if child.parent else ""
+
+            # Direct child of parameter list — simple parameter name
+            if parent_type in ("parameters", "formal_parameters", "parameter_list"):
+                params.append(_get_text(child, self.src))
+                continue
+
+            if parent_type not in self._COMPOUND_PARAM_TYPES:
+                continue
+
+            # Compound parameter — use name field or first-identifier heuristic
+            name_field = child.parent.child_by_field_name("name")
+            if name_field is not None:
+                if name_field.id == child.id:
+                    params.append(_get_text(child, self.src))
+                continue
+
+            # Fallback: first identifier child is the name (tree-sitter Python)
+            first_id = next(
+                (c for c in child.parent.children if c.type == "identifier"),
+                None,
+            )
+            if first_id is not None and first_id.id == child.id:
+                params.append(_get_text(child, self.src))
 
     def _has_varargs(self, func_node) -> bool:
         """Check if function has *args/**kwargs or ...rest."""
@@ -882,7 +914,7 @@ class _Extractor:
                         return True
         return False
 
-    def _walk_all(self, node: Any) -> Iterator[Any]:
+    def _walk_all(self, node: TSNode) -> Iterator[TSNode]:
         """Simple tree walker."""
         yield node
         for child in node.children:
@@ -920,7 +952,7 @@ def extract_semantics(content: str, filepath: str, language: str) -> FileSemanti
         return None
 
     # Guard against pathologically deep ASTs
-    def _tree_depth(node, max_depth=1000):
+    def _tree_depth(node: object, max_depth: int = 1000) -> int:
         depth = 0
         current = node
         while current.child_count > 0:

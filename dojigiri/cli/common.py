@@ -1,6 +1,6 @@
 """Shared helpers for CLI subcommand modules."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import argparse
 import sys

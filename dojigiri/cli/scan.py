@@ -1,6 +1,10 @@
-"""Scan lifecycle commands: scan, cost, stats, report, clean."""
+"""Scan lifecycle commands: scan, cost, stats, report, clean.
 
-from __future__ import annotations
+Orchestrator module with intentionally high coupling — CLI entry point that
+dispatches to analyzer, config, reporting, and output subsystems.
+"""
+
+from __future__ import annotations  # noqa
 
 import argparse
 import logging
@@ -18,165 +22,100 @@ from .common import CONFIDENCE_MAP, SEVERITY_MAP, _apply_profile, _confirm_llm_u
 
 logger = logging.getLogger(__name__)
 
+_SECURITY_RULES = {
+    "eval-usage",
+    "exec-usage",
+    "hardcoded-secret",
+    "sql-injection",
+    "os-system",
+    "shell-true",
+    "pickle-unsafe",
+    "yaml-unsafe",
+    "command-injection",
+    "path-traversal",
+    "insecure-crypto",
+    "insecure-deserialization",
+    "insecure-http",
+    "xss",
+}
 
-def cmd_scan(args: argparse.Namespace) -> int:
-    """Run a code scan (quick or deep)."""
-    from ..metrics import end_session, save_session, start_session
 
-    session = start_session()
+def _load_scan_config(args: object, scan_root: object) -> tuple[dict, list]:
+    """Load project config and custom rules, warn about suppressed security rules.
 
-    _apply_profile(args)
-
-    root = Path(args.path).resolve()
-    if not root.exists():
-        print(f"Error: path '{args.path}' does not exist", file=sys.stderr)
-        return 1
-
-    lang = args.lang
-    if lang and lang not in set(LANGUAGE_EXTENSIONS.values()):
-        print(f"Error: unknown language '{lang}'", file=sys.stderr)
-        print(f"Supported: {', '.join(sorted(set(LANGUAGE_EXTENSIONS.values())))}")
-        return 1
-
-    # Load project config from .doji.toml (if exists)
-    scan_root = root if root.is_dir() else root.parent
+    Returns (project_config, custom_rules).
+    """
     if getattr(args, "no_config", False):
-        project_config = {}
-        custom_rules = []
-    else:
-        project_config = load_project_config(scan_root)
-        custom_rules = compile_custom_rules(project_config)
-        # Warn if config suppresses security-relevant rules
-        _SECURITY_RULES = {
-            "eval-usage",
-            "exec-usage",
-            "hardcoded-secret",
-            "sql-injection",
-            "os-system",
-            "shell-true",
-            "pickle-unsafe",
-            "yaml-unsafe",
-            "command-injection",
-            "path-traversal",
-            "insecure-crypto",
-            "insecure-deserialization",
-            "insecure-http",
-            "xss",
-        }
-        suppressed = _SECURITY_RULES & set(project_config.get("ignore_rules", []))
-        if suppressed:
-            print(
-                f"Warning: .doji.toml is suppressing {len(suppressed)} security rule(s): "
-                f"{', '.join(sorted(suppressed))}",
-                file=sys.stderr,
-            )
-            print("  Use --no-config to override when scanning untrusted code.", file=sys.stderr)
+        return {}, []
 
-    use_cache = not args.no_cache
-    output_format = getattr(args, "output", "text")
-    is_json = output_format == "json"
+    project_config = load_project_config(scan_root)
+    custom_rules = compile_custom_rules(project_config)
+    suppressed = _SECURITY_RULES & set(project_config.get("ignore_rules", []))
+    if suppressed:
+        print(
+            f"Warning: .doji.toml is suppressing {len(suppressed)} security rule(s): "
+            f"{', '.join(sorted(suppressed))}",
+            file=sys.stderr,
+        )
+        print("  Use --no-config to override when scanning untrusted code.", file=sys.stderr)
+    return project_config, custom_rules
 
+
+def _execute_scan(args: object, root: object, lang: str | None, use_cache: bool, is_json: bool, project_config: dict, custom_rules: list) -> tuple[object | None, int | None]:
+    """Execute the appropriate scan mode (diff, deep, or quick).
+
+    Returns (report_obj, error_code) where error_code is None on success.
+    """
     diff_base = getattr(args, "diff", None)
 
-    # LLM confirmation for deep scan
-    if args.deep:
-        from ..plugin import has_llm_plugin
-
-        if not has_llm_plugin():
-            print(
-                "Error: Deep scan requires dojigiri-ai. Install with: pip install dojigiri-ai",
-                file=sys.stderr,
+    if diff_base is not None:
+        try:
+            report_obj, resolved_ref = scan_diff(
+                root,
+                base_ref=diff_base if diff_base != "" else None,
+                language_filter=lang,
+                custom_rules=custom_rules,
             )
-            return 1
-        _setup_llm_backend(args, project_config)
-        if not _confirm_llm_usage(args):
-            return 1
-
-    scan_start = time.monotonic()
-    try:
-        if diff_base is not None:
-            # Diff mode: only scan changed lines vs git ref
-            try:
-                report_obj, resolved_ref = scan_diff(
-                    root,
-                    base_ref=diff_base if diff_base != "" else None,
-                    language_filter=lang,
-                    custom_rules=custom_rules,
-                )
-            except ValueError as e:
-                print(f"Error: {e}", file=sys.stderr)
-                return 1
-            if not is_json:
-                print(f"Diff scan vs {resolved_ref} ({report_obj.files_scanned} changed file(s)) ...\n")
-        elif args.deep:
-            if not is_json:
-                print(f"Deep scanning {root} ...\n")
-            workers = getattr(args, "workers", None)
-            if workers is None:
-                workers = project_config.get("workers", 4)
-            max_cost = getattr(args, "max_cost", None)
-            try:
-                report_obj = scan_deep(
-                    root,
-                    language_filter=lang,
-                    use_cache=use_cache,
-                    max_workers=workers,
-                    custom_rules=custom_rules,
-                    max_cost=max_cost,
-                )
-            except Exception as e:  # CLI boundary: catch-all for user-facing error
-                print(f"Error: {e}", file=sys.stderr)
-                return 1
-        else:
-            if not is_json:
-                print(f"Quick scanning {root} ...\n")
-            # Use config file workers if not specified on CLI
-            workers = getattr(args, "workers", None)
-            if workers is None:
-                workers = project_config.get("workers", 4)
-            report_obj = scan_quick(
-                root, language_filter=lang, use_cache=use_cache, max_workers=workers, custom_rules=custom_rules
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return None, 1
+        if not is_json:
+            print(f"Diff scan vs {resolved_ref} ({report_obj.files_scanned} changed file(s)) ...\n")
+        return report_obj, None
+    elif args.deep:
+        if not is_json:
+            print(f"Deep scanning {root} ...\n")
+        workers = getattr(args, "workers", None)
+        if workers is None:
+            workers = project_config.get("workers", 4)
+        max_cost = getattr(args, "max_cost", None)
+        try:
+            report_obj = scan_deep(
+                root,
+                language_filter=lang,
+                use_cache=use_cache,
+                max_workers=workers,
+                custom_rules=custom_rules,
+                max_cost=max_cost,
             )
-    except KeyboardInterrupt:
-        print("\n\nScan interrupted by user.", file=sys.stderr)
-        print("Partial results may have been saved.", file=sys.stderr)
-        return 130  # 128 + SIGINT(2)
+        except Exception as e:  # CLI boundary: catch-all for user-facing error
+            print(f"Error: {e}", file=sys.stderr)
+            return None, 1
+        return report_obj, None
+    else:
+        if not is_json:
+            print(f"Quick scanning {root} ...\n")
+        workers = getattr(args, "workers", None)
+        if workers is None:
+            workers = project_config.get("workers", 4)
+        report_obj = scan_quick(
+            root, language_filter=lang, use_cache=use_cache, max_workers=workers, custom_rules=custom_rules
+        )
+        return report_obj, None
 
-    # Apply baseline diff if requested
-    baseline_arg = getattr(args, "baseline", None)
-    if baseline_arg:
-        baseline_dict = load_baseline_report(baseline_arg)
-        if baseline_dict:
-            if not is_json:
-                print(f"Comparing against baseline: {baseline_arg}")
-            report_obj = diff_reports(report_obj, baseline_dict)
-        else:
-            print(f"Warning: baseline '{baseline_arg}' not found, showing all findings", file=sys.stderr)
 
-    # Apply post-scan filters (CLI args override config file)
-    ignore_rules = set(args.ignore.split(",")) if getattr(args, "ignore", None) else None
-    if not ignore_rules and "ignore_rules" in project_config:
-        ignore_rules = set(project_config["ignore_rules"])
-
-    min_severity = SEVERITY_MAP.get(getattr(args, "min_severity", None))  # type: ignore[arg-type]  # getattr returns str | None; dict.get accepts both
-    if not min_severity and "min_severity" in project_config:
-        min_severity = SEVERITY_MAP.get(project_config["min_severity"])
-    # Bundled .exe default: warning (reduce noise for new users)
-    if not min_severity and is_bundled():
-        min_severity = Severity.WARNING
-
-    min_confidence = CONFIDENCE_MAP.get(getattr(args, "min_confidence", None))  # type: ignore[arg-type]  # getattr returns str | None; dict.get accepts both
-    if not min_confidence and "min_confidence" in project_config:
-        min_confidence = CONFIDENCE_MAP.get(project_config["min_confidence"])
-    report_obj = filter_report(
-        report_obj,
-        ignore_rules=ignore_rules,
-        min_severity=min_severity,
-        min_confidence=min_confidence,
-    )
-
-    scan_duration = time.monotonic() - scan_start
-
+def _output_report(report_obj, output_format, scan_duration, args) -> int | None:
+    """Format and output the scan report. Returns error code or None on success."""
     classification = getattr(args, "classification", None)
 
     if output_format == "json":
@@ -214,6 +153,101 @@ def cmd_scan(args: argparse.Namespace) -> int:
             return 1
     else:
         rpt.print_report(report_obj, duration=scan_duration, classification=classification)
+    return None
+
+
+def _apply_baseline_and_filters(args: object, report_obj: object, project_config: dict, is_json: bool) -> object:
+    """Apply baseline diff and post-scan severity/confidence/rule filters."""
+    baseline_arg = getattr(args, "baseline", None)
+    if baseline_arg:
+        baseline_dict = load_baseline_report(baseline_arg)
+        if baseline_dict:
+            if not is_json:
+                print(f"Comparing against baseline: {baseline_arg}")
+            report_obj = diff_reports(report_obj, baseline_dict)
+        else:
+            print(f"Warning: baseline '{baseline_arg}' not found, showing all findings", file=sys.stderr)
+
+    ignore_rules = set(args.ignore.split(",")) if getattr(args, "ignore", None) else None
+    if not ignore_rules and "ignore_rules" in project_config:
+        ignore_rules = set(project_config["ignore_rules"])
+
+    min_severity = SEVERITY_MAP.get(getattr(args, "min_severity", None))  # type: ignore[arg-type]  # getattr returns str | None; dict.get accepts both
+    if not min_severity and "min_severity" in project_config:
+        min_severity = SEVERITY_MAP.get(project_config["min_severity"])
+    if not min_severity and is_bundled():
+        min_severity = Severity.WARNING
+
+    min_confidence = CONFIDENCE_MAP.get(getattr(args, "min_confidence", None))  # type: ignore[arg-type]  # getattr returns str | None; dict.get accepts both
+    if not min_confidence and "min_confidence" in project_config:
+        min_confidence = CONFIDENCE_MAP.get(project_config["min_confidence"])
+
+    return filter_report(
+        report_obj,
+        ignore_rules=ignore_rules,
+        min_severity=min_severity,
+        min_confidence=min_confidence,
+    )
+
+
+def cmd_scan(args: argparse.Namespace) -> int:
+    """Run a code scan (quick or deep)."""
+    from ..metrics import end_session, save_session, start_session
+
+    session = start_session()
+
+    _apply_profile(args)
+
+    root = Path(args.path).resolve()
+    if not root.exists():
+        print(f"Error: path '{args.path}' does not exist", file=sys.stderr)
+        return 1
+
+    lang = args.lang
+    if lang and lang not in set(LANGUAGE_EXTENSIONS.values()):
+        print(f"Error: unknown language '{lang}'", file=sys.stderr)
+        print(f"Supported: {', '.join(sorted(set(LANGUAGE_EXTENSIONS.values())))}")
+        return 1
+
+    scan_root = root if root.is_dir() else root.parent
+    project_config, custom_rules = _load_scan_config(args, scan_root)
+
+    use_cache = not args.no_cache
+    output_format = getattr(args, "output", "text")
+    is_json = output_format == "json"
+
+    # LLM confirmation for deep scan
+    if args.deep:
+        from ..plugin import has_llm_plugin
+
+        if not has_llm_plugin():
+            print(
+                "Error: Deep scan requires dojigiri-ai. Install with: pip install dojigiri-ai",
+                file=sys.stderr,
+            )
+            return 1
+        _setup_llm_backend(args, project_config)
+        if not _confirm_llm_usage(args):
+            return 1
+
+    scan_start = time.monotonic()
+    try:
+        report_obj, err = _execute_scan(args, root, lang, use_cache, is_json, project_config, custom_rules)
+        if err is not None:
+            return err
+    except KeyboardInterrupt:
+        print("\n\nScan interrupted by user.", file=sys.stderr)
+        print("Partial results may have been saved.", file=sys.stderr)
+        return 130  # 128 + SIGINT(2)
+
+    # Apply baseline diff and post-scan filters
+    report_obj = _apply_baseline_and_filters(args, report_obj, project_config, is_json)
+
+    scan_duration = time.monotonic() - scan_start
+
+    output_err = _output_report(report_obj, output_format, scan_duration, args)
+    if output_err is not None:
+        return output_err
 
     # Save metrics
     session = end_session()

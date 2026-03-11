@@ -8,7 +8,7 @@ Calls into: config.py (types only)
 Data in -> Data out: source text + AST nodes -> transformed text / boolean checks
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import ast
 import logging
@@ -90,7 +90,7 @@ def _pattern_outside_strings(line: str, pattern: re.Pattern) -> bool:
 # ─── AST helpers ─────────────────────────────────────────────────────
 
 
-def _find_ast_node(content: str, line: int, node_type, predicate=None):
+def _find_ast_node(content: str, line: int, node_type: type, predicate: object | None = None) -> ast.AST | None:
     """Parse content, find node of given type at target line matching optional predicate.
 
     Returns the node or None. Caches parse tree per content id within a call stack.
@@ -110,7 +110,7 @@ def _find_ast_node(content: str, line: int, node_type, predicate=None):
     return None
 
 
-def _replace_node_source(content: str, node, replacement_text: str) -> str:
+def _replace_node_source(content: str, node: ast.AST, replacement_text: str) -> str:
     """Replace the source text of an AST node with new text.
 
     Uses node.lineno/col_offset/end_lineno/end_col_offset for precise replacement.
@@ -152,12 +152,12 @@ _OP_MAP: dict[type, str] = {
 }
 
 
-def _op_str(op) -> str:
+def _op_str(op: ast.AST) -> str:
     """Convert an ast comparison operator to its source string."""
     return _OP_MAP.get(type(op), "==")
 
 
-def _is_empty_mutable(node) -> str | None:
+def _is_empty_mutable(node: ast.AST) -> str | None:
     """If node is an empty mutable literal ([], {}, set()), return its string repr."""
     if isinstance(node, ast.List) and not node.elts:
         return "[]"
@@ -179,7 +179,7 @@ def _is_empty_mutable(node) -> str | None:
 # deeper analysis than the detector's initial pass.
 
 
-def _semantic_import_is_referenced(name: str, semantics) -> bool:
+def _semantic_import_is_referenced(name: str, semantics: object) -> bool:
     """Check if an import name is referenced anywhere in the file's semantic data.
 
     Walks all scopes including nested ones — catches re-exports, closure use,
@@ -196,7 +196,7 @@ def _semantic_import_is_referenced(name: str, semantics) -> bool:
     return False
 
 
-def _semantic_var_is_used_in_child_scope(name: str, assign_scope_id: int, semantics) -> bool:
+def _semantic_var_is_used_in_child_scope(name: str, assign_scope_id: int, semantics: object) -> bool:
     """Check if a variable assigned in scope X is referenced in a child scope.
 
     This catches closure variables and nested function access that the detector
@@ -205,7 +205,7 @@ def _semantic_var_is_used_in_child_scope(name: str, assign_scope_id: int, semant
     # Build set of child scope IDs
     child_ids = set()
 
-    def _collect_children(parent_id):
+    def _collect_children(parent_id: int) -> None:
         for scope in semantics.scopes:
             if scope.parent_id == parent_id:
                 child_ids.add(scope.scope_id)
@@ -221,7 +221,7 @@ def _semantic_var_is_used_in_child_scope(name: str, assign_scope_id: int, semant
     return False
 
 
-def _semantic_var_in_all_export(name: str, semantics) -> bool:
+def _semantic_var_in_all_export(name: str, semantics: object) -> bool:
     """Check if a variable is listed in __all__ (re-export)."""
     for assign in semantics.assignments:
         if assign.name == "__all__" and assign.value_text:
@@ -231,7 +231,7 @@ def _semantic_var_in_all_export(name: str, semantics) -> bool:
     return False
 
 
-def _type_map_var_is_non_nullable(name: str, scope_id: int, type_map) -> bool:
+def _type_map_var_is_non_nullable(name: str, scope_id: int, type_map: object) -> bool:
     """Check FileTypeMap to see if (name, scope_id) has a non-nullable type."""
     # FileTypeMap.types is dict[(var_name, scope_id), TypeInfo]
     type_info = type_map.types.get((name, scope_id))

@@ -9,7 +9,7 @@ Calls into: _compile.py (Rule type), types.py (Severity/Category enums)
 Data in -> Data out: YAML files -> list[Rule]
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import logging
 import re

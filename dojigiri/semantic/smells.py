@@ -9,7 +9,7 @@ Calls into: semantic/core.py, config.py
 Data in → Data out: FileSemantics (or dict of them for cross-file) → list[Finding]
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from collections import Counter
 from dataclasses import dataclass
@@ -135,6 +135,44 @@ def _has_decorator_wiring(fdef: FunctionDef, semantics: FileSemantics) -> bool:
     return False
 
 
+def _extract_import_names(tokens: list[str]) -> list[str]:
+    """Extract bound names from a tokenized import statement.
+
+    Handles ``as`` aliases: ``import foo as bar`` yields ``bar``,
+    ``import foo`` yields ``foo`` (top-level module only).
+    """
+    names: list[str] = []
+    i = 0
+    while i < len(tokens):
+        if i + 1 < len(tokens) and tokens[i + 1] == "as":
+            if i + 2 < len(tokens):
+                names.append(tokens[i + 2].rstrip(","))
+            i += 3
+        else:
+            names.append(tokens[i].rstrip(",").split(".")[0])
+            i += 1
+    return names
+
+
+def _collect_import_names_in_range(
+    source_lines: list[str],
+    start_line: int,
+    end_line: int,
+) -> set[str]:
+    """Collect names introduced by import statements within a line range."""
+    result: set[str] = set()
+    for ln in range(start_line, min(end_line + 1, len(source_lines))):
+        line = source_lines[ln] if ln < len(source_lines) else ""
+        stripped = line.strip()
+        if stripped.startswith("import "):
+            result.update(_extract_import_names(stripped.split()[1:]))
+        elif stripped.startswith("from ") and " import " in stripped:
+            after_import = stripped.split(" import ", 1)[1]
+            tokens = after_import.replace(",", " ").split()
+            result.update(_extract_import_names(tokens))
+    return result
+
+
 def _excluded_receivers(semantics: FileSemantics, fdef: FunctionDef) -> frozenset[str]:
     """Build the set of receiver names to exclude from external ref counting.
 
@@ -149,46 +187,10 @@ def _excluded_receivers(semantics: FileSemantics, fdef: FunctionDef) -> frozense
     excluded: set[str] = set()
 
     # 1. Import names visible at module level
-    #    The extractor skips import identifiers from references but records
-    #    them as assignments.  We collect all assignment names with
-    #    value_node_type that looks like an import or module alias.
-    #    Simpler approach: scan source lines in the method for ``import`` stmts.
     if semantics.source_lines:
-        for ln in range(fdef.line, min(fdef.end_line + 1, len(semantics.source_lines))):
-            line = semantics.source_lines[ln] if ln < len(semantics.source_lines) else ""
-            stripped = line.strip()
-            if stripped.startswith("import "):
-                # ``import foo`` or ``import foo as bar``
-                parts = stripped.split()
-                # Handle ``import foo, bar`` and ``import foo as bar``
-                i = 1
-                while i < len(parts):
-                    name = parts[i]
-                    if i + 1 < len(parts) and parts[i + 1] == "as":
-                        # ``import foo as bar`` → exclude "bar"
-                        if i + 2 < len(parts):
-                            excluded.add(parts[i + 2].rstrip(","))
-                            i += 3
-                        else:
-                            i += 2
-                    else:
-                        excluded.add(name.rstrip(",").split(".")[0])
-                        i += 1
-            elif stripped.startswith("from ") and " import " in stripped:
-                # ``from foo import bar, baz`` or ``from foo import bar as qux``
-                after_import = stripped.split(" import ", 1)[1]
-                tokens = after_import.replace(",", " ").split()
-                i = 0
-                while i < len(tokens):
-                    if i + 1 < len(tokens) and tokens[i + 1] == "as":
-                        if i + 2 < len(tokens):
-                            excluded.add(tokens[i + 2])
-                            i += 3
-                        else:
-                            i += 2
-                    else:
-                        excluded.add(tokens[i])
-                        i += 1
+        excluded.update(_collect_import_names_in_range(
+            semantics.source_lines, fdef.line, fdef.end_line,
+        ))
 
     # 2. Local variable names assigned within the method
     for asgn in semantics.assignments:
@@ -200,6 +202,49 @@ def _excluded_receivers(semantics: FileSemantics, fdef: FunctionDef) -> frozense
     # is a foreign object; the method should probably live on that class.
 
     return frozenset(excluded)
+
+
+def _should_suppress_envy(fdef: FunctionDef, semantics: FileSemantics) -> bool:
+    """Return True if this method should be suppressed from feature envy check."""
+    if fdef.name in _DUNDER_SKIP:
+        return True
+    if fdef.end_line - fdef.line + 1 < _MIN_METHOD_LINES:
+        return True
+    if _is_nested_function(fdef, semantics.function_defs):
+        return True
+    if _has_decorator_wiring(fdef, semantics):
+        return True
+    if not fdef.params or fdef.params[0] not in ("self", "cls"):
+        return True
+    if any(fdef.name.startswith(prefix) for prefix in _BUILDER_PREFIXES):
+        return True
+    if _count_effective_lines(semantics, fdef) <= _MAX_DELEGATION_LINES:
+        return True
+    return False
+
+
+def _count_ref_types(
+    semantics: FileSemantics,
+    fdef: FunctionDef,
+    self_kw: str,
+    excluded: frozenset[str],
+) -> tuple[int, int]:
+    """Count internal vs external attribute references in a method.
+
+    Returns (internal_refs, external_refs).
+    """
+    internal = 0
+    external = 0
+    for ref in semantics.references:
+        if not (fdef.line <= ref.line <= fdef.end_line):
+            continue
+        if ref.context != "attribute_access":
+            continue
+        if ref.receiver == self_kw:
+            internal += 1
+        elif ref.receiver is not None and ref.receiver not in excluded:
+            external += 1
+    return internal, external
 
 
 def check_feature_envy(
@@ -225,82 +270,19 @@ def check_feature_envy(
     class_attrs: dict[str, set[str]] = {}
     for cdef in semantics.class_defs:
         class_attrs[cdef.name] = set(cdef.attribute_names)
-
-    # Also add method names as internal references
     for fdef in semantics.function_defs:
         if fdef.parent_class:
             class_attrs.setdefault(fdef.parent_class, set()).add(fdef.name)
 
-    # Check each method
     for fdef in semantics.function_defs:
         if not fdef.parent_class:
             continue
-
-        # --- Suppression: dunder/protocol methods ---
-        if fdef.name in _DUNDER_SKIP:
+        if _should_suppress_envy(fdef, semantics):
             continue
 
-        # --- Suppression: short methods (< 5 lines) ---
-        method_lines = fdef.end_line - fdef.line + 1
-        if method_lines < _MIN_METHOD_LINES:
-            continue
-
-        # --- Suppression: nested/inner functions ---
-        if _is_nested_function(fdef, semantics.function_defs):
-            continue
-
-        # --- Suppression: decorator wiring patterns ---
-        if _has_decorator_wiring(fdef, semantics):
-            continue
-
-        # --- Suppression: static/class methods (no home object) ---
-        # If the method has no self/cls parameter it's a staticmethod —
-        # feature envy is meaningless because there's no "home" object.
-        if not fdef.params or fdef.params[0] not in ("self", "cls"):
-            continue
-
-        # --- Suppression: builder/mapper/factory patterns ---
-        # These methods deliberately reach into external objects to
-        # construct, encode, or transform data — that's their purpose.
-        if any(fdef.name.startswith(prefix) for prefix in _BUILDER_PREFIXES):
-            continue
-
-        # --- Suppression: single-line delegation ---
-        # If the effective body is ≤ 3 lines it's trivial delegation
-        # (e.g. return super().method(...) or return self.other.method(...)).
-        # Uses _count_effective_lines which properly skips docstrings,
-        # blank lines, comments, and type annotations.
-        method_effective_lines = _count_effective_lines(semantics, fdef)
-        if method_effective_lines <= _MAX_DELEGATION_LINES:
-            continue
-
-        # Determine the self/this keyword for this method (first parameter)
         self_kw = fdef.params[0] if fdef.params else "self"
-
-        # Collect names that should NOT count as external receivers:
-        # 1. Import names (import foo → foo.bar is a module access, not envy)
-        # 2. Local variable names assigned within this method
-        #    (url = urlsplit(self.x) → url.path is derived from self)
-        excluded_receivers = _excluded_receivers(semantics, fdef)
-
-        # Count internal vs external attribute references in this function.
-        # Internal = any attribute access on self/cls (self.xxx is the object's own state).
-        # External = attribute access on any other receiver (other.xxx).
-        internal_refs = 0
-        external_refs = 0
-
-        for ref in semantics.references:
-            # Match refs by line range — scope_id of a function def is the
-            # *parent* scope (class body), while body refs are in a child scope.
-            if not (fdef.line <= ref.line <= fdef.end_line):
-                continue
-            if ref.context == "attribute_access":
-                if ref.receiver == self_kw:
-                    # self.xxx — always internal, whether defined in class body or not
-                    internal_refs += 1
-                elif ref.receiver is not None and ref.receiver not in excluded_receivers:
-                    # other_obj.xxx — external (but not imports or local vars)
-                    external_refs += 1
+        excluded = _excluded_receivers(semantics, fdef)
+        internal_refs, external_refs = _count_ref_types(semantics, fdef, self_kw, excluded)
 
         if external_refs > internal_refs * external_ratio and external_refs >= min_external:
             findings.append(

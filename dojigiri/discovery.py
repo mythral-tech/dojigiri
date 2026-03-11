@@ -9,7 +9,7 @@ Calls into: config.py (constants + ignore patterns)
 Data in -> Data out: Path in -> list[Path] / bool / Optional[str] out
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import fnmatch
 from pathlib import Path

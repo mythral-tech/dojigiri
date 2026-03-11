@@ -8,7 +8,7 @@ Calls into: rules/ (rule data), types.py (Severity/Category enums).
 Data in -> Data out: language string in -> list[Rule] out.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from .rules import (
     CSHARP_RULES,
@@ -61,7 +61,7 @@ def list_all_rules() -> list[dict]:
 
     from .compliance import get_cwe, get_nist
 
-    def _add_rules(rules: list[Rule], languages: list[str]):
+    def _add_rules(rules: list[Rule], languages: list[str]) -> None:
         for _pattern, severity, category, name, message, suggestion in rules:
             if name in seen:
                 existing_langs = seen[name]["languages"]

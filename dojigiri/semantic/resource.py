@@ -10,7 +10,7 @@ Calls into: semantic/lang_config.py, semantic/core.py, semantic/cfg.py, config.p
 Data in → Data out: FileSemantics + CFG → list[Finding] (unclosed files/connections)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import re
 from dataclasses import dataclass
@@ -102,19 +102,85 @@ def _find_finally_closed_vars(
             in_finally = True
             finally_indent = indent
             continue
-        elif in_finally:
-            if indent <= finally_indent and stripped and not stripped.startswith("#"):
-                in_finally = False
-            else:
-                # Check for close patterns
-                for open_pat, close_pat, _, _ in config.resource_patterns:
-                    if close_pat in stripped:
-                        # Extract variable name: var.close() or close(var)
-                        m = re.search(r"(\w+)\." + re.escape(close_pat), stripped)
-                        if m:
-                            closed_vars.add(m.group(1))
+
+        if not in_finally:
+            continue
+
+        # Check if we've left the finally block (dedent to same or less indent)
+        if indent <= finally_indent and stripped and not stripped.startswith("#"):
+            in_finally = False
+            continue
+
+        # Check for close patterns within the finally block
+        for _open_pat, close_pat, _, _ in config.resource_patterns:
+            if close_pat not in stripped:
+                continue
+            m = re.search(r"(\w+)\." + re.escape(close_pat), stripped)
+            if m:
+                closed_vars.add(m.group(1))
 
     return closed_vars
+
+
+def _find_open_resources(
+    semantics: FileSemantics,
+    config: LanguageConfig,
+    fdef: FunctionDef,
+    context_managed_lines: set[int],
+    finally_closed: set[str],
+) -> dict[str, ResourceState]:
+    """Scan assignments within a function for resource open patterns."""
+    resources: dict[str, ResourceState] = {}
+    for asgn in semantics.assignments:
+        if not (fdef.line <= asgn.line <= fdef.end_line):
+            continue
+        if asgn.is_parameter or asgn.is_augmented:
+            continue
+
+        rhs = asgn.value_text
+        for open_pat, _close_pat, has_ctx_mgr, kind in config.resource_patterns:
+            if re.search(r"\b" + re.escape(open_pat) + r"\s*\(", rhs):
+                is_ctx = (has_ctx_mgr and asgn.line in context_managed_lines) or asgn.name in finally_closed
+                resources[asgn.name] = ResourceState(
+                    variable=asgn.name,
+                    open_line=asgn.line,
+                    kind=kind,
+                    is_context_managed=is_ctx,
+                )
+                break
+    return resources
+
+
+def _mark_closed_resources(
+    semantics: FileSemantics,
+    config: LanguageConfig,
+    fdef: FunctionDef,
+    resources: dict[str, ResourceState],
+    lines: list[str],
+) -> None:
+    """Scan function calls and mark resources as closed."""
+    for call in semantics.function_calls:
+        if not (fdef.line <= call.line <= fdef.end_line):
+            continue
+
+        call_text = call.name
+        if call.receiver:
+            call_text = f"{call.receiver}.{call.name}"
+
+        for _open_pat, close_pat, _, _ in config.resource_patterns:
+            if close_pat not in call_text:
+                continue
+            if call.receiver and call.receiver in resources:
+                resources[call.receiver].closed = True
+                resources[call.receiver].close_line = call.line
+            else:
+                line_idx = call.line - 1
+                if 0 <= line_idx < len(lines):
+                    line_text = lines[line_idx]
+                    for rname, rstate in resources.items():
+                        if re.search(r"\b" + re.escape(rname) + r"\b", line_text):
+                            rstate.closed = True
+                            rstate.close_line = call.line
 
 
 def check_resource_leaks(
@@ -126,13 +192,6 @@ def check_resource_leaks(
 ) -> list[Finding]:
     """Detect unclosed resources using CFG-based forward analysis.
 
-    Per function:
-    1. Scan for resource open patterns (assignment containing open/connect/etc.)
-    2. Track resource close patterns through CFG blocks
-    3. At exit blocks, report resources that are open but never closed
-    4. Context managers (with/using) count as automatic close
-    5. Resources closed in finally blocks are considered safe
-
     Returns [] if no resource patterns configured.
     """
     if not config.resource_patterns:
@@ -140,11 +199,8 @@ def check_resource_leaks(
 
     findings = []
     lines = source_bytes.decode("utf-8", errors="replace").splitlines()
-
-    # Find context-managed lines
     context_managed_lines = _find_context_managed_lines(source_bytes, semantics.language)
 
-    # Build fdef → function scope mapping
     fdef_to_scope: dict[str, int] = {}
     for scope in semantics.scopes:
         if scope.kind == "function" and scope.name:
@@ -152,71 +208,20 @@ def check_resource_leaks(
 
     for fdef in semantics.function_defs:
         func_scope_id = fdef_to_scope.get(fdef.qualified_name, fdef.scope_id)
-        cfg = cfgs.get(func_scope_id)
-        if cfg is None:
+        if cfgs.get(func_scope_id) is None:
             continue
 
-        # Find variables closed in finally blocks
         finally_closed = _find_finally_closed_vars(source_bytes, config, fdef)
-
-        # Track open resources: {variable_name: ResourceState}
-        resources: dict[str, ResourceState] = {}
-
-        # Scan all assignments in this function for open patterns
-        for asgn in semantics.assignments:
-            if not (fdef.line <= asgn.line <= fdef.end_line):
-                continue
-            if asgn.is_parameter or asgn.is_augmented:
-                continue
-
-            rhs = asgn.value_text
-            for open_pat, close_pat, has_ctx_mgr, kind in config.resource_patterns:
-                # Use word-boundary matching to avoid false positives:
-                # e.g. "open" should match "open(" but not "open_session()"
-                # or variable names containing "open" as a substring
-                if re.search(r"\b" + re.escape(open_pat) + r"\s*\(", rhs):
-                    is_ctx = (has_ctx_mgr and asgn.line in context_managed_lines) or asgn.name in finally_closed
-                    resources[asgn.name] = ResourceState(
-                        variable=asgn.name,
-                        open_line=asgn.line,
-                        kind=kind,
-                        is_context_managed=is_ctx,
-                    )
-                    break
-
+        resources = _find_open_resources(semantics, config, fdef, context_managed_lines, finally_closed)
         if not resources:
             continue
 
-        # Scan for close calls
-        for call in semantics.function_calls:
-            if not (fdef.line <= call.line <= fdef.end_line):
-                continue
-
-            call_text = call.name
-            if call.receiver:
-                call_text = f"{call.receiver}.{call.name}"
-
-            for open_pat, close_pat, _, _ in config.resource_patterns:
-                if close_pat in call_text:
-                    # Find which resource this closes
-                    if call.receiver and call.receiver in resources:
-                        resources[call.receiver].closed = True
-                        resources[call.receiver].close_line = call.line
-                    else:
-                        # Check line text for resource variable
-                        line_idx = call.line - 1
-                        if 0 <= line_idx < len(lines):
-                            line_text = lines[line_idx]
-                            for rname, rstate in resources.items():
-                                if re.search(r"\b" + re.escape(rname) + r"\b", line_text):
-                                    rstate.closed = True
-                                    rstate.close_line = call.line
+        _mark_closed_resources(semantics, config, fdef, resources, lines)
 
         # Report unclosed resources
-        for rname, rstate in resources.items():
+        for _rname, rstate in resources.items():
             if rstate.closed or rstate.is_context_managed:
                 continue
-
             findings.append(
                 Finding(
                     file=filepath,

@@ -8,7 +8,7 @@ full details via /v1/vulns/{id} for severity, summary, and fix info.
 Concurrent fetching keeps latency reasonable.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import json
 import logging

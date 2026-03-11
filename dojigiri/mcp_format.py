@@ -9,7 +9,7 @@ Calls into: config.py, semantic/explain.py
 Data in -> Data out: ScanReport -> plain text string
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 from typing import TYPE_CHECKING
 

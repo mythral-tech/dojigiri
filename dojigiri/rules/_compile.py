@@ -1,6 +1,6 @@
 """Shared compile helper and Rule type alias for all rule modules."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import re
 

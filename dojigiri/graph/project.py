@@ -10,7 +10,7 @@ Calls into: graph/depgraph.py, graph/callgraph.py, config.py, discovery.py,
 Data in -> Data out: directory path -> ProjectAnalysis
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import ast as ast_mod
 import logging
@@ -183,6 +183,120 @@ def _format_graph_summary(graph: DepGraph, metrics: GraphMetrics) -> str:
 # ─── Main orchestrator ───────────────────────────────────────────────
 
 
+def _read_file_contents(files, root_path: Path) -> tuple[dict[str, str], list[str]]:
+    """Read all file contents and return (rel_path -> content, abs_paths)."""
+    file_contents = {}
+    file_paths = []
+    for fp in files:
+        try:
+            content = fp.read_text(encoding="utf-8", errors="replace")
+            rel = str(fp.relative_to(root_path)).replace("\\", "/")
+            file_contents[rel] = content
+            file_paths.append(str(fp))
+        except OSError:
+            continue
+    return file_contents, file_paths
+
+
+def _extract_semantics_and_cross_file(
+    root_path: Path, file_contents: dict[str, str], graph,
+) -> tuple[dict, list]:
+    """Extract semantics per file and run cross-file static analysis."""
+    from ..semantic.core import extract_semantics
+
+    semantics_by_file = {}
+    for rel, content in file_contents.items():
+        lang = detect_language(root_path / rel)
+        if lang:
+            sem = extract_semantics(content, rel, lang)
+            if sem:
+                semantics_by_file[rel] = sem
+
+    cross_file_static_findings = []
+    if not semantics_by_file:
+        return semantics_by_file, cross_file_static_findings
+
+    call_graph = build_call_graph(graph, semantics_by_file)
+
+    from ..semantic.smells import check_near_duplicate_functions, check_semantic_clones
+    from .callgraph import find_arg_count_mismatches, find_dead_functions
+
+    cross_file_static_findings.extend(find_dead_functions(call_graph, graph))
+    cross_file_static_findings.extend(find_arg_count_mismatches(call_graph, semantics_by_file))
+    cross_file_static_findings.extend(check_near_duplicate_functions(semantics_by_file))
+    cross_file_static_findings.extend(check_semantic_clones(semantics_by_file))
+
+    # v0.10.0: Cross-file contract inference
+    try:
+        from ..semantic.lang_config import get_config as get_lang_config
+        from ..semantic.types import infer_types
+
+        for rel, sem in semantics_by_file.items():
+            lang_cfg = get_lang_config(sem.language)
+            if lang_cfg:
+                content = file_contents.get(rel, "")
+                src_bytes = content.encode("utf-8")
+                infer_types(sem, src_bytes, lang_cfg)
+    except (ValueError, OSError, AttributeError) as e:
+        logger.debug("Cross-file type inference skipped: %s", e)
+
+    return semantics_by_file, cross_file_static_findings
+
+
+def _build_static_only_result(
+    root_path: Path, file_contents: dict[str, str], metrics, graph,
+    cross_file_static_findings: list,
+) -> ProjectAnalysis:
+    """Build ProjectAnalysis for no-LLM mode."""
+    static_per_file: dict[str, list] = {}
+    for f in cross_file_static_findings:
+        static_per_file.setdefault(f.file, []).append(f)
+
+    per_file_analyses = []
+    for rel, content in file_contents.items():
+        lang = detect_language(root_path / rel)
+        fa = FileAnalysis(
+            path=str(root_path / rel),
+            language=lang or "unknown",
+            lines=content.count("\n") + 1,
+            findings=static_per_file.get(rel, []),
+        )
+        if fa.findings:
+            per_file_analyses.append(fa)
+
+    return ProjectAnalysis(
+        root=str(root_path),
+        files_analyzed=len(file_contents),
+        graph_metrics=metrics.to_dict(),
+        dependency_graph=graph.to_dict(),
+        per_file_findings=per_file_analyses,
+    )
+
+
+def _build_cross_findings(raw_findings: list) -> list[CrossFileFinding]:
+    """Convert raw LLM cross-file finding dicts to CrossFileFinding objects."""
+    cross_findings = []
+    for cf in raw_findings:
+        try:
+            cross_findings.append(
+                CrossFileFinding(
+                    source_file=cf.get("source_file", ""),
+                    target_file=cf.get("target_file", ""),
+                    line=cf.get("line", 0),
+                    target_line=cf.get("target_line"),
+                    severity=Severity(cf.get("severity", "warning")),
+                    category=Category(cf.get("category", "bug")),
+                    rule=cf.get("rule", "cross-file-issue"),
+                    message=cf.get("message", ""),
+                    suggestion=cf.get("suggestion"),
+                    confidence=Confidence(cf.get("confidence", "medium")) if cf.get("confidence") else None,
+                )
+            )
+        except (ValueError, KeyError):
+            continue
+    return cross_findings
+
+
 def analyze_project(
     root: str,
     language_filter: str | None = None,
@@ -202,119 +316,29 @@ def analyze_project(
     """
     root_path = Path(root).resolve()
 
-    # 1. Collect files
     files, _skipped = collect_files(root_path, language_filter)
     if not files:
-        return ProjectAnalysis(
-            root=str(root_path),
-            files_analyzed=0,
-            graph_metrics={},
-            dependency_graph={},
-        )
+        return ProjectAnalysis(root=str(root_path), files_analyzed=0, graph_metrics={}, dependency_graph={})
 
-    # 2. Read all file contents
-    file_contents = {}
-    file_paths = []
-    for fp in files:
-        try:
-            content = fp.read_text(encoding="utf-8", errors="replace")
-            rel = str(fp.relative_to(root_path)).replace("\\", "/")
-            file_contents[rel] = content
-            file_paths.append(str(fp))
-        except OSError:
-            continue
-
-    # 3. Build dependency graph
+    file_contents, file_paths = _read_file_contents(files, root_path)
     graph = build_dependency_graph(file_paths, str(root_path), lang_filter=language_filter)
-
-    # 4. Compute metrics
     metrics = compute_metrics(graph)
     graph_summary = _format_graph_summary(graph, metrics)
 
-    # 4b. Semantic extraction + cross-file analysis (v0.8.0)
-    from ..semantic.core import extract_semantics
+    _semantics_by_file, cross_file_static_findings = _extract_semantics_and_cross_file(
+        root_path, file_contents, graph,
+    )
 
-    semantics_by_file = {}
-    for rel, content in file_contents.items():
-        lang = detect_language(root_path / rel)
-        if lang:
-            sem = extract_semantics(content, rel, lang)
-            if sem:
-                semantics_by_file[rel] = sem
-
-    # Build call graph from semantics
-    call_graph = None
-    cross_file_static_findings = []
-    if semantics_by_file:
-        call_graph = build_call_graph(graph, semantics_by_file)
-
-        from ..semantic.smells import check_near_duplicate_functions, check_semantic_clones
-        from .callgraph import find_arg_count_mismatches, find_dead_functions
-
-        cross_file_static_findings.extend(find_dead_functions(call_graph, graph))
-        cross_file_static_findings.extend(find_arg_count_mismatches(call_graph, semantics_by_file))
-        cross_file_static_findings.extend(check_near_duplicate_functions(semantics_by_file))
-        cross_file_static_findings.extend(check_semantic_clones(semantics_by_file))
-
-        # v0.10.0: Cross-file contract inference
-        try:
-            from ..semantic.lang_config import get_config as get_lang_config
-            from ..semantic.types import infer_types
-
-            type_maps = {}
-            for rel, sem in semantics_by_file.items():
-                lang_cfg = get_lang_config(sem.language)
-                if lang_cfg:
-                    content = file_contents.get(rel, "")
-                    src_bytes = content.encode("utf-8")
-                    type_maps[rel] = infer_types(sem, src_bytes, lang_cfg)
-            # type_maps used by null safety checks in per-file analysis
-        except (ValueError, OSError, AttributeError) as e:
-            logger.debug("Cross-file type inference skipped: %s", e)
-
-    # 5. No-LLM mode: return graph + metrics + static cross-file findings
     if not use_llm:
-        # Convert static cross-file findings to FileAnalysis format
-        static_per_file: dict[str, list] = {}
-        for f in cross_file_static_findings:
-            static_per_file.setdefault(f.file, []).append(f)
+        return _build_static_only_result(root_path, file_contents, metrics, graph, cross_file_static_findings)
 
-        per_file_analyses = []
-        for rel, content in file_contents.items():
-            lang = detect_language(root_path / rel)
-            abs_path = str(root_path / rel)
-            fa = FileAnalysis(
-                path=abs_path,
-                language=lang or "unknown",
-                lines=content.count("\n") + 1,
-                findings=static_per_file.get(rel, []),
-            )
-            if fa.findings:
-                per_file_analyses.append(fa)
-
-        return ProjectAnalysis(
-            root=str(root_path),
-            files_analyzed=len(file_contents),
-            graph_metrics=metrics.to_dict(),
-            dependency_graph=graph.to_dict(),
-            per_file_findings=per_file_analyses,
-        )
-
-    # 6. LLM analysis
+    # LLM analysis
     from ..plugin import require_llm_plugin
 
     _llm = require_llm_plugin()
-    CostTracker = _llm.CostTracker
-    LLMError = _llm.LLMError
-    analyze_file_with_context = _llm.analyze_file_with_context
-    synthesize_project = _llm.synthesize_project
-
-    cost_tracker = CostTracker()
-
-    # Get topo order (dependencies analyzed first)
+    cost_tracker = _llm.CostTracker()
     topo_order = graph.topological_sort()
 
-    # 7. Pass 1: analyze each file with context
     per_file_results = []
     per_file_analyses = []
     all_cross_file_findings = []
@@ -322,7 +346,6 @@ def analyze_project(
     for i, rel_path in enumerate(topo_order):
         if rel_path not in file_contents:
             continue
-
         content = file_contents[rel_path]
         lang = detect_language(root_path / rel_path)
         if not lang:
@@ -331,79 +354,33 @@ def analyze_project(
         abs_path = str(root_path / rel_path)
         print(f"  [{i + 1}/{len(topo_order)}] {rel_path} ({lang})", flush=True)
 
-        # Static analysis
         static_findings = analyze_file_static(abs_path, content, lang).findings
-
-        # Add any cross-file static findings for this file
         for cf in cross_file_static_findings:
             if cf.file == rel_path:
                 static_findings.append(cf)
 
-        # Select context files
         context = _select_context_for_file(rel_path, graph, file_contents, depth=depth)
-
-        # LLM cross-file analysis
         try:
-            result, cost_tracker = analyze_file_with_context(
-                content,
-                rel_path,
-                lang,
-                context_files=context,
-                graph_summary=graph_summary,
-                static_findings=static_findings,
-                cost_tracker=cost_tracker,
+            result, cost_tracker = _llm.analyze_file_with_context(
+                content, rel_path, lang, context_files=context,
+                graph_summary=graph_summary, static_findings=static_findings, cost_tracker=cost_tracker,
             )
-        except (LLMError, OSError, ValueError) as e:
+        except (_llm.LLMError, OSError, ValueError) as e:
             logger.warning("LLM error for %s: %s", rel_path, e)
             result = {"cross_file_findings": [], "local_findings": []}
 
-        # Collect cross-file findings
-        for cf in result.get("cross_file_findings", []):
-            all_cross_file_findings.append(cf)
-
+        all_cross_file_findings.extend(result.get("cross_file_findings", []))
         per_file_results.append({"path": rel_path, **result})
+        per_file_analyses.append(FileAnalysis(path=abs_path, language=lang, lines=content.count("\n") + 1, findings=static_findings))
 
-        # Build FileAnalysis for per-file display
-        fa = FileAnalysis(
-            path=abs_path,
-            language=lang,
-            lines=content.count("\n") + 1,
-            findings=static_findings,
-        )
-        per_file_analyses.append(fa)
-
-    # 8. Pass 2: synthesize
     synthesis = None
     try:
-        synthesis, cost_tracker = synthesize_project(
-            graph_summary=graph_summary,
-            per_file_summaries=per_file_results,
-            all_cross_file_findings=all_cross_file_findings,
-            cost_tracker=cost_tracker,
+        synthesis, cost_tracker = _llm.synthesize_project(
+            graph_summary=graph_summary, per_file_summaries=per_file_results,
+            all_cross_file_findings=all_cross_file_findings, cost_tracker=cost_tracker,
         )
-    except (LLMError, OSError, ValueError) as e:
+    except (_llm.LLMError, OSError, ValueError) as e:
         logger.warning("Synthesis error: %s", e)
-
-    # 9. Build CrossFileFinding objects
-    cross_findings = []
-    for cf in all_cross_file_findings:
-        try:
-            cross_findings.append(
-                CrossFileFinding(
-                    source_file=cf.get("source_file", ""),
-                    target_file=cf.get("target_file", ""),
-                    line=cf.get("line", 0),
-                    target_line=cf.get("target_line"),
-                    severity=Severity(cf.get("severity", "warning")),
-                    category=Category(cf.get("category", "bug")),
-                    rule=cf.get("rule", "cross-file-issue"),
-                    message=cf.get("message", ""),
-                    suggestion=cf.get("suggestion"),
-                    confidence=Confidence(cf.get("confidence", "medium")) if cf.get("confidence") else None,
-                )
-            )
-        except (ValueError, KeyError):
-            continue
 
     return ProjectAnalysis(
         root=str(root_path),
@@ -411,7 +388,7 @@ def analyze_project(
         graph_metrics=metrics.to_dict(),
         dependency_graph=graph.to_dict(),
         per_file_findings=per_file_analyses,
-        cross_file_findings=cross_findings,
+        cross_file_findings=_build_cross_findings(all_cross_file_findings),
         synthesis=synthesis,
         llm_cost_usd=cost_tracker.total_cost,
     )

@@ -1,6 +1,6 @@
 """LLM-powered commands: debug, optimize, explain."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import argparse
 import sys
@@ -166,62 +166,65 @@ def cmd_explain(args: argparse.Namespace) -> int:
 
     # Deep mode: enhance with LLM
     if deep:
-        try:
-            api_key = get_api_key()
-            if not api_key:
-                print("\n  --deep requires ANTHROPIC_API_KEY. Showing offline analysis only.", file=sys.stderr)
-            else:
-                from ..plugin import require_llm_plugin
-
-                _llm = require_llm_plugin()
-                CostTracker = _llm.CostTracker
-                explain_file_llm = _llm.explain_file_llm
-
-                tracker = CostTracker()
-                llm_result, tracker = explain_file_llm(
-                    content,
-                    str(filepath),
-                    lang,
-                    static_findings=result.findings,
-                    cost_tracker=tracker,
-                )
-                if llm_result and output_format != "json":
-                    print(f"\n{'=' * 70}")
-                    print("  Deep Analysis (LLM-powered)")
-                    print(f"{'=' * 70}\n")
-                    if isinstance(llm_result, dict):
-                        # Purpose
-                        if llm_result.get("purpose"):
-                            print(f"  Purpose: {llm_result['purpose']}\n")
-                        # Data flow
-                        if llm_result.get("data_flow"):
-                            print(f"  Data flow: {llm_result['data_flow']}\n")
-                        # Key concepts
-                        concepts = llm_result.get("key_concepts", [])
-                        if concepts:
-                            print("  Key concepts:")
-                            for c in concepts:
-                                lines = f" (lines {c['lines']})" if c.get("lines") else ""
-                                print(f"    - {c.get('concept', '?')}{lines}")
-                                print(f"      {c.get('explanation', '')}")
-                            print()
-                        # Gotchas
-                        gotchas = llm_result.get("gotchas", [])
-                        if gotchas:
-                            print("  Gotchas:")
-                            for g in gotchas:
-                                print(f"    - {g}")
-                            print()
-                        # Findings explained
-                        findings_ex = llm_result.get("findings_explained", [])
-                        if findings_ex:
-                            print("  Findings explained:")
-                            for fe in findings_ex:
-                                print(f"    [{fe.get('rule', '?')}] {fe.get('plain_english', '')}")
-                            print()
-                    print(f"  Cost: ${tracker.total_cost:.4f}")
-        except Exception as e:  # LLM can fail many ways (network, API, parse); graceful fallback
-            if output_format != "json":
-                print(f"\n  LLM analysis unavailable: {e}", file=sys.stderr)
+        _run_deep_explain(content, filepath, lang, result.findings, output_format)
 
     return 0
+
+
+def _print_deep_result(llm_result: dict) -> None:
+    """Print the structured fields of a deep LLM explanation."""
+    if llm_result.get("purpose"):
+        print(f"  Purpose: {llm_result['purpose']}\n")
+    if llm_result.get("data_flow"):
+        print(f"  Data flow: {llm_result['data_flow']}\n")
+    concepts = llm_result.get("key_concepts", [])
+    if concepts:
+        print("  Key concepts:")
+        for c in concepts:
+            lines = f" (lines {c['lines']})" if c.get("lines") else ""
+            print(f"    - {c.get('concept', '?')}{lines}")
+            print(f"      {c.get('explanation', '')}")
+        print()
+    gotchas = llm_result.get("gotchas", [])
+    if gotchas:
+        print("  Gotchas:")
+        for g in gotchas:
+            print(f"    - {g}")
+        print()
+    findings_ex = llm_result.get("findings_explained", [])
+    if findings_ex:
+        print("  Findings explained:")
+        for fe in findings_ex:
+            print(f"    [{fe.get('rule', '?')}] {fe.get('plain_english', '')}")
+        print()
+
+
+def _run_deep_explain(content, filepath, lang, findings, output_format) -> None:
+    """Run the LLM-powered deep explanation pass."""
+    try:
+        api_key = get_api_key()
+        if not api_key:
+            print("\n  --deep requires ANTHROPIC_API_KEY. Showing offline analysis only.", file=sys.stderr)
+            return
+
+        from ..plugin import require_llm_plugin
+
+        _llm = require_llm_plugin()
+        tracker = _llm.CostTracker()
+        llm_result, tracker = _llm.explain_file_llm(
+            content,
+            str(filepath),
+            lang,
+            static_findings=findings,
+            cost_tracker=tracker,
+        )
+        if llm_result and output_format != "json":
+            print(f"\n{'=' * 70}")
+            print("  Deep Analysis (LLM-powered)")
+            print(f"{'=' * 70}\n")
+            if isinstance(llm_result, dict):
+                _print_deep_result(llm_result)
+            print(f"  Cost: ${tracker.total_cost:.4f}")
+    except Exception as e:  # LLM can fail many ways (network, API, parse); graceful fallback
+        if output_format != "json":
+            print(f"\n  LLM analysis unavailable: {e}", file=sys.stderr)

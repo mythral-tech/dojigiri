@@ -9,7 +9,7 @@ Calls into: config.py (FixStatus, Fix types)
 Data in -> Data out: file content + applied fixes + semantics -> set of rule names
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa
 
 import ast
 
@@ -41,6 +41,61 @@ def _get_fix_affected_lines(applied_fixes: list[Fix]) -> tuple[set[int], set[int
     return deleted, modified
 
 
+def _collect_python_imports(tree: ast.Module) -> dict[str, int]:
+    """Collect imported names from an AST. Returns name -> import_line mapping."""
+    imported: dict[str, int] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                name = alias.asname or alias.name.split(".")[0]
+                imported[name] = node.lineno
+        elif isinstance(node, ast.ImportFrom):
+            if node.module == "__future__":
+                continue
+            for alias in node.names:
+                if alias.name == "*":
+                    continue
+                name = alias.asname or alias.name
+                imported[name] = node.lineno
+    return imported
+
+
+def _collect_import_usage_lines(tree: ast.Module, imported: dict[str, int]) -> dict[str, set[int]]:
+    """Collect usage lines for each imported name (excluding the import line itself)."""
+    usage_lines: dict[str, set[int]] = {name: set() for name in imported}
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and node.id in imported:
+            if node.lineno != imported.get(node.id):
+                usage_lines[node.id].add(node.lineno)
+        elif isinstance(node, ast.Attribute):
+            root_node = node
+            while isinstance(root_node, ast.Attribute):
+                root_node = root_node.value  # type: ignore[assignment]
+            if isinstance(root_node, ast.Name) and root_node.id in imported:
+                if root_node.lineno != imported.get(root_node.id):
+                    usage_lines[root_node.id].add(root_node.lineno)
+
+    return usage_lines
+
+
+def _build_replacement_text_map(
+    applied_fixes: list[Fix] | None, modified_lines: set[int],
+) -> dict[int, str]:
+    """Build line -> replacement text map for modified lines from applied fixes."""
+    replacement_text: dict[int, str] = {}
+    if applied_fixes:
+        for fix in applied_fixes:
+            if fix.status != FixStatus.APPLIED:
+                continue
+            start = fix.line
+            end = fix.end_line or fix.line
+            for ln in range(start, end + 1):
+                if ln in modified_lines:
+                    replacement_text[ln] = fix.fixed_code or ""
+    return replacement_text
+
+
 def _derive_unused_imports_python(
     content: str,
     deleted_lines: set[int],
@@ -60,51 +115,12 @@ def _derive_unused_imports_python(
     except SyntaxError:
         return False
 
-    # Build: name -> import_line
-    imported: dict[str, int] = {}
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                name = alias.asname or alias.name.split(".")[0]
-                imported[name] = node.lineno
-        elif isinstance(node, ast.ImportFrom):
-            if node.module == "__future__":
-                continue
-            for alias in node.names:
-                if alias.name == "*":
-                    continue
-                name = alias.asname or alias.name
-                imported[name] = node.lineno
-
+    imported = _collect_python_imports(tree)
     if not imported:
         return False
 
-    # Build: name -> set of usage lines (excluding the import line itself)
-    usage_lines: dict[str, set[int]] = {name: set() for name in imported}
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Name) and node.id in imported:
-            if node.lineno != imported.get(node.id):
-                usage_lines[node.id].add(node.lineno)
-        elif isinstance(node, ast.Attribute):
-            root_node = node
-            while isinstance(root_node, ast.Attribute):
-                root_node = root_node.value  # type: ignore[assignment]
-            if isinstance(root_node, ast.Name) and root_node.id in imported:
-                if root_node.lineno != imported.get(root_node.id):
-                    usage_lines[root_node.id].add(root_node.lineno)
-
-    # Build line -> replacement text map for modified lines
-    replacement_text: dict[int, str] = {}
-    if applied_fixes:
-        for fix in applied_fixes:
-            if fix.status != FixStatus.APPLIED:
-                continue
-            start = fix.line
-            end = fix.end_line or fix.line
-            for ln in range(start, end + 1):
-                if ln in modified_lines:
-                    replacement_text[ln] = fix.fixed_code or ""
+    usage_lines = _collect_import_usage_lines(tree, imported)
+    replacement_text = _build_replacement_text_map(applied_fixes, modified_lines)
 
     all_affected = deleted_lines | modified_lines
     for name, lines in usage_lines.items():
@@ -125,7 +141,7 @@ def _derive_unused_imports_python(
     return False
 
 
-def _build_descendant_map(scopes) -> dict[int, set[int]]:
+def _build_descendant_map(scopes: list) -> dict[int, set[int]]:
     """Build scope_id -> all descendant scope_ids in O(s) time.
 
     Bottom-up propagation: process leaves first (no children), then propagate
@@ -162,7 +178,7 @@ def _build_descendant_map(scopes) -> dict[int, set[int]]:
     return result
 
 
-def _derive_unused_variables(semantics, deleted_lines: set[int]) -> bool:
+def _derive_unused_variables(semantics: object, deleted_lines: set[int]) -> bool:
     """Check if any variable's only read-references all fall on deleted lines.
 
     Uses the same scope visibility model as check_unused_variables in scope.py:
@@ -220,7 +236,7 @@ def derive_expected_cascades(
     content: str,
     language: str,
     applied_fixes: list[Fix],
-    semantics=None,
+    semantics: object | None = None,
 ) -> set[str]:
     """Derive rule names expected to appear as side-effects of applied fixes.
 
