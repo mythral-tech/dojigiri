@@ -263,3 +263,45 @@ rules:
   pattern: new\s+CookieOptions\s*\{(?![^}]*HttpOnly\s*=\s*true)
   severity: warning
   suggestion: Set HttpOnly = true to prevent XSS-based cookie theft
+- category: security
+  id: csharp-prompt-injection-interpolation
+  message: String interpolation in prompt/message context — prompt injection risk
+  pattern: (?:prompt|message|instruction|system)\w*\s*=\s*\$"[^"]*\{
+  severity: warning
+  suggestion: Use parameterized prompt templates; never interpolate user input into prompts
+  flags: [IGNORECASE]
+- category: security
+  id: csharp-prompt-injection-system-role
+  message: System role ChatMessage with interpolated content — prompt injection risk
+  pattern: ChatMessage\w*\(\s*(?:ChatRole\.System|"system"|ChatMessageRole\.System)[^)]*\$"[^"]*\{
+  severity: critical
+  suggestion: Use static system prompts; pass user content only in user-role messages
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: csharp-semantic-kernel-prompt-injection
+  message: Semantic Kernel prompt template with variable interpolation — prompt injection risk
+  pattern: (?:KernelFunction|SKFunction|CreateFunctionFromPrompt|PromptTemplate)\s*\([^)]*\$"[^"]*\{
+  severity: critical
+  suggestion: Use Semantic Kernel template variables with input validation instead of string interpolation
+  flags: [DOTALL]
+- category: security
+  id: csharp-llm-tool-call-to-process
+  message: LLM tool call result passed to Process.Start — remote code execution risk
+  pattern: (?:tool|function|action)\w*\.?(?:result|output|response|content|value)\b.*?Process\.Start
+  severity: critical
+  suggestion: Never pass LLM output to process execution; validate against a strict allowlist
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: csharp-llm-no-content-filter
+  message: Azure OpenAI client without content filter configuration — unfiltered output
+  pattern: new\s+(?:OpenAIClient|AzureOpenAIClient|ChatCompletionsOptions)\s*\((?!.*ContentFilter)
+  severity: warning
+  suggestion: Configure Azure content filters to prevent harmful model outputs
+  flags: [DOTALL]
+- category: security
+  id: csharp-llm-secret-in-prompt
+  message: API key or connection string interpolated into prompt — credential leak to LLM
+  pattern: (?:prompt|message|content)\w*\s*=\s*\$"[^"]*\{[^}]*(?:apiKey|api_key|connectionString|secret|password|token)\b
+  severity: critical
+  suggestion: Never include credentials in LLM prompts; use environment variables and keep secrets out of prompt context
+  flags: [IGNORECASE]

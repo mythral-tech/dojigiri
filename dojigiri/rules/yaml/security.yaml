@@ -561,3 +561,229 @@ rules:
   severity: info
   suggestion: Set timeouts on streaming LLM calls to prevent indefinite resource consumption
   flags: [DOTALL]
+# ── RAG-Specific Injection (OWASP LLM01 — RAG Poisoning) ────────────
+- category: security
+  id: rag-document-to-prompt
+  message: Retrieved document/chunk content interpolated directly into LLM prompt without sanitization — RAG injection risk
+  pattern: (?i)(?:similarity_search|vector_search|\.query|\.retrieve|get_relevant_documents|\.search|as_retriever)\s*\([\s\S]{0,300}(?:prompt|system_prompt|system_message|messages|instruction|content)\s*(?:=|\+=|\.append|\.format|\.join|f['"])
+  severity: critical
+  suggestion: Sanitize retrieved document content before including in prompts; strip potential injection payloads from chunks
+  flags: [DOTALL]
+- category: security
+  id: rag-metadata-injection
+  message: Vector DB metadata from retrieval result used in prompt — metadata injection risk if source is user-controlled
+  pattern: (?i)(?:\.metadata|\.page_content|doc\.metadata|chunk\.metadata|result\.metadata)\s*\[[\s\S]{0,200}(?:prompt|system_prompt|system_message|messages|instruction|content)\s*(?:=|\+=|\.append|\.format|f['"])
+  severity: warning
+  suggestion: Treat retrieval metadata as untrusted; validate and sanitize metadata fields before prompt inclusion
+  flags: [DOTALL]
+- category: security
+  id: rag-no-chunk-sanitization
+  message: Document chunks concatenated/joined directly into prompt string without content filtering
+  pattern: (?i)(?:join|\\n\.join|"\s*\\n\s*"\.join|concat)\s*\(\s*(?:chunks|documents|docs|results|passages|contexts|retrieved|search_results)[\s\S]{0,200}(?:prompt|system_prompt|system_message|messages|instruction|content)\s*(?:=|\+=|\.append|\.format|f['"])
+  severity: warning
+  suggestion: Filter and sanitize each chunk before concatenation; remove potential prompt injection patterns from retrieved content
+  flags: [DOTALL]
+- category: security
+  id: rag-user-query-in-system-prompt
+  message: User search query placed in system prompt — should be in user message to maintain role separation
+  pattern: (?i)['\"]role['\"]\s*:\s*['\"]system['\"][\s\S]{0,200}(?:query|question|user_input|user_query|search_query|user_message|user_request)
+  severity: critical
+  suggestion: Place user queries in the user role message, not in system prompts; system prompts should contain only developer-controlled instructions
+  flags: [DOTALL]
+- category: security
+  id: rag-unbounded-context
+  message: All retrieval results added to prompt without length or count limits — unbounded context window consumption
+  pattern: (?i)for\s+\w+\s+in\s+(?:results|documents|docs|chunks|passages|search_results|retrieved)\s*:[\s\S]{0,200}(?:prompt|context|messages)\s*(?:\+=|\.append|\.extend)(?![\s\S]{0,100}(?:\[:|\[0:|limit|max_|slice|truncat))
+  severity: warning
+  suggestion: Limit the number and total length of retrieved chunks added to prompt; use top-k with a reasonable bound
+  flags: [DOTALL]
+- category: security
+  id: rag-source-trust-boundary
+  message: User-uploaded or external file content passed directly to embedding/indexing without sanitization
+  pattern: (?i)(?:add_documents|add_texts|from_documents|index\.upsert|index\.add|\.add_embeddings|collection\.add|\.insert)\s*\([\s\S]{0,200}(?:request|req\.|upload|user_|input_|body\.|file\.|uploaded)
+  severity: critical
+  suggestion: Sanitize and validate user-uploaded document content before indexing into vector store; strip injection payloads
+  flags: [DOTALL]
+# ── Structured Output Manipulation (OWASP LLM01/LLM02) ───────────
+- category: security
+  id: llm-json-output-to-eval
+  message: LLM JSON response parsed then passed to eval/exec — code execution via structured output
+  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:eval|exec)\s*\(
+  severity: critical
+  suggestion: Never pass parsed LLM JSON output to eval/exec; validate fields against an allowlist and use safe dispatch
+  flags: [DOTALL]
+- category: security
+  id: llm-json-output-to-sql
+  message: LLM structured output used in SQL query construction — SQL injection via structured output
+  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:\.execute|\.query|\.raw|cursor\.|SELECT\s|INSERT\s|UPDATE\s|DELETE\s)
+  severity: critical
+  suggestion: Use parameterized queries; never interpolate LLM-generated JSON fields into SQL strings
+  flags: [DOTALL]
+- category: security
+  id: llm-json-output-to-shell
+  message: LLM structured output used in shell command — command injection via structured output
+  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:subprocess|os\.system|os\.popen|child_process|exec\(|execSync|Runtime\.exec|ProcessBuilder)
+  severity: critical
+  suggestion: Never pass LLM-generated JSON fields to shell commands; use allowlisted operations with strict argument validation
+  flags: [DOTALL]
+- category: security
+  id: llm-json-output-to-url
+  message: LLM structured output used to construct URL for HTTP request — SSRF risk via structured output
+  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:requests\.get|requests\.post|fetch\(|urllib|http\.get|axios|httpx|aiohttp)
+  severity: warning
+  suggestion: Validate and allowlist URLs from LLM output before making HTTP requests; block internal/private IP ranges
+  flags: [DOTALL]
+- category: security
+  id: llm-json-output-to-template
+  message: LLM structured output injected into server-side template — SSTI risk via structured output
+  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:render_template_string|Template\(|render_string|Jinja2|\.render\(|template\.render|nunjucks|Handlebars\.compile|ejs\.render)
+  severity: warning
+  suggestion: Never pass LLM output directly into template rendering; use pre-defined templates with auto-escaping
+  flags: [DOTALL]
+- category: security
+  id: llm-function-call-no-validation
+  message: LLM function call name used to invoke function without allowlist validation — arbitrary function execution
+  pattern: (?i)(?:function_call|function_name|tool_calls|tool_name|\.name)\s*[\[=][\s\S]{0,200}(?:getattr|globals\s*\(\s*\)\s*\[|locals\s*\(\s*\)\s*\[|eval\s*\(|__import__)
+  severity: warning
+  suggestion: Validate function names against an explicit allowlist before dispatch; never use getattr/globals/eval with LLM-provided names
+  flags: [DOTALL]
+- category: security
+  id: llm-structured-output-trusted
+  message: LLM response content used directly without validation or sanitization
+  pattern: (?i)(?:response|completion|chat_result)\.(?:choices\[|content|message|text|output)[\s\S]{0,100}(?:return\s|res\.json|jsonify|send\(|response\.write|print\()(?![\s\S]{0,200}(?:sanitize|validate|filter|escape|clean|strip|check|verify|allow))
+  severity: info
+  suggestion: Validate and sanitize LLM response content before using in application logic or returning to users
+  flags: [DOTALL]
+# ── Encoding-Based Prompt Injection (OWASP LLM01 — Encoding Bypass) ──
+- category: security
+  id: llm-base64-decode-to-prompt
+  message: Base64-decoded content injected into LLM prompt — attacker can hide malicious instructions in encoded payloads
+  pattern: (?i)(?:(?:b64decode|atob|base64\.decode|base64\.b64decode|decodebytes)\s*\(|Buffer\.from\s*\([^)]*,\s*['"]base64['"]\s*\))[\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
+  severity: critical
+  suggestion: Never decode base64 content directly into LLM prompts; validate and sanitize decoded content against an allowlist
+  flags: [DOTALL]
+- category: security
+  id: llm-rot13-decode-to-prompt
+  message: ROT13-decoded content used in LLM prompt — simple encoding trick to bypass safety filters
+  pattern: (?i)(?:codecs\.decode\s*\([^)]*['"]rot.?13['"]|rot13|\.translate\s*\([^)]*maketrans)[\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
+  severity: warning
+  suggestion: Do not use ROT13 or other trivial ciphers to construct prompts; use plain text with proper input validation
+  flags: [DOTALL]
+- category: security
+  id: llm-unicode-escape-in-prompt
+  message: Unicode escape sequences in prompt string — can hide malicious instructions from human review
+  pattern: (?i)(?:prompt|system_prompt|system_message|instruction)\s*=\s*(?:.*\\u[0-9a-f]{4}|.*\\x[0-9a-f]{2}|.*unicode_escape)
+  severity: warning
+  suggestion: Avoid unicode escape sequences in prompts; use readable plain text and validate all prompt content
+- category: security
+  id: llm-encoded-instruction-decode
+  message: Decoded or decompressed content fed into LLM prompt — encoding can obscure malicious instructions
+  pattern: (?i)(?:zlib\.decompress|gzip\.decompress|bz2\.decompress|lzma\.decompress|\.decode\s*\(\s*['"](?:utf-8|ascii|latin|cp1252|unicode_escape)['"]|unhexlify|binascii\.unhexlify)\s*\([\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
+  severity: warning
+  suggestion: Validate and sanitize all decoded or decompressed content before including in LLM prompts
+  flags: [DOTALL]
+- category: security
+  id: llm-prompt-from-hex
+  message: Hex-decoded payload injected into LLM prompt — hex encoding can hide malicious instructions
+  pattern: (?i)(?:(?:bytes\.fromhex|bytearray\.fromhex|unhexlify|hex_decode)\s*\(|Buffer\.from\s*\([^)]*,\s*['"]hex['"]\s*\))[\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
+  severity: warning
+  suggestion: Never inject hex-decoded content into LLM prompts; decode and validate against expected format first
+  flags: [DOTALL]
+- category: security
+  id: llm-multiline-ascii-art-in-prompt
+  message: Large multi-line string in prompt — ASCII art injection can embed hidden instructions in visual patterns
+  pattern: (?i)(?:prompt|system_prompt|system_message|instruction)\s*=\s*(?:"""[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?"""|`[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*`)
+  severity: info
+  suggestion: Review large multi-line prompt strings for hidden ASCII art instructions; prefer programmatic prompt construction
+  flags: [DOTALL]
+- category: security
+  id: llm-prompt-char-substitution
+  message: Prompt built from character codes (chr/fromCharCode) — can hide instructions from static analysis and human review
+  pattern: (?i)(?:chr\s*\(\s*\d+\s*\)|String\.fromCharCode\s*\()[\s\S]{0,300}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.join)
+  severity: info
+  suggestion: Do not construct prompts from character codes; use plain text strings that can be reviewed
+  flags: [DOTALL]
+# ── AI Agent Framework Security (CrewAI, AutoGen, DSPy, LangGraph, Claude SDK) ─
+- category: security
+  id: crewai-agent-allow-code-execution
+  message: CrewAI Agent with allow_code_execution=True — enables arbitrary code execution by the agent
+  pattern: (?i)Agent\s*\([\s\S]{0,500}allow_code_execution\s*=\s*True
+  severity: critical
+  suggestion: Disable allow_code_execution or sandbox code execution; agents should not run arbitrary code
+  flags: [DOTALL]
+- category: security
+  id: crewai-task-user-input-in-description
+  message: CrewAI Task description built with user input interpolation — prompt injection risk
+  pattern: (?i)Task\s*\([\s\S]{0,300}description\s*=\s*(?:f['"]|['"][^'"]*['"]\.format\s*\(|['"][^'"]*['"]\s*\+\s*(?:request|req|user|input|params|body))
+  severity: warning
+  suggestion: Sanitize user input before interpolating into Task descriptions; use validated templates
+  flags: [DOTALL]
+- category: security
+  id: crewai-agent-delegation-unrestricted
+  message: CrewAI agent with allow_delegation=True — unrestricted delegation to other agents
+  pattern: (?i)Agent\s*\([\s\S]{0,500}allow_delegation\s*=\s*True
+  severity: warning
+  suggestion: Restrict delegation scope or disable delegation; implement delegation constraints and approval gates
+  flags: [DOTALL]
+- category: security
+  id: autogen-code-executor-unsafe
+  message: AutoGen code executor without sandboxing — enables arbitrary code execution
+  pattern: (?i)(?:LocalCommandLineCodeExecutor|DockerCommandLineCodeExecutor)\s*\(
+  severity: critical
+  suggestion: Use sandboxed code execution with strict resource limits; prefer DockerCommandLineCodeExecutor with restricted images
+- category: security
+  id: autogen-user-proxy-auto-reply
+  message: AutoGen UserProxyAgent with human_input_mode=NEVER — fully autonomous with no human oversight
+  pattern: (?i)UserProxyAgent\s*\([\s\S]{0,500}human_input_mode\s*=\s*['\"]NEVER['\"]
+  severity: warning
+  suggestion: Use human_input_mode=ALWAYS or TERMINATE for safety-critical workflows; add human oversight checkpoints
+  flags: [DOTALL]
+- category: security
+  id: autogen-register-function-unvalidated
+  message: AutoGen register_function with no input validation on the registered callable
+  pattern: (?i)register_function\s*\(\s*\w+\s*,[\s\S]{0,300}(?:caller|executor)\s*=
+  severity: warning
+  suggestion: Validate and sanitize all inputs in registered functions; add type checking and bounds validation
+  flags: [DOTALL]
+- category: security
+  id: dspy-assert-bypass
+  message: DSPy assertion/suggestion bypass enabled — safety assertions will be silently ignored
+  pattern: (?i)(?:dspy\.settings\.configure|dspy\.configure)\s*\([\s\S]{0,300}bypass_assert\s*=\s*True
+  severity: warning
+  suggestion: Do not bypass assertions in production; assertions enforce output quality and safety constraints
+  flags: [DOTALL]
+- category: security
+  id: dspy-tool-user-input-unsanitized
+  message: DSPy tool receiving user input without sanitization — injection risk
+  pattern: (?i)(?:dspy\.Tool|dspy\.ReAct|dspy\.Predict)\s*\([\s\S]{0,300}(?:request\.|req\.|user_input|body\.|params\.)
+  severity: warning
+  suggestion: Sanitize and validate all user input before passing to DSPy tools or modules
+  flags: [DOTALL]
+- category: security
+  id: langgraph-tool-node-unrestricted
+  message: LangGraph ToolNode with unrestricted tool access — no permission boundaries on agent tool use
+  pattern: (?i)ToolNode\s*\(\s*(?:tools|all_tools|\[[\s\S]{0,500}\])
+  severity: critical
+  suggestion: Restrict ToolNode to minimum required tools; implement permission boundaries and tool-level access control
+  flags: [DOTALL]
+- category: security
+  id: langgraph-human-in-loop-disabled
+  message: LangGraph agent graph compiled without interrupt checkpoints — no human-in-the-loop oversight
+  pattern: (?i)(?:StateGraph|MessageGraph)\s*\([\s\S]{0,1000}\.compile\s*\(\s*(?:checkpointer\s*=\s*\w+\s*)?\)(?![\s\S]{0,100}interrupt)
+  severity: warning
+  suggestion: Add interrupt_before or interrupt_after to critical nodes for human oversight; use checkpointer with interrupt points
+  flags: [DOTALL]
+- category: security
+  id: claude-agent-sdk-unsafe-tool
+  message: Claude Agent SDK tool that executes code or shell commands from agent output — RCE risk
+  pattern: (?i)(?:claude_agent_sdk|claude_code_sdk|anthropic\.agent)[\s\S]{0,500}(?:exec\s*\(|eval\s*\(|subprocess|os\.system|os\.popen|child_process|execSync|shell_exec)
+  severity: critical
+  suggestion: Never execute agent-generated code without sandboxing; use validated operations with strict allowlists
+  flags: [DOTALL]
+- category: security
+  id: claude-agent-sdk-no-guardrails
+  message: Claude Agent SDK agent without guardrail functions — no safety validation on agent outputs
+  pattern: (?i)(?:Agent|AgentRunner|create_agent)\s*\([\s\S]{0,500}(?:tools\s*=)(?![\s\S]{0,300}(?:guardrail|guard|validator|filter|safety))
+  severity: warning
+  suggestion: Configure guardrail functions to validate agent outputs before execution; implement safety boundaries
+  flags: [DOTALL]

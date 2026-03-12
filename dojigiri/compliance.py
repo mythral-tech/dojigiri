@@ -932,6 +932,68 @@ CWE_MAP: dict[str, str] = {
     "llm-no-rate-limit": "CWE-770",
     "llm-no-token-budget": "CWE-400",
     "llm-streaming-no-timeout": "CWE-400",
+    # ── Gap 1: C#/PHP/Rust LLM rules ─────────────────────────────────
+    # C# prompt injection & LLM safety
+    "csharp-prompt-injection-interpolation": "CWE-74",
+    "csharp-prompt-injection-system-role": "CWE-74",
+    "csharp-semantic-kernel-prompt-injection": "CWE-74",
+    "csharp-llm-tool-call-to-process": "CWE-94",
+    "csharp-llm-no-content-filter": "CWE-693",
+    "csharp-llm-secret-in-prompt": "CWE-200",
+    # PHP prompt injection & LLM safety
+    "php-prompt-injection-interpolation": "CWE-74",
+    "php-prompt-injection-system-role": "CWE-74",
+    "php-llm-tool-call-to-exec": "CWE-78",
+    "php-llm-response-to-eval": "CWE-94",
+    "php-llm-no-input-validation": "CWE-20",
+    "php-llm-secret-in-prompt": "CWE-200",
+    # Rust prompt injection & LLM safety
+    "rust-prompt-injection-format": "CWE-74",
+    "rust-prompt-injection-system-role": "CWE-74",
+    "rust-llm-unsafe-deserialize": "CWE-502",
+    "rust-llm-tool-call-to-command": "CWE-78",
+    "rust-llm-model-unsafe-load": "CWE-494",
+    # ── Gap 2: RAG injection ──────────────────────────────────────────
+    "rag-document-to-prompt": "CWE-74",
+    "rag-metadata-injection": "CWE-74",
+    "rag-no-chunk-sanitization": "CWE-20",
+    "rag-user-query-in-system-prompt": "CWE-74",
+    "rag-unbounded-context": "CWE-400",
+    "rag-source-trust-boundary": "CWE-94",
+    # ── Gap 3: Structured output manipulation ─────────────────────────
+    "llm-json-output-to-eval": "CWE-94",
+    "llm-json-output-to-sql": "CWE-89",
+    "llm-json-output-to-shell": "CWE-78",
+    "llm-json-output-to-url": "CWE-918",
+    "llm-json-output-to-template": "CWE-1336",
+    "llm-function-call-no-validation": "CWE-20",
+    "llm-structured-output-trusted": "CWE-20",
+    # ── Gap 4: Agent framework rules ──────────────────────────────────
+    # CrewAI
+    "crewai-agent-allow-code-execution": "CWE-94",
+    "crewai-task-user-input-in-description": "CWE-74",
+    "crewai-agent-delegation-unrestricted": "CWE-250",
+    # AutoGen
+    "autogen-code-executor-unsafe": "CWE-94",
+    "autogen-user-proxy-auto-reply": "CWE-693",
+    "autogen-register-function-unvalidated": "CWE-20",
+    # DSPy
+    "dspy-assert-bypass": "CWE-693",
+    "dspy-tool-user-input-unsanitized": "CWE-20",
+    # LangGraph
+    "langgraph-tool-node-unrestricted": "CWE-250",
+    "langgraph-human-in-loop-disabled": "CWE-693",
+    # Claude Agent SDK
+    "claude-agent-sdk-unsafe-tool": "CWE-94",
+    "claude-agent-sdk-no-guardrails": "CWE-693",
+    # ── Gap 5: Encoding attack rules ──────────────────────────────────
+    "llm-base64-decode-to-prompt": "CWE-74",
+    "llm-rot13-decode-to-prompt": "CWE-74",
+    "llm-unicode-escape-in-prompt": "CWE-74",
+    "llm-encoded-instruction-decode": "CWE-74",
+    "llm-prompt-from-hex": "CWE-74",
+    "llm-multiline-ascii-art-in-prompt": "CWE-74",
+    "llm-prompt-char-substitution": "CWE-74",
 }
 
 

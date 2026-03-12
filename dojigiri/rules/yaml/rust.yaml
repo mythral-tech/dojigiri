@@ -209,3 +209,38 @@ rules:
   pattern: \bprintln!\s*\(
   severity: info
   suggestion: Use log::info!() or tracing::info!() for library code
+- category: security
+  id: rust-prompt-injection-format
+  message: format! with prompt-like variable — prompt injection risk
+  pattern: (?:prompt|message|instruction|system)\w*\s*=\s*format!\s*\(\s*"[^"]*\{
+  severity: warning
+  suggestion: Use validated template parameters; never interpolate user input into prompts
+  flags: [IGNORECASE]
+- category: security
+  id: rust-prompt-injection-system-role
+  message: System role message with format! interpolation — prompt injection risk
+  pattern: (?:system|System|role.*system).*?format!\s*\(\s*"[^"]*\{
+  severity: critical
+  suggestion: Use static system prompts; pass user content only in user-role messages
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: rust-llm-unsafe-deserialize
+  message: Deserializing LLM response into executable context — code execution risk
+  pattern: (?:response|completion|output|content)\w*.*?serde_json::from_str.*?(?:command|exec|run|eval|Command|Process)
+  severity: critical
+  suggestion: Validate deserialized LLM output against a strict schema before any execution
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: rust-llm-tool-call-to-command
+  message: LLM tool call result passed to Command — remote code execution risk
+  pattern: (?:tool|function|action)\w*[\._]*(?:result|output|response|content|value)\b.*?Command::new\s*\(
+  severity: critical
+  suggestion: Never pass LLM output to Command::new; validate against a strict allowlist
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: rust-llm-model-unsafe-load
+  message: Loading model weights from user-controlled path with unsafe — code execution risk
+  pattern: (?:user|input|request|param)\w*.*?unsafe\s*\{.*?(?:load|read|from_file|from_path)\w*\s*\(
+  severity: critical
+  suggestion: Validate model file paths against an allowlist; avoid unsafe blocks for model loading
+  flags: [IGNORECASE, DOTALL]

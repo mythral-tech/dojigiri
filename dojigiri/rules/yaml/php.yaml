@@ -275,3 +275,45 @@ rules:
   pattern: phar://
   severity: warning
   suggestion: Disable phar stream wrapper or validate all file paths against phar:// prefix
+- category: security
+  id: php-prompt-injection-interpolation
+  message: Variable interpolation in prompt/message string — prompt injection risk
+  pattern: (?:prompt|message|instruction|system)\w*\s*=\s*"[^"]*\$\w+
+  severity: warning
+  suggestion: Sanitize and validate user input before including in LLM prompts
+  flags: [IGNORECASE]
+- category: security
+  id: php-prompt-injection-system-role
+  message: System role message with variable interpolation — prompt injection risk
+  pattern: (?:role|role_name)["']\s*=>\s*["']system["'].*?(?:content|message)["']\s*=>\s*"[^"]*\$\w+
+  severity: critical
+  suggestion: Use static system prompts; pass user content only in user-role messages
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: php-llm-tool-call-to-exec
+  message: LLM tool call result passed to shell execution — remote code execution risk
+  pattern: (?:tool|function|action)\w*(?:\[|->)(?:result|output|response|content|value)\b.*?(?:\bexec|shell_exec|system|passthru|proc_open)\s*\(
+  severity: critical
+  suggestion: Never pass LLM output to shell execution functions; validate against a strict allowlist
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: php-llm-response-to-eval
+  message: LLM response passed to eval() — arbitrary code execution risk
+  pattern: (?:response|completion|result|output|content|message)\w*(?:\[|->)(?:content|text|choices|body)\b.*?\beval\s*\(
+  severity: critical
+  suggestion: Never pass LLM output to eval(); parse structured responses safely
+  flags: [IGNORECASE, DOTALL]
+- category: security
+  id: php-llm-no-input-validation
+  message: User input from $_GET/$_POST directly in prompt without sanitization
+  pattern: (?:prompt|message|content|instruction)\w*\s*=\s*[^;]*\$_(?:GET|POST|REQUEST)\[
+  severity: warning
+  suggestion: Validate and sanitize user input before including in LLM prompts; apply length limits
+  flags: [IGNORECASE]
+- category: security
+  id: php-llm-secret-in-prompt
+  message: Credentials interpolated into LLM prompt string — credential leak
+  pattern: (?:prompt|message|content)\w*\s*=\s*"[^"]*\$(?:api_key|apiKey|secret|password|token|db_pass)\b
+  severity: critical
+  suggestion: Never include credentials in LLM prompts; keep secrets out of prompt context
+  flags: [IGNORECASE]

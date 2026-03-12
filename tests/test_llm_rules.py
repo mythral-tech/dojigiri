@@ -1072,3 +1072,806 @@ class TestLlmPickleModelLoad:
         code = 'model = torch.load("model.pt")\n'
         findings = run_regex_checks(code, "app.py", "python")
         assert not any(f.rule == "llm-pickle-model-load" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  Structured Output Manipulation
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestLlmJsonOutputToEval:
+    def test_triggers_python(self):
+        code = 'data = json.loads(response.text)\nresult = eval(data["code"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-json-output-to-eval" for f in findings)
+
+    def test_triggers_completion(self):
+        code = 'parsed = json.loads(completion.content)\nexec(parsed["script"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-json-output-to-eval" for f in findings)
+
+    def test_no_trigger_static_json(self):
+        code = 'data = json.loads(config_file.read())\nprint(data["key"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-json-output-to-eval" for f in findings)
+
+
+class TestLlmJsonOutputToSql:
+    def test_triggers_python(self):
+        code = 'data = json.loads(response.text)\ncursor.execute(f"SELECT * FROM {data[\'table\']}")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-json-output-to-sql" for f in findings)
+
+    def test_triggers_js(self):
+        code = 'const data = JSON.parse(completion.body);\ndb.query("SELECT " + data.columns);\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-json-output-to-sql" for f in findings)
+
+    def test_no_trigger_parameterized(self):
+        code = 'data = json.loads(config.read())\ncursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-json-output-to-sql" for f in findings)
+
+
+class TestLlmJsonOutputToShell:
+    def test_triggers_python(self):
+        code = 'data = json.loads(response.text)\nsubprocess.run(data["command"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-json-output-to-shell" for f in findings)
+
+    def test_triggers_js(self):
+        code = 'const data = JSON.parse(llm.body);\nchild_process.exec(data.cmd);\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-json-output-to-shell" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'data = json.loads(config.read())\nsubprocess.run(["ls", "-la"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-json-output-to-shell" for f in findings)
+
+
+class TestLlmJsonOutputToUrl:
+    def test_triggers_python(self):
+        code = 'data = json.loads(response.text)\nrequests.get(data["url"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-json-output-to-url" for f in findings)
+
+    def test_triggers_js(self):
+        code = 'const data = JSON.parse(completion.body);\nfetch(data.endpoint);\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-json-output-to-url" for f in findings)
+
+    def test_no_trigger_hardcoded(self):
+        code = 'data = json.loads(config.read())\nrequests.get("https://api.example.com")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-json-output-to-url" for f in findings)
+
+
+class TestLlmJsonOutputToTemplate:
+    def test_triggers_python(self):
+        code = 'data = json.loads(response.text)\nrender_template_string(data["template"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-json-output-to-template" for f in findings)
+
+    def test_triggers_jinja(self):
+        code = 'parsed = json.loads(llm_result.content)\ntemplate = Template(parsed["html"])\ntemplate.render()\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-json-output-to-template" for f in findings)
+
+    def test_no_trigger_static_template(self):
+        code = 'data = json.loads(config.read())\nrender_template("index.html", name=data["name"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-json-output-to-template" for f in findings)
+
+
+class TestLlmFunctionCallNoValidation:
+    def test_triggers_getattr(self):
+        code = 'function_name = response.function_call.name\nresult = getattr(module, function_name)(args)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-function-call-no-validation" for f in findings)
+
+    def test_triggers_globals(self):
+        code = 'tool_name = tool_calls[0].name\nfn = globals()[tool_name]\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-function-call-no-validation" for f in findings)
+
+    def test_no_trigger_allowlist(self):
+        code = 'name = response.function_call.name\nif name in ALLOWED_FUNCTIONS:\n    result = ALLOWED_FUNCTIONS[name](args)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-function-call-no-validation" for f in findings)
+
+
+class TestLlmStructuredOutputTrusted:
+    def test_triggers_return(self):
+        code = 'answer = response.choices[0].message.content\nreturn answer\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-structured-output-trusted" for f in findings)
+
+    def test_triggers_json_response(self):
+        code = 'text = completion.content\nres.json({"reply": text})\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-structured-output-trusted" for f in findings)
+
+    def test_no_trigger_sanitized(self):
+        code = 'text = response.content\ncleaned = sanitize(text)\nreturn cleaned\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-structured-output-trusted" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  security.yaml — RAG-specific injection rules
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestRagDocumentToPrompt:
+    def test_triggers_langchain(self):
+        code = 'docs = vectorstore.similarity_search(query)\nprompt = f"Context: {docs[0].page_content}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-document-to-prompt" for f in findings)
+
+    def test_triggers_retriever(self):
+        code = 'docs = retriever.get_relevant_documents(q)\nmessages.append({"content": docs[0]})\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-document-to-prompt" for f in findings)
+
+    def test_no_trigger_sanitized(self):
+        code = 'docs = vectorstore.similarity_search(query)\ncleaned = sanitize(docs)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "rag-document-to-prompt" for f in findings)
+
+
+class TestRagMetadataInjection:
+    def test_triggers(self):
+        code = 'source = doc.metadata["source"]\nprompt += f"From {source}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-metadata-injection" for f in findings)
+
+    def test_no_trigger_no_prompt(self):
+        code = 'source = doc.metadata["source"]\nlog.info(source)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "rag-metadata-injection" for f in findings)
+
+
+class TestRagNoChunkSanitization:
+    def test_triggers_join(self):
+        code = 'context = "\\n".join(chunks)\nprompt = f"Context: {context}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-no-chunk-sanitization" for f in findings)
+
+    def test_no_trigger_filtered(self):
+        code = 'context = "\\n".join(chunks)\ndb.save(context)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "rag-no-chunk-sanitization" for f in findings)
+
+
+class TestRagUserQueryInSystemPrompt:
+    def test_triggers(self):
+        code = '{"role": "system", "content": f"Answer the query: {user_query}"}\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-user-query-in-system-prompt" for f in findings)
+
+    def test_no_trigger_user_role(self):
+        code = '{"role": "user", "content": user_query}\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "rag-user-query-in-system-prompt" for f in findings)
+
+
+class TestRagUnboundedContext:
+    def test_triggers(self):
+        code = 'for doc in results:\n    prompt += doc.page_content\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-unbounded-context" for f in findings)
+
+    def test_no_trigger_sliced(self):
+        code = 'for doc in results[:5]:\n    prompt += doc.page_content\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "rag-unbounded-context" for f in findings)
+
+
+class TestRagSourceTrustBoundary:
+    def test_triggers_upload(self):
+        code = 'vectorstore.add_documents(request.files["docs"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-source-trust-boundary" for f in findings)
+
+    def test_triggers_user_file(self):
+        code = 'index.upsert(vectors=uploaded_chunks)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "rag-source-trust-boundary" for f in findings)
+
+    def test_no_trigger_curated(self):
+        code = 'vectorstore.add_documents(curated_docs)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "rag-source-trust-boundary" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  C# LLM security rules
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestCsharpPromptInjectionInterpolation:
+    def test_triggers(self):
+        code = 'var prompt = $"You are a {role} assistant";\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert any(f.rule == "csharp-prompt-injection-interpolation" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'var prompt = "You are a helpful assistant";\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert not any(f.rule == "csharp-prompt-injection-interpolation" for f in findings)
+
+
+class TestCsharpPromptInjectionSystemRole:
+    def test_triggers(self):
+        code = 'new ChatMessage(ChatRole.System, $"You are {persona}");\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert any(f.rule == "csharp-prompt-injection-system-role" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'new ChatMessage(ChatRole.System, "You are a helpful bot");\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert not any(f.rule == "csharp-prompt-injection-system-role" for f in findings)
+
+
+class TestCsharpSemanticKernelPromptInjection:
+    def test_triggers(self):
+        code = 'var func = kernel.CreateFunctionFromPrompt($"Summarize {userInput}");\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert any(f.rule == "csharp-semantic-kernel-prompt-injection" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'var func = kernel.CreateFunctionFromPrompt("Summarize the text");\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert not any(f.rule == "csharp-semantic-kernel-prompt-injection" for f in findings)
+
+
+class TestCsharpLlmToolCallToProcess:
+    def test_triggers(self):
+        code = 'var cmd = toolResult.content;\nProcess.Start(cmd);\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert any(f.rule == "csharp-llm-tool-call-to-process" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'Process.Start("notepad.exe");\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert not any(f.rule == "csharp-llm-tool-call-to-process" for f in findings)
+
+
+class TestCsharpLlmNoContentFilter:
+    def test_triggers(self):
+        code = 'var client = new OpenAIClient(apiKey);\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert any(f.rule == "csharp-llm-no-content-filter" for f in findings)
+
+    def test_no_trigger_with_filter(self):
+        code = 'var opts = new ChatCompletionsOptions(ContentFilter.Default);\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert not any(f.rule == "csharp-llm-no-content-filter" for f in findings)
+
+
+class TestCsharpLlmSecretInPrompt:
+    def test_triggers(self):
+        code = 'var prompt = $"Connect using {connectionString} to db";\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert any(f.rule == "csharp-llm-secret-in-prompt" for f in findings)
+
+    def test_no_trigger_safe(self):
+        code = 'var prompt = $"Hello {userName}, how can I help?";\n'
+        findings = run_regex_checks(code, "app.cs", "csharp")
+        assert not any(f.rule == "csharp-llm-secret-in-prompt" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  PHP LLM security rules
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestPhpPromptInjectionInterpolation:
+    def test_triggers(self):
+        code = '$prompt = "You are a $role assistant";\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert any(f.rule == "php-prompt-injection-interpolation" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = "$prompt = 'You are a helpful assistant';\n"
+        findings = run_regex_checks(code, "app.php", "php")
+        assert not any(f.rule == "php-prompt-injection-interpolation" for f in findings)
+
+
+class TestPhpPromptInjectionSystemRole:
+    def test_triggers(self):
+        code = '["role" => "system", "content" => "You are $persona"];\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert any(f.rule == "php-prompt-injection-system-role" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = "[\"role\" => \"system\", \"content\" => \"You are a bot\"];\n"
+        findings = run_regex_checks(code, "app.php", "php")
+        assert not any(f.rule == "php-prompt-injection-system-role" for f in findings)
+
+
+class TestPhpLlmToolCallToExec:
+    def test_triggers(self):
+        code = '$cmd = $tool_result->content;\nexec($cmd);\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert any(f.rule == "php-llm-tool-call-to-exec" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'exec("ls -la");\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert not any(f.rule == "php-llm-tool-call-to-exec" for f in findings)
+
+
+class TestPhpLlmResponseToEval:
+    def test_triggers(self):
+        code = '$code = $response->content;\neval($code);\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert any(f.rule == "php-llm-response-to-eval" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = '$x = $response->content;\necho $x;\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert not any(f.rule == "php-llm-response-to-eval" for f in findings)
+
+
+class TestPhpLlmNoInputValidation:
+    def test_triggers(self):
+        code = '$prompt = "Tell me about " . $_GET["topic"];\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert any(f.rule == "php-llm-no-input-validation" for f in findings)
+
+    def test_no_trigger_sanitized(self):
+        code = '$topic = htmlspecialchars($_GET["topic"]);\n$prompt = "Tell me about " . $topic;\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert not any(f.rule == "php-llm-no-input-validation" for f in findings)
+
+
+class TestPhpLlmSecretInPrompt:
+    def test_triggers(self):
+        code = '$prompt = "Use key $api_key to connect";\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert any(f.rule == "php-llm-secret-in-prompt" for f in findings)
+
+    def test_no_trigger_safe(self):
+        code = '$prompt = "Hello $username, welcome";\n'
+        findings = run_regex_checks(code, "app.php", "php")
+        assert not any(f.rule == "php-llm-secret-in-prompt" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  Rust LLM security rules
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestRustPromptInjectionFormat:
+    def test_triggers(self):
+        code = 'let prompt = format!("You are a {role} assistant");\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert any(f.rule == "rust-prompt-injection-format" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'let prompt = "You are a helpful assistant";\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert not any(f.rule == "rust-prompt-injection-format" for f in findings)
+
+
+class TestRustPromptInjectionSystemRole:
+    def test_triggers(self):
+        code = 'let system_msg = format!("You are {persona}");\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert any(f.rule == "rust-prompt-injection-system-role" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'let system_msg = "You are a helpful bot";\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert not any(f.rule == "rust-prompt-injection-system-role" for f in findings)
+
+
+class TestRustLlmUnsafeDeserialize:
+    def test_triggers(self):
+        code = 'let data = response_content;\nlet action: Action = serde_json::from_str(&data).unwrap();\naction.command.exec();\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert any(f.rule == "rust-llm-unsafe-deserialize" for f in findings)
+
+    def test_no_trigger_safe(self):
+        code = 'let config: Config = serde_json::from_str(&file_data).unwrap();\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert not any(f.rule == "rust-llm-unsafe-deserialize" for f in findings)
+
+
+class TestRustLlmToolCallToCommand:
+    def test_triggers(self):
+        code = 'let cmd = tool_result.content;\nCommand::new(cmd).spawn();\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert any(f.rule == "rust-llm-tool-call-to-command" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'Command::new("ls").arg("-la").spawn();\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert not any(f.rule == "rust-llm-tool-call-to-command" for f in findings)
+
+
+class TestRustLlmModelUnsafeLoad:
+    def test_triggers(self):
+        code = 'let path = user_input;\nunsafe { model.load(&path); }\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert any(f.rule == "rust-llm-model-unsafe-load" for f in findings)
+
+    def test_no_trigger_safe(self):
+        code = 'let model = Model::from_file("weights.bin");\n'
+        findings = run_regex_checks(code, "app.rs", "rust")
+        assert not any(f.rule == "rust-llm-model-unsafe-load" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  security.yaml — AI Agent Framework rules (CrewAI, AutoGen, DSPy, LangGraph, Claude SDK)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestCrewaiAgentAllowCodeExecution:
+    def test_triggers(self):
+        code = 'agent = Agent(\n    role="coder",\n    allow_code_execution=True\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "crewai-agent-allow-code-execution" for f in findings)
+
+    def test_triggers_inline(self):
+        code = 'Agent(role="dev", allow_code_execution=True, goal="code")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "crewai-agent-allow-code-execution" for f in findings)
+
+    def test_no_trigger_false(self):
+        code = 'Agent(role="researcher", allow_code_execution=False)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "crewai-agent-allow-code-execution" for f in findings)
+
+    def test_no_trigger_no_flag(self):
+        code = 'Agent(role="writer", goal="write articles")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "crewai-agent-allow-code-execution" for f in findings)
+
+
+class TestCrewaiTaskUserInputInDescription:
+    def test_triggers_fstring(self):
+        code = 'Task(\n    description=f"Analyze {user_input}",\n    agent=researcher\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "crewai-task-user-input-in-description" for f in findings)
+
+    def test_triggers_format(self):
+        code = 'Task(description="Process {}".format(request.data))\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "crewai-task-user-input-in-description" for f in findings)
+
+    def test_triggers_concat(self):
+        code = 'Task(description="Handle " + user_query)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "crewai-task-user-input-in-description" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'Task(description="Summarize the quarterly report", agent=analyst)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "crewai-task-user-input-in-description" for f in findings)
+
+
+class TestCrewaiAgentDelegationUnrestricted:
+    def test_triggers(self):
+        code = 'Agent(\n    role="manager",\n    allow_delegation=True,\n    goal="coordinate"\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "crewai-agent-delegation-unrestricted" for f in findings)
+
+    def test_no_trigger_false(self):
+        code = 'Agent(role="worker", allow_delegation=False)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "crewai-agent-delegation-unrestricted" for f in findings)
+
+    def test_no_trigger_no_flag(self):
+        code = 'Agent(role="analyst", goal="analyze data")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "crewai-agent-delegation-unrestricted" for f in findings)
+
+
+class TestAutogenCodeExecutorUnsafe:
+    def test_triggers_local(self):
+        code = 'executor = LocalCommandLineCodeExecutor(work_dir="coding")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "autogen-code-executor-unsafe" for f in findings)
+
+    def test_triggers_docker(self):
+        code = 'executor = DockerCommandLineCodeExecutor(image="python:3.11")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "autogen-code-executor-unsafe" for f in findings)
+
+    def test_no_trigger_unrelated(self):
+        code = 'executor = SafeCodeExecutor(sandbox=True)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "autogen-code-executor-unsafe" for f in findings)
+
+
+class TestAutogenUserProxyAutoReply:
+    def test_triggers(self):
+        code = 'proxy = UserProxyAgent(\n    name="user",\n    human_input_mode="NEVER",\n    code_execution_config=config\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "autogen-user-proxy-auto-reply" for f in findings)
+
+    def test_no_trigger_always(self):
+        code = 'proxy = UserProxyAgent(name="user", human_input_mode="ALWAYS")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "autogen-user-proxy-auto-reply" for f in findings)
+
+    def test_no_trigger_terminate(self):
+        code = 'proxy = UserProxyAgent(name="user", human_input_mode="TERMINATE")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "autogen-user-proxy-auto-reply" for f in findings)
+
+
+class TestAutogenRegisterFunctionUnvalidated:
+    def test_triggers(self):
+        code = 'register_function(\n    run_query,\n    caller=assistant,\n    executor=user_proxy,\n    description="Run a SQL query"\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "autogen-register-function-unvalidated" for f in findings)
+
+    def test_no_trigger_no_caller(self):
+        code = 'register_handler(my_func, event="on_message")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "autogen-register-function-unvalidated" for f in findings)
+
+
+class TestDspyAssertBypass:
+    def test_triggers(self):
+        code = 'dspy.settings.configure(\n    lm=lm,\n    bypass_assert=True\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "dspy-assert-bypass" for f in findings)
+
+    def test_triggers_configure(self):
+        code = 'dspy.configure(lm=turbo, bypass_assert=True)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "dspy-assert-bypass" for f in findings)
+
+    def test_no_trigger_false(self):
+        code = 'dspy.settings.configure(lm=lm, bypass_assert=False)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "dspy-assert-bypass" for f in findings)
+
+    def test_no_trigger_no_flag(self):
+        code = 'dspy.settings.configure(lm=lm)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "dspy-assert-bypass" for f in findings)
+
+
+class TestDspyToolUserInputUnsanitized:
+    def test_triggers_request(self):
+        code = 'tool = dspy.ReAct(\n    signature,\n    tools=[search],\n    query=request.args["q"]\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "dspy-tool-user-input-unsanitized" for f in findings)
+
+    def test_triggers_user_input(self):
+        code = 'predictor = dspy.Predict(sig, input=user_input)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "dspy-tool-user-input-unsanitized" for f in findings)
+
+    def test_no_trigger_sanitized(self):
+        code = 'predictor = dspy.Predict(sig, input=sanitized_data)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "dspy-tool-user-input-unsanitized" for f in findings)
+
+
+class TestLanggraphToolNodeUnrestricted:
+    def test_triggers_tools_var(self):
+        code = 'tool_node = ToolNode(tools)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "langgraph-tool-node-unrestricted" for f in findings)
+
+    def test_triggers_all_tools(self):
+        code = 'tool_node = ToolNode(all_tools)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "langgraph-tool-node-unrestricted" for f in findings)
+
+    def test_triggers_list(self):
+        code = 'tool_node = ToolNode([search, calculator, shell_tool])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "langgraph-tool-node-unrestricted" for f in findings)
+
+    def test_no_trigger_unrelated(self):
+        code = 'node = GraphNode(name="processor")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "langgraph-tool-node-unrestricted" for f in findings)
+
+
+class TestLanggraphHumanInLoopDisabled:
+    def test_triggers(self):
+        code = 'graph = StateGraph(AgentState)\ngraph.add_node("agent", call_model)\napp = graph.compile(checkpointer=memory)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "langgraph-human-in-loop-disabled" for f in findings)
+
+    def test_triggers_no_checkpointer(self):
+        code = 'graph = StateGraph(State)\ngraph.add_node("llm", run_llm)\napp = graph.compile()\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "langgraph-human-in-loop-disabled" for f in findings)
+
+    def test_no_trigger_with_interrupt(self):
+        code = 'graph = StateGraph(State)\ngraph.add_node("agent", call_model)\napp = graph.compile(checkpointer=mem, interrupt_before=["tools"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "langgraph-human-in-loop-disabled" for f in findings)
+
+
+class TestClaudeAgentSdkUnsafeTool:
+    def test_triggers_exec(self):
+        code = 'from claude_agent_sdk import Agent\nagent = Agent(tools=[my_tool])\nresult = exec(agent.output)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "claude-agent-sdk-unsafe-tool" for f in findings)
+
+    def test_triggers_subprocess(self):
+        code = 'import claude_code_sdk\nsubprocess.run(agent_response.command)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "claude-agent-sdk-unsafe-tool" for f in findings)
+
+    def test_triggers_os_system(self):
+        code = 'from anthropic.agent import Agent\nos.system(result.shell_cmd)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "claude-agent-sdk-unsafe-tool" for f in findings)
+
+    def test_no_trigger_safe(self):
+        code = 'from claude_agent_sdk import Agent\nagent = Agent(tools=[safe_search])\nprint(agent.output)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "claude-agent-sdk-unsafe-tool" for f in findings)
+
+
+class TestClaudeAgentSdkNoGuardrails:
+    def test_triggers(self):
+        code = 'agent = Agent(\n    model="claude-3",\n    tools=[search, calculator],\n    max_turns=10\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "claude-agent-sdk-no-guardrails" for f in findings)
+
+    def test_triggers_create_agent(self):
+        code = 'agent = create_agent(\n    tools=[shell_tool, file_tool],\n    model="claude-3"\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "claude-agent-sdk-no-guardrails" for f in findings)
+
+    def test_no_trigger_with_guardrails(self):
+        code = 'agent = Agent(\n    model="claude-3",\n    tools=[search],\n    guardrail=safety_check\n)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "claude-agent-sdk-no-guardrails" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  security.yaml — encoding-based prompt injection
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestLlmBase64DecodeToPrompt:
+    def test_triggers_python_b64decode(self):
+        code = 'decoded = base64.b64decode(payload)\nprompt = f"Do this: {decoded}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-base64-decode-to-prompt" for f in findings)
+
+    def test_triggers_js_atob(self):
+        code = 'const decoded = atob(encoded);\nmessages.append({role: "user", content: decoded})\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-base64-decode-to-prompt" for f in findings)
+
+    def test_triggers_node_buffer(self):
+        code = 'const text = Buffer.from(data, "base64").toString();\nprompt += text\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-base64-decode-to-prompt" for f in findings)
+
+    def test_no_trigger_b64_for_image(self):
+        code = 'image_data = base64.b64decode(img_str)\nwith open("out.png", "wb") as f:\n    f.write(image_data)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-base64-decode-to-prompt" for f in findings)
+
+    def test_no_trigger_no_prompt(self):
+        code = 'decoded = base64.b64decode(token)\nuser_id = decoded.split(b":")[0]\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-base64-decode-to-prompt" for f in findings)
+
+
+class TestLlmRot13DecodeToPrompt:
+    def test_triggers_codecs(self):
+        code = 'hidden = codecs.decode(encoded, "rot13")\nprompt += hidden\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-rot13-decode-to-prompt" for f in findings)
+
+    def test_triggers_maketrans(self):
+        code = 'text = cipher.translate(str.maketrans(a, b))\nsystem_message = f"Instructions: {text}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-rot13-decode-to-prompt" for f in findings)
+
+    def test_no_trigger_rot13_logging(self):
+        code = 'obfuscated = codecs.decode(data, "rot13")\nlogger.debug(obfuscated)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-rot13-decode-to-prompt" for f in findings)
+
+
+class TestLlmUnicodeEscapeInPrompt:
+    def test_triggers_unicode_escape(self):
+        code = 'prompt = "Hello \\u0048\\u0065\\u006c\\u0070 me"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-unicode-escape-in-prompt" for f in findings)
+
+    def test_triggers_hex_escape(self):
+        code = 'system_prompt = "Do \\x48\\x65\\x6c\\x70"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-unicode-escape-in-prompt" for f in findings)
+
+    def test_triggers_unicode_escape_codec(self):
+        code = 'instruction = data.decode("unicode_escape")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-unicode-escape-in-prompt" for f in findings)
+
+    def test_no_trigger_plain_prompt(self):
+        code = 'prompt = "You are a helpful assistant"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-unicode-escape-in-prompt" for f in findings)
+
+
+class TestLlmEncodedInstructionDecode:
+    def test_triggers_zlib(self):
+        code = 'text = zlib.decompress(payload)\nprompt = f"Execute: {text}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-encoded-instruction-decode" for f in findings)
+
+    def test_triggers_gzip(self):
+        code = 'data = gzip.decompress(blob)\nmessages.append({"role": "user", "content": data})\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-encoded-instruction-decode" for f in findings)
+
+    def test_triggers_unhexlify(self):
+        code = 'raw = binascii.unhexlify(hex_str)\nprompt += raw.decode()\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-encoded-instruction-decode" for f in findings)
+
+    def test_no_trigger_decompress_to_file(self):
+        code = 'data = zlib.decompress(blob)\nwith open("out.bin", "wb") as f:\n    f.write(data)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-encoded-instruction-decode" for f in findings)
+
+
+class TestLlmPromptFromHex:
+    def test_triggers_bytes_fromhex(self):
+        code = 'payload = bytes.fromhex(hex_input)\nprompt = f"Run: {payload}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-prompt-from-hex" for f in findings)
+
+    def test_triggers_buffer_hex(self):
+        code = 'const text = Buffer.from(hexStr, "hex").toString();\nmessages.append({content: text})\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-prompt-from-hex" for f in findings)
+
+    def test_no_trigger_hex_for_hash(self):
+        code = 'digest = bytes.fromhex(hash_value)\nassert digest == expected\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-prompt-from-hex" for f in findings)
+
+
+class TestLlmMultilineAsciiArtInPrompt:
+    def test_triggers_triple_quote(self):
+        code = 'prompt = """\nline1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10\n"""\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-multiline-ascii-art-in-prompt" for f in findings)
+
+    def test_triggers_template_literal(self):
+        code = 'instruction = `\nline1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nline10\n`\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-multiline-ascii-art-in-prompt" for f in findings)
+
+    def test_no_trigger_short_prompt(self):
+        code = 'prompt = """You are a helpful assistant.\nBe concise."""\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-multiline-ascii-art-in-prompt" for f in findings)
+
+
+class TestLlmPromptCharSubstitution:
+    def test_triggers_chr_python(self):
+        code = 'hidden = chr(72) + chr(101) + chr(108)\nprompt = f"Do: {hidden}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-prompt-char-substitution" for f in findings)
+
+    def test_triggers_fromcharcode_js(self):
+        code = 'const cmd = String.fromCharCode(72, 101, 108);\nmessages.append({content: cmd})\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "llm-prompt-char-substitution" for f in findings)
+
+    def test_no_trigger_chr_no_prompt(self):
+        code = 'separator = chr(0) + chr(10)\ndata = payload.split(separator)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-prompt-char-substitution" for f in findings)
