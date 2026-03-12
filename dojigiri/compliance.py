@@ -797,6 +797,117 @@ CWE_MAP: dict[str, str] = {
     "xml-sax-parser": "CWE-611",
     "elementtree-defused": "CWE-611",
     "xml-parse-untrusted": "CWE-611",
+    # ── Prompt Injection (LLM Security) ──────────────────────────────
+    # Direct injection — user input interpolated into prompts (CWE-74: Injection)
+    "prompt-injection-fstring": "CWE-74",
+    "prompt-injection-format": "CWE-74",
+    "prompt-injection-concat": "CWE-74",
+    "prompt-injection-percent": "CWE-74",
+    "prompt-injection-template-literal": "CWE-74",
+    "prompt-injection-system-role-fstring": "CWE-74",
+    "prompt-injection-system-role-template": "CWE-74",
+    "prompt-injection-system-content-js": "CWE-74",
+    "prompt-injection-system-content-concat": "CWE-74",
+    "prompt-injection-system-content-ts": "CWE-74",
+    # SDK-specific direct injection
+    "prompt-injection-openai-fstring": "CWE-74",
+    "prompt-injection-openai-format": "CWE-74",
+    "prompt-injection-openai-template": "CWE-74",
+    "prompt-injection-openai-concat": "CWE-74",
+    "prompt-injection-openai-ts": "CWE-74",
+    "prompt-injection-anthropic-fstring": "CWE-74",
+    "prompt-injection-anthropic-js": "CWE-74",
+    "prompt-injection-anthropic-ts": "CWE-74",
+    "prompt-injection-langchain-fstring": "CWE-74",
+    "prompt-injection-langchain-system-var": "CWE-74",
+    "prompt-injection-langchain-js": "CWE-74",
+    "prompt-injection-langchain-ts": "CWE-74",
+    "prompt-injection-litellm": "CWE-74",
+    "prompt-injection-genai": "CWE-74",
+    "prompt-injection-cohere": "CWE-74",
+    "prompt-injection-llamaindex-fstring": "CWE-74",
+    "prompt-injection-jinja-prompt": "CWE-94",
+    "prompt-injection-vercel-ai": "CWE-74",
+    "prompt-injection-vercel-ai-ts": "CWE-74",
+    # Java/Go SDK-specific
+    "prompt-injection-java-format": "CWE-74",
+    "prompt-injection-java-concat": "CWE-74",
+    "prompt-injection-java-stringbuilder": "CWE-74",
+    "prompt-injection-spring-ai": "CWE-74",
+    "prompt-injection-system-msg-java": "CWE-74",
+    "prompt-injection-go-sprintf": "CWE-74",
+    "prompt-injection-go-concat": "CWE-74",
+    "prompt-injection-go-builder": "CWE-74",
+    # Indirect injection — untrusted external content in prompts (CWE-94: Code Injection)
+    "prompt-injection-url-to-prompt": "CWE-94",
+    "prompt-injection-file-to-prompt": "CWE-94",
+    "prompt-injection-db-to-prompt": "CWE-94",
+    "prompt-injection-email-to-prompt": "CWE-94",
+    "prompt-injection-scrape-to-prompt": "CWE-94",
+    # Input validation before LLM calls (CWE-20: Improper Input Validation)
+    "prompt-injection-request-to-llm": "CWE-20",
+    "prompt-injection-request-to-llm-js": "CWE-20",
+    # Insecure output handling — LLM output to dangerous sinks
+    "llm-output-to-exec": "CWE-94",
+    "llm-output-to-sql": "CWE-89",
+    "llm-output-to-eval-js": "CWE-94",
+    "llm-output-to-eval-ts": "CWE-94",
+    "llm-output-to-innerhtml": "CWE-79",
+    "llm-output-to-sql-js": "CWE-89",
+    "llm-output-to-exec-java": "CWE-94",
+    "llm-output-to-exec-go": "CWE-94",
+    # LLM safety & configuration
+    "llm-safety-disabled-google": "CWE-693",
+    "llm-safety-disabled-cohere": "CWE-693",
+    "llm-safety-disabled-mistral": "CWE-693",
+    "llm-temperature-max": "CWE-693",
+    # llm-no-max-tokens removed (regex can't handle nested parens)
+    # Multi-turn / conversation injection
+    "llm-client-controlled-messages": "CWE-20",
+    "llm-client-messages-direct": "CWE-20",
+    "llm-role-from-user-input": "CWE-74",
+    # Secrets in prompts
+    "llm-secret-in-prompt": "CWE-200",
+    "llm-connection-string-in-prompt": "CWE-200",
+    # Dangerous executors
+    "llm-langchain-python-repl": "CWE-94",
+    "llm-langchain-bash": "CWE-78",
+    "llm-agent-unbounded-loop": "CWE-400",
+    # Namespace leakage
+    "prompt-injection-format-locals": "CWE-200",
+    "prompt-injection-format-map-locals": "CWE-200",
+    # Additional output handling
+    "llm-output-to-file": "CWE-22",
+    "llm-output-to-html": "CWE-79",
+    "llm-output-to-import": "CWE-94",
+    "llm-output-to-pickle": "CWE-502",
+    "llm-output-to-redirect": "CWE-601",
+    "llm-output-to-fs": "CWE-22",
+    # Safety checks
+    "llm-no-refusal-check": "CWE-252",
+    # RAG & MCP
+    "llm-rag-unsanitized-ingest": "CWE-94",
+    "llm-mcp-tool-shell": "CWE-78",
+    "llm-mcp-tool-file-delete": "CWE-250",
+    "llm-mcp-tool-exec-js": "CWE-78",
+    # Content-field-level injection
+    "prompt-injection-content-fstring": "CWE-74",
+    "prompt-injection-content-template": "CWE-74",
+    # Anthropic SDK variants
+    "prompt-injection-anthropic-format": "CWE-74",
+    "prompt-injection-anthropic-concat": "CWE-74",
+    # Tool call argument injection
+    "llm-tool-call-to-exec": "CWE-94",
+    "llm-tool-call-to-sql": "CWE-89",
+    # Supply chain (OWASP LLM03)
+    "llm-untrusted-model-load": "CWE-494",
+    "llm-model-download-url": "CWE-494",
+    # Excessive agency (OWASP LLM06)
+    "llm-auto-approve-tools": "CWE-693",
+    "llm-agent-unrestricted-tools": "CWE-250",
+    # System prompt leakage (OWASP LLM07)
+    "llm-system-prompt-logged": "CWE-200",
+    "llm-system-prompt-returned": "CWE-200",
 }
 
 

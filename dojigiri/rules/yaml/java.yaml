@@ -751,3 +751,41 @@ rules:
   pattern: '@(?:ModelAttribute|RequestBody)\s+(?!.*(?:Dto|DTO|Request|Form|Command|Input))\w+Entity\s+'
   severity: warning
   suggestion: Use a DTO/Form object instead of binding directly to entity classes
+# ── Prompt Injection (LLM SDK) ────────────────────────────────────
+- category: security
+  id: prompt-injection-java-format
+  message: LLM prompt built with String.format — prompt injection risk if arguments are user-controlled
+  pattern: (?i)(?:prompt|system_prompt|system_message|instruction|llm_input)\w*\s*=\s*String\.format\s*\(
+  severity: critical
+  suggestion: Use structured message types with proper role separation; validate all user input
+- category: security
+  id: prompt-injection-java-concat
+  message: LLM prompt built with string concatenation — prompt injection risk
+  pattern: (?i)(?:prompt|systemPrompt|systemMessage|instructions)\s*=\s*["'][^"']*["']\s*\+
+  severity: critical
+  suggestion: Separate system instructions from user content using the API's message/role structure
+- category: security
+  id: prompt-injection-java-stringbuilder
+  message: LLM prompt built with StringBuilder — prompt injection risk
+  pattern: (?i)(?:StringBuilder|StringBuffer)\s*\(\s*["'].*(?:prompt|system|instruction).*["']\s*\)[\s\S]{0,200}\.append\s*\(
+  severity: critical
+  suggestion: Use the LLM SDK's structured message types; never build prompts with StringBuilder from user input
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-spring-ai
+  message: Spring AI prompt constructed with string interpolation — prompt injection risk
+  pattern: (?:ChatClient|PromptTemplate|SystemPromptTemplate)\s*\.(?:create|builder|from)\s*\([^)]*(?:String\.format|\+\s*\w+)
+  severity: critical
+  suggestion: Use Spring AI's PromptTemplate with validated parameters; keep system prompts static
+- category: security
+  id: prompt-injection-system-msg-java
+  message: System message in LLM call built with concatenation — full prompt takeover risk
+  pattern: (?i)(?:setSystemMessage|systemMessage|addSystemMessage)\s*\(\s*(?:String\.format\s*\(|["'][^"']*["']\s*\+)
+  severity: critical
+  suggestion: Use static system messages; pass user data through designated user input channels
+- category: security
+  id: llm-output-to-exec-java
+  message: LLM output passed to Runtime.exec or ProcessBuilder — AI-generated code execution risk
+  pattern: (?:Runtime\.getRuntime\(\)\.exec|ProcessBuilder)\s*\(\s*(?:response|completion|result|output|generated|answer)
+  severity: critical
+  suggestion: Never execute LLM output directly; validate against an allowlist

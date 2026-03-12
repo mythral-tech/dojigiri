@@ -23,12 +23,12 @@ class TestTypescriptRuleLoading:
     """Verify TypeScript rules load and integrate correctly."""
 
     def test_typescript_rules_loaded(self):
-        assert len(TYPESCRIPT_RULES) == 35
+        assert len(TYPESCRIPT_RULES) == 41
 
     def test_typescript_gets_js_plus_ts_rules(self):
         ts_rules = get_rules_for_language("typescript")
         js_rules = get_rules_for_language("javascript")
-        assert len(ts_rules) == len(js_rules) + 35
+        assert len(ts_rules) == len(js_rules) + 41
 
     def test_typescript_includes_js_rules(self):
         ts_rules = get_rules_for_language("typescript")

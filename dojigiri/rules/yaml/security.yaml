@@ -257,3 +257,221 @@ rules:
   pattern: Cipher\.getInstance\s*\(\s*['"](?:AES|DES|DESede)(?:/ECB)?['"]
   severity: warning
   suggestion: Use AES/GCM/NoPadding or AES/CBC/PKCS5Padding with random IV
+# ── Prompt Injection (LLM Security) ──────────────────────────────────
+- category: security
+  id: prompt-injection-fstring
+  message: Prompt string built with f-string interpolation — prompt injection risk if variables contain user input
+  pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*f['"]
+  severity: critical
+  suggestion: Build prompts with validated, sanitized inputs; never interpolate raw user data into system prompts
+- category: security
+  id: prompt-injection-format
+  message: Prompt string built with .format() — prompt injection risk if arguments contain user input
+  pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*['"][^'"]*['"]\.format\s*\(
+  severity: critical
+  suggestion: Use structured message arrays with role separation instead of string formatting
+- category: security
+  id: prompt-injection-concat
+  message: Prompt string built with concatenation — prompt injection risk if concatenated value is user-controlled
+  pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|context_prompt)\s*=\s*['"][^'"]*['"]\s*\+
+  severity: critical
+  suggestion: Separate system instructions from user content using the API's message/role structure
+- category: security
+  id: prompt-injection-percent
+  message: Prompt string built with % formatting — prompt injection risk
+  pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*['"][^'"]*%s[^'"]*['"]\s*%
+  severity: critical
+  suggestion: Use structured message arrays; never use % formatting to insert user data into prompts
+- category: security
+  id: prompt-injection-template-literal
+  message: Prompt built with template literal interpolation — prompt injection risk if interpolated values are user-controlled
+  pattern: (?i)(?:prompt|systemPrompt|systemMessage|userPrompt|instructions|contextPrompt)\s*=\s*`[^`]*\$\{
+  severity: critical
+  suggestion: Use structured message arrays with role separation; sanitize user content before inclusion
+- category: security
+  id: prompt-injection-content-fstring
+  message: Message content field built with f-string — prompt injection regardless of variable naming
+  pattern: (?i)['\"]content['\"]\s*:\s*f['"]
+  severity: critical
+  suggestion: Never interpolate user data into message content fields; use validated inputs only
+- category: security
+  id: prompt-injection-content-template
+  message: Message content field built with template literal — prompt injection regardless of variable naming
+  pattern: (?i)['\"]content['\"]\s*:\s*`[^`]*\$\{
+  severity: critical
+  suggestion: Never interpolate user data into message content fields; use validated inputs only
+- category: security
+  id: prompt-injection-system-role-fstring
+  message: System role message with f-string content — user input in system prompt enables full prompt takeover
+  pattern: (?i)['\"]role['\"]\s*:\s*['\"]system['\"][\s\S]{0,100}['\"]content['\"]\s*:\s*f['"]
+  severity: critical
+  suggestion: System prompts must contain only developer-controlled content; place user data in 'user' role messages only
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-system-role-template
+  message: System role message with template literal — prompt injection via system prompt
+  pattern: (?i)role\s*:\s*['\"]system['\"][\s\S]{0,100}content\s*:\s*`[^`]*\$\{
+  severity: critical
+  suggestion: System prompts must be static strings; place user data in user role messages only
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-url-to-prompt
+  message: HTTP response content used in LLM prompt — indirect prompt injection via untrusted web content
+  pattern: (?i)(?:requests\.get|httpx\.get|fetch|axios\.get|http\.Get)\s*\([^)]*\)[\s\S]{0,200}(?:prompt|messages|system_message|instruction)\s*(?:=|\+=|\.append|\.push)
+  severity: warning
+  suggestion: Sanitize and validate fetched content before including in prompts; instruct the model to ignore embedded instructions
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-file-to-prompt
+  message: File content loaded into LLM prompt — indirect prompt injection if file is user-uploaded or untrusted
+  pattern: (?i)(?:\.read\s*\(\)|\.read_text\s*\(\)|readFile|readFileSync)\s*[\s\S]{0,200}(?:prompt|messages|system_message|instruction)\s*(?:=|\+=|\.append|\.push)
+  severity: warning
+  suggestion: Validate file content and strip potential injection payloads before including in prompts
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-db-to-prompt
+  message: Database query result used in LLM prompt — indirect injection if DB contains user-generated content
+  pattern: (?i)(?:\.fetchone|\.fetchall|\.find\(|\.findOne|\.query\s*\()\s*[\s\S]{0,200}(?:prompt|messages|system_message|instruction)\s*(?:=|\+=|\.append|\.push)
+  severity: warning
+  suggestion: Treat database content as untrusted when building prompts; sanitize before inclusion
+  flags: [DOTALL]
+# ── LLM Safety & Configuration ──────────────────────────────────────
+- category: security
+  id: llm-safety-disabled-google
+  message: Google AI safety settings set to BLOCK_NONE — all safety filters disabled
+  pattern: (?:(?:threshold|safety|harm|block)\s*[=:]\s*.*BLOCK_NONE|HarmBlockThreshold\s*\.\s*BLOCK_NONE|['\"]BLOCK_NONE['\"])
+  severity: critical
+  suggestion: Use BLOCK_MEDIUM_AND_ABOVE or stricter; never disable safety filters in production
+- category: security
+  id: llm-safety-disabled-cohere
+  message: Cohere safety_mode set to NONE — content filtering disabled
+  pattern: (?i)safety_mode\s*=\s*['\"](?:NONE|none)['\"]
+  severity: critical
+  suggestion: Use CONTEXTUAL or STRICT safety mode in production
+- category: security
+  id: llm-safety-disabled-mistral
+  message: Mistral safe_prompt disabled — safety guardrails removed
+  pattern: (?i)safe_prompt\s*=\s*False
+  severity: critical
+  suggestion: Keep safe_prompt=True to enable Mistral's safety guardrails
+- category: security
+  id: llm-temperature-max
+  message: LLM temperature set to maximum — increases unpredictability and jailbreak susceptibility
+  pattern: temperature\s*[=:]\s*(?:2\.0|2(?:\.0*)?)\s*(?:[,}\)\]\s;]|$)
+  severity: warning
+  suggestion: Use temperature <= 1.0 for most applications; high temperature increases attack surface
+  # llm-no-max-tokens removed — regex fundamentally cannot handle nested parens in real API calls.
+  # This check requires AST/semantic analysis, not regex. See Takumi review fold-48.
+# ── Conversation History / Multi-turn Injection ──────────────────────
+- category: security
+  id: llm-client-controlled-messages
+  message: Client-supplied message array passed directly to LLM — attacker can inject fake system/assistant messages
+  pattern: (?i)(?:request\.json|req\.body|request\.get_json)\s*(?:\[|\.get\s*\()\s*['\"]messages['\"]
+  severity: critical
+  suggestion: Never pass raw client message arrays to LLM; construct messages server-side with validated roles
+- category: security
+  id: llm-role-from-user-input
+  message: Message role field from user input — allows injection of fake system/assistant messages
+  pattern: (?i)['\"]role['\"]\s*:\s*(?:request\.|req\.|params\.|body\.|input\.|data\[|user_|msg\[)
+  severity: critical
+  suggestion: Always set message roles server-side; only allow 'user' role from client input
+# ── Secrets in Prompts ───────────────────────────────────────────────
+- category: security
+  id: llm-secret-in-prompt
+  message: API key or secret variable interpolated into LLM prompt — will be sent to LLM provider
+  pattern: (?i)(?:prompt|system_prompt|system_message|instructions)\s*=\s*f['\"].*\{(?:api_key|secret|password|token|credential|db_|database_|conn)
+  severity: critical
+  suggestion: Never embed secrets in prompts; use tool calling to access backends securely
+- category: security
+  id: llm-connection-string-in-prompt
+  message: Database connection string or URL in prompt template — credential exposure to LLM provider
+  pattern: (?i)(?:prompt|system|instruction|message)\s*=\s*['\"].*(?:postgres(?:ql)?|mysql|mongodb|redis)://
+  severity: critical
+  suggestion: Never embed connection strings in prompts; use tool calling for database access
+# ── Tool/Function Call Output Handling ─────────────────────────────
+- category: security
+  id: llm-tool-call-to-exec
+  message: LLM tool call arguments passed to dangerous sink — code execution via tool calling
+  pattern: (?:tool_calls|function\.arguments|tool_result|function_call)[\s\S]{0,300}(?:exec|eval|system|popen|subprocess|Runtime\.exec|ProcessBuilder|os\.Command)
+  severity: critical
+  suggestion: Validate and sanitize all LLM-generated tool call arguments before execution; never pass directly to shell or eval
+  flags: [DOTALL]
+- category: security
+  id: llm-tool-call-to-sql
+  message: LLM tool call arguments used in SQL query — SQL injection via tool calling
+  pattern: (?:tool_calls|function\.arguments|tool_result|function_call)[\s\S]{0,300}(?:\.execute|\.query|\.raw|cursor\.)
+  severity: critical
+  suggestion: Parameterize SQL queries; never pass LLM-generated tool arguments directly to database queries
+  flags: [DOTALL]
+# ── Supply Chain (OWASP LLM03) ────────────────────────────────────
+- category: security
+  id: llm-untrusted-model-load
+  message: Model loaded from user-controlled path — supply chain attack via malicious model
+  pattern: (?i)(?:from_pretrained|load_model|AutoModel|AutoTokenizer|pipeline)\s*\(\s*(?:request|req|params|body|input|user|args|sys\.argv)
+  severity: critical
+  suggestion: Only load models from trusted, pinned sources; never allow user input to control model paths
+- category: security
+  id: llm-model-download-url
+  message: Model downloaded from dynamic URL — supply chain risk
+  pattern: (?i)(?:from_pretrained|load_model|download_model)\s*\(\s*f['"]|(?:from_pretrained|load_model)\s*\(\s*['"][^'"]*['"]\.format
+  severity: warning
+  suggestion: Pin model URLs to trusted registries; avoid dynamic model source resolution
+# ── Excessive Agency (OWASP LLM06) ────────────────────────────────
+- category: security
+  id: llm-auto-approve-tools
+  message: LLM tool execution with auto-approval — no human oversight for potentially destructive actions
+  pattern: (?i)(?:auto_approve|auto_execute|skip_confirmation|confirm)\s*[=:]\s*(?:True|true|1|False|false)
+  severity: warning
+  suggestion: Require human confirmation for destructive tool actions; implement approval gates
+- category: security
+  id: llm-agent-unrestricted-tools
+  message: Agent created with all tools or unrestricted tool access
+  pattern: (?i)(?:tools\s*=\s*(?:get_all_tools|list_tools|ALL_TOOLS|\[.*\.\.\.\s*\])|allow_all_tools\s*=\s*True)
+  severity: warning
+  suggestion: Restrict agent tool access to minimum required set; apply principle of least privilege
+# ── System Prompt Leakage (OWASP LLM07) ──────────────────────────
+- category: security
+  id: llm-system-prompt-logged
+  message: System prompt written to logs — information leakage risk
+  pattern: (?i)(?:log(?:ger)?|print|console)\s*\.(?:info|debug|warning|error|log)\s*\(.*(?:system_prompt|system_message|instructions)
+  severity: warning
+  suggestion: Never log system prompts; they may contain security-critical instructions
+- category: security
+  id: llm-system-prompt-returned
+  message: System prompt included in API response — information leakage to client
+  pattern: (?i)(?:return|jsonify|json\.dumps|res\.json|response)\s*\(.*(?:system_prompt|system_message|instructions)
+  severity: warning
+  suggestion: Never return system prompts to clients; keep system instructions server-side only
+# ── Dangerous LLM Executors ──────────────────────────────────────────
+- category: security
+  id: llm-langchain-python-repl
+  message: LangChain PythonREPL executes arbitrary code — critical if fed LLM output
+  pattern: (?:PythonREPL|PythonREPLTool)\s*\(\s*\)
+  severity: critical
+  suggestion: Never use PythonREPL in production; sandbox code execution or use validated operations
+- category: security
+  id: llm-langchain-bash
+  message: LangChain BashProcess executes shell commands — critical if fed LLM output
+  pattern: (?:BashProcess|ShellTool|Terminal)\s*\(\s*\)
+  severity: critical
+  suggestion: Never expose shell execution to LLM agents; use specific, validated tool functions
+- category: security
+  id: llm-agent-unbounded-loop
+  message: LLM agent in unbounded loop — runaway cost and potential infinite execution
+  pattern: (?:while\s*\(\s*(?:true|True|1)\s*\)|while\s+(?:True|true|1)\s*:?)[\s\S]{0,300}(?:chat\.completions\.create|messages\.create|completion|generate|\.invoke|\.run|\.predict)
+  severity: warning
+  suggestion: Set iteration limits and cost guards on LLM agent loops
+  flags: [DOTALL]
+# ── Prompt Namespace Leakage ─────────────────────────────────────────
+- category: security
+  id: prompt-injection-format-locals
+  message: Prompt formatted with locals()/vars() — entire namespace leaks into prompt including secrets
+  pattern: (?i)(?:prompt|system|instruction|message).*\.format\s*\(\s*\*\*(?:locals|vars|globals)\s*\(\s*\)\s*\)
+  severity: critical
+  suggestion: Explicitly pass only intended variables to .format(); never use locals()/vars()/globals()
+- category: security
+  id: prompt-injection-format-map-locals
+  message: Prompt built with format_map(locals()/vars()) — namespace leakage risk
+  pattern: (?i)(?:prompt|system|instruction|message).*\.format_map\s*\(\s*(?:locals|vars)\s*\(\s*\)\s*\)
+  severity: critical
+  suggestion: Explicitly pass only intended variables; never use format_map(locals())

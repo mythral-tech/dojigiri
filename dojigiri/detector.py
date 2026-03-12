@@ -375,6 +375,23 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules: l
             if languages is None or language in languages:
                 applicable_custom_rules.append((pattern, severity, category, name, message, suggestion))
 
+    # ── Full-content pass for DOTALL rules (multiline patterns) ──────
+    dotall_rule_names: set[str] = set()
+    for pattern, severity, category, rule_name, message, suggestion in rules:
+        if pattern.flags & re.DOTALL:
+            dotall_rule_names.add(rule_name)
+            if rule_name in skip_rules:
+                continue
+            for match in pattern.finditer(content):
+                line_num = content[:match.start()].count('\n') + 1
+                matched_text = match.group()[:120].replace('\n', ' ')
+                findings.append(_make_finding(
+                    filepath, line_num, severity, category, rule_name,
+                    message, suggestion, matched_text,
+                ))
+    # Add DOTALL rules to skip set so they don't run again line-by-line
+    skip_rules = skip_rules | dotall_rule_names
+
     lines = content.splitlines()
 
     # Language-aware comment prefixes for full-line detection

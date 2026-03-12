@@ -857,3 +857,162 @@ rules:
   pattern: (?:werkzeug|debugger).*(?:use_debugger|use_reloader)\s*=\s*True
   severity: critical
   suggestion: Never enable Werkzeug debugger in production — it provides a Python shell
+# ── Prompt Injection (LLM SDK) ────────────────────────────────────
+- category: security
+  id: prompt-injection-openai-fstring
+  message: OpenAI API call with f-string interpolation — prompt injection if user data is interpolated
+  pattern: (?:chat\.completions\.create|ChatCompletion\.create)\s*\([^)]*f['"]
+  severity: critical
+  suggestion: Pass user content via the 'user' role message; never interpolate into system messages
+- category: security
+  id: prompt-injection-openai-format
+  message: OpenAI API call with .format() in message content — prompt injection risk
+  pattern: (?:chat\.completions\.create|ChatCompletion\.create)\s*\([^)]*\.format\s*\(
+  severity: critical
+  suggestion: Use structured messages with role separation; never format user input into prompts
+- category: security
+  id: prompt-injection-anthropic-fstring
+  message: Anthropic API call with f-string interpolation — prompt injection risk
+  pattern: (?:client\.messages\.create|messages\.create)\s*\([^)]*f['"]
+  severity: critical
+  suggestion: Use structured message content blocks; separate system from user content
+- category: security
+  id: prompt-injection-anthropic-format
+  message: Anthropic API call with .format() in message content — prompt injection risk
+  pattern: (?i)messages\.create\s*\([\s\S]{0,300}['"][^'"]*['"]\.format\s*\(
+  severity: critical
+  suggestion: Use validated inputs; never format user data into Anthropic message content
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-anthropic-concat
+  message: Anthropic API call with string concatenation in message content — prompt injection risk
+  pattern: (?i)messages\.create\s*\([\s\S]{0,300}['\"]content['\"]\s*:\s*['"][^'"]*['"]\s*\+
+  severity: critical
+  suggestion: Use validated inputs; never concatenate user data into Anthropic message content
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-langchain-fstring
+  message: LangChain prompt template constructed with f-string — prompt injection risk
+  pattern: (?:LLMChain|ChatPromptTemplate|PromptTemplate|SystemMessagePromptTemplate|HumanMessagePromptTemplate)\s*\([^)]*f['"]
+  severity: critical
+  suggestion: Use LangChain's input_variables for parameterized templates instead of f-string interpolation
+- category: security
+  id: prompt-injection-langchain-system-var
+  message: LangChain prompt template with variable in system/instruction position — injection if user-controlled
+  pattern: (?:SystemMessagePromptTemplate|SystemMessage)\s*\(\s*(?:content\s*=\s*)?(?:f['"]|['"][^'"]*['"]\.format\s*\(|['"][^'"]*['"]\s*\+)
+  severity: critical
+  suggestion: System messages must be static strings; use input_variables only for user content fields
+- category: security
+  id: prompt-injection-litellm
+  message: LiteLLM completion call with f-string — prompt injection risk
+  pattern: litellm\.completion\s*\([^)]*f['"]
+  severity: critical
+  suggestion: Construct messages array with proper role separation; never interpolate user input
+- category: security
+  id: prompt-injection-genai
+  message: Google GenerativeAI API call with f-string — prompt injection risk
+  pattern: (?:genai\.GenerativeModel|model\.generate_content|model\.start_chat)\s*\([^)]*f['"]
+  severity: critical
+  suggestion: Validate and sanitize input before passing to generate_content()
+- category: security
+  id: prompt-injection-cohere
+  message: Cohere API call with f-string — prompt injection risk
+  pattern: (?:co\.chat|co\.generate|client\.chat)\s*\([^)]*f['"]
+  severity: critical
+  suggestion: Validate user input before passing to Cohere API calls
+- category: security
+  id: prompt-injection-llamaindex-fstring
+  message: LlamaIndex prompt template with f-string — prompt injection risk
+  pattern: (?:PromptTemplate|ChatMessage|Prompt)\s*\(\s*(?:template\s*=\s*)?f['"]
+  severity: critical
+  suggestion: Use LlamaIndex's template variables for user content; keep system prompts static
+- category: security
+  id: prompt-injection-jinja-prompt
+  message: Jinja2 template constructed from variable for prompt generation — template injection + prompt injection
+  pattern: (?:jinja2\.Template|Environment\(\)\.from_string)\s*\(\s*(?!['\"]).*(?:prompt|system|instruction|message)
+  severity: critical
+  suggestion: Use pre-defined template files; never construct Jinja2 templates from user-controlled strings for LLM prompts
+- category: security
+  id: prompt-injection-request-to-llm
+  message: HTTP request data passed to LLM API without visible validation — prompt injection risk
+  pattern: (?:request\.(?:form|args|json|data|get_json)\s*(?:\[|\.get))[^;]*(?:chat\.completions\.create|messages\.create|completion|generate_content|\.invoke|\.run|\.predict)
+  severity: warning
+  suggestion: Validate, sanitize, and length-limit user input before passing to LLM; use allowlists where possible
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-email-to-prompt
+  message: Email content loaded into LLM prompt — classic indirect prompt injection vector
+  pattern: (?i)(?:email|mail|imap|pop3).*(?:\.get_payload|\.body|\.text|\.content)[\s\S]{0,200}(?:prompt|messages|context)\s*(?:=|\+=)
+  severity: warning
+  suggestion: Emails are untrusted by definition; sanitize aggressively and instruct the model to ignore embedded instructions
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-scrape-to-prompt
+  message: Scraped web content used in LLM prompt — attacker-controlled HTML can contain injections
+  pattern: (?:BeautifulSoup|Selector|\.select\(|\.find_all\()[\s\S]{0,300}(?:prompt|messages|content|context)\s*(?:=|\+=|\.append)
+  severity: warning
+  suggestion: Strip HTML tags, sanitize content, and use delimiter-based prompt isolation before including in prompts
+  flags: [DOTALL]
+- category: security
+  id: llm-output-to-exec
+  message: LLM output passed to exec/eval/subprocess — AI-generated code execution risk
+  pattern: (?:exec|eval|subprocess\.run|os\.system|os\.popen)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
+  severity: critical
+  suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
+- category: security
+  id: llm-output-to-sql
+  message: LLM output used in SQL query — SQL injection via AI-generated content
+  pattern: (?:\.execute|\.raw|cursor\.)\s*\(\s*(?:response|completion|result|output|generated|answer|chunk|delta|stream)
+  severity: critical
+  suggestion: Never pass LLM output to SQL queries; validate and parameterize any AI-generated query components
+- category: security
+  id: llm-output-to-file
+  message: LLM output used as file path — path traversal via AI-generated content
+  pattern: (?:open|Path)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
+  severity: critical
+  suggestion: Never use LLM output as file paths; validate against an allowlist of safe paths
+- category: security
+  id: llm-output-to-html
+  message: LLM output rendered as HTML template — XSS and SSTI via AI-generated content
+  pattern: (?:render_template_string|Markup|mark_safe)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
+  severity: critical
+  suggestion: Use textContent or escape LLM output before rendering as HTML
+- category: security
+  id: llm-output-to-import
+  message: LLM output used in dynamic import — arbitrary module loading
+  pattern: (?:importlib\.import_module|__import__)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
+  severity: critical
+  suggestion: Never import modules based on LLM output; use a fixed allowlist
+- category: security
+  id: llm-output-to-pickle
+  message: LLM output deserialized with pickle — remote code execution
+  pattern: pickle\.loads?\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
+  severity: critical
+  suggestion: Never deserialize LLM output with pickle; use json.loads() with schema validation
+- category: security
+  id: llm-no-refusal-check
+  message: OpenAI response used without checking refusal field — may miss safety-triggered refusals
+  pattern: (?:\.choices\[0\]\.message\.content|\.choices\[0\]\.text)(?![\s\S]{0,100}(?:refusal|finish_reason|stop_reason))
+  severity: info
+  suggestion: Check response.choices[0].message.refusal and finish_reason before using content
+  flags: [DOTALL]
+- category: security
+  id: llm-rag-unsanitized-ingest
+  message: Documents loaded directly into vector store without sanitization — RAG poisoning risk
+  pattern: (?:SimpleDirectoryReader|DirectoryLoader|WebBaseLoader|TextLoader)\s*\(\s*(?:upload|user_|request\.|req\.)
+  severity: warning
+  suggestion: Sanitize and validate documents before ingesting into vector stores; strip potential injection payloads
+- category: security
+  id: llm-mcp-tool-shell
+  message: MCP tool function contains shell execution — command injection if arguments are LLM-controlled
+  pattern: (?:@(?:mcp\.tool|server\.tool|tool)\s*\(\s*\)[\s\S]{0,500})(?:os\.system|subprocess\.|os\.popen|exec\()
+  severity: critical
+  suggestion: Never use shell execution inside MCP tools; use parameterized operations with input validation
+  flags: [DOTALL]
+- category: security
+  id: llm-mcp-tool-file-delete
+  message: MCP tool function performs file deletion without confirmation — excessive agency
+  pattern: (?:@(?:mcp\.tool|server\.tool|tool)\s*\(\s*\)[\s\S]{0,500})(?:os\.remove|os\.unlink|shutil\.rmtree|Path.*\.unlink)
+  severity: warning
+  suggestion: Require explicit user confirmation for destructive operations in MCP tools
+  flags: [DOTALL]

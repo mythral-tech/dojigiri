@@ -604,3 +604,28 @@ rules:
   pattern: url\.Parse\s*\(\s*(?!['"])
   severity: info
   suggestion: Validate scheme is http/https after parsing; reject unexpected schemes
+# ── Prompt Injection (LLM SDK) ────────────────────────────────────
+- category: security
+  id: prompt-injection-go-sprintf
+  message: LLM prompt built with fmt.Sprintf — prompt injection risk if arguments are user-controlled
+  pattern: (?i)fmt\.Sprintf\s*\(\s*["'].*(?:prompt|system_prompt|system_message|instruction|llm_input)
+  severity: critical
+  suggestion: Use structured message types with proper role separation; validate all user input
+- category: security
+  id: prompt-injection-go-concat
+  message: LLM prompt built with string concatenation — prompt injection risk
+  pattern: (?i)(?:prompt|systemPrompt|systemMessage|instructions)\s*(?::=|=)\s*["'][^"']*["']\s*\+
+  severity: critical
+  suggestion: Separate system instructions from user content using the API's message/role structure
+- category: security
+  id: prompt-injection-go-builder
+  message: LLM prompt built with strings.Builder — prompt injection risk
+  pattern: (?i)(?:\w*(?:prompt|system|msg|message|instruction|context|query)\w*)\s*\.WriteString\s*\(
+  severity: warning
+  suggestion: Use structured message types; never build prompts from user-controlled strings
+- category: security
+  id: llm-output-to-exec-go
+  message: LLM output passed to exec.Command — AI-generated code execution risk
+  pattern: exec\.Command\s*\(\s*(?:response|completion|result|output|generated|answer)
+  severity: critical
+  suggestion: Never execute LLM output directly; validate against an allowlist

@@ -719,3 +719,101 @@ rules:
   pattern: window\.open\s*\(\s*(?!['"]https?://)[a-zA-Z]
   severity: warning
   suggestion: "Validate URLs against an allowlist and set noopener, noreferrer features"
+# ── Prompt Injection (LLM SDK) ────────────────────────────────────
+- category: security
+  id: prompt-injection-openai-template
+  message: OpenAI API call with template literal interpolation — prompt injection risk
+  pattern: (?:openai\.chat\.completions\.create|completions\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
+  severity: critical
+  suggestion: Build the messages array with validated inputs; never interpolate user data into content strings
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-openai-concat
+  message: OpenAI API call with string concatenation in content — prompt injection risk
+  pattern: (?:openai\.chat\.completions\.create|completions\.create)\s*\(\s*\{[\s\S]*?content\s*:\s*['"][^'"]*['"]\s*\+
+  severity: critical
+  suggestion: Use structured messages with role separation; never concatenate user input into prompts
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-vercel-ai
+  message: Vercel AI SDK call with interpolated system/prompt — prompt injection risk
+  pattern: (?:generateText|streamText|generateObject)\s*\(\s*\{[\s\S]*?(?:system|prompt)\s*:\s*`[^`]*\$\{
+  severity: critical
+  suggestion: Sanitize user input before embedding in system or prompt parameters
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-anthropic-js
+  message: Anthropic JS SDK call with template literal interpolation — prompt injection risk
+  pattern: (?:anthropic\.messages\.create|client\.messages\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
+  severity: critical
+  suggestion: Use structured message content; separate system from user content
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-langchain-js
+  message: LangChain JS prompt template with interpolation — prompt injection risk
+  pattern: (?:ChatPromptTemplate|PromptTemplate|SystemMessagePromptTemplate)\.\w+\s*\(\s*`[^`]*\$\{
+  severity: critical
+  suggestion: Use LangChain's input_variables for parameterization instead of template literals
+- category: security
+  id: prompt-injection-system-content-js
+  message: System message content with template literal — prompt injection via system prompt takeover
+  pattern: role\s*:\s*['"]system['"]\s*,\s*content\s*:\s*`[^`]*\$\{
+  severity: critical
+  suggestion: System message content must be static; pass user data via user role messages only
+- category: security
+  id: prompt-injection-system-content-concat
+  message: System message content built with concatenation — prompt injection risk
+  pattern: role\s*:\s*['"]system['"]\s*,\s*content\s*:\s*['"][^'"]*['"]\s*\+
+  severity: critical
+  suggestion: System message content must be static; pass user data via user role messages only
+- category: security
+  id: prompt-injection-request-to-llm-js
+  message: Express request data flows to LLM API without validation — prompt injection risk
+  pattern: (?:req\.body|req\.query|req\.params)\s*(?:\[|\.)\w+[\s\S]{0,300}(?:openai|anthropic|generateText|streamText|completions\.create)
+  severity: warning
+  suggestion: Validate and sanitize request parameters before LLM calls; implement input schemas with Zod/Joi
+  flags: [DOTALL]
+- category: security
+  id: llm-output-to-eval-js
+  message: LLM output passed to eval/Function/exec — AI-generated code execution risk
+  pattern: (?:eval|new\s+Function|execSync|exec)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|text|chunk|delta|stream)
+  severity: critical
+  suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
+- category: security
+  id: llm-output-to-innerhtml
+  message: LLM output rendered as innerHTML — XSS via AI-generated content
+  pattern: \.innerHTML\s*=\s*(?:response|completion|result|output|generated|answer|reply|text|chunk|delta|stream)
+  severity: critical
+  suggestion: Use textContent for LLM output or sanitize with DOMPurify before rendering as HTML
+- category: security
+  id: llm-output-to-sql-js
+  message: LLM output used in SQL query — SQL injection via AI-generated content
+  pattern: (?:query|execute)\s*\(\s*(?:response|completion|result|output|generated|answer|chunk|delta|stream)
+  severity: critical
+  suggestion: Never pass LLM output to SQL queries; validate and parameterize any AI-generated query components
+- category: security
+  id: llm-output-to-redirect
+  message: LLM output used as redirect URL — open redirect and phishing via AI-generated content
+  pattern: (?:res\.redirect|window\.location|location\.href)\s*(?:=|\()\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
+  severity: critical
+  suggestion: Never use LLM output as redirect targets; validate against an allowlist
+- category: security
+  id: llm-output-to-fs
+  message: LLM output used as file path in fs operation — path traversal via AI-generated content
+  pattern: fs\.(?:readFile|writeFile|unlink|mkdir|access)(?:Sync)?\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
+  severity: critical
+  suggestion: Never use LLM output as file paths; validate against safe base directory
+- category: security
+  id: llm-client-messages-direct
+  message: Express request messages array passed directly to LLM — multi-turn injection risk
+  pattern: (?:req\.body\.messages|request\.body\.messages)[\s\S]{0,200}(?:openai|anthropic|completions\.create|messages\.create|generateText)
+  severity: critical
+  suggestion: Never pass client message arrays directly; construct messages server-side with validated roles
+  flags: [DOTALL]
+- category: security
+  id: llm-mcp-tool-exec-js
+  message: MCP tool handler contains command execution — injection risk if arguments are LLM-controlled
+  pattern: (?:server\.tool|\.addTool|registerTool)[\s\S]{0,500}(?:exec|execSync|spawn|child_process)
+  severity: critical
+  suggestion: Never use shell execution inside MCP tools; use parameterized operations with input validation
+  flags: [DOTALL]

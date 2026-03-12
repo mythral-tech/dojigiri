@@ -244,3 +244,43 @@ rules:
   severity: warning
   suggestion: Explicitly define which fields are optional instead of using Partial on security types
   cwe: CWE-284
+# ── Prompt Injection (LLM SDK) ────────────────────────────────────
+- category: security
+  id: prompt-injection-openai-ts
+  message: OpenAI API call with template literal interpolation — prompt injection risk
+  pattern: (?:openai\.chat\.completions\.create|completions\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
+  severity: critical
+  suggestion: Build the messages array with validated inputs; never interpolate user data into content strings
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-anthropic-ts
+  message: Anthropic API call with template literal — prompt injection risk
+  pattern: (?:anthropic\.messages\.create|client\.messages\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
+  severity: critical
+  suggestion: Use structured message content; separate system from user content
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-vercel-ai-ts
+  message: Vercel AI SDK call with interpolated system/prompt — prompt injection risk
+  pattern: (?:generateText|streamText|generateObject)\s*\(\s*\{[\s\S]*?(?:system|prompt)\s*:\s*`[^`]*\$\{
+  severity: critical
+  suggestion: Sanitize user input before embedding in system or prompt parameters
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-system-content-ts
+  message: System message content with template literal — prompt injection via system prompt takeover
+  pattern: role\s*:\s*['"]system['"]\s*,\s*content\s*:\s*`[^`]*\$\{
+  severity: critical
+  suggestion: System message content must be static; pass user data via user role messages only
+- category: security
+  id: prompt-injection-langchain-ts
+  message: LangChain TS prompt template with interpolation — prompt injection risk
+  pattern: (?:ChatPromptTemplate|PromptTemplate|SystemMessagePromptTemplate)\.\w+\s*\(\s*`[^`]*\$\{
+  severity: critical
+  suggestion: Use LangChain's input_variables for parameterization instead of template literals
+- category: security
+  id: llm-output-to-eval-ts
+  message: LLM output passed to eval/Function — AI-generated code execution risk
+  pattern: (?:eval|new\s+Function)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|text)
+  severity: critical
+  suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
