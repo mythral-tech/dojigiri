@@ -842,3 +842,113 @@ class TestLlmClientMessagesDirectJs:
         code = 'const msg = req.body.input\nconst msgs = [{role:"user", content: msg}]\n'
         findings = run_regex_checks(code, "app.js", "javascript")
         assert not any(f.rule == "llm-client-messages-direct" for f in findings)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  Fold 49 — Additional SDK, multimodal, OWASP LLM02
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestPromptInjectionOllama:
+    def test_triggers(self):
+        code = 'ollama.chat(model="llama3", messages=[{"content": f"Help {user}"}])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "prompt-injection-ollama" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'ollama.chat(model="llama3", messages=[{"content": "Hello"}])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "prompt-injection-ollama" for f in findings)
+
+
+class TestPromptInjectionBedrock:
+    def test_triggers(self):
+        code = 'client.invoke_model(body=json.dumps({"prompt": f"Tell me about {topic}"}))\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "prompt-injection-bedrock" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'client.invoke_model(body=json.dumps({"prompt": "Hello"}))\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "prompt-injection-bedrock" for f in findings)
+
+
+class TestPromptInjectionGroq:
+    def test_triggers(self):
+        code = 'groq.chat.completions.create(messages=[{"content": f"Do {task}"}])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "prompt-injection-groq" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'groq.chat.completions.create(messages=[{"content": "Hello"}])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "prompt-injection-groq" for f in findings)
+
+
+class TestLlmUntrustedImageToVision:
+    def test_triggers(self):
+        code = 'image_url = request.files["image"]\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-untrusted-image-to-vision" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'image_url = "https://example.com/static.png"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-untrusted-image-to-vision" for f in findings)
+
+
+class TestLlmBase64ImageFromInput:
+    def test_triggers(self):
+        code = 'encoded = base64.b64encode(request.files["image"].read())\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-base64-image-from-input" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'encoded = base64.b64encode(static_image_bytes)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-base64-image-from-input" for f in findings)
+
+
+class TestLlmResponseNoPiiFilter:
+    def test_triggers(self):
+        code = 'return jsonify(response.content)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-response-no-pii-filter" for f in findings)
+
+    def test_no_trigger_different_var(self):
+        code = 'return jsonify({"status": "ok"})\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-response-no-pii-filter" for f in findings)
+
+
+class TestTemperatureMaxBroadened:
+    def test_triggers_1_5(self):
+        code = 'temperature=1.5,\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-temperature-max" for f in findings)
+
+    def test_triggers_1_9(self):
+        code = 'temperature=1.9,\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-temperature-max" for f in findings)
+
+    def test_no_trigger_1_0(self):
+        code = 'temperature=1.0,\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-temperature-max" for f in findings)
+
+
+class TestSeverityCalibration:
+    """Generic prompt concat rules should be warning, not critical."""
+
+    def test_fstring_is_warning(self):
+        code = 'system_prompt = f"You are {persona}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        match = [f for f in findings if f.rule == "prompt-injection-fstring"]
+        assert match and match[0].severity.name.lower() == "warning"
+
+    def test_content_fstring_is_critical(self):
+        code = '"content": f"Hello {user}"\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        match = [f for f in findings if f.rule == "prompt-injection-content-fstring"]
+        assert match and match[0].severity.name.lower() == "critical"

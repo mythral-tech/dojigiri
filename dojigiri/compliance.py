@@ -908,6 +908,16 @@ CWE_MAP: dict[str, str] = {
     # System prompt leakage (OWASP LLM07)
     "llm-system-prompt-logged": "CWE-200",
     "llm-system-prompt-returned": "CWE-200",
+    # Additional SDK coverage
+    "prompt-injection-ollama": "CWE-74",
+    "prompt-injection-bedrock": "CWE-74",
+    "prompt-injection-groq": "CWE-74",
+    # Multimodal injection
+    "llm-untrusted-image-to-vision": "CWE-74",
+    "llm-base64-image-from-input": "CWE-74",
+    # Sensitive info in responses (OWASP LLM02)
+    "llm-response-no-pii-filter": "CWE-200",
+    "llm-training-data-leak-check": "CWE-200",
 }
 
 

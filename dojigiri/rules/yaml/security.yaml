@@ -262,31 +262,31 @@ rules:
   id: prompt-injection-fstring
   message: Prompt string built with f-string interpolation — prompt injection risk if variables contain user input
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*f['"]
-  severity: critical
+  severity: warning
   suggestion: Build prompts with validated, sanitized inputs; never interpolate raw user data into system prompts
 - category: security
   id: prompt-injection-format
   message: Prompt string built with .format() — prompt injection risk if arguments contain user input
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*['"][^'"]*['"]\.format\s*\(
-  severity: critical
+  severity: warning
   suggestion: Use structured message arrays with role separation instead of string formatting
 - category: security
   id: prompt-injection-concat
   message: Prompt string built with concatenation — prompt injection risk if concatenated value is user-controlled
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|context_prompt)\s*=\s*['"][^'"]*['"]\s*\+
-  severity: critical
+  severity: warning
   suggestion: Separate system instructions from user content using the API's message/role structure
 - category: security
   id: prompt-injection-percent
   message: Prompt string built with % formatting — prompt injection risk
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*['"][^'"]*%s[^'"]*['"]\s*%
-  severity: critical
+  severity: warning
   suggestion: Use structured message arrays; never use % formatting to insert user data into prompts
 - category: security
   id: prompt-injection-template-literal
   message: Prompt built with template literal interpolation — prompt injection risk if interpolated values are user-controlled
   pattern: (?i)(?:prompt|systemPrompt|systemMessage|userPrompt|instructions|contextPrompt)\s*=\s*`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Use structured message arrays with role separation; sanitize user content before inclusion
 - category: security
   id: prompt-injection-content-fstring
@@ -357,7 +357,7 @@ rules:
 - category: security
   id: llm-temperature-max
   message: LLM temperature set to maximum — increases unpredictability and jailbreak susceptibility
-  pattern: temperature\s*[=:]\s*(?:2\.0|2(?:\.0*)?)\s*(?:[,}\)\]\s;]|$)
+  pattern: temperature\s*[=:]\s*(?:2\.0|2(?:\.0*)?|1\.[5-9]\d*)\s*(?:[,}\)\]\s;]|$)
   severity: warning
   suggestion: Use temperature <= 1.0 for most applications; high temperature increases attack surface
   # llm-no-max-tokens removed — regex fundamentally cannot handle nested parens in real API calls.
@@ -458,7 +458,7 @@ rules:
 - category: security
   id: llm-agent-unbounded-loop
   message: LLM agent in unbounded loop — runaway cost and potential infinite execution
-  pattern: (?:while\s*\(\s*(?:true|True|1)\s*\)|while\s+(?:True|true|1)\s*:?)[\s\S]{0,300}(?:chat\.completions\.create|messages\.create|completion|generate|\.invoke|\.run|\.predict)
+  pattern: (?:while\s*\(\s*(?:true|True|1)\s*\)|while\s+(?:True|true|1)\s*:?)[\s\S]{0,1000}(?:chat\.completions\.create|messages\.create|completion|generate|\.invoke|\.run|\.predict)
   severity: warning
   suggestion: Set iteration limits and cost guards on LLM agent loops
   flags: [DOTALL]
@@ -475,3 +475,53 @@ rules:
   pattern: (?i)(?:prompt|system|instruction|message).*\.format_map\s*\(\s*(?:locals|vars)\s*\(\s*\)\s*\)
   severity: critical
   suggestion: Explicitly pass only intended variables; never use format_map(locals())
+# ── Additional LLM SDK Coverage ───────────────────────────────────
+- category: security
+  id: prompt-injection-ollama
+  message: Ollama API call with interpolated content — prompt injection risk
+  pattern: (?i)ollama\.(?:chat|generate)\s*\([\s\S]{0,200}(?:f['"]|['"][^'"]*['"]\.format|\+\s*\w|`[^`]*\$\{)
+  severity: critical
+  suggestion: Sanitize user input before passing to Ollama; use structured messages
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-bedrock
+  message: AWS Bedrock invoke_model with interpolated content — prompt injection risk
+  pattern: (?i)(?:invoke_model|invoke_model_with_response_stream)\s*\([\s\S]{0,200}(?:f['"]|['"][^'"]*['"]\.format|\+\s*\w)
+  severity: critical
+  suggestion: Validate and sanitize all user input before sending to Bedrock models
+  flags: [DOTALL]
+- category: security
+  id: prompt-injection-groq
+  message: Groq API call with interpolated content — prompt injection risk
+  pattern: (?i)groq\.(?:chat\.completions\.create|completions\.create)\s*\([\s\S]{0,200}(?:f['"]|['"][^'"]*['"]\.format|\+\s*\w)
+  severity: critical
+  suggestion: Sanitize user input before passing to Groq API
+  flags: [DOTALL]
+# ── Multimodal Injection (OWASP emerging) ─────────────────────────
+- category: security
+  id: llm-untrusted-image-to-vision
+  message: User-uploaded or untrusted image passed to vision model — image-based prompt injection risk
+  pattern: (?i)(?:image_url|image_data|image_content|image_path)\s*[=:]\s*(?:request|req|params|body|input|user|upload|args)
+  severity: warning
+  suggestion: Validate and filter image content before passing to vision models; do not trust embedded text in images
+- category: security
+  id: llm-base64-image-from-input
+  message: Base64 image from user input sent to LLM — potential image-based injection
+  pattern: (?i)base64[._](?:encode|b64encode|encodebytes)\s*\([\s\S]{0,200}(?:request|req\.|upload|user_|input)
+  severity: warning
+  suggestion: Validate image content and source before base64 encoding for LLM consumption
+  flags: [DOTALL]
+# ── Sensitive Info in Responses (OWASP LLM02) ─────────────────────
+- category: security
+  id: llm-response-no-pii-filter
+  message: LLM response returned to user without PII/sensitive data filtering
+  pattern: (?i)(?:return|send|res\.json|jsonify|response\.write)\s*\(\s*(?:response|completion|result|output|answer|reply)\.(?:text|content|choices)
+  severity: info
+  suggestion: Filter LLM responses for PII, credentials, and sensitive data before returning to users
+- category: security
+  id: llm-training-data-leak-check
+  message: LLM output used without checking for training data memorization markers
+  pattern: (?i)(?:response|completion|output)\.(?:text|content|choices)[\s\S]{0,50}(?:return|send|print|write|render)(?![\s\S]{0,200}(?:filter|sanitize|redact|mask|scrub))
+  severity: info
+  suggestion: Implement output filtering to detect and redact potential training data leakage
+  flags: [DOTALL]
