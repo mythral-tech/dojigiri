@@ -96,7 +96,7 @@ rules:
   severity: info
   suggestion: Use configuration files or environment variables for IP addresses
 - category: security
-  id: bind-all-interfaces
+  id: generic-bind-all-interfaces
   message: Binding to 0.0.0.0 exposes the service to all network interfaces
   pattern: (?:\.bind|\.run|start_server|HTTPServer|TCPServer|UDPServer|SimpleXMLRPCServer|ThreadingTCPServer|ForkingTCPServer|BaseManager|SyncManager)\s*\([^)]*['"]0\.0\.0\.0['"]|=\s*['"]0\.0\.0\.0['"]
   severity: warning
@@ -120,13 +120,7 @@ rules:
   severity: warning
   suggestion: Use SHA-256 or SHA-3 instead
 - category: security
-  id: cors-wildcard
-  message: 'CORS allows all origins — any website can make authenticated requests'
-  pattern: (?i)(?:Access-Control-Allow-Origin['"]\s*[:,]\s*['"]\*|cors\s*\(\s*\)|allow_origins\s*=\s*\[['"]?\*)
-  severity: warning
-  suggestion: Restrict CORS to specific trusted origins
-- category: security
-  id: open-redirect
+  id: generic-open-redirect
   message: Redirect to user-controlled URL — open redirect risk
   pattern: (?i)(?:redirect|location\.href|window\.location|res\.redirect)\s*(?:=|\()\s*(?:req\.|request\.|params\.|query\.)
   severity: warning
@@ -150,13 +144,13 @@ rules:
   severity: critical
   suggestion: Use safe deserialization (yaml.safe_load, JSON) or validate input
 - category: security
-  id: debug-enabled
+  id: generic-debug-enabled
   message: Debug mode enabled — may expose sensitive information in production
   pattern: (?i)(?:DEBUG\s*=\s*True|debug\s*:\s*true|\.debug\s*=\s*true|app\.run\s*\([^)]*debug\s*=\s*True)
   severity: warning
   suggestion: Disable debug mode in production environments
 - category: security
-  id: weak-tls-version
+  id: generic-weak-tls-version
   message: Weak TLS version (< 1.2) — vulnerable to known attacks
   pattern: (?i)(?:SSLv[23]|TLSv1(?:\.0)?|TLS_1_0|TLS_1_1|PROTOCOL_TLSv1(?:_1)?)\b
   severity: warning
@@ -174,7 +168,7 @@ rules:
   severity: warning
   suggestion: Set Secure, HttpOnly, and SameSite flags on session cookies
 - category: security
-  id: password-in-url
+  id: generic-password-in-url
   message: Password in URL — visible in logs, referrer headers, browser history
   pattern: (?i)(?:https?://[^:]+:[^@]+@(?!localhost))
   severity: critical
@@ -240,7 +234,7 @@ rules:
   severity: warning
   suggestion: Simplify regex to avoid catastrophic backtracking; use atomic groups or possessive quantifiers
 - category: security
-  id: insecure-cookie
+  id: generic-insecure-cookie
   message: Cookie set without security flags
   pattern: (?i)(?:set_cookie|setCookie|document\.cookie)\s*(?:\(|=)(?!.*(?:secure|httponly|samesite))
   severity: warning
