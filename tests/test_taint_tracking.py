@@ -1,4 +1,4 @@
-"""Tests for enhanced taint tracking (dojigiri.taint).
+"""Tests for enhanced taint tracking (dojigiri.taint_cross).
 
 Covers intra-file variable indirection, multi-hop propagation, f-string taint,
 function parameter taint, and cross-file taint analysis.
@@ -6,7 +6,7 @@ function parameter taint, and cross-file taint analysis.
 
 import pytest
 
-from dojigiri.taint import (
+from dojigiri.taint_cross import (
     TaintVar,
     analyze_taint_ast,
     analyze_taint_cross_file,

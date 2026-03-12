@@ -2,6 +2,7 @@
 
 __version__ = "1.1.0"
 
+from .analyzer import scan_string  # doji:ignore(unused-import)
 from .bundling import patch_tree_sitter_for_bundled
 from .types import (  # doji:ignore(unused-import)
     Category,
@@ -37,4 +38,5 @@ __all__ = [
     "FixReport",
     "CrossFileFinding",
     "ProjectAnalysis",
+    "scan_string",
 ]

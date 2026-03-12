@@ -17,7 +17,7 @@ from ..analyzer import cost_estimate, diff_reports, filter_report, scan_deep, sc
 from ..bundling import is_bundled
 from ..config import LANGUAGE_EXTENSIONS, compile_custom_rules, load_project_config
 from ..storage import list_reports, load_baseline_report, load_latest_report
-from ..types import Severity
+from ..types import ScanReport, Severity
 from .common import CONFIDENCE_MAP, SEVERITY_MAP, _apply_profile, _confirm_llm_usage, _setup_llm_backend
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ _SECURITY_RULES = {
 }
 
 
-def _load_scan_config(args: object, scan_root: object) -> tuple[dict, list]:
+def _load_scan_config(args: argparse.Namespace, scan_root: Path) -> tuple[dict, list]:
     """Load project config and custom rules, warn about suppressed security rules.
 
     Returns (project_config, custom_rules).
@@ -61,7 +61,7 @@ def _load_scan_config(args: object, scan_root: object) -> tuple[dict, list]:
     return project_config, custom_rules
 
 
-def _execute_scan(args: object, root: object, lang: str | None, use_cache: bool, is_json: bool, project_config: dict, custom_rules: list) -> tuple[object | None, int | None]:
+def _execute_scan(args: argparse.Namespace, root: Path, lang: str | None, use_cache: bool, is_json: bool, project_config: dict, custom_rules: list) -> tuple[ScanReport | None, int | None]:
     """Execute the appropriate scan mode (diff, deep, or quick).
 
     Returns (report_obj, error_code) where error_code is None on success.
@@ -156,7 +156,7 @@ def _output_report(report_obj, output_format, scan_duration, args) -> int | None
     return None
 
 
-def _apply_baseline_and_filters(args: object, report_obj: object, project_config: dict, is_json: bool) -> object:
+def _apply_baseline_and_filters(args: argparse.Namespace, report_obj: ScanReport, project_config: dict, is_json: bool) -> ScanReport:
     """Apply baseline diff and post-scan severity/confidence/rule filters."""
     baseline_arg = getattr(args, "baseline", None)
     if baseline_arg:

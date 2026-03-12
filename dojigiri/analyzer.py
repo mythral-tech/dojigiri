@@ -17,9 +17,11 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -41,7 +43,7 @@ from .types import (
 )
 
 
-def _safe_enum(enum_cls: type, value: str) -> object | None:
+def _safe_enum(enum_cls: type[Enum], value: str) -> Enum | None:
     """Safely instantiate an enum, returning None for invalid values."""
     try:
         return enum_cls(value)
@@ -198,7 +200,7 @@ def _detect_cross_file_taint(analyses: list[FileAnalysis]) -> list[CrossFileFind
     if len(python_files) < 2:
         return []
     try:
-        from .taint import analyze_taint_cross_file
+        from .taint_cross import analyze_taint_cross_file
         return list(analyze_taint_cross_file(python_files))
     except Exception as e:
         logger.debug("Cross-file taint analysis skipped: %s", e)
@@ -251,6 +253,92 @@ def scan_quick(
 
     save_report(report_obj)
     return report_obj
+
+
+# Reverse mapping: language name → canonical file extension (for temp files)
+_LANG_TO_EXT: dict[str, str] = {
+    "python": ".py",
+    "javascript": ".js",
+    "typescript": ".ts",
+    "go": ".go",
+    "rust": ".rs",
+    "java": ".java",
+    "c": ".c",
+    "cpp": ".cpp",
+    "ruby": ".rb",
+    "php": ".php",
+    "csharp": ".cs",
+    "swift": ".swift",
+    "kotlin": ".kt",
+    "pine": ".pine",
+    "bash": ".sh",
+    "sql": ".sql",
+    "html": ".html",
+    "css": ".css",
+}
+
+
+def scan_string(
+    code: str,
+    language: str,
+    filename: str = "input",
+    custom_rules: list | None = None,
+) -> ScanReport:
+    """Scan a code string directly — no file on disk required.
+
+    Creates a temporary file internally so the analysis pipeline (which expects
+    file paths) works unchanged, then cleans up.
+
+    Args:
+        code: Source code to scan.
+        language: Language identifier (e.g. "python", "javascript").
+        filename: Virtual filename used in findings (default "input").
+        custom_rules: Compiled custom rules from compile_custom_rules().
+
+    Returns:
+        ScanReport with findings for the single input.
+    """
+    ext = _LANG_TO_EXT.get(language, ".txt")
+    suffix = ext if not filename.endswith(ext) else ""
+
+    fd = None
+    tmp_path = None
+    try:
+        fd, tmp_path = tempfile.mkstemp(suffix=suffix, prefix="doji_scan_")
+        os.write(fd, code.encode("utf-8"))
+        os.close(fd)
+        fd = None  # mark as closed
+
+        result = analyze_file_static(tmp_path, code, language, custom_rules=custom_rules)
+
+        # Rewrite file paths in findings to use the virtual filename
+        for f in result.findings:
+            f.file = filename
+
+        fa = FileAnalysis(
+            path=filename,
+            language=language,
+            lines=code.count("\n") + 1,
+            findings=result.findings,
+        )
+        return ScanReport(
+            root=filename,
+            mode="string",
+            files_scanned=1,
+            files_skipped=0,
+            file_analyses=[fa],
+        )
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        if tmp_path is not None:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
 
 
 def _reconstruct_cached_analysis(fp_str: str, lang: str, fhash: str, cached_data: dict[str, object]) -> FileAnalysis:

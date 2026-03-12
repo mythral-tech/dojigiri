@@ -37,6 +37,7 @@ _GENERIC_SINK_RULES: dict[str, str] = {
     "eval": "eval-usage",
     "html_output": "xss",
     "ssrf": "ssrf",
+    "llm_input": "llm-prompt-injection",
 }
 _JAVA_SINK_RULES: dict[str, str] = {
     "sql_query": "java-sql-injection",
@@ -67,14 +68,14 @@ def _resolve_taint_rule(sink_kind: str, language: str = "") -> str:
 class TaintSource:
     variable: str
     line: int
-    kind: str  # "user_input", "file_read", "network", "env_var"
+    kind: str  # "user_input", "file_read", "network", "env_var", "llm_output"
 
 
 @dataclass
 class TaintSink:
     variable: str
     line: int
-    kind: str  # "sql_query", "eval", "system_cmd", "html_output"
+    kind: str  # "sql_query", "eval", "system_cmd", "html_output", "llm_input"
     function_name: str
     scope_id: int = 0
 

@@ -1,9 +1,9 @@
-"""Tests for dojigiri/taint.py — AST-based taint analysis helpers."""
+"""Tests for dojigiri/taint_cross.py — AST-based taint analysis helpers."""
 
 import ast
 import pytest
 
-from dojigiri.taint import (
+from dojigiri.taint_cross import (
     _get_call_name,
     _get_name,
     _expr_contains_name,

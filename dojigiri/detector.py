@@ -18,12 +18,20 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
 from .ast_checks import run_python_ast_checks
 from .languages import get_rules_for_language
-from .types import Category, Finding, Source
+from .types import Category, Finding, Severity, Source
+
+if TYPE_CHECKING:
+    from .semantic.core import FileSemantics
+    from .semantic.lang_config import LanguageConfig
+    from .semantic.types import FileTypeMap
+    from .types import StaticAnalysisResult
 
 # Security-related categories where string lines should still be scanned
 _SECURITY_CATEGORIES = {Category.SECURITY}
@@ -225,7 +233,7 @@ def _check_block_comment_open(stripped: str, opener: str, language: str) -> bool
 def _update_block_comment_state(
     stripped: str, language: str, in_block_comment: bool, block_comment_delimiter: str | None,
     block_open: str | None, block_close: str | None, alt_block_open: str | None, alt_block_close: str | None,
-) -> tuple[bool, object, bool]:
+) -> tuple[bool, str | None, bool]:
     """Track block comment state for a single line.
 
     Returns (in_block_comment, block_comment_delimiter, should_skip_line).
@@ -292,7 +300,7 @@ def _get_check_line(line: str, language: str, category: Category, rule_name: str
 
 def _check_builtin_rules(rules: list[tuple], line: str, stripped: str, line_num: int, lines: list[str], language: str,
                          is_comment: bool, is_string_line: bool, skip_rules: set[str], filepath: str,
-                         is_suppressed: object, findings: list[Finding]) -> None:
+                         is_suppressed: Callable[[str], bool], findings: list[Finding]) -> None:
     """Check built-in rules against a line and append findings."""
     for pattern, severity, category, rule_name, message, suggestion in rules:
         if _should_skip_rule_for_line(rule_name, category, is_comment, is_string_line, skip_rules, stripped):
@@ -309,7 +317,7 @@ def _check_builtin_rules(rules: list[tuple], line: str, stripped: str, line_num:
             ))
 
 
-def _check_custom_rules(custom_rules: list[tuple], line: str, stripped: str, line_num: int, filepath: str, is_suppressed: object, findings: list[Finding]) -> None:
+def _check_custom_rules(custom_rules: list[tuple], line: str, stripped: str, line_num: int, filepath: str, is_suppressed: Callable[[str], bool], findings: list[Finding]) -> None:
     """Check custom rules against a line and append findings."""
     for pattern, severity, category, rule_name, message, suggestion in custom_rules:
         if pattern.search(line):
@@ -330,7 +338,7 @@ def _is_string_literal_line(stripped: str) -> bool:
     )
 
 
-def _make_finding(filepath: str, line_num: int, severity: object, category: Category, rule_name: str, message: str, suggestion: str, snippet: str) -> Finding:
+def _make_finding(filepath: str, line_num: int, severity: Severity, category: Category, rule_name: str, message: str, suggestion: str, snippet: str) -> Finding:
     """Create a Finding from matched rule data."""
     return Finding(
         file=filepath,
@@ -449,8 +457,8 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules: l
 
 
 def _run_semantic_checks(
-    findings: list[Finding], semantics: object, content: str, filepath: str, language: str,
-) -> object | None:
+    findings: list[Finding], semantics: FileSemantics, content: str, filepath: str, language: str,
+) -> FileTypeMap | None:
     """Run semantic analysis checks (scope, taint, CFG, types, null-safety, smells).
 
     Returns the type_map if computed, else None. Appends findings in place.
@@ -485,8 +493,8 @@ def _run_semantic_checks(
 
 
 def _run_cfg_and_type_checks(
-    findings: list[Finding], semantics: object, source_bytes: bytes, config: object, filepath: str,
-) -> object | None:
+    findings: list[Finding], semantics: FileSemantics, source_bytes: bytes, config: LanguageConfig, filepath: str,
+) -> FileTypeMap | None:
     """Run CFG-based taint/resource checks and type inference + null safety.
 
     Returns the type_map if computed, else None. Appends findings in place.
@@ -524,7 +532,7 @@ def _run_cfg_and_type_checks(
 def _run_ast_taint_checks(findings: list[Finding], filepath: str, content: str) -> None:
     """Run AST-based taint analysis for Python files, deduplicating against existing findings."""
     try:
-        from .taint import analyze_taint_ast
+        from .taint_cross import analyze_taint_ast
 
         ast_taint_findings = analyze_taint_ast(filepath, content)
         existing_taint_keys = {
@@ -540,7 +548,7 @@ def _run_ast_taint_checks(findings: list[Finding], filepath: str, content: str) 
 def _run_all_checks(
     filepath: str, content: str, language: str, custom_rules: list | None = None,
     *, skip_benchmark_filters: bool = False,
-) -> tuple[list[Finding], object | None, object | None]:
+) -> tuple[list[Finding], FileSemantics | None, FileTypeMap | None]:
     """Run regex + AST + semantic checks. Returns (findings, semantics, type_map).
 
     Note: imports inside this function are intentionally lazy, not due to circular
@@ -688,7 +696,7 @@ def _record_metrics(findings: list[Finding], scan_ms: float) -> None:
         logger.debug("Failed to record metrics: %s", e)
 
 
-def analyze_file_static(filepath: str, content: str, language: str, custom_rules: list | None = None) -> StaticAnalysisResult:  # noqa: F821
+def analyze_file_static(filepath: str, content: str, language: str, custom_rules: list | None = None) -> StaticAnalysisResult:
     """Run all static checks (regex + tree-sitter AST + Python AST fallback + semantic).
 
     Always returns a StaticAnalysisResult with findings, semantics, and type_map.

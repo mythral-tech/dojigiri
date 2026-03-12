@@ -245,7 +245,7 @@ def _merge_verification(aggregate_verification: dict | None, report_verification
     return aggregate_verification
 
 
-def _validate_fix_args(args: object) -> tuple[Path, str | None, int | None]:
+def _validate_fix_args(args: argparse.Namespace) -> tuple[Path, str | None, int | None]:
     """Validate fix command arguments. Returns (root, lang, error_code) — error_code is None on success."""
     root = Path(args.path).resolve()
     if not root.exists():

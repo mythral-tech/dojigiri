@@ -15,6 +15,11 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .semantic.core import FileSemantics
+    from .semantic.types import FileTypeMap
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +142,7 @@ class FileAnalysis:
     lines: int
     findings: list[Finding] = field(default_factory=list)
     file_hash: str | None = None
-    semantics: object | None = None  # semantic.core.FileSemantics (not serialized)
+    semantics: FileSemantics | None = None  # not serialized
 
     @property
     def critical_count(self) -> int:
@@ -290,8 +295,8 @@ class FixContext:
 
     content: str
     finding: Finding
-    semantics: object | None = None  # semantic.core.FileSemantics
-    type_map: object | None = None  # semantic.types.FileTypeMap
+    semantics: FileSemantics | None = None
+    type_map: FileTypeMap | None = None
     language: str = "python"
 
 
@@ -368,5 +373,5 @@ class StaticAnalysisResult:
     """Return type of analyze_file_static — always carries findings + optional semantics."""
 
     findings: list[Finding]
-    semantics: object | None = None  # semantic.core.FileSemantics
-    type_map: object | None = None  # semantic.types.FileTypeMap
+    semantics: FileSemantics | None = None
+    type_map: FileTypeMap | None = None

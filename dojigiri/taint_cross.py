@@ -41,11 +41,20 @@ TAINT_SOURCE_ATTRS = {
     ("request", "headers"): "user_input",
     ("os", "environ"): "env_var",
     ("sys", "argv"): "user_input",
+    # LLM response outputs — tainted because model output is untrusted
+    ("response", "choices"): "llm_output",
+    ("completion", "choices"): "llm_output",
+    ("response", "content"): "llm_output",
+    ("message", "content"): "llm_output",
+    ("completion", "text"): "llm_output",
+    ("response", "text"): "llm_output",
 }
 
 # Function calls that produce tainted data
 TAINT_SOURCE_CALLS = {
     "input": "user_input",
+    # LangChain call patterns that return LLM output
+    "invoke": "llm_output",
 }
 
 # Method/function calls that are dangerous sinks
@@ -85,6 +94,25 @@ TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
     ("urlopen", "ssrf"),
     ("aiohttp.ClientSession.get", "ssrf"),
     ("aiohttp.ClientSession.post", "ssrf"),
+    # LLM API calls — user input flowing here is prompt injection
+    ("client.chat.completions.create", "llm_input"),
+    ("openai.ChatCompletion.create", "llm_input"),
+    ("client.completions.create", "llm_input"),
+    ("client.messages.create", "llm_input"),
+    ("anthropic.messages.create", "llm_input"),
+    ("litellm.completion", "llm_input"),
+    ("litellm.acompletion", "llm_input"),
+    ("cohere.Client.generate", "llm_input"),
+    ("cohere.Client.chat", "llm_input"),
+    ("co.generate", "llm_input"),
+    ("co.chat", "llm_input"),
+    ("genai.GenerativeModel", "llm_input"),
+    ("model.generate_content", "llm_input"),
+    ("chain.invoke", "llm_input"),
+    ("chain.run", "llm_input"),
+    ("llm.invoke", "llm_input"),
+    ("llm.predict", "llm_input"),
+    ("chat.invoke", "llm_input"),
 ]
 
 # Functions that sanitize tainted data
