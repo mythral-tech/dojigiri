@@ -30,7 +30,7 @@ Every version follows the same pattern: BSL 1.1 for 4 years from release, then A
 
 For commercial license inquiries:
 
-- Email: licensing@dojigiri.dev
+- Email: licensing@dojigiri.com
 - Volume discounts available for multi-team deployments
 - White-label licensing available for integration into third-party tools
 

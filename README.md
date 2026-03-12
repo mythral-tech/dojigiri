@@ -257,7 +257,7 @@ See [PRIVACY.md](PRIVACY.md) for data handling, [TERMS.md](TERMS.md) for terms o
 ## Development
 
 ```bash
-git clone https://github.com/Inklling/dojigiri
+git clone https://github.com/mythral-tech/dojigiri
 cd dojigiri
 pip install -e ".[dev]"
 pytest tests/ -q

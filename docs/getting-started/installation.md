@@ -25,7 +25,7 @@ pip install dojigiri[dev]    # Adds pytest, hypothesis, coverage
 ## From source
 
 ```bash
-git clone https://github.com/Inklling/dojigiri
+git clone https://github.com/mythral-tech/dojigiri
 cd dojigiri
 pip install -e ".[dev]"
 ```

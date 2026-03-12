@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Inklling/dojigiri@main
+      - uses: mythral-tech/dojigiri@main
         id: scan
         with:
           min-severity: warning
@@ -130,7 +130,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: Inklling/dojigiri@main
+      - uses: mythral-tech/dojigiri@main
         with:
           diff-only: 'true'
           min-severity: info

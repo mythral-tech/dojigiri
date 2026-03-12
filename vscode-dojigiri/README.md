@@ -1,6 +1,6 @@
 # Dojigiri Security Scanner
 
-VS Code extension for [Dojigiri](https://github.com/Inklling/dojigiri) -- real-time security vulnerability scanning for Python, JavaScript, TypeScript, Go, and Rust.
+VS Code extension for [Dojigiri](https://github.com/mythral-tech/dojigiri) -- real-time security vulnerability scanning for Python, JavaScript, TypeScript, Go, and Rust.
 
 ## Features
 

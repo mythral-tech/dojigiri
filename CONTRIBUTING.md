@@ -5,7 +5,7 @@ Thanks for your interest in contributing. This guide covers the basics.
 ## Setup
 
 ```bash
-git clone https://github.com/Inklling/dojigiri
+git clone https://github.com/mythral-tech/dojigiri
 cd dojigiri
 pip install -e ".[dev]"
 ```

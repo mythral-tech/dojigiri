@@ -452,7 +452,7 @@ def format_pr_comment(review: PRReview) -> str:
         lines.append("No security findings on changed lines. ✅")
         lines.append("")
         lines.append("---")
-        lines.append("*Scanned by [Dojigiri](https://github.com/Inklling/dojigiri)*")
+        lines.append("*Scanned by [Dojigiri](https://github.com/mythral-tech/dojigiri)*")
         return "\n".join(lines)
 
     # Per-file analysis
@@ -498,6 +498,6 @@ def format_pr_comment(review: PRReview) -> str:
                 lines.append("")
 
     lines.append("---")
-    lines.append("*Scanned by [Dojigiri](https://github.com/Inklling/dojigiri)*")
+    lines.append("*Scanned by [Dojigiri](https://github.com/mythral-tech/dojigiri)*")
 
     return "\n".join(lines)

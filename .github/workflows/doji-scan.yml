@@ -59,7 +59,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Install Dojigiri
-        run: pip install --quiet "dojigiri @ git+https://github.com/Inklling/dojigiri.git@${{ inputs.dojigiri-version }}"
+        run: pip install --quiet "dojigiri @ git+https://github.com/mythral-tech/dojigiri.git@${{ inputs.dojigiri-version }}"
 
       - name: Run scan
         id: scan

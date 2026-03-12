@@ -1,8 +1,8 @@
 site_name: Dojigiri
 site_description: LLM-augmented static analysis for security-conscious teams
 site_url: https://inklling.github.io/dojigiri
-repo_url: https://github.com/Inklling/dojigiri
-repo_name: Inklling/dojigiri
+repo_url: https://github.com/mythral-tech/dojigiri
+repo_name: mythral-tech/dojigiri
 
 theme:
   name: material

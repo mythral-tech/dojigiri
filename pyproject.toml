@@ -49,11 +49,11 @@ dev = [
 doji = "dojigiri.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/Inklling/dojigiri"
-Repository = "https://github.com/Inklling/dojigiri"
-Documentation = "https://dojigiri.dev"
-Issues = "https://github.com/Inklling/dojigiri/issues"
-Changelog = "https://github.com/Inklling/dojigiri/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/mythral-tech/dojigiri"
+Repository = "https://github.com/mythral-tech/dojigiri"
+Documentation = "https://dojigiri.com"
+Issues = "https://github.com/mythral-tech/dojigiri/issues"
+Changelog = "https://github.com/mythral-tech/dojigiri/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["dojigiri*"]

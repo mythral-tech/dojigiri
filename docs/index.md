@@ -2,7 +2,7 @@
 
 **Static analysis + SCA with a three-tier engine: regex, AST/semantic, and LLM.**
 
-[![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](https://github.com/Inklling/dojigiri/blob/main/LICENSE)
+[![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](https://github.com/mythral-tech/dojigiri/blob/main/LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-1426-brightgreen.svg)]()
 [![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-100%25-brightgreen.svg)]()

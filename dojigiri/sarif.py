@@ -30,7 +30,7 @@ SARIF_SCHEMA = (
     "sarif-2.1/schema/sarif-schema-2.1.0.json"
 )
 
-DOJIGIRI_URI = "https://github.com/Inklling/dojigiri"
+DOJIGIRI_URI = "https://github.com/mythral-tech/dojigiri"
 
 CWE_TAXONOMY_URI = "https://cwe.mitre.org/data/published/cwe_latest.pdf"
 

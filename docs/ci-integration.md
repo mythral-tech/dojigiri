@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Inklling/dojigiri@main
+      - uses: mythral-tech/dojigiri@main
         id: scan
         with:
           min-severity: warning
@@ -66,7 +66,7 @@ on: [push, pull_request]
 
 jobs:
   scan:
-    uses: Inklling/dojigiri/.github/workflows/doji-scan.yml@main
+    uses: mythral-tech/dojigiri/.github/workflows/doji-scan.yml@main
     with:
       min-severity: warning
       output-format: sarif
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Inklling/dojigiri@main
+      - uses: mythral-tech/dojigiri@main
         with:
           fail-on-findings: 'true'
 
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: Inklling/dojigiri@main
+      - uses: mythral-tech/dojigiri@main
         with:
           diff-only: 'true'
           min-severity: info
@@ -134,7 +134,7 @@ dojigiri:
   image: python:3.12-slim
   stage: test
   script:
-    - pip install --quiet "dojigiri @ git+https://github.com/Inklling/dojigiri.git@main"
+    - pip install --quiet "dojigiri @ git+https://github.com/mythral-tech/dojigiri.git@main"
     - doji scan . --min-severity warning --output text
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -145,7 +145,7 @@ dojigiri-sast:
   image: python:3.12-slim
   stage: test
   script:
-    - pip install --quiet "dojigiri @ git+https://github.com/Inklling/dojigiri.git@main"
+    - pip install --quiet "dojigiri @ git+https://github.com/mythral-tech/dojigiri.git@main"
     - doji scan . --min-severity warning --output sarif > gl-sast-report.sarif
   artifacts:
     reports:
@@ -161,7 +161,7 @@ dojigiri-sast:
 Works anywhere Python 3.10+ is available:
 
 ```bash
-pip install "dojigiri @ git+https://github.com/Inklling/dojigiri.git@main"
+pip install "dojigiri @ git+https://github.com/mythral-tech/dojigiri.git@main"
 
 # Quick scan, fail on critical (exit code 2)
 doji scan . --min-severity warning
@@ -192,7 +192,7 @@ doji scan . --output sarif > results.sarif
 
 ```dockerfile
 FROM python:3.12-slim
-RUN pip install --no-cache-dir "dojigiri @ git+https://github.com/Inklling/dojigiri.git@main"
+RUN pip install --no-cache-dir "dojigiri @ git+https://github.com/mythral-tech/dojigiri.git@main"
 ENTRYPOINT ["doji"]
 ```
 

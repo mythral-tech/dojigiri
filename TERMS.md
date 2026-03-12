@@ -2,7 +2,7 @@
 
 **Effective date:** March 9, 2026
 
-These Terms of Service ("Terms") govern your use of Dojigiri ("the Software"), a static analysis and AI-powered code audit tool maintained at [github.com/Inklling/dojigiri](https://github.com/Inklling/dojigiri).
+These Terms of Service ("Terms") govern your use of Dojigiri ("the Software"), a static analysis and AI-powered code audit tool maintained at [github.com/mythral-tech/dojigiri](https://github.com/mythral-tech/dojigiri).
 
 ---
 
@@ -78,4 +78,4 @@ For significant changes, notice will be provided via the project's GitHub reposi
 
 ---
 
-For questions about these Terms, open an issue at [github.com/Inklling/dojigiri](https://github.com/Inklling/dojigiri).
+For questions about these Terms, open an issue at [github.com/mythral-tech/dojigiri](https://github.com/mythral-tech/dojigiri).

@@ -45,7 +45,7 @@
 
 ### Minor (improved but not blocking)
 
-4. **Missing Documentation and Changelog URLs** -- Added `Documentation = "https://dojigiri.dev"` and `Changelog` URL to `[project.urls]`. PyPI renders these as sidebar links.
+4. **Missing Documentation and Changelog URLs** -- Added `Documentation = "https://dojigiri.com"` and `Changelog` URL to `[project.urls]`. PyPI renders these as sidebar links.
 
 ---
 

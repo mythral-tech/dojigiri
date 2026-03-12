@@ -27,7 +27,7 @@ Production use in a commercial product or service requires a commercial license.
 - Bundling in a product you sell
 - Offering as a managed service
 
-**Contact:** licensing@dojigiri.dev
+**Contact:** licensing@dojigiri.com
 
 Volume discounts available for multi-team deployments. White-label licensing available.
 
