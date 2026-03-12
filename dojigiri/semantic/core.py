@@ -953,14 +953,19 @@ def extract_semantics(content: str, filepath: str, language: str) -> FileSemanti
 
     # Guard against pathologically deep ASTs
     def _tree_depth(node: object, max_depth: int = 1000) -> int:
-        depth = 0
-        current = node
-        while current.child_count > 0:
-            current = current.children[0]
-            depth += 1
-            if depth > max_depth:
-                return depth
-        return depth
+        """Iterative DFS to find actual maximum tree depth."""
+        max_seen = 0
+        stack = [(node, 0)]
+        while stack:
+            current, depth = stack.pop()
+            if depth > max_seen:
+                max_seen = depth
+                if max_seen > max_depth:
+                    return max_seen
+            if current.child_count > 0:
+                for child in current.children:
+                    stack.append((child, depth + 1))
+        return max_seen
 
     if _tree_depth(tree.root_node) > 1000:
         logger.warning("AST too deep (>1000) for %s, skipping semantic analysis", filepath)

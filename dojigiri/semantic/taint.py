@@ -949,13 +949,12 @@ def _propagate_taint(
         if _INT_LITERAL_RE.match(val):
             constant_vars[asgn.name] = int(val)
 
-    changed = True
     max_iters = 10
     iteration = 0
 
-    while changed and iteration < max_iters:
-        changed = False
-        iteration += 1
+    for iteration in range(max_iters):
+        # Snapshot taint state at start of iteration to detect real changes
+        taint_snapshot = {k: list(v) for k, v in tainted.items()}
 
         for asgn in scoped_assignments:
             rhs = asgn.value_text
@@ -964,10 +963,9 @@ def _propagate_taint(
             is_sanitized = any(sanitizer in rhs for sanitizer in config.taint_sanitizer_patterns)
 
             if is_sanitized:
-                if _handle_sanitizer_in_propagation(
+                _handle_sanitizer_in_propagation(
                     asgn, tainted, branch_groups, conditional_bodies, sink_lines,
-                ):
-                    changed = True
+                )
                 continue
 
             if asgn.name in tainted:
@@ -976,13 +974,17 @@ def _propagate_taint(
             # Constant propagation: ternary resolution
             ternary_result = _try_ternary_propagation(asgn, rhs, tainted, constant_vars)
             if ternary_result is not None:
-                if ternary_result:
-                    changed = True
                 continue
 
             # Collection-aware and direct RHS propagation
-            if _try_rhs_propagation(asgn, rhs, tainted, src_lines, coll_state, method_summaries):
-                changed = True
+            _try_rhs_propagation(asgn, rhs, tainted, src_lines, coll_state, method_summaries)
+
+        # Only continue if the taint set actually changed from start of iteration
+        if set(tainted.keys()) == set(taint_snapshot.keys()) and all(
+            sorted(map(str, tainted[k])) == sorted(map(str, taint_snapshot[k]))
+            for k in tainted
+        ):
+            break
 
     return tainted
 

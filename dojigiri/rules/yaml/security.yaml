@@ -350,7 +350,7 @@ rules:
   suggestion: Keep safe_prompt=True to enable Mistral's safety guardrails
 - category: security
   id: llm-temperature-max
-  message: LLM temperature set to maximum — increases unpredictability and jailbreak susceptibility
+  message: LLM temperature set very high — increases unpredictability and jailbreak susceptibility
   pattern: temperature\s*[=:]\s*(?:2\.0|2(?:\.0*)?|1\.[5-9]\d*)\s*(?:[,}\)\]\s;]|$)
   severity: warning
   suggestion: Use temperature <= 1.0 for most applications; high temperature increases attack surface
@@ -414,7 +414,7 @@ rules:
 - category: security
   id: llm-auto-approve-tools
   message: LLM tool execution with auto-approval — no human oversight for potentially destructive actions
-  pattern: (?i)(?:auto_approve|auto_execute|skip_confirmation|confirm)\s*[=:]\s*(?:True|true|1|False|false)
+  pattern: (?i)(?:auto_approve|auto_execute|skip_confirmation)\s*[=:]\s*(?:True|true|1)
   severity: warning
   suggestion: Require human confirmation for destructive tool actions; implement approval gates
 - category: security
@@ -786,4 +786,27 @@ rules:
   pattern: (?i)(?:Agent|AgentRunner|create_agent)\s*\([\s\S]{0,500}(?:tools\s*=)(?![\s\S]{0,300}(?:guardrail|guard|validator|filter|safety))
   severity: warning
   suggestion: Configure guardrail functions to validate agent outputs before execution; implement safety boundaries
+  flags: [DOTALL]
+# ── LLM Output as Regex (ReDoS) ──────────────────────────────────
+- category: security
+  id: llm-output-to-regex-python
+  message: LLM output used as regex pattern — ReDoS risk from unvalidated model response
+  pattern: re\.compile\s*\(\s*(?:response|completion|result|output|generated|answer|reply|content|text)
+  severity: warning
+  suggestion: Never pass raw LLM output to re.compile; validate or sanitize regex patterns first
+  cwe: CWE-1333
+- category: security
+  id: llm-output-to-regex-js
+  message: LLM output used as regex pattern — ReDoS risk from unvalidated model response
+  pattern: new\s+RegExp\s*\(\s*(?:response|completion|result|output|generated|answer|reply|content|text)
+  severity: warning
+  suggestion: Never pass raw LLM output to RegExp constructor; validate or sanitize regex patterns first
+  cwe: CWE-1333
+# ── Missing Stop Reason Check ────────────────────────────────────
+- category: security
+  id: llm-no-stop-reason-check-anthropic
+  message: Anthropic messages.create() response used without checking stop_reason — may process incomplete or truncated output
+  pattern: messages\.create\s*\([^)]*\)[\s\S]{0,500}(?!stop_reason)
+  severity: info
+  suggestion: Check response.stop_reason to ensure the model completed normally before using output
   flags: [DOTALL]

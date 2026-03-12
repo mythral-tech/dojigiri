@@ -521,7 +521,7 @@ def _run_cfg_and_type_checks(
         file_type_map = infer_types(semantics, source_bytes, config, cfgs=cfgs if config else None)
         if file_type_map and file_type_map.types:
             findings.extend(
-                check_null_safety(semantics, file_type_map, config, filepath, cfgs=cfgs if config else None)
+                check_null_safety(semantics, file_type_map, config, filepath, cfgs=cfgs if config else None, source_bytes=source_bytes)
             )
     except (ValueError, OSError, AttributeError) as e:
         logger.debug("Type inference/null safety skipped: %s", e)

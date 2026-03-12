@@ -48,6 +48,11 @@ def _find_python_boundaries(content: str) -> list[int]:
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             boundaries.append(node.lineno - 1)  # AST is 1-indexed, we want 0-indexed
+            # Also collect methods inside top-level classes (one level of nesting)
+            if isinstance(node, ast.ClassDef):
+                for child in node.body:
+                    if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        boundaries.append(child.lineno - 1)
 
     return sorted(boundaries)
 

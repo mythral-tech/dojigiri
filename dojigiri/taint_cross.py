@@ -646,6 +646,20 @@ def _find_tainted_in_expr(
     return None
 
 
+# ─── Source-order AST traversal ───────────────────────────────────────
+
+
+def _walk_source_order(node: ast.AST):
+    """Yield all descendant AST nodes in source order (depth-first, pre-order).
+
+    Unlike ast.walk which uses BFS (arbitrary order), this traverses children
+    in the order they appear in the source, which matters for taint analysis.
+    """
+    yield node
+    for child in ast.iter_child_nodes(node):
+        yield from _walk_source_order(child)
+
+
 # ─── Function taint summarization (for cross-file) ───────────────────
 
 
@@ -745,7 +759,7 @@ def _summarize_function_taint(
     returns_tainted = False
     returned_param_indices: set[int] = set()
 
-    for stmt in ast.walk(func_node):
+    for stmt in _walk_source_order(func_node):
         call_nodes = _collect_call_nodes_from_stmt(stmt)
         _check_sink_flows(call_nodes, params, taint_map, param_flows_to_sink)
 

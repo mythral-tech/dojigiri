@@ -4,12 +4,15 @@ Parameters
 
 Licensor:             Mythral Technologies Inc.
 Licensed Work:        Dojigiri 1.1.0
-                      The Licensed Work is (c) 2026 Stephane Perez.
+                      The Licensed Work is (c) 2026 Mythral Technologies Inc.
 Additional Use Grant: You may use the Licensed Work for non-production
                       purposes including development, testing, personal
                       projects, and educational use. Production use in a
                       commercial product or service requires a separate
-                      commercial license. Contact: licensing@dojigiri.com
+                      commercial license. Production use means any use that
+                      directly or indirectly supports revenue-generating
+                      activities, including internal tools used by for-profit
+                      organizations. Contact: licensing@dojigiri.com
 Change Date:          2030-03-09
 Change License:       Apache License, Version 2.0
 

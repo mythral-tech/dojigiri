@@ -456,6 +456,7 @@ def check_null_safety(
     config: LanguageConfig,
     filepath: str,
     cfgs: dict | None = None,
+    source_bytes: bytes | None = None,
 ) -> list[Finding]:
     """Check for attribute/method access on nullable values.
 
@@ -480,12 +481,13 @@ def check_null_safety(
 
     self_assigned_attrs = _find_self_assigned_attrs(semantics, nullable_vars)
 
-    # We need source bytes for narrowing detection — reconstruct from file
-    try:
-        with open(filepath, encoding="utf-8", errors="replace") as f:
-            source_bytes = f.read().encode("utf-8")
-    except OSError:
-        return []
+    # Use provided source bytes, fall back to disk read
+    if source_bytes is None:
+        try:
+            with open(filepath, encoding="utf-8", errors="replace") as f:
+                source_bytes = f.read().encode("utf-8")
+        except OSError:
+            return []
 
     guarded_lines = _find_guarded_lines(source_bytes, semantics.language)
     seen: set = set()

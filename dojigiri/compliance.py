@@ -986,6 +986,11 @@ CWE_MAP: dict[str, str] = {
     # Claude Agent SDK
     "claude-agent-sdk-unsafe-tool": "CWE-94",
     "claude-agent-sdk-no-guardrails": "CWE-693",
+    # LLM output as regex (ReDoS)
+    "llm-output-to-regex-python": "CWE-1333",
+    "llm-output-to-regex-js": "CWE-1333",
+    # Missing stop reason check
+    "llm-no-stop-reason-check-anthropic": "CWE-252",
     # ── Gap 5: Encoding attack rules ──────────────────────────────────
     "llm-base64-decode-to-prompt": "CWE-74",
     "llm-rot13-decode-to-prompt": "CWE-74",

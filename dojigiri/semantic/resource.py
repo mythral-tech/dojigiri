@@ -183,6 +183,27 @@ def _mark_closed_resources(
                             rstate.close_line = call.line
 
 
+def _find_returned_vars(lines: list[str], fdef: FunctionDef) -> set[str]:
+    """Find variable names that are directly returned from the function.
+
+    Only matches variables returned as-is (``return f``) or as part of a
+    tuple/list (``return f, g``). Does NOT match variables merely referenced
+    in a return expression (``return f.read()``).
+    """
+    returned: set[str] = set()
+    for line_idx in range(fdef.line - 1, min(fdef.end_line, len(lines))):
+        stripped = lines[line_idx].strip()
+        if stripped.startswith("return "):
+            expr = stripped[len("return "):].strip()
+            # Split on commas for tuple returns, then check each element
+            for part in expr.split(","):
+                part = part.strip().strip("()[]")
+                # Only count bare variable names (no dot access, subscript, or call)
+                if re.fullmatch(r"[A-Za-z_]\w*", part):
+                    returned.add(part)
+    return returned
+
+
 def check_resource_leaks(
     semantics: FileSemantics,
     source_bytes: bytes,
@@ -218,9 +239,14 @@ def check_resource_leaks(
 
         _mark_closed_resources(semantics, config, fdef, resources, lines)
 
+        # Skip resources that are returned from the function (caller owns them)
+        returned_vars = _find_returned_vars(lines, fdef)
+
         # Report unclosed resources
         for _rname, rstate in resources.items():
             if rstate.closed or rstate.is_context_managed:
+                continue
+            if rstate.variable in returned_vars:
                 continue
             findings.append(
                 Finding(

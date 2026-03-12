@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./
+      - uses: mythral-tech/dojigiri-action@main
         id: doji
         with:
           min-severity: warning
@@ -39,7 +39,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: ./
+      - uses: mythral-tech/dojigiri-action@main
         with:
           diff-only: 'true'
           min-severity: info

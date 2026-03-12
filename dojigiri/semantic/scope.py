@@ -17,16 +17,26 @@ from .core import FileSemantics, ScopeInfo
 # ─── Helpers ─────────────────────────────────────────────────────────
 
 
+def _build_children_map(scopes: list[ScopeInfo]) -> dict[int, list[int]]:
+    """Pre-build a parent_id -> [child_scope_ids] lookup dict."""
+    children_map: dict[int, list[int]] = {}
+    for s in scopes:
+        if s.parent_id is not None:
+            children_map.setdefault(s.parent_id, []).append(s.scope_id)
+    return children_map
+
+
 def _child_scope_ids(scopes: list[ScopeInfo], scope_id: int) -> set[int]:
     """Get all descendant scope IDs (children, grandchildren, etc.)."""
+    children_map = _build_children_map(scopes)
     children = set()
     queue = [scope_id]
     while queue:
         sid = queue.pop()
-        for s in scopes:
-            if s.parent_id == sid and s.scope_id not in children:
-                children.add(s.scope_id)
-                queue.append(s.scope_id)
+        for child_id in children_map.get(sid, ()):
+            if child_id not in children:
+                children.add(child_id)
+                queue.append(child_id)
     return children
 
 
@@ -34,6 +44,19 @@ def _scope_and_children(scopes: list[ScopeInfo], scope_id: int) -> set[int]:
     """Get scope_id plus all descendant scope IDs."""
     result = {scope_id}
     result.update(_child_scope_ids(scopes, scope_id))
+    return result
+
+
+def _scope_and_children_fast(children_map: dict[int, list[int]], scope_id: int) -> set[int]:
+    """Get scope_id plus all descendant scope IDs using pre-built children map."""
+    result = {scope_id}
+    queue = [scope_id]
+    while queue:
+        sid = queue.pop()
+        for child_id in children_map.get(sid, ()):
+            if child_id not in result:
+                result.add(child_id)
+                queue.append(child_id)
     return result
 
 
@@ -198,12 +221,26 @@ def _should_skip_assignment(
     return False
 
 
+def _build_name_scope_index(semantics: FileSemantics) -> dict[str, set[int]]:
+    """Pre-build a name -> set[scope_id] index from references and calls."""
+    index: dict[str, set[int]] = {}
+    for ref in semantics.references:
+        index.setdefault(ref.name, set()).add(ref.scope_id)
+    for call in semantics.function_calls:
+        index.setdefault(call.name, set()).add(call.scope_id)
+    return index
+
+
 def _is_name_used(
     name: str,
     visible_scopes: set[int],
     semantics: FileSemantics,
+    name_scope_index: dict[str, set[int]] | None = None,
 ) -> bool:
     """Check if a name is referenced or called in the given scopes."""
+    if name_scope_index is not None:
+        scopes_with_name = name_scope_index.get(name)
+        return scopes_with_name is not None and not scopes_with_name.isdisjoint(visible_scopes)
     for ref in semantics.references:
         if ref.name == name and ref.scope_id in visible_scopes:
             return True
@@ -224,13 +261,15 @@ def check_unused_variables(semantics: FileSemantics, filepath: str) -> list[Find
     class_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "class"}
     module_scope_ids = {s.scope_id for s in semantics.scopes if s.kind == "module"}
     all_names = _extract_all_names(semantics)
+    children_map = _build_children_map(semantics.scopes)
+    name_scope_index = _build_name_scope_index(semantics)
 
     for asgn in semantics.assignments:
         if _should_skip_assignment(asgn, class_scope_ids, module_scope_ids, all_names, filepath):
             continue
 
-        visible_scopes = _scope_and_children(semantics.scopes, asgn.scope_id)
-        if not _is_name_used(asgn.name, visible_scopes, semantics):
+        visible_scopes = _scope_and_children_fast(children_map, asgn.scope_id)
+        if not _is_name_used(asgn.name, visible_scopes, semantics, name_scope_index):
             findings.append(
                 Finding(
                     file=filepath,

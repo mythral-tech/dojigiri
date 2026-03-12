@@ -100,6 +100,11 @@ class _CfgBuilder:
         # Loop context stack for break/continue: (header_block, exit_block)
         self._loop_stack: list[tuple[int, int]] = []
 
+        # Finally stack: when processing inside a try-with-finally, return/throw
+        # must route through the finally block before reaching exit.
+        # Each entry is the finally body AST node.
+        self._finally_stack: list[object] = []
+
     def _new_block(self, is_entry=False, is_exit=False) -> BasicBlock:
         self._block_counter += 1
         blk = BasicBlock(id=self._block_counter, is_entry=is_entry, is_exit=is_exit)
@@ -189,7 +194,20 @@ class _CfgBuilder:
 
         if ntype in self._return_types or ntype in self._throw_types:
             self._add_stmt(cur, child)
-            self._link(cur.id, exit_block.id)
+            if self._finally_stack:
+                # Route through pending finally blocks before exit
+                prev_id = cur.id
+                for finally_body in self._finally_stack:
+                    fin_block = self._new_block()
+                    self._link(prev_id, fin_block.id)
+                    fin_tails = self._process_body(finally_body, fin_block, exit_block)
+                    if fin_tails:
+                        prev_id = fin_tails[0]
+                    else:
+                        prev_id = fin_block.id
+                self._link(prev_id, exit_block.id)
+            else:
+                self._link(cur.id, exit_block.id)
             return []
 
         if ntype in self._break_types:
@@ -335,6 +353,20 @@ class _CfgBuilder:
         """Process try/catch/finally. Returns tail block IDs."""
         tails = []
 
+        # Pre-scan for finally body so we can push it on the stack
+        finally_body = None
+        for ch in node.children:
+            if ch.type in ("finally_clause", "finally"):
+                for sub in ch.children:
+                    if sub.type in ("block", "statement_block", "compound_statement"):
+                        finally_body = sub
+                        break
+                break
+
+        # Push finally onto stack so return/throw inside try/catch route through it
+        if finally_body is not None:
+            self._finally_stack.append(finally_body)
+
         # Find try body
         try_body = node.child_by_field_name("body")
         if try_body is None:
@@ -372,22 +404,18 @@ class _CfgBuilder:
                     catch_tails = self._process_body(ch, catch_block, exit_block)
                     tails.extend(catch_tails)
 
-        # Find finally block
-        for ch in node.children:
-            if ch.type in ("finally_clause", "finally"):
-                finally_body = None
-                for sub in ch.children:
-                    if sub.type in ("block", "statement_block", "compound_statement"):
-                        finally_body = sub
-                        break
-                if finally_body:
-                    # Finally runs after all tails
-                    if tails:
-                        finally_block = self._new_block()
-                        for t in tails:
-                            self._link(t, finally_block.id)
-                        finally_tails = self._process_body(finally_body, finally_block, exit_block)
-                        tails = finally_tails
+        # Pop finally stack before processing finally for normal flow
+        if finally_body is not None:
+            self._finally_stack.pop()
+
+        # Process finally block for normal (non-return) flow
+        if finally_body is not None:
+            if tails:
+                finally_block = self._new_block()
+                for t in tails:
+                    self._link(t, finally_block.id)
+                finally_tails = self._process_body(finally_body, finally_block, exit_block)
+                tails = finally_tails
 
         if not tails:
             tails = [current_block.id]
