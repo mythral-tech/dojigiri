@@ -519,3 +519,45 @@ rules:
   severity: info
   suggestion: Implement output filtering to detect and redact potential training data leakage
   flags: [DOTALL]
+# ── Data and Model Poisoning (OWASP LLM04) ───────────────────────
+- category: security
+  id: llm-untrusted-training-data
+  message: Training data loaded from user-controlled or untrusted source — data poisoning risk
+  pattern: (?i)(?:load_dataset|read_csv|read_json|from_pandas|from_csv)\s*\(\s*(?:request|req|params|body|input|user|upload|args|sys\.argv)
+  severity: critical
+  suggestion: Validate and sanitize all training data sources; use curated datasets only
+- category: security
+  id: llm-fine-tune-untrusted
+  message: Fine-tuning with user-uploaded data without validation — model poisoning risk
+  pattern: (?i)(?:fine_tune|finetune|train|Trainer|SFTTrainer|TrainingArguments)\s*\([\s\S]{0,300}(?:request|req\.|upload|user_|input_|body\.)
+  severity: critical
+  suggestion: Validate, filter, and review all fine-tuning data; implement data quality checks
+  flags: [DOTALL]
+- category: security
+  id: llm-pickle-model-load
+  message: Model loaded via pickle/joblib — arbitrary code execution on deserialization
+  pattern: (?i)(?:pickle\.load|joblib\.load|torch\.load)\s*\(\s*(?:request|req|params|upload|user|input|args)
+  severity: critical
+  suggestion: Use safetensors or verified model formats; never load pickled models from untrusted sources
+# ── Unbounded Consumption (OWASP LLM10) ──────────────────────────
+- category: security
+  id: llm-no-rate-limit
+  message: LLM endpoint without rate limiting — resource exhaustion and cost overrun risk
+  pattern: (?i)(?:@app\.(?:route|post|get)|@router\.(?:post|get)|app\.(?:post|get))\s*\([\s\S]{0,500}(?:chat\.completions\.create|messages\.create|generate_content|completion|\.invoke)(?![\s\S]{0,300}(?:rate_limit|ratelimit|throttle|RateLimiter|slowapi|limiter))
+  severity: warning
+  suggestion: Apply rate limiting to all LLM-powered endpoints to prevent abuse and cost overruns
+  flags: [DOTALL]
+- category: security
+  id: llm-no-token-budget
+  message: LLM call without token budget or cost tracking — unbounded spending risk
+  pattern: (?i)(?:chat\.completions\.create|messages\.create|generate_content)\s*\([^)]*\)[\s\S]{0,200}(?![\s\S]{0,200}(?:max_tokens|token_budget|cost_limit|usage\.total_tokens))
+  severity: info
+  suggestion: Track token usage and set budgets to prevent unexpected cost overruns
+  flags: [DOTALL]
+- category: security
+  id: llm-streaming-no-timeout
+  message: LLM streaming response without timeout — potential hanging connection
+  pattern: (?i)(?:stream\s*=\s*True|stream:\s*true)[\s\S]{0,300}(?![\s\S]{0,200}(?:timeout|signal|AbortController|asyncio\.wait_for))
+  severity: info
+  suggestion: Set timeouts on streaming LLM calls to prevent indefinite resource consumption
+  flags: [DOTALL]

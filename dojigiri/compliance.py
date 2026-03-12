@@ -924,6 +924,14 @@ CWE_MAP: dict[str, str] = {
     # Sensitive info in responses (OWASP LLM02)
     "llm-response-no-pii-filter": "CWE-200",
     "llm-training-data-leak-check": "CWE-200",
+    # Data and model poisoning (OWASP LLM04)
+    "llm-untrusted-training-data": "CWE-20",
+    "llm-fine-tune-untrusted": "CWE-20",
+    "llm-pickle-model-load": "CWE-502",
+    # Unbounded consumption (OWASP LLM10)
+    "llm-no-rate-limit": "CWE-770",
+    "llm-no-token-budget": "CWE-400",
+    "llm-streaming-no-timeout": "CWE-400",
 }
 
 

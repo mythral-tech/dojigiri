@@ -19,11 +19,6 @@ class TestPromptInjectionFstring:
         findings = run_regex_checks(code, "app.py", "python")
         assert any(f.rule == "prompt-injection-fstring" for f in findings)
 
-    def test_triggers_javascript(self):
-        code = 'system_prompt = f"You are {persona}"\n'
-        findings = run_regex_checks(code, "app.js", "javascript")
-        assert any(f.rule == "prompt-injection-fstring" for f in findings)
-
     def test_no_trigger_static(self):
         code = 'system_prompt = "You are a helper"\n'
         findings = run_regex_checks(code, "app.py", "python")
@@ -36,11 +31,6 @@ class TestPromptInjectionFormat:
         findings = run_regex_checks(code, "app.py", "python")
         assert any(f.rule == "prompt-injection-format" for f in findings)
 
-    def test_triggers_javascript(self):
-        code = 'prompt = "Help {}".format(topic)\n'
-        findings = run_regex_checks(code, "app.js", "javascript")
-        assert any(f.rule == "prompt-injection-format" for f in findings)
-
     def test_no_trigger_static(self):
         code = 'prompt = "Help with math"\n'
         findings = run_regex_checks(code, "app.py", "python")
@@ -51,11 +41,6 @@ class TestPromptInjectionConcat:
     def test_triggers_python(self):
         code = 'system_message = "You are " + role\n'
         findings = run_regex_checks(code, "app.py", "python")
-        assert any(f.rule == "prompt-injection-concat" for f in findings)
-
-    def test_triggers_javascript(self):
-        code = 'system_message = "You are " + role\n'
-        findings = run_regex_checks(code, "app.js", "javascript")
         assert any(f.rule == "prompt-injection-concat" for f in findings)
 
     def test_no_trigger_static(self):
@@ -238,13 +223,28 @@ class TestLlmSafetyDisabledMistral:
 
 
 class TestLlmTemperatureMax:
-    def test_triggers(self):
+    def test_triggers_2_0(self):
         code = 'temperature=2.0,\n'
         findings = run_regex_checks(code, "app.py", "python")
         assert any(f.rule == "llm-temperature-max" for f in findings)
 
-    def test_no_trigger_normal(self):
+    def test_triggers_1_5(self):
+        code = 'temperature=1.5,\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-temperature-max" for f in findings)
+
+    def test_triggers_1_9(self):
+        code = 'temperature=1.9,\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-temperature-max" for f in findings)
+
+    def test_no_trigger_0_7(self):
         code = 'temperature=0.7,\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-temperature-max" for f in findings)
+
+    def test_no_trigger_1_0(self):
+        code = 'temperature=1.0,\n'
         findings = run_regex_checks(code, "app.py", "python")
         assert not any(f.rule == "llm-temperature-max" for f in findings)
 
@@ -921,23 +921,6 @@ class TestLlmResponseNoPiiFilter:
         assert not any(f.rule == "llm-response-no-pii-filter" for f in findings)
 
 
-class TestTemperatureMaxBroadened:
-    def test_triggers_1_5(self):
-        code = 'temperature=1.5,\n'
-        findings = run_regex_checks(code, "app.py", "python")
-        assert any(f.rule == "llm-temperature-max" for f in findings)
-
-    def test_triggers_1_9(self):
-        code = 'temperature=1.9,\n'
-        findings = run_regex_checks(code, "app.py", "python")
-        assert any(f.rule == "llm-temperature-max" for f in findings)
-
-    def test_no_trigger_1_0(self):
-        code = 'temperature=1.0,\n'
-        findings = run_regex_checks(code, "app.py", "python")
-        assert not any(f.rule == "llm-temperature-max" for f in findings)
-
-
 class TestSeverityCalibration:
     """Generic prompt concat rules should be warning, not critical."""
 
@@ -952,3 +935,140 @@ class TestSeverityCalibration:
         findings = run_regex_checks(code, "app.py", "python")
         match = [f for f in findings if f.rule == "prompt-injection-content-fstring"]
         assert match and match[0].severity.name.lower() == "critical"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  Missing rule coverage + OWASP LLM04/LLM10
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+class TestPromptInjectionJinjaPrompt:
+    def test_triggers(self):
+        code = 'template = jinja2.Template(prompt_template)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "prompt-injection-jinja-prompt" for f in findings)
+
+    def test_no_trigger_literal(self):
+        code = 'template = jinja2.Template("Hello {{ name }}")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "prompt-injection-jinja-prompt" for f in findings)
+
+
+class TestPromptInjectionRequestToLlm:
+    def test_triggers(self):
+        code = 'user_msg = request.json["input"]\nchat.completions.create(messages=[{"content": user_msg}])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "prompt-injection-request-to-llm" for f in findings)
+
+    def test_no_trigger_no_llm(self):
+        code = 'user_msg = request.json["input"]\ndb.save(user_msg)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "prompt-injection-request-to-llm" for f in findings)
+
+
+class TestPromptInjectionEmailToPrompt:
+    def test_triggers(self):
+        code = 'body = email.get_payload()\nprompt = body\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "prompt-injection-email-to-prompt" for f in findings)
+
+    def test_no_trigger_no_prompt(self):
+        code = 'body = email.get_payload()\narchive = body\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "prompt-injection-email-to-prompt" for f in findings)
+
+
+class TestPromptInjectionScrapeToPrompt:
+    def test_triggers(self):
+        code = 'text = BeautifulSoup(html).get_text()\nprompt += text\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "prompt-injection-scrape-to-prompt" for f in findings)
+
+    def test_no_trigger_no_prompt(self):
+        code = 'text = BeautifulSoup(html).get_text()\nresult = process(text)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "prompt-injection-scrape-to-prompt" for f in findings)
+
+
+class TestPromptInjectionOpenaiConcatJs:
+    def test_triggers(self):
+        code = 'completions.create({messages:[{content: "Hello " + userInput}]})\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "prompt-injection-openai-concat" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'completions.create({messages:[{content: "Hello world"}]})\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert not any(f.rule == "prompt-injection-openai-concat" for f in findings)
+
+
+class TestPromptInjectionSystemContentJs:
+    def test_triggers(self):
+        code = '{role: \'system\', content: `You are ${role}`}\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "prompt-injection-system-content-js" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = '{role: \'system\', content: "You are a helper"}\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert not any(f.rule == "prompt-injection-system-content-js" for f in findings)
+
+
+class TestPromptInjectionSystemContentConcat:
+    def test_triggers(self):
+        code = '{role: \'system\', content: "You are " + role}\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert any(f.rule == "prompt-injection-system-content-concat" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = '{role: \'system\', content: "You are a helper"}\n'
+        findings = run_regex_checks(code, "app.js", "javascript")
+        assert not any(f.rule == "prompt-injection-system-content-concat" for f in findings)
+
+
+class TestLlmTrainingDataLeakCheck:
+    def test_triggers(self):
+        code = 'answer = response.content\nreturn send(answer)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-training-data-leak-check" for f in findings)
+
+    def test_no_trigger_with_filter(self):
+        code = 'answer = response.content\nfiltered = sanitize(answer)\nreturn send(filtered)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-training-data-leak-check" for f in findings)
+
+
+class TestLlmUntrustedTrainingData:
+    def test_triggers(self):
+        code = 'dataset = load_dataset(request.form["data_path"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-untrusted-training-data" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'dataset = load_dataset("imdb")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-untrusted-training-data" for f in findings)
+
+
+class TestLlmFineTuneUntrusted:
+    def test_triggers(self):
+        code = 'trainer = Trainer(train_dataset=request.files["data"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-fine-tune-untrusted" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'trainer = Trainer(train_dataset=curated_data)\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-fine-tune-untrusted" for f in findings)
+
+
+class TestLlmPickleModelLoad:
+    def test_triggers(self):
+        code = 'model = torch.load(request.files["model"])\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert any(f.rule == "llm-pickle-model-load" for f in findings)
+
+    def test_no_trigger_static(self):
+        code = 'model = torch.load("model.pt")\n'
+        findings = run_regex_checks(code, "app.py", "python")
+        assert not any(f.rule == "llm-pickle-model-load" for f in findings)

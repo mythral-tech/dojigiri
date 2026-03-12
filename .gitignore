@@ -65,3 +65,4 @@ semgrep_benchmark.json
 .ruff_cache/
 .pytest_cache/
 site/
+dojigiri-ai/
