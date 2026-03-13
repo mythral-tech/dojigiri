@@ -339,7 +339,7 @@ PYTHON_RULES: list[Rule] = _compile(
             Severity.WARNING,
             Category.SECURITY,
             "debug-enabled",
-            "DEBUG=True may expose sensitive information in production",  # doji:ignore(debug-enabled)
+            "DEBUG=True may expose sensitive information in production",  # doji:ignore(debug-enabled,generic-debug-enabled)
             "Set DEBUG=False in production and use environment variables",
         ),
         # compile() with user input — code compilation
@@ -589,16 +589,16 @@ PYTHON_RULES: list[Rule] = _compile(
         # ── Cryptography — weak TLS ──────────────────────────────────────
         # Weak TLS protocol versions — SSLv2, SSLv3, TLSv1, TLSv1.1
         (
-            r"\bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b",  # doji:ignore(weak-tls-version)
+            r"\bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b",  # doji:ignore(weak-tls-version,generic-weak-tls-version)
             Severity.CRITICAL,
             Category.SECURITY,
             "weak-tls-version",
-            "Weak TLS protocol version — SSLv2/v3/TLS1.0/1.1 are broken or deprecated",  # doji:ignore(weak-tls-version)
+            "Weak TLS protocol version — SSLv2/v3/TLS1.0/1.1 are broken or deprecated",  # doji:ignore(weak-tls-version,generic-weak-tls-version)
             "Use ssl.PROTOCOL_TLS_CLIENT or ssl.TLSVersion.TLSv1_2 minimum",
         ),
         # SSLContext with minimum_version set to broken protocol
         (
-            r"minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b",  # doji:ignore(weak-tls-version)
+            r"minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b",  # doji:ignore(weak-tls-version,generic-weak-tls-version)
             Severity.CRITICAL,
             Category.SECURITY,
             "weak-tls-version",

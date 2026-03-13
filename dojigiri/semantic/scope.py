@@ -240,7 +240,7 @@ def _is_name_used(
     """Check if a name is referenced or called in the given scopes."""
     if name_scope_index is not None:
         scopes_with_name = name_scope_index.get(name)
-        return scopes_with_name is not None and not scopes_with_name.isdisjoint(visible_scopes)
+        return scopes_with_name is not None and not scopes_with_name.isdisjoint(visible_scopes)  # doji:ignore(null-dereference) — guarded by short-circuit
     for ref in semantics.references:
         if ref.name == name and ref.scope_id in visible_scopes:
             return True

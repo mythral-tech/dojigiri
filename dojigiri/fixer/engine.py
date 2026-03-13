@@ -410,7 +410,7 @@ def _validate_syntax(filepath: str, content: str, language: str) -> str | None:
             tree = parser.parse(content.encode("utf-8"))
             if tree.root_node.has_error:
                 return "Syntax error detected by tree-sitter parser"
-        except (ImportError, LookupError, ValueError, RuntimeError, MemoryError, RecursionError):
+        except (ImportError, LookupError, ValueError, RuntimeError, MemoryError, RecursionError):  # doji:ignore(exception-swallowed,empty-exception-handler) — tree-sitter is optional
             pass
     return None
 
@@ -562,7 +562,7 @@ def _postfix_validate_and_verify(
     applied: int,
 ) -> tuple[int, int, dict | None]:
     """Run post-fix syntax validation and verification. Returns (applied, failed, verification)."""
-    failed = sum(1 for f in all_fixes if f.status == FixStatus.FAILED)
+    failed = sum(1 for fix in all_fixes if fix.status == FixStatus.FAILED)  # doji:ignore(possibly-uninitialized)
     verification = None
 
     # Post-fix syntax validation -- rollback if broken

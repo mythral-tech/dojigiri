@@ -132,7 +132,7 @@ def _output_report(report_obj, output_format, scan_duration, args) -> int | None
         )
         output_file = getattr(args, "output_file", None)
         if output_file:
-            Path(output_file).write_text(html_content, encoding="utf-8")
+            Path(output_file).write_text(html_content, encoding="utf-8")  # doji:ignore(llm-output-to-file) CLI --output-file arg, not LLM output
             print(f"HTML report written to {output_file}")
         else:
             print(html_content)

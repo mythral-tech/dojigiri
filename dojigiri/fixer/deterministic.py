@@ -244,7 +244,7 @@ def _fix_loose_equality(line: str, finding: Finding, content: str, ctx: FixConte
 
 
 def _rebuild_none_comparison(node: ast.AST, content: str) -> str:
-    """Rebuild an ast.Compare node replacing ==/!= None with is/is not None."""
+    """Rebuild an ast.Compare node replacing equality checks against None with identity checks."""  # doji:ignore(none-comparison)
     parts = [ast.get_source_segment(content, node.left) or ast.unparse(node.left)]
     for op, comp in zip(node.ops, node.comparators):
         if isinstance(comp, ast.Constant) and comp.value is None:

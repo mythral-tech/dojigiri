@@ -133,7 +133,7 @@ class AnthropicBackend:
                 "cache_control": {"type": "ephemeral"},
             }
         ]
-        response = client.messages.create(
+        response = client.messages.create(  # doji:ignore(taint-flow) system/messages are internally-constructed scan prompts, not user-controlled
             model=self._model,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -207,7 +207,7 @@ class AnthropicBackend:
         if tool_choice:
             kwargs["tool_choice"] = tool_choice
 
-        response = client.messages.create(**kwargs)
+        response = client.messages.create(**kwargs)  # doji:ignore(taint-flow) system/messages are internally-constructed scan prompts, not user-controlled
 
         # Track cache performance
         usage = response.usage
@@ -285,7 +285,7 @@ class OpenAICompatibleBackend:
         # Convert Anthropic-style system+messages to OpenAI format
         oai_messages = [{"role": "system", "content": system}]
         for msg in messages:
-            oai_messages.append({"role": msg["role"], "content": msg["content"]})
+            oai_messages.append({"role": msg["role"], "content": msg["content"]})  # doji:ignore(llm-role-from-user-input) roles are hardcoded internally as "user", never from external input
 
         payload = {
             "model": self._model,

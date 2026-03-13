@@ -548,7 +548,7 @@ rules:
 - category: security
   id: crypto-static-iv
   message: Static or hardcoded IV/nonce — defeats the purpose of initialization vectors
-  pattern: (?:iv|nonce|IV|NONCE)\s*=\s*b?['"][^'"]{1,}['"]
+  pattern: (?<![a-zA-Z])(?:iv|nonce|IV|NONCE)\s*=\s*b?['"][^'"]{1,}['"]
   severity: warning
   suggestion: Generate a random IV/nonce for each encryption operation using os.urandom()
 - category: security

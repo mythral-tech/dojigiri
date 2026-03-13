@@ -121,9 +121,9 @@ def _scan_files_parallel(files: list[Path], cache: dict, use_cache: bool, max_wo
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {
             executor.submit(
-                _analyze_single_file, filepath, cache, use_cache, cache_lock, custom_rules=custom_rules
-            ): filepath
-            for filepath in files
+                _analyze_single_file, fp, cache, use_cache, cache_lock, custom_rules=custom_rules
+            ): fp
+            for fp in files  # doji:ignore(possibly-uninitialized) — fp is the comprehension loop var
         }
         for future in as_completed(future_to_file):
             filepath = future_to_file[future]
@@ -145,14 +145,14 @@ def _scan_files_parallel(files: list[Path], cache: dict, use_cache: bool, max_wo
 def _detect_semantic_clones(analyses: list[FileAnalysis]) -> list[CrossFileFinding]:
     """Run cross-file semantic clone detection. Returns cross-file findings and mutates intra-file."""
     cross_file_findings: list[CrossFileFinding] = []
-    semantics_by_file = {fa.path: fa.semantics for fa in analyses if fa.semantics is not None}
+    semantics_by_file = {a.path: a.semantics for a in analyses if a.semantics is not None}  # doji:ignore(possibly-uninitialized)
     if len(semantics_by_file) < 2:
         return cross_file_findings
 
     from .semantic.smells import find_semantic_clone_pairs
 
     clone_pairs = find_semantic_clone_pairs(semantics_by_file)
-    analysis_by_path = {fa.path: fa for fa in analyses}
+    analysis_by_path = {fa.path: fa for fa in analyses}  # doji:ignore(possibly-uninitialized)
     for p in clone_pairs:
         if p.file_a != p.file_b:
             cross_file_findings.append(
@@ -196,7 +196,7 @@ def _detect_cross_file_taint(analyses: list[FileAnalysis]) -> list[CrossFileFind
                 content = Path(fa.path).read_text(encoding="utf-8", errors="replace")
                 python_files[fa.path] = content
             except OSError:
-                pass
+                logger.debug("Could not read %s for cross-file taint analysis", fa.path)
     if len(python_files) < 2:
         return []
     try:
@@ -332,12 +332,12 @@ def scan_string(
         if fd is not None:
             try:
                 os.close(fd)
-            except OSError:
+            except OSError:  # doji:ignore(exception-swallowed,empty-exception-handler) — best-effort cleanup
                 pass
         if tmp_path is not None:
             try:
                 os.unlink(tmp_path)
-            except OSError:
+            except OSError:  # doji:ignore(exception-swallowed,empty-exception-handler) — best-effort cleanup
                 pass
 
 
@@ -784,7 +784,7 @@ def _find_git_root(path: Path) -> Path | None:
             cwd=str(path if path.is_dir() else path.parent),
         )
         if result.returncode == 0:
-            return Path(result.stdout.strip())
+            return Path(result.stdout.strip())  # doji:ignore(llm-output-to-file) git stdout, not LLM output
     except (OSError, FileNotFoundError) as e:
         logger.debug("Failed to find git root: %s", e)
     return None
