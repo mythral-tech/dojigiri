@@ -95,6 +95,10 @@ A master smith returns to the blade. Audit found 16 cracks in the steel — brok
 | Fold | Type | Work | Measurement |
 |------|------|------|-------------|
 | 51 | Repair | 9 blade cracks: chmod regex (missed 0o644), rule dedup (pickle×3, yaml×2, ssl×3, tls×3, cors×2 → unique IDs), requests-no-timeout DOTALL, false sanitizers removed (str.isdigit/isalnum), Exception→specific catches in analyzer, O(n²)→O(n) taint regex | 2,059 rules (deduped from 2,068), 2,392 tests passing, Ctrl+C works |
+| 52 | Repair | 7 guard cracks: Stripe URL validation (hostname check), key expiry datetime casting, migration error specificity, rate limiter eviction, Dockerfile secret mount, signup IntegrityError types, docs default false | 189 API tests passing, -546 lines |
+| 53 | Capability | Secrets detection: 15 rules for leaked credentials (AWS, GCP, GitHub, Slack, Stripe, Twilio, SendGrid, Mailgun, JWT, generic password/api_key) | 2,059 → 2,179 rules (+120) |
+| 54 | Precision | lang_config.py direct tests: structural completeness, taint validation, cross-module consistency, resource patterns, type inference, control flow | 0 → 165 parametrized tests |
+| 55 | Precision | Rule quality pass: CWE mappings added to ~85 rules, 5 severity corrections, ~30 message improvements, ~15 suggestion improvements | 2,557 tests passing |
 
 ---
 
