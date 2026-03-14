@@ -5,6 +5,7 @@ rules:
   pattern: \bmysql_query\s*\(
   severity: critical
   suggestion: Use PDO with prepared statements or mysqli with parameterized queries
+  cwe: CWE-89
 - category: security
   id: php-sql-injection-mysqli-concat
   message: mysqli_query with string concatenation — SQL injection risk
@@ -25,10 +26,11 @@ rules:
   suggestion: Use prepared statements with parameter binding
 - category: security
   id: php-xss-echo
-  message: echo/print with raw variable — XSS risk if user-controlled
+  message: echo/print with raw superglobal — XSS risk, user input rendered without encoding
   pattern: (?:echo|print)\s+.*?\$_(?:GET|POST|REQUEST|COOKIE|SERVER)
   severity: critical
   suggestion: Use htmlspecialchars($var, ENT_QUOTES, 'UTF-8') before output
+  cwe: CWE-79
 - category: security
   id: php-xss-no-escape
   message: Direct output of variable without encoding — XSS risk
@@ -37,10 +39,11 @@ rules:
   suggestion: Use htmlspecialchars() before outputting any user input
 - category: security
   id: php-command-injection-exec
-  message: exec() can execute system commands — command injection risk
+  message: exec() can execute system commands — command injection enables remote code execution
   pattern: \bexec\s*\(\s*(?!\s*["'][^$"']*["'])
   severity: critical
   suggestion: Use escapeshellarg()/escapeshellcmd() on all arguments, or avoid entirely
+  cwe: CWE-78
 - category: security
   id: php-command-injection-system
   message: system() executes shell command — injection risk if input is user-controlled
@@ -91,10 +94,11 @@ rules:
   suggestion: Validate against a whitelist of allowed paths; never include user-controlled paths
 - category: security
   id: php-unserialize
-  message: unserialize() with user input — arbitrary object injection/RCE
+  message: unserialize() with user input — arbitrary object injection enables remote code execution
   pattern: \bunserialize\s*\(\s*\$
   severity: critical
   suggestion: Use json_decode() for data exchange; if unserialize is needed, use allowed_classes option
+  cwe: CWE-502
 - category: security
   id: php-file-upload-no-validation
   message: move_uploaded_file without type validation — unrestricted file upload
@@ -193,10 +197,11 @@ rules:
   suggestion: Set libxml_disable_entity_loader(true) and use LIBXML_NOENT|LIBXML_DTDLOAD
 - category: security
   id: php-eval
-  message: eval() executes arbitrary PHP code — code injection risk
+  message: eval() executes arbitrary PHP code — remote code execution if input is user-controlled
   pattern: \beval\s*\(
   severity: critical
   suggestion: Refactor to avoid eval(); use proper control flow or whitelisted operations
+  cwe: CWE-95
 - category: security
   id: php-preg-replace-e
   message: preg_replace with /e modifier executes replacement as PHP — code injection
@@ -241,10 +246,11 @@ rules:
   suggestion: Validate redirect URL against an allowlist of trusted domains
 - category: security
   id: php-hardcoded-credentials
-  message: Hardcoded database credentials in source code
+  message: Hardcoded database credentials in source code — extractable from repository
   pattern: (?:password|passwd|pwd)\s*(?:=>|=)\s*["'][A-Za-z0-9+/=_\-!@#$%^&*]{4,}["']
-  severity: warning
+  severity: critical
   suggestion: Store credentials in environment variables or a secrets file outside webroot
+  cwe: CWE-798
 - category: security
   id: php-error-display
   message: display_errors enabled — leaks internal paths and info to users

@@ -15,20 +15,22 @@ rules:
   id: none-comparison
   message: Use 'is None' or 'is not None' instead of == / !=
   pattern: (?:==|!=)\s*None
-  severity: warning
-  suggestion: Replace with 'is None' or 'is not None'
+  severity: info
+  suggestion: Replace with 'is None' or 'is not None' — identity check is more reliable and Pythonic
 - category: security
   id: eval-usage
-  message: eval() can execute arbitrary code
+  message: eval() can execute arbitrary code — remote code execution if input is user-controlled
   pattern: \beval\s*\(
   severity: critical
   suggestion: Use ast.literal_eval() for safe evaluation, or avoid entirely
+  cwe: CWE-95
 - category: security
   id: exec-usage
-  message: exec() can execute arbitrary code
+  message: exec() can execute arbitrary code — remote code execution if input is user-controlled
   pattern: \bexec\s*\(
   severity: critical
-  suggestion: Avoid exec() — restructure code to not need it
+  suggestion: Avoid exec() — restructure code to not need dynamic code execution
+  cwe: CWE-95
 - category: bug
   id: open-without-with
   message: File opened without 'with' statement — may not be closed on error
@@ -37,16 +39,18 @@ rules:
   suggestion: Use 'with open(...) as f:' for automatic cleanup
 - category: security
   id: os-system
-  message: os.system() is vulnerable to shell injection
+  message: os.system() passes command to shell — command injection risk if arguments are user-controlled
   pattern: \bos\.system\s*\(
-  severity: warning
-  suggestion: Use subprocess.run() with a list of arguments
+  severity: critical
+  suggestion: Use subprocess.run() with a list of arguments (no shell=True)
+  cwe: CWE-78
 - category: security
   id: shell-true
-  message: subprocess with shell=True is vulnerable to injection
+  message: subprocess with shell=True — command injection risk if arguments contain user input
   pattern: subprocess\.\w+\([^)]*shell\s*=\s*True
-  severity: warning
+  severity: critical
   suggestion: Pass command as a list without shell=True
+  cwe: CWE-78
 - category: security
   id: subprocess-audit
   message: subprocess call — verify input is not constructed from untrusted data
@@ -77,18 +81,21 @@ rules:
   pattern: \b(?:pickle|cPickle|_pickle)\.(?:loads?\s*\(|Unpickler\s*\()|\b(?:dill|cloudpickle|shelve)\.loads?\s*\(|\bjsonpickle\.(?:decode|loads?)\s*\(
   severity: critical
   suggestion: Use json, msgpack, or a safe serialization format instead
+  cwe: CWE-502
 - category: security
   id: yaml-unsafe
   message: yaml.load()/load_all()/unsafe_load() can execute arbitrary code without SafeLoader
   pattern: \byaml\.(?:load|load_all|unsafe_load|unsafe_load_all)\s*\(
   severity: critical
   suggestion: Use yaml.safe_load() or yaml.safe_load_all() instead
+  cwe: CWE-502
 - category: security
   id: weak-hash
-  message: MD5/SHA1 are cryptographically weak hash algorithms
+  message: MD5/SHA1 are cryptographically weak — collision attacks are practical
   pattern: \bhashlib\.(?:md5|sha1)\b|\bhashlib\.new\s*\(\s*['"](?:md5|sha1)['"]
   severity: warning
   suggestion: Use hashlib.sha256() or stronger for security-sensitive hashing
+  cwe: CWE-328
 - category: security
   id: weak-random
   message: random module is not cryptographically secure
@@ -103,10 +110,11 @@ rules:
   suggestion: Use json or msgpack for untrusted data; shelve is pickle-backed
 - category: security
   id: insecure-tempfile
-  message: mktemp/tempnam/tmpnam are vulnerable to race conditions (TOCTOU)
+  message: mktemp/tempnam/tmpnam are vulnerable to race conditions (TOCTOU) — symlink attacks possible
   pattern: \b(?:tempfile\.mktemp\s*\(|os\.tempnam\s*\(|os\.tmpnam\s*\()
   severity: warning
   suggestion: Use tempfile.mkstemp() or tempfile.NamedTemporaryFile() instead
+  cwe: CWE-377
 - category: security
   id: os-exec
   message: os.exec*() replaces the current process — verify arguments are trusted
@@ -121,10 +129,11 @@ rules:
   suggestion: Use subprocess.run() for better control and input validation
 - category: security
   id: os-popen
-  message: os.popen() starts a shell process — vulnerable to injection
+  message: os.popen() starts a shell process — command injection risk if argument is user-controlled
   pattern: \bos\.popen\s*\(
-  severity: warning
+  severity: critical
   suggestion: Use subprocess.run() with a list of arguments instead
+  cwe: CWE-78
 - category: security
   id: subprocess-shell
   message: subprocess.getoutput()/getstatusoutput() always uses shell — vulnerable to injection
@@ -149,6 +158,7 @@ rules:
   pattern: \bEnvironment\s*\(\s*\)|\bEnvironment\s*\([^)]*autoescape\s*=\s*False
   severity: warning
   suggestion: Use autoescape=True or select_autoescape() for HTML templates
+  cwe: CWE-79
 - category: security
   id: pycrypto-deprecated
   message: pyCrypto is unmaintained and has known vulnerabilities
@@ -163,10 +173,11 @@ rules:
   suggestion: Use ssl.SSLContext.wrap_socket() with proper cert verification
 - category: security
   id: requests-no-verify
-  message: requests call with verify=False disables SSL certificate verification
+  message: requests call with verify=False disables SSL certificate verification — MITM risk
   pattern: (?:requests|httpx)\.(?:get|post|put|delete|patch|head|options|request)\s*\([^)]*verify\s*=\s*False
   severity: warning
   suggestion: Remove verify=False to enable certificate verification (default behavior)
+  cwe: CWE-295
 - category: security
   id: ssl-verify-disabled
   message: SSL certificate verification disabled — vulnerable to MITM attacks
@@ -317,6 +328,7 @@ rules:
   pattern: ^\s*SECRET_KEY\s*=\s*['"][A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]
   severity: critical
   suggestion: Load SECRET_KEY from environment variable or secrets manager
+  cwe: CWE-798
 - category: security
   id: csrf-middleware-disabled
   message: CsrfViewMiddleware not found in MIDDLEWARE — CSRF protection disabled

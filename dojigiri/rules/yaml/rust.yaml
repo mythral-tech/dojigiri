@@ -13,10 +13,11 @@ rules:
   suggestion: Use pattern matching or the ? operator instead
 - category: security
   id: unsafe-block
-  message: Unsafe block — memory safety guarantees suspended
+  message: Unsafe block — memory safety guarantees suspended, undefined behavior possible
   pattern: \bunsafe\s*\{
   severity: warning
-  suggestion: Minimize unsafe usage and document invariants
+  suggestion: Minimize unsafe usage and document safety invariants that callers must uphold
+  cwe: CWE-787
 - category: bug
   id: unwrap-or-default
   message: .unwrap_or() with potentially expensive default — consider unwrap_or_else()
@@ -37,10 +38,11 @@ rules:
   suggestion: Use .get(index) which returns Option instead of panicking
 - category: security
   id: transmute
-  message: std::mem::transmute bypasses type safety — UB risk
+  message: std::mem::transmute bypasses type safety — undefined behavior if types are incompatible
   pattern: \btransmute\s*[:<(]
   severity: critical
   suggestion: Use safe casts (as, From/Into) or well-typed alternatives
+  cwe: CWE-704
 - category: security
   id: raw-pointer-deref
   message: Raw pointer dereference — undefined behavior if pointer is invalid
@@ -55,28 +57,32 @@ rules:
   suggestion: Use ManuallyDrop for explicit control or restructure to avoid leaks
 - category: security
   id: command-injection
-  message: Command::new with dynamic argument — command injection risk
+  message: Command::new with dynamic argument — command injection risk if user-controlled
   pattern: Command::new\s*\(\s*(?!['"])
   severity: warning
   suggestion: Validate command and arguments; never pass unsanitized user input
+  cwe: CWE-78
 - category: security
   id: command-shell
-  message: Shell execution via sh/cmd — command injection risk
+  message: Shell execution via sh/cmd — command injection risk if arguments contain user input
   pattern: Command::new\s*\(\s*['"](?:sh|bash|cmd|powershell)['"]
   severity: critical
   suggestion: Avoid shell invocation; use Command::new with the target binary directly
+  cwe: CWE-78
 - category: security
   id: format-string-sql
   message: SQL query built with format! — SQL injection risk
   pattern: (?i)format!\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b
   severity: critical
   suggestion: Use parameterized queries with your database driver
+  cwe: CWE-89
 - category: security
   id: hardcoded-credential
-  message: Possible hardcoded credential in Rust source
+  message: Hardcoded credential in Rust source — extractable from binary or repository
   pattern: (?i)(?:password|passwd|secret|api_key|token)\s*[:=]\s*['"][^'"]{8,}['"]
   severity: critical
   suggestion: Use environment variables or a secrets manager
+  cwe: CWE-798
 - category: security
   id: weak-crypto-md5
   message: MD5 is cryptographically broken — collisions are trivial
@@ -91,16 +97,17 @@ rules:
   suggestion: Use SHA-256 or SHA-3 instead
 - category: security
   id: tls-no-verify
-  message: TLS certificate verification disabled — MITM risk
+  message: TLS certificate verification disabled — man-in-the-middle attack risk
   pattern: danger_accept_invalid_certs\s*\(\s*true\s*\)|danger_accept_invalid_hostnames\s*\(\s*true\s*\)
   severity: critical
   suggestion: Enable certificate verification; configure proper CA certificates
+  cwe: CWE-295
 - category: bug
   id: todo-unfinished
-  message: TODO/FIXME marker found in code
+  message: TODO/FIXME marker found in code — track in issue tracker
   pattern: (?i)(?://|/\*).*\b(?:TODO|FIXME|HACK|XXX)\b
   severity: info
-  suggestion: null
+  suggestion: Create a ticket and reference it in the comment
 - category: bug
   id: panic-in-lib
   message: panic!() crashes the program — inappropriate for library code

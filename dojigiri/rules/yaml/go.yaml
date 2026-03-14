@@ -6,12 +6,14 @@ rules:
   pattern: (?i)fmt\.Sprintf\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b
   severity: critical
   suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
+  cwe: CWE-89
 - category: security
   id: go-sql-concat
   message: SQL query built with string concatenation — SQL injection risk
   pattern: (?i)(?:['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*['"]\s*\+)
   severity: critical
   suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
+  cwe: CWE-89
 - category: security
   id: go-sql-join
   message: SQL query built with strings.Join — SQL injection risk
@@ -25,6 +27,7 @@ rules:
   pattern: exec\.Command\s*\(\s*(?!['"])
   severity: warning
   suggestion: Validate command and arguments; never pass unsanitized user input
+  cwe: CWE-78
 - category: security
   id: go-command-injection-ctx
   message: exec.CommandContext() with dynamic argument — command injection risk
@@ -34,10 +37,11 @@ rules:
 # ── Security: Path Traversal / File ──────────────────────────────────────
 - category: security
   id: go-path-traversal
-  message: File operation with dynamic path — path traversal risk
+  message: File operation with dynamic path — path traversal risk if path is user-controlled
   pattern: (?:os\.(?:Open|OpenFile|ReadFile|Create|Remove|RemoveAll|Mkdir|MkdirAll)|ioutil\.(?:ReadFile|ReadDir|WriteFile))\s*\(\s*(?!['"])
   severity: warning
   suggestion: Use filepath.Clean() and validate path is within expected base directory
+  cwe: CWE-22
 - category: security
   id: go-filepath-join-dotdot
   message: filepath.Join with user input — may resolve ../ traversals
@@ -47,10 +51,11 @@ rules:
 # ── Security: Credentials & Secrets ──────────────────────────────────────
 - category: security
   id: go-hardcoded-credential
-  message: Possible hardcoded credential in Go source
+  message: Hardcoded credential in Go source — extractable from binary or repository
   pattern: (?i)(?:password|passwd|secret|apiKey|api_key|token)\s*[:=]\s*['"][^'"]{8,}['"]
   severity: critical
   suggestion: Use environment variables or a secrets manager
+  cwe: CWE-798
 - category: security
   id: go-hardcoded-ip
   message: Hardcoded IP address — may break in different environments
@@ -64,6 +69,7 @@ rules:
   pattern: \bmd5\.(?:New|Sum)\b
   severity: warning
   suggestion: Use SHA-256 or SHA-3 for integrity; use bcrypt/scrypt/argon2 for passwords
+  cwe: CWE-328
 - category: security
   id: go-weak-crypto-sha1
   message: SHA1 is cryptographically weak — collision attacks demonstrated
@@ -109,10 +115,11 @@ rules:
 # ── Security: TLS / Network ─────────────────────────────────────────────
 - category: security
   id: go-insecure-tls
-  message: 'TLS certificate verification disabled (InsecureSkipVerify: true)'
+  message: 'TLS certificate verification disabled (InsecureSkipVerify: true) — MITM risk'
   pattern: InsecureSkipVerify\s*:\s*true
   severity: critical
   suggestion: Enable certificate verification; configure proper CA certificates
+  cwe: CWE-295
 - category: security
   id: go-weak-tls-version
   message: TLS minimum version set below 1.2 — vulnerable to known attacks

@@ -1,22 +1,25 @@
 rules:
 - category: security
   id: eval-usage
-  message: eval() can execute arbitrary code — XSS risk
+  message: eval() can execute arbitrary code — XSS and code injection risk
   pattern: \beval\s*\(
   severity: critical
-  suggestion: Avoid eval() entirely
+  suggestion: Avoid eval() entirely; use JSON.parse() for data or a safe parser for expressions
+  cwe: CWE-95
 - category: security
   id: function-constructor
   message: new Function() is equivalent to eval() — code injection risk
   pattern: \bnew\s+Function\s*\(
   severity: critical
   suggestion: Avoid dynamic code generation; use a lookup table or safe parser
+  cwe: CWE-95
 - category: security
   id: innerhtml
   message: innerHTML assignment — XSS risk if value is user-controlled
   pattern: \.innerHTML\s*=
   severity: warning
-  suggestion: Use textContent or sanitize HTML before inserting
+  suggestion: Use textContent or sanitize HTML with DOMPurify before inserting
+  cwe: CWE-79
 - category: security
   id: outerhtml
   message: outerHTML assignment — XSS risk if value is user-controlled
@@ -41,6 +44,7 @@ rules:
   pattern: \b__proto__\b
   severity: warning
   suggestion: Use Object.getPrototypeOf() / Object.create() instead
+  cwe: CWE-1321
 - category: security
   id: object-assign-merge
   message: Object.assign() with dynamic source — prototype pollution risk if source is user-controlled
@@ -53,6 +57,7 @@ rules:
   pattern: (?:window\.location|document\.location|location\.href)\s*=\s*(?!['\"](/|https?://))
   severity: warning
   suggestion: Validate redirect URLs against an allowlist of trusted domains
+  cwe: CWE-601
 - category: security
   id: insecure-random
   message: Math.random() is not cryptographically secure
@@ -97,16 +102,18 @@ rules:
   suggestion: Use parameterized queries; never pass raw user input to MongoDB operators
 - category: security
   id: js-command-injection
-  message: child_process.exec() with dynamic argument — command injection risk
+  message: child_process.exec() with dynamic argument — command injection enables remote code execution
   pattern: (?:child_process\.exec|execSync)\s*\(\s*(?!['"])
   severity: critical
   suggestion: Use execFile() or spawn() with argument arrays instead of shell strings
+  cwe: CWE-78
 - category: security
   id: js-command-injection-template
   message: child_process.exec() with template literal interpolation — command injection
   pattern: (?:child_process\.exec|execSync)\s*\(\s*['"].*?\$\{
   severity: critical
   suggestion: Use execFile() or spawn() with argument arrays; never interpolate into shell strings
+  cwe: CWE-78
 - category: security
   id: js-path-traversal
   message: fs operation with dynamic path — path traversal risk
@@ -115,10 +122,11 @@ rules:
   suggestion: Validate and sanitize file paths; use path.resolve() and check against a base directory
 - category: security
   id: js-hardcoded-jwt-secret
-  message: Hardcoded JWT secret in source code
+  message: Hardcoded JWT secret in source code — extractable from repository
   pattern: (?:jwt\.sign|jwt\.verify)\s*\([^)]*,\s*['"][^'"]{8,}['"]
   severity: critical
   suggestion: Use environment variables or a secrets manager for JWT secrets
+  cwe: CWE-798
 - category: security
   id: js-tls-reject-unauthorized
   message: 'TLS certificate verification disabled (rejectUnauthorized: false)'
@@ -212,10 +220,11 @@ rules:
 # ── React XSS ──────────────────────────────────────────────
 - category: security
   id: react-dangerously-set-innerhtml
-  message: dangerouslySetInnerHTML bypasses React XSS protection
+  message: dangerouslySetInnerHTML bypasses React XSS protection — XSS if content is user-controlled
   pattern: dangerouslySetInnerHTML\s*=\s*\{
   severity: critical
   suggestion: Sanitize HTML with DOMPurify before passing to dangerouslySetInnerHTML
+  cwe: CWE-79
 - category: security
   id: react-ref-innerhtml
   message: Setting innerHTML via ref bypasses React XSS protection
@@ -321,12 +330,14 @@ rules:
   pattern: (?:query|execute)\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE)\b[^'"]*['"]\s*\+
   severity: critical
   suggestion: Use parameterized queries with placeholders ($1, ?) instead of concatenation
+  cwe: CWE-89
 - category: security
   id: sql-template-literal
   message: SQL query with template literal interpolation — SQL injection risk
   pattern: (?:query|execute)\s*\(\s*`(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE)\b[^`]*\$\{
   severity: critical
   suggestion: Use parameterized queries instead of template literal interpolation
+  cwe: CWE-89
 - category: security
   id: sequelize-raw-query
   message: Sequelize raw query with interpolation — SQL injection risk

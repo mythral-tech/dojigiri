@@ -5,6 +5,7 @@ rules:
   pattern: new\s+SqlCommand\s*\(\s*(?:[\$"'].*?\+|.*?\+\s*["'])
   severity: critical
   suggestion: Use parameterized queries with SqlParameter or an ORM
+  cwe: CWE-89
 - category: security
   id: cs-sql-injection-format
   message: SqlCommand with string interpolation — SQL injection risk
@@ -25,10 +26,11 @@ rules:
   suggestion: Use parameterized queries via FromSqlInterpolated or pass parameters array
 - category: security
   id: cs-xss-response-write
-  message: Response.Write with unencoded output — XSS risk
+  message: Response.Write with unencoded output — XSS risk if content is user-controlled
   pattern: Response\.Write\s*\(
   severity: warning
   suggestion: Use HttpUtility.HtmlEncode() before writing to response
+  cwe: CWE-79
 - category: security
   id: cs-xss-html-raw
   message: Html.Raw() bypasses output encoding — XSS risk if content is user-controlled
@@ -55,10 +57,11 @@ rules:
   suggestion: Validate and canonicalize path against an allowed base directory
 - category: security
   id: cs-binary-formatter
-  message: BinaryFormatter deserialization — arbitrary code execution risk
+  message: BinaryFormatter deserialization — arbitrary code execution risk (banned by Microsoft)
   pattern: \bBinaryFormatter\b
   severity: critical
-  suggestion: BinaryFormatter is banned by Microsoft. Use System.Text.Json or protobuf instead
+  suggestion: Use System.Text.Json or protobuf instead — BinaryFormatter is officially banned
+  cwe: CWE-502
 - category: security
   id: cs-javascript-serializer
   message: JavaScriptSerializer can deserialize to arbitrary types — code execution risk
@@ -193,10 +196,11 @@ rules:
   suggestion: Store connection strings in environment variables or Azure Key Vault
 - category: security
   id: cs-hardcoded-password
-  message: Hardcoded password/secret in source code
+  message: Hardcoded password/secret in source code — extractable from repository or binary
   pattern: (?:password|Password|secret|apiKey|ApiKey)\s*=\s*["'][A-Za-z0-9+/=_\-!@#$%^&*]{8,}["']
   severity: critical
   suggestion: Use environment variables, user secrets, or a secrets manager
+  cwe: CWE-798
 - category: security
   id: cs-weak-password-hash
   message: Custom password hashing without proper algorithm — use a KDF
@@ -223,10 +227,11 @@ rules:
   suggestion: Specify explicit origins when using AllowCredentials
 - category: security
   id: cs-ssl-bypass
-  message: SSL certificate validation bypassed — MITM attack risk
+  message: SSL certificate validation bypassed — man-in-the-middle attack risk
   pattern: ServerCertificateValidationCallback\s*=\s*(?:\(\s*\w+\s*,\s*\w+\s*,\s*\w+\s*,\s*\w+\s*\)\s*=>\s*true|delegate\s*\{.*?return\s+true)
   severity: critical
   suggestion: Implement proper certificate validation or use trusted certificates
+  cwe: CWE-295
 - category: security
   id: cs-ssl-check-revocation
   message: Certificate revocation check disabled

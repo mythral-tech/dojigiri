@@ -5,6 +5,7 @@ rules:
   pattern: (?:Cipher|KeyGenerator)\.getInstance\s*\(\s*["'](?:[^"']*(?:DES|RC2|RC4|Blowfish|DESede)[^"']*)["']
   severity: critical
   suggestion: Use AES/GCM/NoPadding or ChaCha20-Poly1305
+  cwe: CWE-327
 - category: security
   id: java-weak-hash
   message: Weak hash algorithm (MD5/SHA1) — vulnerable to collision attacks
@@ -41,6 +42,7 @@ rules:
   pattern: \.(?:prepareCall|prepareStatement|queryForObject|queryForList|batchUpdate)\s*\([^)]*\+
   severity: critical
   suggestion: Use PreparedStatement with ? placeholders and bind parameters
+  cwe: CWE-89
 - category: security
   id: java-sql-injection
   message: SQL injection — string concatenation in SQL execute call
@@ -232,10 +234,11 @@ rules:
 # --- Deserialization ---
 - category: security
   id: java-unsafe-deserialization
-  message: Unsafe deserialization — ObjectInputStream.readObject() on untrusted data
+  message: Unsafe deserialization — ObjectInputStream.readObject() on untrusted data enables RCE
   pattern: \.readObject\s*\(\s*\)|\.readUnshared\s*\(\s*\)
   severity: critical
   suggestion: Use ObjectInputFilter (JEP 290), or switch to safe formats like JSON
+  cwe: CWE-502
 - category: security
   id: java-xmldecoder-deserialization
   message: XMLDecoder deserializes arbitrary objects — remote code execution risk
@@ -263,10 +266,11 @@ rules:
 # --- XXE ---
 - category: security
   id: java-xxe-documentbuilder
-  message: DocumentBuilderFactory without XXE protection — external entity injection
+  message: DocumentBuilderFactory without XXE protection — external entity injection enables file read and SSRF
   pattern: DocumentBuilderFactory\.newInstance\s*\(\s*\)(?![\s\S]{0,200}(?:setFeature|FEATURE_SECURE_PROCESSING|disallow-doctype-decl))
   severity: critical
   suggestion: 'Set factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)'
+  cwe: CWE-611
 - category: security
   id: java-xxe-saxparser
   message: SAXParserFactory without XXE protection

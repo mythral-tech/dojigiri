@@ -1,10 +1,11 @@
 rules:
 - category: security
   id: hardcoded-secret
-  message: Possible hardcoded secret or API key
+  message: Possible hardcoded secret or API key — credential exposure if repository is shared or leaked
   pattern: (?i)(?<!\w)(?!(?:fake|mock|dummy|stub)[_-])(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]
   severity: critical
-  suggestion: Use environment variables or a secrets manager
+  suggestion: Use environment variables or a secrets manager; rotate the exposed credential immediately
+  cwe: CWE-798
 - category: security
   id: hardcoded-secret-dict
   message: Possible hardcoded secret in dict/config literal
@@ -19,10 +20,10 @@ rules:
   suggestion: Use IAM roles or environment variables
 - category: style
   id: todo-marker
-  message: TODO/FIXME marker found
+  message: TODO/FIXME marker found — track in issue tracker
   pattern: (?i)(?:^|\s)(?:#|//|/\*|\*|--|;).*\b(?:TODO|FIXME|HACK|XXX)\b
   severity: info
-  suggestion: null
+  suggestion: Create a ticket and reference it in the comment
 - category: style
   id: long-line
   message: Line exceeds 200 characters
@@ -31,22 +32,25 @@ rules:
   suggestion: Break into multiple lines for readability
 - category: security
   id: insecure-http
-  message: Insecure HTTP URL (not localhost)
+  message: Insecure HTTP URL (not localhost) — data transmitted in cleartext
   pattern: (?!.*(?:xmlns\s*=|data:))['"]http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0|www\.w3\.org/|schemas\.|purl\.org/|xml\.org/|relaxng\.org/|docbook\.org/|openid\.net/|ogp\.me/)
   severity: warning
-  suggestion: Use HTTPS instead
+  suggestion: Use HTTPS to encrypt data in transit
+  cwe: CWE-319
 - category: security
   id: sql-injection-execute
-  message: Possible SQL injection — string interpolation in query
+  message: SQL injection — string interpolation in query allows attacker to modify SQL logic
   pattern: (?i)(?:execute(?:many)?|cursor\.execute(?:many)?|query|\.execute)\s*\(\s*(?:f['"]|['"].*?%s|['"].*?\+\s*\w+|['"].*?\{)
   severity: critical
-  suggestion: Use parameterized queries
+  suggestion: Use parameterized queries with placeholders (?, %s, $1) and bind parameters
+  cwe: CWE-89
 - category: security
   id: sql-injection-format
-  message: Possible SQL injection — .format() on SQL string
+  message: SQL injection — .format() on SQL string allows query manipulation
   pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b.*?['"]\.format\s*\(
   severity: critical
   suggestion: Use parameterized queries instead of string formatting
+  cwe: CWE-89
 - category: security
   id: sql-injection-fstring
   message: Possible SQL injection — f-string inside text()
