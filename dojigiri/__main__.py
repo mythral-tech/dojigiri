@@ -14,6 +14,7 @@ from __future__ import annotations  # noqa
 
 import argparse
 import sys
+import threading
 
 from . import __version__
 from .cli import (
@@ -205,6 +206,21 @@ def _register_simple_subcommands(subparsers) -> None:
     p.set_defaults(func=cmd_sca)
 
 
+def _check_version() -> str | None:
+    """Fetch latest version from API. Returns message if update available, None otherwise."""
+    try:
+        from urllib.request import urlopen
+        import json
+        with urlopen("https://api.dojigiri.com/health", timeout=3) as resp:
+            data = json.loads(resp.read())
+        latest = data.get("dojigiri_version", "")
+        if latest and latest != __version__:
+            return f"\n  Update available: {__version__} → {latest}  —  pip install --upgrade dojigiri-cli\n"
+    except Exception:
+        pass
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="doji", description="Dojigiri — static analysis engine")
     parser.add_argument("--version", action="version", version=f"dojigiri {__version__}")
@@ -222,11 +238,29 @@ def main() -> None:
         parser.print_help()
         sys.exit(1)
 
+    # Non-blocking version check (skipped in offline mode)
+    version_msg: list[str | None] = [None]
+    if not getattr(args, "offline", False):
+        def _bg_check() -> None:
+            version_msg[0] = _check_version()
+        t = threading.Thread(target=_bg_check, daemon=True)
+        t.start()
+    else:
+        t = None
+
     try:
-        sys.exit(args.func(args))
+        exit_code = args.func(args)
     except KeyboardInterrupt:
         print("\nInterrupted.", file=sys.stderr)
         sys.exit(130)
+
+    # Show update notice after command output
+    if t is not None:
+        t.join(timeout=1)
+    if version_msg[0]:
+        print(version_msg[0], file=sys.stderr)
+
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
