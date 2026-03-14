@@ -787,7 +787,7 @@ rules:
 - category: security
   id: llm-output-to-eval-js
   message: LLM output passed to eval/Function/exec — AI-generated code execution risk
-  pattern: (?:eval|new\s+Function|execSync|exec)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|text|chunk|delta|stream)
+  pattern: (?:(?<!\.)(?:eval|execSync)|new\s+Function)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|text|chunk|delta|stream)
   severity: critical
   suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
 - category: security

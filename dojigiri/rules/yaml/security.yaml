@@ -417,7 +417,7 @@ rules:
 - category: security
   id: llm-tool-call-to-exec
   message: LLM tool call arguments passed to dangerous sink — code execution via tool calling
-  pattern: (?:tool_calls|function\.arguments|tool_result|function_call)[\s\S]{0,300}(?:exec|eval|system|popen|subprocess|Runtime\.exec|ProcessBuilder|os\.Command)
+  pattern: (?:function\.arguments|tool_call\w*[\[\.]\S*\.?argument|tool_result\w*\.output)[\s\S]{0,150}(?:\bexec\s*\(|\beval\s*\(|\bsystem\s*\(|\bpopen\s*\(|\bsubprocess\.\w+\s*\(|Runtime\.exec\s*\(|ProcessBuilder|os\.Command)
   severity: critical
   suggestion: Validate and sanitize all LLM-generated tool call arguments before execution; never pass directly to shell or eval
   flags: [DOTALL]
