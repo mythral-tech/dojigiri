@@ -584,7 +584,6 @@ CWE_MAP: dict[str, str] = {
     "ts-non-null-assertion-chain": "CWE-476",
     # ── TypeScript-specific ────────────────────────────────────────────
     "ts-as-any-cast": "CWE-704",
-    "ts-double-cast": "CWE-704",
     "ts-non-null-assertion": "CWE-476",
     "ts-angle-bracket-any": "CWE-704",
     "ts-ignore-comment": "CWE-710",
@@ -1567,7 +1566,6 @@ NIST_MAP: dict[str, list[str]] = {
     "ts-non-null-assertion-chain": ["SA-11"],
     # ── TypeScript-specific ────────────────────────────────────────────
     "ts-as-any-cast": ["SA-11"],
-    "ts-double-cast": ["SA-11"],
     "ts-non-null-assertion": ["SA-11"],
     "ts-angle-bracket-any": ["SA-11"],
     "ts-ignore-comment": ["SA-11"],

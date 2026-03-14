@@ -87,7 +87,7 @@ rules:
 - category: security
   id: ssti-risk
   message: Template constructed from string — server-side template injection enables remote code execution
-  pattern: (?<!def )(?:Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|Jinja2\s*\(.*\bstring\b|new\s+Function\s*\()
+  pattern: (?:(?:jinja2|mako|django\.template|chameleon)\.Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|\.from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|new\s+Function\s*\()
   severity: critical
   suggestion: Use pre-compiled templates from files, never from user-controlled strings
   cwe: CWE-94
@@ -424,7 +424,7 @@ rules:
 - category: security
   id: llm-tool-call-to-sql
   message: LLM tool call arguments used in SQL query — SQL injection via tool calling
-  pattern: (?:tool_calls|function\.arguments|tool_result|function_call)[\s\S]{0,300}(?:\.execute|\.query|\.raw|cursor\.)
+  pattern: (?:function\.arguments|tool_call\w*[\[\.]\S*\.?argument)[\s\S]{0,100}(?:\.execute\s*\(|\.query\s*\(|\.raw\s*\(|cursor\.)
   severity: critical
   suggestion: Parameterize SQL queries; never pass LLM-generated tool arguments directly to database queries
   flags: [DOTALL]
@@ -596,7 +596,7 @@ rules:
 - category: security
   id: rag-document-to-prompt
   message: Retrieved document/chunk content interpolated directly into LLM prompt without sanitization — RAG injection risk
-  pattern: (?i)(?:similarity_search|vector_search|\.query|\.retrieve|get_relevant_documents|\.search|as_retriever)\s*\([\s\S]{0,300}(?:prompt|system_prompt|system_message|messages|instruction|content)\s*(?:=|\+=|\.append|\.format|\.join|f['"])
+  pattern: (?i)(?:similarity_search|vector_search|\.retrieve|get_relevant_documents|as_retriever)\s*\([\s\S]{0,150}(?:prompt|system_prompt|system_message|messages|instruction)\s*(?:=|\+=|\.append|\.format|\.join|f['"])
   severity: critical
   suggestion: Sanitize retrieved document content before including in prompts; strip potential injection payloads from chunks
   flags: [DOTALL]
@@ -646,14 +646,14 @@ rules:
 - category: security
   id: llm-json-output-to-sql
   message: LLM structured output used in SQL query construction — SQL injection via structured output
-  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:\.execute|\.query|\.raw|cursor\.|SELECT\s|INSERT\s|UPDATE\s|DELETE\s)
+  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\(\s*(?:response|completion|llm[_.]|ai_response|chat_response|generated)[\s\S]{0,100}(?:\.execute\s*\(|\.query\s*\(|\.raw\s*\(|cursor\.|SELECT\s|INSERT\s|UPDATE\s|DELETE\s)
   severity: critical
   suggestion: Use parameterized queries; never interpolate LLM-generated JSON fields into SQL strings
   flags: [DOTALL]
 - category: security
   id: llm-json-output-to-shell
   message: LLM structured output used in shell command — command injection via structured output
-  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:subprocess|os\.system|os\.popen|child_process|exec\(|execSync|Runtime\.exec|ProcessBuilder)
+  pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\(\s*(?:response|completion|llm[_.]|ai_response|chat_response|generated)[\s\S]{0,100}(?:subprocess|os\.system|os\.popen|child_process|\bexec\s*\(|execSync|Runtime\.exec|ProcessBuilder)
   severity: critical
   suggestion: Never pass LLM-generated JSON fields to shell commands; use allowlisted operations with strict argument validation
   flags: [DOTALL]

@@ -2,7 +2,7 @@ rules:
 - category: security
   id: hardcoded-secret
   message: Possible hardcoded secret or API key — credential exposure if repository is shared or leaked
-  pattern: (?i)(?<!\w)(?!(?:fake|mock|dummy|stub)[_-])(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]
+  pattern: (?i)(?<!\w)(?!(?:fake|mock|dummy|stub|cookie[_-]?name|header[_-]?name|field[_-]?name|content[_-]?key|config[_-]?key)[_-]?)(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])(?![a-z][a-z_]{6,}['"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]
   severity: critical
   suggestion: Use environment variables or a secrets manager; rotate the exposed credential immediately
   cwe: CWE-798

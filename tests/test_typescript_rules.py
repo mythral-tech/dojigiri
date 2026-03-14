@@ -23,12 +23,12 @@ class TestTypescriptRuleLoading:
     """Verify TypeScript rules load and integrate correctly."""
 
     def test_typescript_rules_loaded(self):
-        assert len(TYPESCRIPT_RULES) == 41
+        assert len(TYPESCRIPT_RULES) == 40
 
     def test_typescript_gets_js_plus_ts_rules(self):
         ts_rules = get_rules_for_language("typescript")
         js_rules = get_rules_for_language("javascript")
-        assert len(ts_rules) == len(js_rules) + 41
+        assert len(ts_rules) == len(js_rules) + 40
 
     def test_typescript_includes_js_rules(self):
         ts_rules = get_rules_for_language("typescript")
@@ -62,17 +62,6 @@ class TestAsAnyCast:
 
     def test_no_match_as_unknown(self):
         assert not _pattern("ts-as-any-cast").search("const x = value as unknown;")
-
-
-class TestDoubleCast:
-    def test_matches_unknown_as_type(self):
-        assert _pattern("ts-double-cast").search("value as unknown as User")
-
-    def test_matches_in_assignment(self):
-        assert _pattern("ts-double-cast").search("const x = data as unknown as Config;")
-
-    def test_no_match_single_cast(self):
-        assert not _pattern("ts-double-cast").search("value as string")
 
 
 class TestNonNullAssertion:

@@ -1,31 +1,24 @@
 rules:
 # ── Type Safety Bypasses (Critical) ──────────────────────────────────
-- category: security
+- category: style
   id: ts-as-any-cast
   message: "'as any' cast disables type checking — hides type errors and security bugs"
   pattern: \bas\s+any\b
-  severity: critical
+  severity: warning
   suggestion: Use a specific type or fix the underlying type mismatch
   cwe: CWE-704
-- category: security
-  id: ts-double-cast
-  message: "'as unknown as T' double-cast bypasses all type safety"
-  pattern: \bas\s+unknown\s+as\s+\w
-  severity: critical
-  suggestion: Fix the underlying type mismatch instead of using double assertion
-  cwe: CWE-704
-- category: security
+- category: style
   id: ts-non-null-assertion
   message: Non-null assertion operator (!) tells the compiler to trust you — crashes at runtime if wrong
   pattern: (?<!\w)(?:[a-zA-Z_$]\w*(?:\.[a-zA-Z_$]\w*)*)\s*!\s*\.
   severity: warning
   suggestion: Use optional chaining (?.) or proper null checks instead
   cwe: CWE-476
-- category: security
+- category: style
   id: ts-angle-bracket-any
   message: Angle-bracket <any> type assertion bypasses type safety
   pattern: <any>\s*(?:\w|['"`\(])
-  severity: critical
+  severity: warning
   suggestion: Use a specific type or fix the type mismatch
   cwe: CWE-704
 - category: security
