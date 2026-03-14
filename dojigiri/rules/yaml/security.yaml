@@ -1,64 +1,74 @@
 rules:
 - category: security
   id: path-traversal
-  message: Possible path traversal attack with ../
+  message: Path traversal via ../ in file operation — attacker can read or write arbitrary files
   pattern: (?:open|read|write|include)\s*\([^)]*\.\./
   severity: critical
-  suggestion: Validate and sanitize file paths
+  suggestion: Canonicalize paths with os.path.realpath() and verify they start within an allowed base directory
+  cwe: CWE-22
 - category: security
   id: private-key
-  message: Private key found in source code
+  message: Private key embedded in source code — credential exposure if repository is shared or leaked
   pattern: '-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
   severity: critical
-  suggestion: Remove immediately and rotate the key
+  suggestion: Remove immediately, rotate the key, and store in a secrets manager or environment variable
+  cwe: CWE-798
 - category: security
   id: db-connection-string
-  message: Database connection string with embedded credentials
+  message: Database connection string with embedded credentials — password visible in source code
   pattern: (?i)(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp|jdbc:[a-z]+)://[^:]+:[^@]+@
   severity: critical
-  suggestion: Use environment variables for connection strings
+  suggestion: Use environment variables or a secrets manager for connection strings
+  cwe: CWE-798
 - category: security
   id: logging-sensitive-data
-  message: Possibly logging sensitive data (password, secret, token)
+  message: Possibly logging sensitive data (password, secret, token) — credentials may appear in log files
   pattern: (?i)(?:log(?:ger)?\.(?:info|debug|warn|error|critical|warning)|print|console\.log|puts)\s*\(.*\b(?:password|passwd|secret_key|api_key|auth_token|credential)\b
   severity: warning
-  suggestion: Redact sensitive values before logging
+  suggestion: Redact sensitive values before logging; use structured logging with explicit field masking
+  cwe: CWE-532
 - category: security
   id: logging-config-listen
   message: logging.config.listen() accepts config over network — can load arbitrary handler classes (RCE)
   pattern: logging\.config\.listen\s*\(
   severity: critical
   suggestion: Avoid network-based logging config; use file-based or environment-based config instead
+  cwe: CWE-94
 - category: security
   id: insecure-des
   message: DES encryption is broken — 56-bit keys are trivially brute-forced
   pattern: \bDES\b\.new\(|\bDES\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+DES\b
   severity: warning
   suggestion: Use AES-256 or ChaCha20 instead
+  cwe: CWE-327
 - category: security
   id: insecure-ecb-mode
-  message: ECB mode does not hide data patterns — insecure for most uses
+  message: ECB mode does not hide data patterns — identical plaintext blocks produce identical ciphertext
   pattern: (?i)(?:MODE_ECB|mode\s*=\s*['"]?ECB|\.ECB\b)
   severity: warning
-  suggestion: Use CBC, GCM, or CTR mode instead
+  suggestion: Use GCM (authenticated encryption) or CBC with random IV instead
+  cwe: CWE-327
 - category: security
   id: insecure-blowfish
   message: Blowfish has 64-bit blocks — vulnerable to birthday attacks at scale
   pattern: \bBlowfish\b\.new\(|\bBlowfish\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+Blowfish\b
   severity: warning
   suggestion: Use AES-256 or ChaCha20 instead
+  cwe: CWE-327
 - category: security
   id: insecure-rc4
   message: RC4/ARC4 is a broken stream cipher with known biases
   pattern: \bARC4\b\.new\(|\bARC4\.(?:encrypt|decrypt)\b|from\s+Crypto\.Cipher\s+import\s+ARC4\b|\bRC4\b
   severity: warning
   suggestion: Use AES-GCM or ChaCha20-Poly1305 instead
+  cwe: CWE-327
 - category: security
   id: requests-no-timeout
   message: HTTP request without timeout — can hang indefinitely
   pattern: requests\.(?:get|post|put|delete|patch|head|request)\s*\((?:(?!timeout)[^)])*\)
   severity: warning
   suggestion: Always pass timeout= to requests calls
+  cwe: CWE-400
   flags:
   - DOTALL
 - category: security
@@ -67,6 +77,7 @@ rules:
   pattern: (?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|fetch\s*\(\s*(?!['"]/)(?!url_for)|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()(?!.*url_for\s*\()
   severity: warning
   suggestion: Validate URLs against an allowlist of domains/schemes before making requests
+  cwe: CWE-918
 - category: security
   id: url-scheme-audit
   message: urlopen permits file:/ and custom schemes — verify URL scheme is restricted to https
@@ -75,22 +86,25 @@ rules:
   suggestion: Validate URL scheme against allowlist (e.g., only https://) before opening
 - category: security
   id: ssti-risk
-  message: Template constructed from string — may allow server-side template injection
+  message: Template constructed from string — server-side template injection enables remote code execution
   pattern: (?<!def )(?:Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|Jinja2\s*\(.*\bstring\b|new\s+Function\s*\()
   severity: critical
   suggestion: Use pre-compiled templates from files, never from user-controlled strings
+  cwe: CWE-94
 - category: security
   id: xxe-risk
-  message: XML parsing — ensure external entities are disabled to prevent XXE attacks
+  message: XML parsing without entity protection — XXE can read local files or trigger SSRF
   pattern: (?:xml\.etree\.ElementTree\.(?:parse|fromstring|iterparse)\s*\(|xml\.dom\.minidom\.(?:parse|parseString)\s*\(|xml\.sax\.(?:parse|parseString)\s*\(|lxml\.etree\.(?:parse|fromstring|iterparse)\s*\(|DocumentBuilderFactory|XMLReader|SAXParser|DOMParser\s*\(\)|ET\.(?:parse|fromstring|iterparse)\s*\(|etree\.(?:parse|fromstring|iterparse)\s*\(|minidom\.(?:parse|parseString)\s*\(|sax\.(?:parse|parseString)\s*\()
   severity: warning
   suggestion: Use defusedxml (Python), disable DTDs/external entities in parser config
+  cwe: CWE-611
 - category: security
   id: jwt-insecure
-  message: JWT decoded with insecure settings — disabled verification or 'none' algorithm
+  message: JWT decoded with insecure settings — disabled verification or 'none' algorithm allows token forgery
   pattern: (?:jwt\.decode\s*\([^)]*(?:algorithms\s*=\s*\[['"]none['"]\]|verify\s*=\s*False|options\s*=\s*\{[^}]*'verify_\w+'\s*:\s*False)|\.decode\s*\(\s*token[^)]*algorithm\s*=\s*['"](?:none|HS256)['"])
   severity: critical
   suggestion: Always verify JWT signatures with a strong algorithm (RS256/ES256) and validate claims
+  cwe: CWE-347
 - category: security
   id: hardcoded-ip
   message: Hardcoded IP address — may break in different environments
@@ -111,40 +125,46 @@ rules:
   suggestion: Use try/except around the file operation instead of checking first
 - category: security
   id: weak-hash-md5
-  message: MD5 is cryptographically broken — do not use for security
+  message: MD5 is cryptographically broken — collision attacks are practical
   pattern: (?i)\bmd5\s*\(|\bhashlib\.md5\b|\bMD5\.(?:Create|new|digest)\b|\bDigestUtils\.md5\b|MessageDigest\.getInstance\s*\(\s*['"]MD5['"]
   severity: warning
   suggestion: Use SHA-256 or SHA-3 for integrity; use bcrypt/scrypt/argon2 for passwords
+  cwe: CWE-328
 - category: security
   id: weak-hash-sha1
   message: SHA1 is cryptographically weak — collision attacks demonstrated
   pattern: (?i)\bsha1\s*\(|\bhashlib\.sha1\b|\bSHA1\.(?:Create|new|digest)\b|\bDigestUtils\.sha1\b|MessageDigest\.getInstance\s*\(\s*['"]SHA-?1['"]
   severity: warning
   suggestion: Use SHA-256 or SHA-3 instead
+  cwe: CWE-328
 - category: security
   id: generic-open-redirect
-  message: Redirect to user-controlled URL — open redirect risk
+  message: Redirect to user-controlled URL — open redirect enables phishing attacks
   pattern: (?i)(?:redirect|location\.href|window\.location|res\.redirect)\s*(?:=|\()\s*(?:req\.|request\.|params\.|query\.)
   severity: warning
   suggestion: Validate redirect targets against an allowlist of trusted paths/domains
+  cwe: CWE-601
 - category: security
   id: xss-innerhtml
   message: innerHTML assignment — XSS risk if value contains user input
   pattern: \.innerHTML\s*=\s*(?!['"]<)
   severity: warning
   suggestion: Use textContent for text, or sanitize HTML with DOMPurify
+  cwe: CWE-79
 - category: security
   id: xss-document-write
   message: document.write() — XSS risk and blocks page rendering
   pattern: \bdocument\.write\s*\(
   severity: warning
   suggestion: Use DOM manipulation methods (createElement, textContent) instead
+  cwe: CWE-79
 - category: security
   id: deserialization-unsafe
-  message: Unsafe deserialization — can lead to remote code execution
+  message: Unsafe deserialization — can lead to remote code execution via crafted payloads
   pattern: (?i)(?:pickle\.loads?\s*\(|yaml\.load\s*\([^)]*(?!Loader)|marshal\.loads?\s*\(|ObjectInputStream|unserialize\s*\(|readObject\s*\()
   severity: critical
   suggestion: Use safe deserialization (yaml.safe_load, JSON) or validate input
+  cwe: CWE-502
 - category: security
   id: generic-debug-enabled
   message: Debug mode enabled — may expose sensitive information in production
@@ -163,6 +183,7 @@ rules:
   pattern: (?i)(?:csrf_exempt|@csrf_exempt|WTF_CSRF_ENABLED\s*=\s*False|csrf\s*:\s*false|CSRF_COOKIE_SECURE\s*=\s*False)
   severity: warning
   suggestion: Enable CSRF protection for state-changing endpoints
+  cwe: CWE-352
 - category: security
   id: session-insecure
   message: Session cookie without secure flags — may be intercepted
@@ -175,12 +196,14 @@ rules:
   pattern: (?i)(?:https?://[^:]+:[^@]+@(?!localhost))
   severity: critical
   suggestion: Use authentication headers instead of embedding credentials in URLs
+  cwe: CWE-522
 - category: security
   id: insecure-ssl-context
-  message: SSL context with no verification — MITM risk
+  message: SSL context with no verification — man-in-the-middle attack risk
   pattern: (?i)(?:ssl\.create_default_context\s*\([^)]*\)\s*\n\s*.*check_hostname\s*=\s*False|ssl\._create_unverified_context|CERT_NONE|verify_mode\s*=\s*ssl\.CERT_NONE)
   severity: critical
   suggestion: Enable certificate verification; configure proper CA certificates
+  cwe: CWE-295
 - category: security
   id: directory-listing
   message: Directory listing or autoindex enabled — may expose sensitive files
@@ -201,40 +224,46 @@ rules:
   suggestion: Use os.makedirs(path, exist_ok=True) to handle concurrent creation
 - category: security
   id: mass-assignment
-  message: Mass assignment — all request parameters passed to model/object
+  message: Mass assignment — all request parameters passed to model/object, attacker can set unintended fields
   pattern: (?i)(?:\.create\s*\(\s*\*\*request\.|\.update\s*\(\s*\*\*request\.|Object\.assign\s*\(\s*\w+\s*,\s*req\.body|\.set\s*\(\s*req\.body\))
   severity: warning
   suggestion: Explicitly list allowed parameters instead of passing all request data
+  cwe: CWE-915
 - category: security
   id: header-injection
-  message: HTTP header set from user input — header injection risk
+  message: HTTP header set from user input — header injection / response splitting risk
   pattern: (?i)(?:set_header|add_header|response\.headers|setHeader)\s*\([^)]*(?:request\.|req\.|params\.|query\.)
   severity: warning
-  suggestion: Validate and sanitize header values; reject newlines
+  suggestion: Validate and sanitize header values; reject CR/LF characters
+  cwe: CWE-113
 - category: security
   id: ldap-injection
   message: LDAP query with string interpolation — injection risk
   pattern: (?i)(?:ldap_search|search_s|search_ext_s)\s*\([^)]*(?:format\s*\(|\+\s*\w+|f['"])
   severity: critical
   suggestion: Use parameterized LDAP queries; escape special characters
+  cwe: CWE-90
 - category: security
   id: xpath-injection
   message: XPath query with string interpolation — injection risk
   pattern: (?i)(?:xpath|selectNodes|evaluate)\s*\(\s*(?:f['"]|['"].*?\+|['"].*?format\s*\()
   severity: critical
   suggestion: Use parameterized XPath queries or sanitize input
+  cwe: CWE-643
 - category: security
   id: shell-injection
-  message: Shell command constructed from string interpolation — injection risk
+  message: Shell command constructed from string interpolation — command injection enables remote code execution
   pattern: (?i)(?:os\.system|os\.popen|subprocess\.(?:call|run|Popen)|exec|execSync|child_process)\s*\(\s*(?:f['"]|['"].*?\+|['"].*?format\s*\(|`[^`]*\$)
   severity: critical
   suggestion: Use parameterized command execution (subprocess with list args, no shell=True)
+  cwe: CWE-78
 - category: security
   id: regex-dos
   message: Regex with nested quantifiers — potential ReDoS vulnerability
   pattern: (?:\(\.\*\)\+|\(\.\+\)\*|\(\[.*?\]\+\)\+|\(\.\*\)\{|\(\w\+\)\+)
   severity: warning
   suggestion: Simplify regex to avoid catastrophic backtracking; use atomic groups or possessive quantifiers
+  cwe: CWE-1333
 - category: security
   id: generic-insecure-cookie
   message: Cookie set without security flags
@@ -812,3 +841,94 @@ rules:
   severity: info
   suggestion: Check response.stop_reason to ensure the model completed normally before using output
   flags: [DOTALL]
+# ── Secrets Detection ──────────────────────────────────────────
+- category: security
+  id: aws-access-key
+  message: AWS access key ID found in source code
+  pattern: (?:^|[^A-Za-z0-9])AKIA[0-9A-Z]{16}(?:[^A-Za-z0-9]|$)
+  severity: critical
+  suggestion: Remove the key, rotate it in AWS IAM, and use environment variables or AWS Secrets Manager
+- category: security
+  id: aws-secret-key
+  message: AWS secret access key found in source code
+  pattern: (?i)(?:aws|secret|access)[_\-\s]*key[\s'"]*[:=]\s*['"][A-Za-z0-9/+=]{40}['"]
+  severity: critical
+  suggestion: Remove the secret key, rotate it in AWS IAM, and use environment variables or instance roles
+- category: security
+  id: gcp-api-key
+  message: Google Cloud API key found in source code
+  pattern: (?:^|[^A-Za-z0-9])AIza[A-Za-z0-9_\-]{35}(?:[^A-Za-z0-9_\-]|$)
+  severity: critical
+  suggestion: Remove the key, rotate it in Google Cloud Console, and use environment variables
+- category: security
+  id: gcp-service-account
+  message: GCP service account private key identifier found in source code
+  pattern: (?i)["']private_key_id["']\s*:\s*["'][a-f0-9]{40}["']
+  severity: critical
+  suggestion: Remove the service account key file from source; use workload identity federation or environment-based credentials
+- category: security
+  id: github-token
+  message: GitHub personal access token or OAuth token found in source code
+  pattern: (?:^|[^A-Za-z0-9_])(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36}(?:[^A-Za-z0-9_]|$)
+  severity: critical
+  suggestion: Remove the token, revoke it in GitHub settings, and use environment variables or GitHub Apps
+- category: security
+  id: github-fine-grained-token
+  message: GitHub fine-grained personal access token found in source code
+  pattern: (?:^|[^A-Za-z0-9_])github_pat_[A-Za-z0-9]{22}_[A-Za-z0-9]{59}(?:[^A-Za-z0-9_]|$)
+  severity: critical
+  suggestion: Remove the token, revoke it in GitHub settings, and use environment variables
+- category: security
+  id: slack-token
+  message: Slack API token found in source code
+  pattern: (?:^|[^A-Za-z0-9])xox[bps]\-[0-9A-Za-z\-]{10,250}(?:[^A-Za-z0-9\-]|$)
+  severity: critical
+  suggestion: Remove the token, revoke it in Slack admin, and use environment variables
+- category: security
+  id: slack-webhook
+  message: Slack incoming webhook URL found in source code
+  pattern: https://hooks\.slack\.com/services/T[A-Z0-9]{8,}/B[A-Z0-9]{8,}/[A-Za-z0-9]{20,}
+  severity: critical
+  suggestion: Remove the webhook URL and regenerate it; store webhook URLs in environment variables
+- category: security
+  id: stripe-secret-key
+  message: Stripe secret or restricted API key found in source code
+  pattern: (?:^|[^A-Za-z0-9_])(?:sk|rk)_live_[A-Za-z0-9]{20,}(?:[^A-Za-z0-9_]|$)
+  severity: critical
+  suggestion: Remove the key, rotate it in Stripe Dashboard, and use environment variables
+- category: security
+  id: twilio-api-key
+  message: Twilio API key found in source code
+  pattern: (?:^|[^A-Za-z0-9])SK[0-9a-f]{32}(?:[^0-9a-f]|$)
+  severity: critical
+  suggestion: Remove the key, rotate it in Twilio Console, and use environment variables
+- category: security
+  id: sendgrid-api-key
+  message: SendGrid API key found in source code
+  pattern: (?:^|[^A-Za-z0-9.])SG\.[A-Za-z0-9_\-]{22,}\.[A-Za-z0-9_\-]{22,}(?:[^A-Za-z0-9_\-]|$)
+  severity: critical
+  suggestion: Remove the key, regenerate it in SendGrid, and use environment variables
+- category: security
+  id: mailgun-api-key
+  message: Mailgun API key found in source code
+  pattern: (?i)(?:mailgun|api[_\-]?key)[\s'"]*[:=]\s*['"]key\-[0-9a-f]{32}['"]
+  severity: critical
+  suggestion: Remove the key, rotate it in Mailgun, and use environment variables
+- category: security
+  id: jwt-secret
+  message: Hardcoded JWT secret string — use environment variables for signing keys
+  pattern: (?i)jwt\.(?:encode|sign)\s*\([^)]*,\s*['"][^'"]{8,}['"]
+  severity: critical
+  suggestion: Store JWT signing secrets in environment variables or a secrets manager, never hardcode them
+- category: security
+  id: generic-api-key-assignment
+  message: API key or secret appears to be hardcoded as a string literal
+  pattern: (?i)(?:api[_\-]?key|api[_\-]?secret|access[_\-]?key)\s*[:=]\s*['"][A-Za-z0-9/+=_\-]{12,}['"]
+  severity: warning
+  suggestion: Use environment variables or a secrets manager instead of hardcoding API keys
+- category: security
+  id: generic-password-assignment
+  message: Password appears to be hardcoded as a string literal
+  pattern: (?i)(?:password|passwd|pass_?word)\s*[:=]\s*['"][^'"]{6,}['"]
+  severity: warning
+  suggestion: Use environment variables or a secrets manager instead of hardcoding passwords
