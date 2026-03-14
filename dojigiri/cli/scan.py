@@ -8,6 +8,8 @@ from __future__ import annotations  # noqa
 
 import argparse
 import logging
+import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -190,6 +192,56 @@ def _apply_baseline_and_filters(args: argparse.Namespace, report_obj: ScanReport
     )
 
 
+def _resolve_github_url(url: str) -> tuple[Path, bool]:
+    """If url is a GitHub repo URL, clone it to a temp dir and return (path, True).
+
+    Otherwise return (Path(url).resolve(), False).
+    """
+    import re
+    import shutil
+    import tempfile
+
+    match = re.match(r"https?://github\.com/([^/]+/[^/]+?)(?:\.git)?/?$", url)
+    if not match:
+        return Path(url).resolve(), False
+
+    repo_slug = match.group(1)
+    clone_url = f"https://github.com/{repo_slug}.git"
+    tmp_dir = Path(tempfile.mkdtemp(prefix="doji-scan-"))
+    repo_name = repo_slug.split("/")[-1]
+    clone_dest = tmp_dir / repo_name
+
+    print(f"Cloning {repo_slug}...")
+    result = subprocess.run(
+        ["git", "clone", "--depth", "1", str(clone_url), str(clone_dest)],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        print(f"Error: failed to clone {clone_url}", file=sys.stderr)
+        if result.stderr:
+            print(result.stderr.strip(), file=sys.stderr)
+        raise SystemExit(1)
+
+    print(f"Scanning {repo_slug}...\n")
+    return clone_dest, True
+
+
+def _rewrite_paths(report_obj: ScanReport, clone_dir: Path, repo_slug: str) -> None:
+    """Rewrite absolute temp paths to repo-relative paths in the report."""
+    prefix = str(clone_dir) + os.sep
+    for fa in report_obj.file_analyses:
+        if fa.path.startswith(prefix):
+            fa.path = repo_slug + "/" + fa.path[len(prefix):].replace(os.sep, "/")
+    for cf in report_obj.cross_file_findings:
+        if cf.source_file.startswith(prefix):
+            cf.source_file = repo_slug + "/" + cf.source_file[len(prefix):].replace(os.sep, "/")
+        if cf.target_file.startswith(prefix):
+            cf.target_file = repo_slug + "/" + cf.target_file[len(prefix):].replace(os.sep, "/")
+    report_obj.root = repo_slug
+
+
 def cmd_scan(args: argparse.Namespace) -> int:
     """Run a code scan (quick or deep)."""
     from ..metrics import end_session, save_session, start_session
@@ -198,7 +250,18 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
     _apply_profile(args)
 
-    root = Path(args.path).resolve()
+    clone_dir: Path | None = None
+    repo_slug: str | None = None
+    try:
+        root, is_clone = _resolve_github_url(args.path)
+        if is_clone:
+            clone_dir = root
+            import re
+            m = re.match(r"https?://github\.com/([^/]+/[^/]+?)(?:\.git)?/?$", args.path)
+            repo_slug = m.group(1) if m else root.name
+    except SystemExit:
+        return 1
+
     if not root.exists():
         print(f"Error: path '{args.path}' does not exist", file=sys.stderr)
         return 1
@@ -210,6 +273,9 @@ def cmd_scan(args: argparse.Namespace) -> int:
         return 1
 
     scan_root = root if root.is_dir() else root.parent
+    # Force --no-config for cloned repos — don't trust remote .doji.toml
+    if clone_dir:
+        args.no_config = True
     project_config, custom_rules = _load_scan_config(args, scan_root)
 
     use_cache = not args.no_cache
@@ -243,9 +309,19 @@ def cmd_scan(args: argparse.Namespace) -> int:
     # Apply baseline diff and post-scan filters
     report_obj = _apply_baseline_and_filters(args, report_obj, project_config, is_json)
 
+    # Rewrite temp clone paths to repo-relative paths
+    if clone_dir and repo_slug:
+        _rewrite_paths(report_obj, clone_dir, repo_slug)
+
     scan_duration = time.monotonic() - scan_start
 
     output_err = _output_report(report_obj, output_format, scan_duration, args)
+
+    # Clean up cloned repo
+    if clone_dir:
+        import shutil
+        shutil.rmtree(clone_dir.parent, ignore_errors=True)
+
     if output_err is not None:
         return output_err
 
