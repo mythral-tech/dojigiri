@@ -224,16 +224,15 @@ def scan_quick(
         custom_rules: Compiled custom rules from compile_custom_rules()
     """
     files, skipped = collect_files(root, language_filter)
-    cache = load_cache() if use_cache else {}
+    # Quick scan is fast enough that caching adds no value — always re-scan.
+    # Cache is only useful for deep scans (where LLM calls cost money).
+    cache: dict = {}
 
     if max_workers == 1:
-        analyses, errors = _scan_files_sequential(files, cache, use_cache, custom_rules)
+        analyses, errors = _scan_files_sequential(files, cache, False, custom_rules)
     else:
-        analyses, errors = _scan_files_parallel(files, cache, use_cache, max_workers, custom_rules)
+        analyses, errors = _scan_files_parallel(files, cache, False, max_workers, custom_rules)
     skipped += errors
-
-    if use_cache:
-        save_cache(cache)
 
     cross_file_findings = _detect_semantic_clones(analyses)
     cross_file_findings.extend(_detect_cross_file_taint(analyses))
@@ -565,7 +564,12 @@ def scan_deep(
 
     files, skipped = collect_files(root, language_filter)
     cost_tracker = CostTracker(max_cost=max_cost)
-    cache = load_cache() if use_cache else {}
+    if use_cache:
+        full_cache = load_cache()
+        root_prefix = str(root.resolve()) + os.sep
+        cache = {k: v for k, v in full_cache.items() if k.startswith(root_prefix) or k == "__version__"}
+    else:
+        cache = {}
 
     # Phase 1: Static analysis and cache check
     file_data, cached_analyses, skipped = _collect_file_data(
