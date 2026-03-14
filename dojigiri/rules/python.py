@@ -245,11 +245,11 @@ PYTHON_RULES: list[Rule] = _compile(
         ),
         # os.chmod with permissive mask (world-writable/executable)
         (
-            r"\bos\.chmod\s*\([^)]*,\s*0o?[0-7](?:[1-35-7][0-7]|[0-7][1-35-7])\b",
+            r"\bos\.chmod\s*\([^)]*,\s*0o?[0-7](?:[1-7][0-7]|[0-7][1-7])\b",
             Severity.WARNING,
             Category.SECURITY,
             "insecure-file-permissions",
-            "os.chmod() with overly permissive mode — world-writable or world-readable+executable",
+            "os.chmod() with overly permissive mode — group or world permissions are non-zero",
             "Use restrictive permissions (e.g., 0o600 for owner-only read/write)",
         ),
         # Jinja2 Environment without autoescape — XSS risk

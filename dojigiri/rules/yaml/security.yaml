@@ -56,9 +56,11 @@ rules:
 - category: security
   id: requests-no-timeout
   message: HTTP request without timeout — can hang indefinitely
-  pattern: requests\.(?:get|post|put|delete|patch|head|request)\s*\([^)]*\)\s*(?!.*timeout)
+  pattern: requests\.(?:get|post|put|delete|patch|head|request)\s*\((?:(?!timeout)[^)])*\)
   severity: warning
   suggestion: Always pass timeout= to requests calls
+  flags:
+  - DOTALL
 - category: security
   id: ssrf-risk
   message: HTTP request — verify URL is not constructed from user input (SSRF risk)

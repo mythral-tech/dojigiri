@@ -160,21 +160,30 @@ class _CollectionTaintState:
         return _CollectionTaintState(map_taint=merged_map, list_has_taint=merged_list)
 
 
+def _build_tainted_re(tainted_vars: set[str]) -> re.Pattern | None:
+    """Build a single compiled regex matching any tainted variable name, or None if empty."""
+    if not tainted_vars:
+        return None
+    # Sort by length descending so longer names match first (e.g. user_input before user)
+    escaped = sorted((re.escape(tv) for tv in tainted_vars), key=len, reverse=True)
+    return re.compile(r"\b(?:" + "|".join(escaped) + r")\b")
+
+
 def _track_collection_put(
     full_line: str,
     tainted_vars: set[str],
     coll_state: _CollectionTaintState,
 ) -> None:
     """Detect map.put/list.add and update collection taint state."""
+    # Pre-compile a single combined regex for all tainted vars (avoids O(n²) per-var matching)
+    taint_re = _build_tainted_re(tainted_vars)
+
     for m in _RE_MAP_PUT.finditer(full_line):
         coll_var = m.group(1)
         key = m.group(2)
         put_start = m.end()
         remainder = full_line[put_start:]
-        is_value_tainted = any(
-            re.search(r"\b" + re.escape(tv) + r"\b", remainder)
-            for tv in tainted_vars
-        )
+        is_value_tainted = bool(taint_re and taint_re.search(remainder))
         coll_state.map_taint.setdefault(coll_var, {})[key] = is_value_tainted
 
     for m in _RE_LIST_ADD.finditer(full_line):
@@ -189,7 +198,7 @@ def _track_collection_put(
                 depth -= 1
             end += 1
         arg_text = full_line[add_start:end]
-        if any(re.search(r"\b" + re.escape(tv) + r"\b", arg_text) for tv in tainted_vars):
+        if taint_re and taint_re.search(arg_text):
             coll_state.list_has_taint[coll_var] = True
 
     for m in _RE_LIST_CLEAR.finditer(full_line):

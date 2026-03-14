@@ -73,34 +73,16 @@ rules:
   suggestion: Remove the f prefix
 - category: security
   id: pickle-unsafe
-  message: pickle.load()/loads()/Unpickler() can execute arbitrary code during deserialization
-  pattern: \bpickle\.(?:loads?\s*\(|Unpickler\s*\()
+  message: Unsafe deserialization via pickle/dill/cloudpickle/shelve/jsonpickle — can execute arbitrary code
+  pattern: \b(?:pickle|cPickle|_pickle)\.(?:loads?\s*\(|Unpickler\s*\()|\b(?:dill|cloudpickle|shelve)\.loads?\s*\(|\bjsonpickle\.(?:decode|loads?)\s*\(
   severity: critical
   suggestion: Use json, msgpack, or a safe serialization format instead
 - category: security
-  id: pickle-unsafe
-  message: Pickle-equivalent deserialization — can execute arbitrary code
-  pattern: \b(?:dill|cloudpickle|shelve)\.loads?\s*\(
-  severity: critical
-  suggestion: Use json, msgpack, or a safe serialization format instead
-- category: security
-  id: pickle-unsafe
-  message: jsonpickle can execute arbitrary code via crafted JSON
-  pattern: \bjsonpickle\.(?:decode|loads?)\s*\(
-  severity: critical
-  suggestion: Use json.loads() for safe JSON deserialization
-- category: security
   id: yaml-unsafe
-  message: yaml.load() without SafeLoader can execute arbitrary code
-  pattern: \byaml\.load\s*\(
+  message: yaml.load()/load_all()/unsafe_load() can execute arbitrary code without SafeLoader
+  pattern: \byaml\.(?:load|load_all|unsafe_load|unsafe_load_all)\s*\(
   severity: critical
-  suggestion: Use yaml.safe_load() or yaml.load(data, Loader=yaml.SafeLoader)
-- category: security
-  id: yaml-unsafe
-  message: yaml.load_all()/unsafe_load() can execute arbitrary code
-  pattern: \byaml\.(?:load_all|unsafe_load|unsafe_load_all)\s*\(
-  severity: critical
-  suggestion: Use yaml.safe_load_all() instead
+  suggestion: Use yaml.safe_load() or yaml.safe_load_all() instead
 - category: security
   id: weak-hash
   message: MD5/SHA1 are cryptographically weak hash algorithms
@@ -157,8 +139,8 @@ rules:
   suggestion: Validate file type and path before opening
 - category: security
   id: insecure-file-permissions
-  message: os.chmod() with overly permissive mode — world-writable or world-readable+executable
-  pattern: \bos\.chmod\s*\([^)]*,\s*0o?[0-7](?:[1-35-7][0-7]|[0-7][1-35-7])\b
+  message: os.chmod() with overly permissive mode — group or world permissions are non-zero
+  pattern: \bos\.chmod\s*\([^)]*,\s*0o?[0-7](?:[1-7][0-7]|[0-7][1-7])\b
   severity: warning
   suggestion: Use restrictive permissions (e.g., 0o600 for owner-only read/write)
 - category: security
@@ -188,21 +170,9 @@ rules:
 - category: security
   id: ssl-verify-disabled
   message: SSL certificate verification disabled — vulnerable to MITM attacks
-  pattern: \.verify\s*=\s*False
+  pattern: \.verify\s*=\s*False|\bssl\._create_unverified_context\s*\(|\bssl\.CERT_NONE\b
   severity: warning
-  suggestion: Enable certificate verification or use a custom CA bundle
-- category: security
-  id: ssl-verify-disabled
-  message: ssl._create_unverified_context() disables all certificate verification
-  pattern: \bssl\._create_unverified_context\s*\(
-  severity: warning
-  suggestion: Use ssl.create_default_context() for verified connections
-- category: security
-  id: ssl-verify-disabled
-  message: ssl.CERT_NONE disables certificate verification — MITM risk
-  pattern: \bssl\.CERT_NONE\b
-  severity: warning
-  suggestion: Use ssl.CERT_REQUIRED for certificate verification
+  suggestion: Enable certificate verification (use ssl.create_default_context() or remove verify=False)
 - category: security
   id: hardcoded-tmp
   message: Hardcoded /tmp path — predictable location vulnerable to symlink attacks
@@ -386,21 +356,9 @@ rules:
 - category: security
   id: weak-tls-version
   message: Weak TLS protocol version — SSLv2/v3/TLS1.0/1.1 are broken or deprecated
-  pattern: \bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b
+  pattern: \bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b|minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b|\bSSL\.(?:SSLv2_METHOD|SSLv3_METHOD|SSLv23_METHOD|TLSv1_METHOD|TLSv1_1_METHOD)\b
   severity: critical
-  suggestion: Use ssl.PROTOCOL_TLS_CLIENT or ssl.TLSVersion.TLSv1_2 minimum
-- category: security
-  id: weak-tls-version
-  message: TLS minimum version set to deprecated protocol
-  pattern: minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b
-  severity: critical
-  suggestion: Set minimum_version to ssl.TLSVersion.TLSv1_2 or TLSv1_3
-- category: security
-  id: weak-tls-version
-  message: pyOpenSSL weak TLS method — use TLS 1.2+ only
-  pattern: \bSSL\.(?:SSLv2_METHOD|SSLv3_METHOD|SSLv23_METHOD|TLSv1_METHOD|TLSv1_1_METHOD)\b
-  severity: critical
-  suggestion: Use SSL.TLSv1_2_METHOD or SSL.TLS_METHOD with proper options
+  suggestion: Use TLS 1.2+ minimum (ssl.PROTOCOL_TLS_CLIENT, ssl.TLSVersion.TLSv1_2, or SSL.TLSv1_2_METHOD)
 - category: security
   id: weak-cipher-suite
   message: Weak cipher suite configured — RC4/DES/NULL/EXPORT/anon ciphers are broken
@@ -422,15 +380,9 @@ rules:
 - category: security
   id: cors-wildcard
   message: CORS wildcard allows any origin — credentials and data may leak cross-origin
-  pattern: (?:Access-Control-Allow-Origin|CORS_ORIGIN_ALLOW_ALL|CORS_ALLOW_ALL_ORIGINS)\s*[:=]\s*(?:['\"]?\*['\"]?|True)
+  pattern: (?:Access-Control-Allow-Origin|CORS_ORIGIN_ALLOW_ALL|CORS_ALLOW_ALL_ORIGINS)\s*[:=]\s*(?:['\"]?\*['\"]?|True)|\bCORS\s*\(\s*\w+\s*(?:,\s*origins\s*=\s*['\"]?\*['\"]?)?(?:\s*\))
   severity: warning
   suggestion: Specify allowed origins explicitly via an allowlist
-- category: security
-  id: cors-wildcard
-  message: Flask-CORS with default wildcard origin — all cross-origin requests allowed
-  pattern: \bCORS\s*\(\s*\w+\s*(?:,\s*origins\s*=\s*['\"]?\*['\"]?)?(?:\s*\))
-  severity: warning
-  suggestion: Pass origins=['https://yourdomain.com'] to restrict allowed origins
 - category: security
   id: security-header-disabled
   message: Security header explicitly disabled — browser protections weakened
@@ -443,12 +395,6 @@ rules:
   pattern: ^\s*SECURE_SSL_REDIRECT\s*=\s*False
   severity: info
   suggestion: Set SECURE_SSL_REDIRECT=True in production
-- category: security
-  id: pickle-unsafe
-  message: cPickle/_pickle deserialization can execute arbitrary code
-  pattern: \b(?:cPickle|_pickle)\.(?:loads?\s*\(|Unpickler\s*\()
-  severity: critical
-  suggestion: Use json or msgpack for untrusted data
 - category: security
   id: zipfile-extract-audit
   message: Archive extract() — verify member path does not escape target directory

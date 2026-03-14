@@ -207,8 +207,6 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
             "parameterized",
             "int",
             "float",
-            "str.isdigit",
-            "str.isalnum",
             "re.sub",
             "os.path.basename",
             "pathlib.PurePath",

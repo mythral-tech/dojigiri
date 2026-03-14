@@ -136,7 +136,7 @@ def _scan_files_parallel(files: list[Path], cache: dict, use_cache: bool, max_wo
                             cache[str(filepath)] = updated_hash
                 elif is_error:
                     errors += 1
-            except Exception as e:  # future.result() — any worker error must be caught
+            except (OSError, ValueError, RuntimeError, UnicodeDecodeError) as e:  # worker errors — lets KeyboardInterrupt/SystemExit propagate
                 logger.warning("Error analyzing %s: %s", filepath, e)
                 errors += 1
     return analyses, errors
@@ -520,7 +520,7 @@ def _run_llm_enrichment(file_data: list[tuple], cached_analyses: list[FileAnalys
             for future in as_completed(futures):
                 try:
                     future.result()
-                except Exception as e:  # future.result() — any worker error must be caught
+                except (OSError, ValueError, RuntimeError, UnicodeDecodeError) as e:  # worker errors — lets KeyboardInterrupt/SystemExit propagate
                     logger.warning("Worker error: %s", e)
 
     if skipped_clean_count:
