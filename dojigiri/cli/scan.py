@@ -72,7 +72,7 @@ def _execute_scan(args: argparse.Namespace, root: Path, lang: str | None, use_ca
 
     if diff_base is not None:
         try:
-            report_obj, resolved_ref = scan_diff(
+            report_obj, resolved_ref = scan_diff(  # doji:ignore(taint-flow) — sink uses subprocess list args, no shell
                 root,
                 base_ref=diff_base if diff_base != "" else None,
                 language_filter=lang,

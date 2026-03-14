@@ -405,7 +405,7 @@ def review_diff(
     resolved_ref = _resolve_base_ref(pr_number, base_ref, git_root)
 
     try:
-        scan_report, resolved_ref = scan_diff(
+        scan_report, resolved_ref = scan_diff(  # doji:ignore(taint-flow) — sink uses subprocess list args, no shell
             root, base_ref=resolved_ref, language_filter=language_filter,
             custom_rules=custom_rules,
         )

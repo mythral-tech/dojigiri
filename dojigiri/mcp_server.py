@@ -205,7 +205,7 @@ def doji_scan(
 
     try:
         if diff_only:
-            report, _ = scan_diff(
+            report, _ = scan_diff(  # doji:ignore(taint-flow) — sink uses subprocess list args, no shell
                 root,
                 base_ref=diff_ref or None,
                 language_filter=language,

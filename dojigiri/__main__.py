@@ -211,12 +211,12 @@ def _check_version() -> str | None:
     try:
         from urllib.request import urlopen
         import json
-        with urlopen("https://api.dojigiri.com/health", timeout=3) as resp:
+        with urlopen("https://api.dojigiri.com/health", timeout=3) as resp:  # doji:ignore(url-scheme-audit) — hardcoded https URL
             data = json.loads(resp.read())
         latest = data.get("dojigiri_version", "")
         if latest and latest != __version__:
             return f"\n  Update available: {__version__} → {latest}  —  pip install --upgrade dojigiri-cli\n"
-    except Exception:
+    except Exception:  # doji:ignore(empty-exception-handler) — intentional: version check must never disrupt CLI
         pass
     return None
 
