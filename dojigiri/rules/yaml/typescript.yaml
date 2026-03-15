@@ -1,8 +1,7 @@
 rules:
-# ── Type Safety Bypasses (Critical) ──────────────────────────────────
 - category: style
   id: ts-as-any-cast
-  message: "'as any' cast disables type checking — hides type errors and security bugs"
+  message: '''as any'' cast disables type checking — hides type errors and security bugs'
   pattern: \bas\s+any\b
   severity: warning
   suggestion: Use a specific type or fix the underlying type mismatch
@@ -23,14 +22,14 @@ rules:
   cwe: CWE-704
 - category: security
   id: ts-ignore-comment
-  message: "@ts-ignore suppresses type errors — may hide real bugs"
+  message: '@ts-ignore suppresses type errors — may hide real bugs'
   pattern: //\s*@ts-ignore\b
   severity: warning
   suggestion: Fix the underlying type error instead of suppressing it
   cwe: CWE-710
 - category: security
   id: ts-expect-error-bypass
-  message: "@ts-expect-error used to silence type checker — verify the suppression is justified"
+  message: '@ts-expect-error used to silence type checker — verify the suppression is justified'
   pattern: //\s*@ts-expect-error\b
   severity: info
   suggestion: Add a comment explaining why the suppression is needed; prefer fixing the type
@@ -51,19 +50,18 @@ rules:
   cwe: CWE-704
 - category: bug
   id: ts-excessive-any-annotation
-  message: "Variable or property typed as 'any' — defeats TypeScript's type system"
+  message: Variable or property typed as 'any' — defeats TypeScript's type system
   pattern: (?:let|const|var)\s+\w+\s*:\s*any\s*[=;]
   severity: warning
   suggestion: Use a specific type, 'unknown', or infer from assignment
   cwe: CWE-704
 - category: security
   id: ts-object-type
-  message: "'Object' type is too permissive — accepts any non-nullish value"
-  pattern: ":\\s*Object\\s*[;,=)\\]}]"
+  message: '''Object'' type is too permissive — accepts any non-nullish value'
+  pattern: :\s*Object\s*[;,=)\]}]
   severity: warning
-  suggestion: "Use 'object', 'Record<string, unknown>', or a specific interface instead"
+  suggestion: Use 'object', 'Record<string, unknown>', or a specific interface instead
   cwe: CWE-704
-# ── Runtime Safety (Warning) ─────────────────────────────────────────
 - category: security
   id: ts-json-parse-assertion
   message: JSON.parse() with type assertion but no runtime validation — trusts untrusted data
@@ -73,21 +71,21 @@ rules:
   cwe: CWE-20
 - category: security
   id: ts-record-string-any
-  message: "Record<string, any> allows any value — bypasses type safety"
+  message: Record<string, any> allows any value — bypasses type safety
   pattern: Record\s*<\s*string\s*,\s*any\s*>
   severity: warning
-  suggestion: "Use Record<string, unknown> and narrow types with runtime checks"
+  suggestion: Use Record<string, unknown> and narrow types with runtime checks
   cwe: CWE-704
 - category: security
   id: ts-type-only-import-runtime
-  message: "'import type' used where runtime validation is needed — types are erased at compile time"
+  message: '''import type'' used where runtime validation is needed — types are erased at compile time'
   pattern: import\s+type\s+\{[^}]*(?:Schema|Validator|Guard|Checker)[^}]*\}
   severity: info
   suggestion: Use a regular import if you need runtime validation behavior
   cwe: CWE-20
 - category: security
   id: ts-declare-ambient
-  message: "'declare' ambient declaration tells TS something exists without proof — can lie about types"
+  message: '''declare'' ambient declaration tells TS something exists without proof — can lie about types'
   pattern: ^\s*declare\s+(?:var|let|const|function|class)\s+
   severity: info
   suggestion: Prefer importing from proper type definitions (.d.ts) over inline declare
@@ -97,10 +95,10 @@ rules:
   message: Switch on enum without default case — misses future enum variants
   pattern: switch\s*\(\s*\w+\s*\)\s*\{(?:(?!default\s*:)[\s\S])*\}
   severity: info
-  suggestion: "Add a default case with exhaustive check (const _exhaustive: never = value)"
+  suggestion: 'Add a default case with exhaustive check (const _exhaustive: never = value)'
 - category: security
   id: ts-satisfies-no-validation
-  message: "'satisfies' checks compile-time shape but adds no runtime validation"
+  message: '''satisfies'' checks compile-time shape but adds no runtime validation'
   pattern: \bsatisfies\s+\w+\s*;
   severity: info
   suggestion: Add runtime validation (zod, io-ts) for data from external sources
@@ -114,22 +112,21 @@ rules:
   cwe: CWE-20
 - category: bug
   id: ts-as-const-mutable
-  message: "'as const' on a let/var binding — value is still reassignable despite const assertion"
+  message: '''as const'' on a let/var binding — value is still reassignable despite const assertion'
   pattern: (?:let|var)\s+\w+\s*=\s*[^;]+\bas\s+const\b
   severity: warning
   suggestion: Use 'const' declaration with 'as const' for truly immutable values
 - category: security
   id: ts-index-signature-any
-  message: "Index signature [key: string]: any allows arbitrary property access without type checking"
+  message: 'Index signature [key: string]: any allows arbitrary property access without type checking'
   pattern: \[\s*\w+\s*:\s*string\s*\]\s*:\s*any\b
   severity: warning
-  suggestion: "Use a specific value type or [key: string]: unknown with runtime narrowing"
+  suggestion: 'Use a specific value type or [key: string]: unknown with runtime narrowing'
   cwe: CWE-704
-# ── Framework-Specific Security ──────────────────────────────────────
 - category: security
   id: ts-nestjs-no-auth-guard
   message: NestJS controller or route without authentication guard decorator
-  pattern: "@(?:Controller|Get|Post|Put|Delete|Patch)\\s*\\([^)]*\\)\\s*(?!.*@(?:UseGuards|Auth))"
+  pattern: '@(?:Controller|Get|Post|Put|Delete|Patch)\s*\([^)]*\)\s*(?!.*@(?:UseGuards|Auth))'
   severity: info
   suggestion: Add @UseGuards(AuthGuard) to protect endpoints
   cwe: CWE-306
@@ -150,7 +147,7 @@ rules:
 - category: security
   id: ts-graphql-any-return
   message: GraphQL resolver returning 'any' type — response shape is unchecked
-  pattern: "@(?:Query|Mutation|Resolver|ResolveField)\\s*\\([^)]*\\)[\\s\\S]*?:\\s*(?:Promise\\s*<\\s*)?any\\b"
+  pattern: '@(?:Query|Mutation|Resolver|ResolveField)\s*\([^)]*\)[\s\S]*?:\s*(?:Promise\s*<\s*)?any\b'
   severity: warning
   suggestion: Define explicit return types for GraphQL resolvers
   cwe: CWE-704
@@ -158,14 +155,14 @@ rules:
   id: ts-prisma-raw-interpolation
   message: Prisma $queryRaw/$executeRaw with template literal interpolation — SQL injection
   pattern: \$(?:queryRaw|executeRaw)\s*\(\s*`[^`]*\$\{
-  severity: critical
-  suggestion: "Use Prisma.sql template tag or parameterized queries: $queryRaw(Prisma.sql`...`)"
+  severity: warning
+  suggestion: 'Use Prisma.sql template tag or parameterized queries: $queryRaw(Prisma.sql`...`)'
   cwe: CWE-89
 - category: security
   id: ts-typeorm-raw-query
   message: TypeORM raw query with string interpolation — SQL injection risk
   pattern: \.(?:query|createQueryBuilder)\s*\(\s*(?:`[^`]*\$\{|['"][^'"]*['"]\s*\+)
-  severity: critical
+  severity: warning
   suggestion: Use TypeORM parameterized queries with $1 placeholders or QueryBuilder bindings
   cwe: CWE-89
 - category: security
@@ -182,12 +179,11 @@ rules:
   severity: warning
   suggestion: Validate fetched data shape at runtime before trusting the asserted type
   cwe: CWE-20
-# ── Code Quality with Security Impact ────────────────────────────────
 - category: security
   id: ts-nocheck
-  message: "@ts-nocheck disables ALL type checking for the entire file"
+  message: '@ts-nocheck disables ALL type checking for the entire file'
   pattern: //\s*@ts-nocheck\b
-  severity: critical
+  severity: warning
   suggestion: Remove @ts-nocheck and fix the underlying type errors
   cwe: CWE-710
 - category: security
@@ -199,10 +195,10 @@ rules:
   cwe: CWE-710
 - category: bug
   id: ts-typeof-object-no-null
-  message: "typeof x === 'object' is true for null — missing null check"
+  message: typeof x === 'object' is true for null — missing null check
   pattern: typeof\s+\w+\s*===?\s*['"]object['"](?!\s*&&\s*\w+\s*!==?\s*null)
   severity: warning
-  suggestion: "Add a null check: typeof x === 'object' && x !== null"
+  suggestion: 'Add a null check: typeof x === ''object'' && x !== null'
   cwe: CWE-476
 - category: bug
   id: ts-type-predicate-no-narrow
@@ -219,10 +215,10 @@ rules:
   cwe: CWE-704
 - category: security
   id: ts-generic-any-constraint
-  message: "Generic with 'extends any' constraint — provides no type narrowing"
+  message: Generic with 'extends any' constraint — provides no type narrowing
   pattern: <\s*\w+\s+extends\s+any\s*>
   severity: warning
-  suggestion: "Use a meaningful constraint: <T extends Record<string, unknown>> or <T extends object>"
+  suggestion: 'Use a meaningful constraint: <T extends Record<string, unknown>> or <T extends object>'
   cwe: CWE-704
 - category: security
   id: ts-missing-readonly-config
@@ -232,48 +228,50 @@ rules:
   suggestion: Use 'const' with 'as const' or Readonly<T> for configuration objects
 - category: security
   id: ts-partial-security-type
-  message: "Partial<T> on security-critical type makes all fields optional — can bypass required checks"
-  pattern: "Partial\\s*<\\s*(?:\\w*Auth\\w*|\\w*Permission\\w*|\\w*Credential\\w*|\\w*Session\\w*|\\w*Token\\w*)\\s*>"
+  message: Partial<T> on security-critical type makes all fields optional — can bypass required checks
+  pattern: Partial\s*<\s*(?:\w*Auth\w*|\w*Permission\w*|\w*Credential\w*|\w*Session\w*|\w*Token\w*)\s*>
   severity: warning
   suggestion: Explicitly define which fields are optional instead of using Partial on security types
   cwe: CWE-284
-# ── Prompt Injection (LLM SDK) ────────────────────────────────────
 - category: security
   id: prompt-injection-openai-ts
   message: OpenAI API call with template literal interpolation — prompt injection risk
   pattern: (?:openai\.chat\.completions\.create|completions\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Build the messages array with validated inputs; never interpolate user data into content strings
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-anthropic-ts
   message: Anthropic API call with template literal — prompt injection risk
   pattern: (?:anthropic\.messages\.create|client\.messages\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Use structured message content; separate system from user content
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-vercel-ai-ts
   message: Vercel AI SDK call with interpolated system/prompt — prompt injection risk
   pattern: (?:generateText|streamText|generateObject)\s*\(\s*\{[\s\S]*?(?:system|prompt)\s*:\s*`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Sanitize user input before embedding in system or prompt parameters
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-system-content-ts
   message: System message content with template literal — prompt injection via system prompt takeover
   pattern: role\s*:\s*['"]system['"]\s*,\s*content\s*:\s*`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: System message content must be static; pass user data via user role messages only
 - category: security
   id: prompt-injection-langchain-ts
   message: LangChain TS prompt template with interpolation — prompt injection risk
   pattern: (?:ChatPromptTemplate|PromptTemplate|SystemMessagePromptTemplate)\.\w+\s*\(\s*`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Use LangChain's input_variables for parameterization instead of template literals
 - category: security
   id: llm-output-to-eval-ts
   message: LLM output passed to eval/Function — AI-generated code execution risk
   pattern: (?:eval|new\s+Function)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|text)
-  severity: critical
+  severity: warning
   suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
