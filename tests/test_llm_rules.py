@@ -930,11 +930,12 @@ class TestSeverityCalibration:
         match = [f for f in findings if f.rule == "prompt-injection-fstring"]
         assert match and match[0].severity.name.lower() == "warning"
 
-    def test_content_fstring_is_critical(self):
+    def test_content_fstring_is_warning(self):
+        """Demoted to warning — taint engine handles critical-severity prompt injection."""
         code = '"content": f"Hello {user}"\n'
         findings = run_regex_checks(code, "app.py", "python")
         match = [f for f in findings if f.rule == "prompt-injection-content-fstring"]
-        assert match and match[0].severity.name.lower() == "critical"
+        assert match and match[0].severity.name.lower() == "warning"
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

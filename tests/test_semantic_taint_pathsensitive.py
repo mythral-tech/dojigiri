@@ -87,7 +87,7 @@ def handler():
         assert len(findings) >= 1
         f = findings[0]
         assert f.rule == "eval-usage"
-        assert f.severity == Severity.WARNING
+        assert f.severity == Severity.CRITICAL
         assert f.category == Category.SECURITY
         assert f.source == Source.AST
         assert "path-sensitive" in f.message
@@ -368,7 +368,7 @@ function handle(req, res) {
         # verify correctness of any findings produced
         for f in findings:
             assert f.rule == "eval-usage"
-            assert f.severity == Severity.WARNING
+            assert f.severity == Severity.CRITICAL
 
     def test_go_formvalue_to_exec_command(self):
         """Go: r.FormValue flowing to exec.Command should produce a finding."""

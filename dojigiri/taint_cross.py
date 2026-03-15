@@ -28,6 +28,13 @@ from .types import Category, CrossFileFinding, Finding, Severity, Source
 
 logger = logging.getLogger(__name__)
 
+_CRITICAL_SINK_KINDS = {"sql_query", "system_cmd", "eval", "llm_input", "ssrf"}
+
+
+def _taint_severity(sink_kind: str) -> Severity:
+    """Critical for dangerous sinks with confirmed taint flow, warning otherwise."""
+    return Severity.CRITICAL if sink_kind in _CRITICAL_SINK_KINDS else Severity.WARNING
+
 # ─── Taint sources / sinks (AST-based, mirrors semantic/lang_config.py) ────
 
 # Attribute chains that produce tainted data
@@ -561,7 +568,7 @@ def _check_call_sink(
                 Finding(
                     file=filepath,
                     line=call.lineno,
-                    severity=Severity.WARNING,
+                    severity=_taint_severity(sink_kind),
                     category=Category.SECURITY,
                     source=Source.AST,
                     rule="taint-flow",
@@ -593,7 +600,7 @@ def _check_call_sink(
                     Finding(
                         file=filepath,
                         line=call.lineno,
-                        severity=Severity.WARNING,
+                        severity=_taint_severity(sink_kind),
                         category=Category.SECURITY,
                         source=Source.AST,
                         rule="taint-flow",

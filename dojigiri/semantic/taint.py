@@ -54,6 +54,8 @@ _JAVA_SINK_RULES: dict[str, str] = {
 _LANG_SINK_RULES: dict[str, dict[str, str]] = {
     "java": _JAVA_SINK_RULES,
 }
+# Taint-confirmed flows to these sinks are critical (high confidence)
+_CRITICAL_SINK_KINDS = {"sql_query", "system_cmd", "eval", "llm_input", "ssrf"}
 
 
 def _resolve_taint_rule(sink_kind: str, language: str = "") -> str:
@@ -1562,10 +1564,11 @@ def _build_taint_finding(
         chain_desc = f" (through: {' → '.join(chain_names)})"
 
     rule_name = _resolve_taint_rule(sink.kind, config.ts_language_name)
+    severity = Severity.CRITICAL if sink.kind in _CRITICAL_SINK_KINDS else Severity.WARNING
     return Finding(
         file=filepath,
         line=sink.line,
-        severity=Severity.WARNING,
+        severity=severity,
         category=Category.SECURITY,
         source=Source.AST,
         rule=rule_name,
@@ -1751,11 +1754,12 @@ def _check_tainted_var_at_sink(
     src_kind = source_info.kind if source_info else "unknown"
     src_var = source_info.variable if source_info else tvar
     ps_rule = _resolve_taint_rule(sink_kind, ctx.config.ts_language_name)
+    ps_severity = Severity.CRITICAL if sink_kind in _CRITICAL_SINK_KINDS else Severity.WARNING
 
     return Finding(
         file=ctx.filepath,
         line=stmt.line,
-        severity=Severity.WARNING,
+        severity=ps_severity,
         category=Category.SECURITY,
         source=Source.AST,
         rule=ps_rule,

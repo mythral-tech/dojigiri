@@ -139,7 +139,7 @@ def foo():
         assert len(findings) == 1
         f = findings[0]
         assert f.rule == "eval-usage"
-        assert f.severity == Severity.WARNING
+        assert f.severity == Severity.CRITICAL
         assert f.category == Category.SECURITY
         assert "eval" in f.message
 
@@ -387,7 +387,7 @@ def get_user():
         assert len(findings) >= 1
         f = findings[0]
         assert f.rule == "sql-injection"
-        assert f.severity == Severity.WARNING
+        assert f.severity == Severity.CRITICAL
         assert f.category == Category.SECURITY
         assert f.source == Source.AST
         assert "execute" in f.message
@@ -445,7 +445,7 @@ def vulnerable():
         rules = {f.rule for f in findings}
         assert rules == {"os-system", "sql-injection"}
         severities = {f.severity for f in findings}
-        assert severities == {Severity.WARNING}
+        assert severities == {Severity.CRITICAL}
 
 
 # ─── Cross-Language Tests ────────────────────────────────────────────────────
@@ -466,7 +466,7 @@ function handle(req, res) {
         assert len(findings) >= 1
         f = findings[0]
         assert f.rule == "eval-usage"
-        assert f.severity == Severity.WARNING
+        assert f.severity == Severity.CRITICAL
         assert f.category == Category.SECURITY
         assert "eval" in f.message
 

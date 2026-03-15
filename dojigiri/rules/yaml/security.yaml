@@ -315,9 +315,9 @@ rules:
   suggestion: Use structured message arrays with role separation; sanitize user content before inclusion
 - category: security
   id: prompt-injection-content-fstring
-  message: Message content field built with f-string — prompt injection regardless of variable naming
+  message: Message content field built with f-string — potential prompt injection if variables are user-controlled
   pattern: (?i)['\"]content['\"]\s*:\s*f['"]
-  severity: critical
+  severity: warning
   suggestion: Never interpolate user data into message content fields; use validated inputs only
 - category: security
   id: prompt-injection-content-template
@@ -618,7 +618,7 @@ rules:
   id: rag-user-query-in-system-prompt
   message: User search query placed in system prompt — should be in user message to maintain role separation
   pattern: (?i)['\"]role['\"]\s*:\s*['\"]system['\"][\s\S]{0,200}(?:query|question|user_input|user_query|search_query|user_message|user_request)
-  severity: critical
+  severity: warning
   suggestion: Place user queries in the user role message, not in system prompts; system prompts should contain only developer-controlled instructions
   flags: [DOTALL]
 - category: security
