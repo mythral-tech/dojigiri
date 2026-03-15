@@ -30,6 +30,11 @@ logger = logging.getLogger(__name__)
 
 _CRITICAL_SINK_KINDS = {"sql_query", "system_cmd", "eval", "llm_input", "ssrf"}
 
+# Keyword arguments that are safe for SSRF sinks — only the URL matters
+_SSRF_SAFE_KWARGS = {"headers", "auth", "cookies", "timeout", "verify",
+                     "cert", "proxies", "hooks", "stream",
+                     "allow_redirects", "params", "files", "json"}
+
 
 def _taint_severity(sink_kind: str, source_kind: str = "") -> Severity:
     """Critical for dangerous sinks with confirmed taint flow, warning otherwise.
@@ -732,9 +737,11 @@ def _check_call_sink(
             )
             break  # one finding per call
 
-    # Also check keyword arguments
+    # Also check keyword arguments (skip safe kwargs for SSRF sinks)
     for kw in call.keywords:
         if kw.value:
+            if sink_kind == "ssrf" and kw.arg in _SSRF_SAFE_KWARGS:
+                continue
             tainted_var = _find_tainted_in_expr(kw.value, taint_map)
             if tainted_var:
                 key = (tainted_var.source_line, call.lineno)
@@ -864,12 +871,9 @@ def _check_sink_flows(
                     pass
         # For SSRF sinks, kwargs like headers=/auth=/cookies= are safe — only
         # the URL (positional arg) matters.
-        _ssrf_safe_kw = {"headers", "auth", "cookies", "timeout", "verify",
-                         "cert", "proxies", "hooks", "stream",
-                         "allow_redirects", "params", "files", "json"}
         for kw in call_node.keywords:
             if kw.value:
-                if sink_kind == "ssrf" and kw.arg in _ssrf_safe_kw:
+                if sink_kind == "ssrf" and kw.arg in _SSRF_SAFE_KWARGS:
                     continue
                 tvar = _find_tainted_in_expr(kw.value, taint_map)
                 if tvar and tvar.source_kind == "parameter":
