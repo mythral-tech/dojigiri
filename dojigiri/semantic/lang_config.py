@@ -155,7 +155,6 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
         ],
         taint_sink_patterns=[
             ("cursor.execute", "sql_query"),
-            ("execute", "sql_query"),
             ("eval", "eval"),
             ("exec", "eval"),
             ("os.system", "system_cmd"),

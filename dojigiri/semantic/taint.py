@@ -784,15 +784,25 @@ def _matches_pattern(text: str, pattern: str) -> bool:
 
 
 def _matches_sink_pattern(call_text: str, pattern: str) -> bool:
-    """Check if a call matches a sink pattern.
+    """Check if a call matches a sink pattern using boundary matching.
 
-    For method-only patterns starting with '.' (e.g. '.Get'), requires the
-    pattern to appear at the end of call_text — prevents '.Head' from
-    matching 'w.Header().Set' where 'Head' is just a substring.
+    - Dotted patterns (e.g. 'cursor.execute') → exact or suffix match
+    - Bare patterns (e.g. 'eval') → must match the method name after the last '.'
+    - Dot-prefixed patterns (e.g. '.Get') → suffix match
+
+    This prevents 'execute' from matching 'execute_code()' and 'eval' from
+    matching '.save()'.
     """
     if pattern.startswith("."):
         return call_text.endswith(pattern)
-    return pattern in call_text
+    if "." in pattern:
+        # Dotted pattern: exact match or call_text ends with ".pattern"
+        return call_text == pattern or call_text.endswith("." + pattern)
+    # Bare pattern: must be the method name (part after last dot), or exact match
+    if call_text == pattern:
+        return True
+    parts = call_text.rsplit(".", 1)
+    return len(parts) == 2 and parts[1] == pattern
 
 
 def _find_taint_sources(

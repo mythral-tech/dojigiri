@@ -7,7 +7,7 @@ taint propagation, sanitization, end-to-end scenarios, and cross-language suppor
 import pytest
 
 from dojigiri.semantic.core import extract_semantics
-from dojigiri.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath
+from dojigiri.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath, _matches_sink_pattern
 from dojigiri.semantic.lang_config import get_config, LanguageConfig
 from dojigiri.types import Severity, Category, Source
 
@@ -903,3 +903,52 @@ def process():
         findings = analyze_taint_pathsensitive(sem, source_bytes, config, "test.py", cfgs)
         # Path-sensitive should detect that the else-branch path has unsanitized taint
         assert isinstance(findings, list)  # at minimum, doesn't crash
+
+
+# ─── Sink Pattern Boundary Matching ──────────────────────────────────────────
+
+
+class TestMatchesSinkPattern:
+    """Tests for _matches_sink_pattern boundary matching."""
+
+    # Bare patterns — must match the method name exactly
+    def test_bare_pattern_exact_match(self):
+        assert _matches_sink_pattern("eval", "eval") is True
+
+    def test_bare_pattern_with_receiver(self):
+        assert _matches_sink_pattern("cursor.execute", "execute") is True
+
+    def test_bare_pattern_rejects_substring(self):
+        """'execute' must NOT match 'execute_code'."""
+        assert _matches_sink_pattern("execute_code", "execute") is False
+
+    def test_bare_pattern_rejects_partial_method(self):
+        """'eval' must NOT match 'obj.save'."""
+        assert _matches_sink_pattern("obj.save", "eval") is False
+
+    def test_bare_pattern_rejects_prefix_substring(self):
+        """'open' must NOT match 'open_connection'."""
+        assert _matches_sink_pattern("open_connection", "open") is False
+
+    def test_bare_pattern_rejects_unrelated(self):
+        assert _matches_sink_pattern("retrieval_resource_list.append", "eval") is False
+
+    # Dotted patterns — exact or suffix match
+    def test_dotted_pattern_exact(self):
+        assert _matches_sink_pattern("cursor.execute", "cursor.execute") is True
+
+    def test_dotted_pattern_suffix(self):
+        assert _matches_sink_pattern("db.cursor.execute", "cursor.execute") is True
+
+    def test_dotted_pattern_rejects_substring(self):
+        assert _matches_sink_pattern("not_cursor.execute", "cursor.execute") is False
+
+    def test_dotted_pattern_rejects_partial(self):
+        assert _matches_sink_pattern("cursor.execute_many", "cursor.execute") is False
+
+    # Dot-prefixed patterns — suffix match (existing behavior)
+    def test_dot_prefix_suffix_match(self):
+        assert _matches_sink_pattern("w.Header.Get", ".Get") is True
+
+    def test_dot_prefix_rejects_non_suffix(self):
+        assert _matches_sink_pattern("w.Header().Set", ".Head") is False
