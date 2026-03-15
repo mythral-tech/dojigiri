@@ -31,8 +31,13 @@ logger = logging.getLogger(__name__)
 _CRITICAL_SINK_KINDS = {"sql_query", "system_cmd", "eval", "llm_input", "ssrf"}
 
 
-def _taint_severity(sink_kind: str) -> Severity:
-    """Critical for dangerous sinks with confirmed taint flow, warning otherwise."""
+def _taint_severity(sink_kind: str, source_kind: str = "") -> Severity:
+    """Critical for dangerous sinks with confirmed taint flow, warning otherwise.
+
+    Parameter-sourced taint stays WARNING — speculative without caller analysis.
+    """
+    if source_kind == "parameter":
+        return Severity.WARNING
     return Severity.CRITICAL if sink_kind in _CRITICAL_SINK_KINDS else Severity.WARNING
 
 # ─── Taint sources / sinks (AST-based, mirrors semantic/lang_config.py) ────
@@ -568,7 +573,7 @@ def _check_call_sink(
                 Finding(
                     file=filepath,
                     line=call.lineno,
-                    severity=_taint_severity(sink_kind),
+                    severity=_taint_severity(sink_kind, tainted_var.source_kind),
                     category=Category.SECURITY,
                     source=Source.AST,
                     rule="taint-flow",
@@ -600,7 +605,7 @@ def _check_call_sink(
                     Finding(
                         file=filepath,
                         line=call.lineno,
-                        severity=_taint_severity(sink_kind),
+                        severity=_taint_severity(sink_kind, tainted_var.source_kind),
                         category=Category.SECURITY,
                         source=Source.AST,
                         rule="taint-flow",

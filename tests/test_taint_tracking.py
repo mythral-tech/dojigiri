@@ -32,7 +32,7 @@ def handle(user_input):
         assert len(findings) >= 1
         f = findings[0]
         assert f.rule == "taint-flow"
-        assert f.severity == Severity.CRITICAL
+        assert f.severity == Severity.WARNING  # parameter source = speculative
         assert f.category == Category.SECURITY
         assert "execute" in f.message
 

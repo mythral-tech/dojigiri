@@ -20,7 +20,7 @@ rules:
 - category: security
   id: eval-usage
   message: eval() can execute arbitrary code — remote code execution if input is user-controlled
-  pattern: (?<!\w\.)(?<!\.)eval\s*\(
+  pattern: (?<!\w)(?<!\.)eval\s*\(
   severity: critical
   suggestion: Use ast.literal_eval() for safe evaluation, or avoid entirely
   cwe: CWE-95
