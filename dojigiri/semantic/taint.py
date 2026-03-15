@@ -786,6 +786,7 @@ def _matches_pattern(text: str, pattern: str) -> bool:
 def _matches_sink_pattern(call_text: str, pattern: str) -> bool:
     """Check if a call matches a sink pattern using boundary matching.
 
+    - '=open' (= prefix) → exact match only, no suffix (builtins without receiver)
     - Dotted patterns (e.g. 'cursor.execute') → exact or suffix match
     - Bare patterns (e.g. 'eval') → must match the method name after the last '.'
     - Dot-prefixed patterns (e.g. '.Get') → suffix match
@@ -793,6 +794,8 @@ def _matches_sink_pattern(call_text: str, pattern: str) -> bool:
     This prevents 'execute' from matching 'execute_code()' and 'eval' from
     matching '.save()'.
     """
+    if pattern.startswith("="):
+        return call_text == pattern[1:]
     if pattern.startswith("."):
         return call_text.endswith(pattern)
     if "." in pattern:
@@ -1055,6 +1058,7 @@ def _match_call_to_sink(call: object, call_text: str, config: object, lines: lis
         line_text = lines[line_idx]
         tvar = _find_tainted_arg_at_sink(
             tainted_vars, call, pattern, line_text, assigned_on_line,
+            sink_kind=kind,
         )
         if tvar is not None:
             sinks.append(TaintSink(
@@ -1064,7 +1068,13 @@ def _match_call_to_sink(call: object, call_text: str, config: object, lines: lis
         break
 
 
-def _find_tainted_arg_at_sink(tainted_vars: list[str], call: object, pattern: str, line_text: str, assigned_on_line: set) -> str | None:
+_SSRF_SAFE_KWARGS = re.compile(
+    r"\b(?:headers|auth|cookies|timeout|verify|cert|proxies|hooks|stream"
+    r"|allow_redirects|params|files|json)\s*=\s*"
+)
+
+
+def _find_tainted_arg_at_sink(tainted_vars: list[str], call: object, pattern: str, line_text: str, assigned_on_line: set, sink_kind: str = "") -> str | None:
     """Find the first tainted variable that appears as an argument at a sink call."""
     for tvar in tainted_vars:
         if (tvar, call.line) in assigned_on_line:
@@ -1074,6 +1084,19 @@ def _find_tainted_arg_at_sink(tainted_vars: list[str], call: object, pattern: st
             if tvar == receiver_root:
                 continue
         if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
+            # For SSRF sinks, only flag if tainted var is the URL (not a kwarg
+            # like headers=, auth=, timeout=).
+            if sink_kind == "ssrf":
+                m = re.search(r"\b" + re.escape(tvar) + r"\b", line_text)
+                if m:
+                    # Check if preceded by a safe keyword= on the same arg
+                    before = line_text[:m.start()]
+                    # Find the last comma or opening paren before the var
+                    last_sep = max(before.rfind(","), before.rfind("("))
+                    if last_sep >= 0:
+                        arg_prefix = before[last_sep + 1:].strip()
+                        if _SSRF_SAFE_KWARGS.match(arg_prefix):
+                            continue
             return tvar
     return None
 
@@ -1750,8 +1773,17 @@ def _check_tainted_var_at_sink(
         receiver_root = call_receiver.split(".")[0].split("(")[0]
         if tvar == receiver_root:
             return None
-    if not re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
+    m = re.search(r"\b" + re.escape(tvar) + r"\b", line_text)
+    if not m:
         return None
+    # For SSRF sinks, skip if tainted var is in a safe kwarg (headers=, auth=, etc.)
+    if sink_kind == "ssrf":
+        before = line_text[:m.start()]
+        last_sep = max(before.rfind(","), before.rfind("("))
+        if last_sep >= 0:
+            arg_prefix = before[last_sep + 1:].strip()
+            if _SSRF_SAFE_KWARGS.match(arg_prefix):
+                return None
 
     source_lines = ctx.source_lines or {}
     src_line = source_lines.get(tvar, 0)

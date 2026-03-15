@@ -76,6 +76,7 @@ TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
     ("connection.execute", "sql_query"),
     ("db.execute", "sql_query"),
     ("session.execute", "sql_query"),
+    ("session.exec", "sql_query"),
     ("engine.execute", "sql_query"),
     ("cursor.executemany", "sql_query"),
     ("conn.executemany", "sql_query"),
@@ -305,6 +306,10 @@ def _expr_is_taint_source(node: ast.expr) -> str | None:
 def _call_is_sink(call_name: str) -> str | None:
     """Check if a call name matches a taint sink. Returns sink kind or None."""
     for pattern, kind in TAINT_SINK_PATTERNS:
+        if pattern.startswith("="):
+            if call_name == pattern[1:]:
+                return kind
+            continue
         if call_name == pattern or call_name.endswith("." + pattern):
             return kind
         # Match suffix: "cursor.execute" matches "execute"
@@ -857,8 +862,15 @@ def _check_sink_flows(
                     param_flows_to_sink[idx] = sink_kind
                 except ValueError:  # doji:ignore(exception-swallowed,empty-exception-handler)
                     pass
+        # For SSRF sinks, kwargs like headers=/auth=/cookies= are safe — only
+        # the URL (positional arg) matters.
+        _ssrf_safe_kw = {"headers", "auth", "cookies", "timeout", "verify",
+                         "cert", "proxies", "hooks", "stream",
+                         "allow_redirects", "params", "files", "json"}
         for kw in call_node.keywords:
             if kw.value:
+                if sink_kind == "ssrf" and kw.arg in _ssrf_safe_kw:
+                    continue
                 tvar = _find_tainted_in_expr(kw.value, taint_map)
                 if tvar and tvar.source_kind == "parameter":
                     try:

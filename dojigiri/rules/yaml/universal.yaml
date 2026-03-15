@@ -60,7 +60,7 @@ rules:
 - category: security
   id: sql-injection-concat
   message: Possible SQL injection — string concatenation on SQL query
-  pattern: (?i)['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b.*?['"]\s*\+
+  pattern: (?i)['"]\s*(?:SELECT\s+(?:\*|[\w.,\s]+\bFROM\b)|INSERT\s+INTO|UPDATE\s+\w+\s+SET\s|DELETE\s+FROM|DROP\s+(?:TABLE|DATABASE)).*?['"]\s*\+
   severity: warning
   suggestion: Use parameterized queries instead of string concatenation
 - category: security
