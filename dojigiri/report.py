@@ -583,8 +583,6 @@ def print_project_json(analysis: ProjectAnalysis) -> None:
 
 def stream_json(report: ScanReport, outfile=None) -> None:
     """Stream report as JSON to a file or stdout, file-by-file to avoid OOM on large repos."""
-    import io
-
     f = outfile if outfile else sys.stdout
     close_after = False
     if isinstance(f, str):
