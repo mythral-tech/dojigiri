@@ -3,14 +3,14 @@ rules:
   id: eval-usage
   message: eval() can execute arbitrary code — XSS and code injection risk
   pattern: \beval\s*\(
-  severity: critical
+  severity: warning
   suggestion: Avoid eval() entirely; use JSON.parse() for data or a safe parser for expressions
   cwe: CWE-95
 - category: security
   id: function-constructor
   message: new Function() is equivalent to eval() — code injection risk
   pattern: \bnew\s+Function\s*\(
-  severity: critical
+  severity: warning
   suggestion: Avoid dynamic code generation; use a lookup table or safe parser
   cwe: CWE-95
 - category: security
@@ -104,14 +104,14 @@ rules:
   id: js-command-injection
   message: child_process.exec() with dynamic argument — command injection enables remote code execution
   pattern: (?:child_process\.exec|execSync)\s*\(\s*(?!['"])
-  severity: critical
+  severity: warning
   suggestion: Use execFile() or spawn() with argument arrays instead of shell strings
   cwe: CWE-78
 - category: security
   id: js-command-injection-template
   message: child_process.exec() with template literal interpolation — command injection
   pattern: (?:child_process\.exec|execSync)\s*\(\s*['"].*?\$\{
-  severity: critical
+  severity: warning
   suggestion: Use execFile() or spawn() with argument arrays; never interpolate into shell strings
   cwe: CWE-78
 - category: security
@@ -217,27 +217,25 @@ rules:
   pattern: \bvoid\s+0\b
   severity: info
   suggestion: Use undefined directly in modern JavaScript
-# ── React XSS ──────────────────────────────────────────────
 - category: security
   id: react-dangerously-set-innerhtml
   message: dangerouslySetInnerHTML bypasses React XSS protection — XSS if content is user-controlled
   pattern: dangerouslySetInnerHTML\s*=\s*\{
-  severity: critical
+  severity: warning
   suggestion: Sanitize HTML with DOMPurify before passing to dangerouslySetInnerHTML
   cwe: CWE-79
 - category: security
   id: react-ref-innerhtml
   message: Setting innerHTML via ref bypasses React XSS protection
   pattern: \.current\s*\.innerHTML\s*=
-  severity: critical
+  severity: warning
   suggestion: Use React state and JSX rendering instead of direct DOM manipulation
 - category: security
   id: react-href-javascript
-  message: "javascript: URI in href — XSS vector in React"
+  message: 'javascript: URI in href — XSS vector in React'
   pattern: 'href\s*=\s*\{?\s*[''"`]javascript:'
-  severity: critical
-  suggestion: "Never use javascript: URIs; use onClick handlers instead"
-# ── Express.js Security ────────────────────────────────────
+  severity: warning
+  suggestion: 'Never use javascript: URIs; use onClick handlers instead'
 - category: security
   id: express-no-helmet
   message: Express app without helmet — missing security headers
@@ -249,7 +247,7 @@ rules:
   message: Express session cookie without secure flag
   pattern: session\s*\(\s*\{[\s\S]*?cookie\s*:\s*\{(?![\s\S]*?secure\s*:\s*true)
   severity: warning
-  suggestion: "Set cookie.secure = true to prevent session cookies over HTTP"
+  suggestion: Set cookie.secure = true to prevent session cookies over HTTP
 - category: security
   id: express-session-no-httponly
   message: Express session cookie with httpOnly disabled
@@ -267,20 +265,19 @@ rules:
   message: body-parser without size limit — denial of service risk
   pattern: (?:bodyParser|express)\.(?:json|urlencoded|raw|text)\s*\(\s*\)
   severity: info
-  suggestion: "Set a request size limit, e.g. express.json({ limit: '100kb' })"
+  suggestion: 'Set a request size limit, e.g. express.json({ limit: ''100kb'' })'
 - category: security
   id: express-static-dotfiles
   message: express.static serving dotfiles — may expose .env and .git
   pattern: express\.static\s*\([^)]*dotfiles\s*:\s*['"]allow['"]
   severity: warning
-  suggestion: "Set dotfiles to 'ignore' or 'deny' to hide sensitive files"
+  suggestion: Set dotfiles to 'ignore' or 'deny' to hide sensitive files
 - category: security
   id: express-cors-credentials-wildcard
   message: CORS with credentials and wildcard origin — misconfiguration
   pattern: credentials\s*:\s*true[\s\S]*?origin\s*:\s*['"]\*['"]|origin\s*:\s*['"]\*['"][\s\S]*?credentials\s*:\s*true
   severity: warning
   suggestion: Use a specific origin list when credentials are enabled
-# ── Node.js Crypto ─────────────────────────────────────────
 - category: security
   id: crypto-create-cipher
   message: crypto.createCipher() is deprecated — uses weak key derivation
@@ -323,51 +320,49 @@ rules:
   pattern: (?:token|secret|key|nonce|salt|password|apiKey)\s*=.*Math\.random
   severity: critical
   suggestion: Use crypto.randomBytes() or crypto.randomUUID() for security tokens
-# ── SQL Injection (Node) ───────────────────────────────────
 - category: security
   id: sql-string-concat
   message: SQL query built with string concatenation — SQL injection risk
   pattern: (?:query|execute)\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE)\b[^'"]*['"]\s*\+
-  severity: critical
+  severity: warning
   suggestion: Use parameterized queries with placeholders ($1, ?) instead of concatenation
   cwe: CWE-89
 - category: security
   id: sql-template-literal
   message: SQL query with template literal interpolation — SQL injection risk
   pattern: (?:query|execute)\s*\(\s*`(?:SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE)\b[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Use parameterized queries instead of template literal interpolation
   cwe: CWE-89
 - category: security
   id: sequelize-raw-query
   message: Sequelize raw query with interpolation — SQL injection risk
   pattern: sequelize\.query\s*\(\s*(?:`[^`]*\$\{|['"][^'"]*['"]\s*\+)
-  severity: critical
+  severity: warning
   suggestion: Use Sequelize replacements or bind parameters for dynamic values
 - category: security
   id: knex-raw-interpolation
   message: knex.raw() with template literal — SQL injection risk
   pattern: \.raw\s*\(\s*`[^`]*\$\{
-  severity: critical
-  suggestion: "Use knex.raw('? query', [binding]) with parameter bindings"
-# ── NoSQL Injection ────────────────────────────────────────
+  severity: warning
+  suggestion: Use knex.raw('? query', [binding]) with parameter bindings
 - category: security
   id: mongodb-where-operator
   message: MongoDB $where operator executes JavaScript — injection risk
   pattern: \$where\s*:\s*(?:['"`]|function)
-  severity: critical
+  severity: warning
   suggestion: Use standard MongoDB query operators instead of $where
 - category: security
   id: mongodb-regex-user-input
   message: MongoDB $regex with variable — ReDoS and injection risk
   pattern: \$regex\s*:\s*(?:req\.|params\.|query\.|body\.|args\.|input\.)
-  severity: critical
+  severity: warning
   suggestion: Escape user input before using in regex or use exact match instead
 - category: security
   id: mongoose-find-user-object
   message: Mongoose query with unsanitized user input — NoSQL injection risk
   pattern: \.(?:find|findOne|findOneAndUpdate|findOneAndDelete|deleteOne|deleteMany|updateOne|updateMany)\s*\(\s*(?:req\.(?:body|query|params))
-  severity: critical
+  severity: warning
   suggestion: Validate and sanitize user input; strip $ operators before passing to queries
 - category: security
   id: nosql-injection-mongodb
@@ -375,32 +370,30 @@ rules:
   pattern: \.collection\s*\(\s*['"][^'"]+['"]\s*\)\s*\.(?:find|findOne|findOneAndUpdate|findOneAndDelete|deleteOne|deleteMany|updateOne|updateMany|aggregate|countDocuments|distinct|replaceOne)\s*\(\s*(?:\{[^}]*(?:email|password|username|user|name|role|token|query|filter|search|key|value|id)\s*[:,]|\{\s*$|(?!['"{])(?:[a-z]\w*)\s*[,)])
   severity: warning
   suggestion: Validate query values with mongo-sanitize or explicit type checks; strip $ operators before passing to MongoDB
-# ── SSRF ───────────────────────────────────────────────────
 - category: security
   id: ssrf-fetch-user-url
   message: fetch() with user-controlled URL — SSRF risk
   pattern: \bfetch\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|userUrl|targetUrl|unsafeUrl)
-  severity: critical
+  severity: warning
   suggestion: Validate URLs against an allowlist of domains and block internal IPs
 - category: security
   id: ssrf-axios-user-url
   message: axios request with user-controlled URL — SSRF risk
   pattern: axios\.(?:get|post|put|delete|patch|request)\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|url|userUrl|targetUrl)
-  severity: critical
+  severity: warning
   suggestion: Validate URLs against an allowlist of domains and block internal IPs
 - category: security
   id: ssrf-got-user-url
   message: got() with user-controlled URL — SSRF risk
   pattern: \bgot\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|url|userUrl|targetUrl)
-  severity: critical
+  severity: warning
   suggestion: Validate URLs against an allowlist; use ssrf-req-filter or similar library
 - category: security
   id: ssrf-request-user-url
   message: HTTP request with user-controlled URL — SSRF risk
   pattern: (?:request|http\.get|https\.get|http\.request|https\.request)\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.)
-  severity: critical
+  severity: warning
   suggestion: Validate URLs against an allowlist of trusted domains
-# ── Authentication ─────────────────────────────────────────
 - category: security
   id: jwt-no-expiry
   message: JWT signed without expiresIn — tokens valid forever
@@ -422,7 +415,7 @@ rules:
 - category: security
   id: password-in-url
   message: Password included in URL — will appear in logs and referrer headers
-  pattern: "['`\"]https?://[^'`\"]*[:?&](?:password|passwd|pwd)=[^'`\"]+['`\"]"
+  pattern: '[''`"]https?://[^''`"]*[:?&](?:password|passwd|pwd)=[^''`"]+[''`"]'
   severity: critical
   suggestion: Never include credentials in URLs; use request headers or body
 - category: security
@@ -431,7 +424,6 @@ rules:
   pattern: (?:password|passwd|pwd)\s*[:=]\s*['"][^'"]{4,}['"]
   severity: critical
   suggestion: Use environment variables or a secrets manager for credentials
-# ── Deserialization ────────────────────────────────────────
 - category: security
   id: node-serialize-usage
   message: node-serialize is unsafe — can execute arbitrary code during deserialization
@@ -443,14 +435,13 @@ rules:
   message: js-yaml load() without safe schema — arbitrary code execution risk
   pattern: yaml\.load\s*\([^)]*(?!,\s*\{\s*schema\s*:\s*yaml\.SAFE_SCHEMA)
   severity: critical
-  suggestion: "Use yaml.load(str, { schema: yaml.SAFE_SCHEMA }) or yaml.safeLoad()"
+  suggestion: 'Use yaml.load(str, { schema: yaml.SAFE_SCHEMA }) or yaml.safeLoad()'
 - category: security
   id: serialize-unserialize
   message: Unsafe deserialization of user-controlled data — object injection risk
   pattern: (?:unserialize|deserialize)\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.)
   severity: critical
   suggestion: Use JSON.parse() with schema validation for deserialization
-# ── Electron Security ──────────────────────────────────────
 - category: security
   id: electron-node-integration
   message: Electron nodeIntegration enabled — renderer can access Node.js APIs
@@ -480,23 +471,22 @@ rules:
   message: shell.openExternal() with user input — can launch arbitrary programs
   pattern: shell\.openExternal\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|url|userUrl|href)
   severity: critical
-  suggestion: "Validate URLs against an allowlist of protocols (https:) before opening"
+  suggestion: Validate URLs against an allowlist of protocols (https:) before opening
 - category: security
   id: electron-allow-running-insecure
   message: Electron allowRunningInsecureContent enables mixed content attacks
   pattern: allowRunningInsecureContent\s*:\s*true
   severity: critical
   suggestion: Remove allowRunningInsecureContent and serve all content over HTTPS
-# ── TypeScript-specific ────────────────────────────────────
 - category: security
   id: ts-any-security-context
-  message: "'any' type in security-critical code bypasses type checking"
+  message: '''any'' type in security-critical code bypasses type checking'
   pattern: (?:password|secret|token|credential|auth|session|key)\s*:\s*any\b
   severity: warning
   suggestion: Use a specific type definition for security-critical values
 - category: security
   id: ts-double-assertion
-  message: "Type assertion via 'as unknown as' bypasses TypeScript safety"
+  message: Type assertion via 'as unknown as' bypasses TypeScript safety
   pattern: as\s+unknown\s+as\s+
   severity: warning
   suggestion: Fix the underlying type mismatch instead of using double assertion
@@ -506,26 +496,24 @@ rules:
   pattern: (?:req|input|params|query|body)\.[a-zA-Z]+!\.
   severity: info
   suggestion: Use optional chaining (?.) and proper null checks instead
-# ── WebSocket ──────────────────────────────────────────────
 - category: security
   id: websocket-unencrypted
-  message: "Unencrypted WebSocket (ws://) — data transmitted in cleartext"
-  pattern: "['\"](ws://)(?!localhost|127\\.0\\.0\\.1)"
+  message: Unencrypted WebSocket (ws://) — data transmitted in cleartext
+  pattern: '[''"](ws://)(?!localhost|127\.0\.0\.1)'
   severity: warning
-  suggestion: "Use wss:// (WebSocket Secure) for encrypted connections"
+  suggestion: Use wss:// (WebSocket Secure) for encrypted connections
 - category: security
   id: websocket-no-origin-check
   message: WebSocket server without origin verification — CSWSH risk
   pattern: new\s+(?:WebSocket\.Server|WebSocketServer|ws\.Server)\s*\(\s*\{(?![\s\S]*?verifyClient)
   severity: warning
   suggestion: Implement verifyClient to validate the Origin header
-# ── GraphQL ────────────────────────────────────────────────
 - category: security
   id: graphql-introspection-enabled
   message: GraphQL introspection enabled — exposes full schema to attackers
   pattern: introspection\s*:\s*true
   severity: warning
-  suggestion: "Disable introspection in production with introspection: false"
+  suggestion: 'Disable introspection in production with introspection: false'
 - category: security
   id: graphql-no-depth-limit
   message: GraphQL without depth limiting — allows deeply nested query attacks
@@ -538,7 +526,6 @@ rules:
   pattern: new\s+ApolloServer\s*\(\s*\{(?![\s\S]*?(?:costAnalysis|queryComplexity|complexityLimit))
   severity: info
   suggestion: Add query cost analysis to prevent expensive queries from DoSing the server
-# ── Next.js / Nuxt ─────────────────────────────────────────
 - category: security
   id: nextjs-exposed-server-env
   message: Server-side secret exposed to client via NEXT_PUBLIC_ prefix
@@ -563,37 +550,35 @@ rules:
   pattern: runtimeConfig\s*:\s*\{[\s\S]*?public\s*:\s*\{[\s\S]*?(?:secret|password|apiKey|privateKey|dbPassword)
   severity: critical
   suggestion: Keep secrets in private runtimeConfig, never in public
-# ── npm / package ──────────────────────────────────────────
 - category: security
   id: npm-postinstall-script
   message: Package has a postinstall script — may execute arbitrary code on install
-  pattern: "['\"]postinstall['\"]\\s*:\\s*['\"][^'\"]+['\"]"
+  pattern: '[''"]postinstall[''"]\s*:\s*[''"][^''"]+[''"]'
   severity: warning
   suggestion: Review postinstall scripts for malicious behavior; use --ignore-scripts for untrusted packages
 - category: security
   id: npm-preinstall-script
   message: Package has a preinstall script — runs before any install verification
-  pattern: "['\"]preinstall['\"]\\s*:\\s*['\"][^'\"]+['\"]"
+  pattern: '[''"]preinstall[''"]\s*:\s*[''"][^''"]+[''"]'
   severity: warning
   suggestion: Review preinstall scripts carefully; they run before any security checks
 - category: security
   id: npm-dependency-confusion
   message: Private scope package without registry restriction — dependency confusion risk
-  pattern: "['\"](\\@[a-z]+/[a-z])[\\s\\S]*?['\"]registry['\"]\\s*:\\s*['\"]https://registry\\.npmjs\\.org"
+  pattern: '[''"](\@[a-z]+/[a-z])[\s\S]*?[''"]registry[''"]\s*:\s*[''"]https://registry\.npmjs\.org'
   severity: info
   suggestion: Configure .npmrc to point private scopes to your internal registry
-# ── Prototype Pollution ────────────────────────────────────
 - category: security
   id: deep-merge-no-proto-check
   message: Deep merge without __proto__/constructor filtering — prototype pollution risk
   pattern: (?:deepMerge|deepAssign|merge|extend)\s*\(\s*(?:target|dest|obj)[\s\S]*?(?:req\.|body\.|params\.|query\.|input\.)
-  severity: critical
-  suggestion: "Filter out __proto__, constructor, and prototype keys before merging"
+  severity: warning
+  suggestion: Filter out __proto__, constructor, and prototype keys before merging
 - category: security
   id: lodash-merge-user-input
   message: lodash merge/defaultsDeep with user input — prototype pollution risk
   pattern: _\.(?:merge|defaultsDeep|mergeWith)\s*\([^)]*(?:req\.|body\.|params\.|query\.|input\.)
-  severity: critical
+  severity: warning
   suggestion: Use lodash >= 4.17.21 and sanitize input objects before merging
 - category: security
   id: object-assign-user-input
@@ -613,7 +598,6 @@ rules:
   pattern: (?:_\.(?:merge|defaultsDeep|mergeWith)|Object\.assign|deepMerge|deepExtend)\s*\(\s*\w+\s*,\s*(?!['"{])(?:[a-zA-Z_$]\w*)
   severity: warning
   suggestion: Sanitize input objects by removing __proto__, constructor, and prototype keys before merging
-# ── RegExp DoS ─────────────────────────────────────────────
 - category: security
   id: redos-nested-quantifier
   message: Nested quantifiers in regex — catastrophic backtracking risk
@@ -626,24 +610,23 @@ rules:
   pattern: \/(?:[^/]*\([^)]*\|[^)]*\)[^/]*(?:\+|\*))[^/]*\/
   severity: info
   suggestion: Use non-overlapping alternatives or switch to RE2 for user-controlled input
-# ── File System ────────────────────────────────────────────
 - category: security
   id: fs-user-controlled-read
   message: fs.readFile with user-controlled path — arbitrary file read risk
   pattern: fs\.readFile(?:Sync)?\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|args\.)
-  severity: critical
+  severity: warning
   suggestion: Validate and resolve paths against a base directory; reject ../ sequences
 - category: security
   id: fs-user-controlled-write
   message: fs.writeFile with user-controlled path — arbitrary file write risk
   pattern: fs\.writeFile(?:Sync)?\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|args\.)
-  severity: critical
+  severity: warning
   suggestion: Validate paths against a safe base directory; reject traversal sequences
 - category: security
   id: fs-user-controlled-unlink
   message: fs.unlink with user-controlled path — arbitrary file deletion risk
   pattern: fs\.(?:unlink|rm|rmdir)(?:Sync)?\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|args\.)
-  severity: critical
+  severity: warning
   suggestion: Validate paths strictly and check against an allowlist before deletion
 - category: security
   id: fs-chmod-world-writable
@@ -657,13 +640,12 @@ rules:
   pattern: (?:\/tmp\/|os\.tmpdir\(\)[\s\S]*?)\+\s*['"][a-zA-Z_-]+['"]
   severity: warning
   suggestion: Use fs.mkdtemp() or tmp library to create unique temp directories
-# ── Miscellaneous Security ─────────────────────────────────
 - category: security
   id: child-process-spawn-shell
-  message: "spawn() with shell: true re-introduces command injection risk"
+  message: 'spawn() with shell: true re-introduces command injection risk'
   pattern: spawn\s*\([^)]*\{[\s\S]*?shell\s*:\s*true
   severity: warning
-  suggestion: "Remove shell: true and pass arguments as array elements instead"
+  suggestion: 'Remove shell: true and pass arguments as array elements instead'
 - category: security
   id: vm-module-escape
   message: Node.js vm module is NOT a sandbox — code can escape trivially
@@ -674,18 +656,18 @@ rules:
   id: unsafe-redirect
   message: HTTP redirect using user-controlled value — open redirect risk
   pattern: (?:res\.redirect|response\.redirect)\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.)
-  severity: critical
+  severity: warning
   suggestion: Validate redirect targets against an allowlist of trusted URLs
 - category: security
   id: helmet-csp-unsafe-inline
-  message: "Content Security Policy with 'unsafe-inline' — XSS protection weakened"
-  pattern: "(?:script-src|style-src)[^;]*'unsafe-inline'"
+  message: Content Security Policy with 'unsafe-inline' — XSS protection weakened
+  pattern: (?:script-src|style-src)[^;]*'unsafe-inline'
   severity: warning
   suggestion: Remove unsafe-inline and use nonce or hash-based CSP directives
 - category: security
   id: cors-reflect-origin
   message: CORS reflecting request Origin — equivalent to wildcard with credentials
-  pattern: "['\"](Access-Control-Allow-Origin)['\"]\\s*[:,]\\s*(?:req\\.headers\\.origin|origin)"
+  pattern: '[''"](Access-Control-Allow-Origin)[''"]\s*[:,]\s*(?:req\.headers\.origin|origin)'
   severity: critical
   suggestion: Validate origin against an allowlist before reflecting it in CORS headers
 - category: security
@@ -710,7 +692,7 @@ rules:
   id: zip-slip-extract
   message: Archive extraction without path validation — Zip Slip vulnerability
   pattern: (?:extract|unzip|decompress|tar\.x)\s*\(\s*(?:req\.|params\.|query\.|body\.|input\.|userFile|uploadedFile)
-  severity: critical
+  severity: warning
   suggestion: Validate extracted file paths stay within the target directory
 - category: security
   id: process-env-default-secret
@@ -729,53 +711,56 @@ rules:
   message: window.open() with user-controlled URL — tabnabbing or phishing risk
   pattern: window\.open\s*\(\s*(?!['"]https?://)[a-zA-Z]
   severity: warning
-  suggestion: "Validate URLs against an allowlist and set noopener, noreferrer features"
-# ── Prompt Injection (LLM SDK) ────────────────────────────────────
+  suggestion: Validate URLs against an allowlist and set noopener, noreferrer features
 - category: security
   id: prompt-injection-openai-template
   message: OpenAI API call with template literal interpolation — prompt injection risk
   pattern: (?:openai\.chat\.completions\.create|completions\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Build the messages array with validated inputs; never interpolate user data into content strings
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-openai-concat
   message: OpenAI API call with string concatenation in content — prompt injection risk
   pattern: (?:openai\.chat\.completions\.create|completions\.create)\s*\(\s*\{[\s\S]*?content\s*:\s*['"][^'"]*['"]\s*\+
-  severity: critical
+  severity: warning
   suggestion: Use structured messages with role separation; never concatenate user input into prompts
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-vercel-ai
   message: Vercel AI SDK call with interpolated system/prompt — prompt injection risk
   pattern: (?:generateText|streamText|generateObject)\s*\(\s*\{[\s\S]*?(?:system|prompt)\s*:\s*`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Sanitize user input before embedding in system or prompt parameters
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-anthropic-js
   message: Anthropic JS SDK call with template literal interpolation — prompt injection risk
   pattern: (?:anthropic\.messages\.create|client\.messages\.create)\s*\(\s*\{[\s\S]*?`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Use structured message content; separate system from user content
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-langchain-js
   message: LangChain JS prompt template with interpolation — prompt injection risk
   pattern: (?:ChatPromptTemplate|PromptTemplate|SystemMessagePromptTemplate)\.\w+\s*\(\s*`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: Use LangChain's input_variables for parameterization instead of template literals
 - category: security
   id: prompt-injection-system-content-js
   message: System message content with template literal — prompt injection via system prompt takeover
   pattern: role\s*:\s*['"]system['"]\s*,\s*content\s*:\s*`[^`]*\$\{
-  severity: critical
+  severity: warning
   suggestion: System message content must be static; pass user data via user role messages only
 - category: security
   id: prompt-injection-system-content-concat
   message: System message content built with concatenation — prompt injection risk
   pattern: role\s*:\s*['"]system['"]\s*,\s*content\s*:\s*['"][^'"]*['"]\s*\+
-  severity: critical
+  severity: warning
   suggestion: System message content must be static; pass user data via user role messages only
 - category: security
   id: prompt-injection-request-to-llm-js
@@ -783,36 +768,37 @@ rules:
   pattern: (?:req\.body|req\.query|req\.params)\s*(?:\[|\.)\w+[\s\S]{0,300}(?:openai|anthropic|generateText|streamText|completions\.create)
   severity: warning
   suggestion: Validate and sanitize request parameters before LLM calls; implement input schemas with Zod/Joi
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: llm-output-to-eval-js
   message: LLM output passed to eval/Function/exec — AI-generated code execution risk
   pattern: (?:(?<!\.)(?:eval|execSync)|new\s+Function)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|text|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
 - category: security
   id: llm-output-to-innerhtml
   message: LLM output rendered as innerHTML — XSS via AI-generated content
   pattern: \.innerHTML\s*=\s*(?:response|completion|result|output|generated|answer|reply|text|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Use textContent for LLM output or sanitize with DOMPurify before rendering as HTML
 - category: security
   id: llm-output-to-sql-js
   message: LLM output used in SQL query — SQL injection via AI-generated content
   pattern: (?:query|execute)\s*\(\s*(?:response|completion|result|output|generated|answer|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never pass LLM output to SQL queries; validate and parameterize any AI-generated query components
 - category: security
   id: llm-output-to-redirect
   message: LLM output used as redirect URL — open redirect and phishing via AI-generated content
   pattern: (?:res\.redirect|window\.location|location\.href)\s*(?:=|\()\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never use LLM output as redirect targets; validate against an allowlist
 - category: security
   id: llm-output-to-fs
   message: LLM output used as file path in fs operation — path traversal via AI-generated content
   pattern: fs\.(?:readFile|writeFile|unlink|mkdir|access)(?:Sync)?\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never use LLM output as file paths; validate against safe base directory
 - category: security
   id: llm-client-messages-direct
@@ -820,11 +806,13 @@ rules:
   pattern: (?:req\.body\.messages|request\.body\.messages)[\s\S]{0,200}(?:openai|anthropic|completions\.create|messages\.create|generateText)
   severity: critical
   suggestion: Never pass client message arrays directly; construct messages server-side with validated roles
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: llm-mcp-tool-exec-js
   message: MCP tool handler contains command execution — injection risk if arguments are LLM-controlled
   pattern: (?:server\.tool|\.addTool|registerTool)[\s\S]{0,500}(?:exec|execSync|spawn|child_process)
   severity: critical
   suggestion: Never use shell execution inside MCP tools; use parameterized operations with input validation
-  flags: [DOTALL]
+  flags:
+  - DOTALL

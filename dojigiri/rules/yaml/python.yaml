@@ -21,14 +21,14 @@ rules:
   id: eval-usage
   message: eval() can execute arbitrary code — remote code execution if input is user-controlled
   pattern: (?<!\w)(?<!\.)eval\s*\(
-  severity: critical
+  severity: warning
   suggestion: Use ast.literal_eval() for safe evaluation, or avoid entirely
   cwe: CWE-95
 - category: security
   id: exec-usage
   message: exec() can execute arbitrary code — remote code execution if input is user-controlled
   pattern: \bexec\s*\(
-  severity: critical
+  severity: warning
   suggestion: Avoid exec() — restructure code to not need dynamic code execution
   cwe: CWE-95
 - category: bug
@@ -41,14 +41,14 @@ rules:
   id: os-system
   message: os.system() passes command to shell — command injection risk if arguments are user-controlled
   pattern: \bos\.system\s*\(
-  severity: critical
+  severity: warning
   suggestion: Use subprocess.run() with a list of arguments (no shell=True)
   cwe: CWE-78
 - category: security
   id: shell-true
   message: subprocess with shell=True — command injection risk if arguments contain user input
   pattern: subprocess\.\w+\([^)]*shell\s*=\s*True
-  severity: critical
+  severity: warning
   suggestion: Pass command as a list without shell=True
   cwe: CWE-78
 - category: security
@@ -131,7 +131,7 @@ rules:
   id: os-popen
   message: os.popen() starts a shell process — command injection risk if argument is user-controlled
   pattern: \bos\.popen\s*\(
-  severity: critical
+  severity: warning
   suggestion: Use subprocess.run() with a list of arguments instead
   cwe: CWE-78
 - category: security
@@ -435,19 +435,19 @@ rules:
   id: django-raw-fstring
   message: Django .raw() with f-string — SQL injection via string interpolation
   pattern: \.raw\s*\(\s*f['"]
-  severity: critical
-  suggestion: "Use .raw() with params: Model.objects.raw('SELECT ... WHERE id = %s', [user_id])"
+  severity: warning
+  suggestion: 'Use .raw() with params: Model.objects.raw(''SELECT ... WHERE id = %s'', [user_id])'
 - category: security
   id: django-rawsql-format
   message: RawSQL() with .format() or f-string — SQL injection risk
   pattern: RawSQL\s*\(\s*(?:f['"]|['"][^'"]*['"]\.format\s*\()
-  severity: critical
+  severity: warning
   suggestion: Use RawSQL with %s placeholders and pass params as second argument
 - category: security
   id: django-extra-fstring
   message: QuerySet.extra() with f-string or .format() — SQL injection
   pattern: \.extra\s*\([^)]*(?:f['"]|\.format\s*\()
-  severity: critical
+  severity: warning
   suggestion: Use Django ORM methods (annotate, filter) instead of extra() with interpolation
 - category: security
   id: flask-debug-production
@@ -483,26 +483,26 @@ rules:
   id: sqlalchemy-execute-fstring
   message: SQLAlchemy execute() with f-string — SQL injection
   pattern: \.execute\s*\(\s*f['"]
-  severity: critical
+  severity: warning
   suggestion: Use text() with bound parameters instead of f-string interpolation
 - category: security
   id: sqlalchemy-execute-format
   message: SQLAlchemy execute() with .format() — SQL injection
   pattern: \.execute\s*\(\s*['"][^'"]*['"]\.format\s*\(
-  severity: critical
+  severity: warning
   suggestion: Use text() with bound parameters instead of .format()
 - category: security
   id: sqlalchemy-execute-concat
   message: SQLAlchemy execute() with string concatenation — SQL injection
   pattern: \.execute\s*\(\s*['"][^'"]*['"]\s*\+
-  severity: critical
+  severity: warning
   suggestion: Use text() with bound parameters instead of string concatenation
 - category: security
   id: sqlalchemy-text-format
   message: SQLAlchemy text() with .format() — SQL injection
   pattern: text\s*\(\s*['"][^'"]*['"]\.format\s*\(
-  severity: critical
-  suggestion: "Use text() with :param bindparams: text('SELECT ... WHERE id = :id').bindparams(id=val)"
+  severity: warning
+  suggestion: 'Use text() with :param bindparams: text(''SELECT ... WHERE id = :id'').bindparams(id=val)'
 - category: security
   id: crypto-static-iv
   message: Static or hardcoded IV/nonce — defeats the purpose of initialization vectors
@@ -585,13 +585,13 @@ rules:
   id: subprocess-popen-concat
   message: Popen with string concatenation — command injection risk
   pattern: subprocess\.Popen\s*\(\s*(?:['"][^'"]*['"]\s*\+|\w+\s*\+\s*['"])
-  severity: critical
+  severity: warning
   suggestion: Pass command as a list of arguments, never concatenate strings
 - category: security
   id: subprocess-shell-user-input
   message: subprocess with shell=True using request/input data — command injection
   pattern: subprocess\.\w+\([^)]*(?:request\.|input\(|sys\.argv|args\.).*shell\s*=\s*True
-  severity: critical
+  severity: warning
   suggestion: Never pass user input to shell commands — use a list of arguments without shell=True
 - category: security
   id: boto3-hardcoded-key
@@ -815,80 +815,81 @@ rules:
   pattern: (?:werkzeug|debugger).*(?:use_debugger|use_reloader)\s*=\s*True
   severity: critical
   suggestion: Never enable Werkzeug debugger in production — it provides a Python shell
-# ── Prompt Injection (LLM SDK) ────────────────────────────────────
 - category: security
   id: prompt-injection-openai-fstring
   message: OpenAI API call with f-string interpolation — prompt injection if user data is interpolated
   pattern: (?:chat\.completions\.create|ChatCompletion\.create)\s*\([^)]*f['"]
-  severity: critical
+  severity: warning
   suggestion: Pass user content via the 'user' role message; never interpolate into system messages
 - category: security
   id: prompt-injection-openai-format
   message: OpenAI API call with .format() in message content — prompt injection risk
   pattern: (?:chat\.completions\.create|ChatCompletion\.create)\s*\([^)]*\.format\s*\(
-  severity: critical
+  severity: warning
   suggestion: Use structured messages with role separation; never format user input into prompts
 - category: security
   id: prompt-injection-anthropic-fstring
   message: Anthropic API call with f-string interpolation — prompt injection risk
   pattern: (?:client\.messages\.create|messages\.create)\s*\([^)]*f['"]
-  severity: critical
+  severity: warning
   suggestion: Use structured message content blocks; separate system from user content
 - category: security
   id: prompt-injection-anthropic-format
   message: Anthropic API call with .format() in message content — prompt injection risk
   pattern: (?i)messages\.create\s*\([\s\S]{0,300}['"][^'"]*['"]\.format\s*\(
-  severity: critical
+  severity: warning
   suggestion: Use validated inputs; never format user data into Anthropic message content
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-anthropic-concat
   message: Anthropic API call with string concatenation in message content — prompt injection risk
   pattern: (?i)messages\.create\s*\([\s\S]{0,300}['\"]content['\"]\s*:\s*['"][^'"]*['"]\s*\+
-  severity: critical
+  severity: warning
   suggestion: Use validated inputs; never concatenate user data into Anthropic message content
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-langchain-fstring
   message: LangChain prompt template constructed with f-string — prompt injection risk
   pattern: (?:LLMChain|ChatPromptTemplate|PromptTemplate|SystemMessagePromptTemplate|HumanMessagePromptTemplate)\s*\([^)]*f['"]
-  severity: critical
+  severity: warning
   suggestion: Use LangChain's input_variables for parameterized templates instead of f-string interpolation
 - category: security
   id: prompt-injection-langchain-system-var
   message: LangChain prompt template with variable in system/instruction position — injection if user-controlled
   pattern: (?:SystemMessagePromptTemplate|SystemMessage)\s*\(\s*(?:content\s*=\s*)?(?:f['"]|['"][^'"]*['"]\.format\s*\(|['"][^'"]*['"]\s*\+)
-  severity: critical
+  severity: warning
   suggestion: System messages must be static strings; use input_variables only for user content fields
 - category: security
   id: prompt-injection-litellm
   message: LiteLLM completion call with f-string — prompt injection risk
   pattern: litellm\.completion\s*\([^)]*f['"]
-  severity: critical
+  severity: warning
   suggestion: Construct messages array with proper role separation; never interpolate user input
 - category: security
   id: prompt-injection-genai
   message: Google GenerativeAI API call with f-string — prompt injection risk
   pattern: (?:genai\.GenerativeModel|model\.generate_content|model\.start_chat)\s*\([^)]*f['"]
-  severity: critical
+  severity: warning
   suggestion: Validate and sanitize input before passing to generate_content()
 - category: security
   id: prompt-injection-cohere
   message: Cohere API call with f-string — prompt injection risk
   pattern: (?:co\.chat|co\.generate|client\.chat)\s*\([^)]*f['"]
-  severity: critical
+  severity: warning
   suggestion: Validate user input before passing to Cohere API calls
 - category: security
   id: prompt-injection-llamaindex-fstring
   message: LlamaIndex prompt template with f-string — prompt injection risk
   pattern: (?:PromptTemplate|ChatMessage|Prompt)\s*\(\s*(?:template\s*=\s*)?f['"]
-  severity: critical
+  severity: warning
   suggestion: Use LlamaIndex's template variables for user content; keep system prompts static
 - category: security
   id: prompt-injection-jinja-prompt
   message: Jinja2 template constructed from variable for prompt generation — template injection + prompt injection
   pattern: (?:jinja2\.Template|Environment\(\)\.from_string)\s*\(\s*(?!['\"]).*(?:prompt|system|instruction|message)
-  severity: critical
+  severity: warning
   suggestion: Use pre-defined template files; never construct Jinja2 templates from user-controlled strings for LLM prompts
 - category: security
   id: prompt-injection-request-to-llm
@@ -896,56 +897,59 @@ rules:
   pattern: (?:request\.(?:form|args|json|data|get_json)\s*(?:\[|\.get))[^;]*(?:chat\.completions\.create|messages\.create|completion|generate_content|\.invoke|\.run|\.predict)
   severity: warning
   suggestion: Validate, sanitize, and length-limit user input before passing to LLM; use allowlists where possible
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-email-to-prompt
   message: Email content loaded into LLM prompt — classic indirect prompt injection vector
   pattern: (?i)(?:email|mail|imap|pop3).*(?:\.get_payload|\.body|\.text|\.content)[\s\S]{0,200}(?:prompt|messages|context)\s*(?:=|\+=)
   severity: warning
   suggestion: Emails are untrusted by definition; sanitize aggressively and instruct the model to ignore embedded instructions
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-scrape-to-prompt
   message: Scraped web content used in LLM prompt — attacker-controlled HTML can contain injections
   pattern: (?:BeautifulSoup|Selector|\.select\(|\.find_all\()[\s\S]{0,300}(?:prompt|messages|content|context)\s*(?:=|\+=|\.append)
   severity: warning
   suggestion: Strip HTML tags, sanitize content, and use delimiter-based prompt isolation before including in prompts
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: llm-output-to-exec
   message: LLM output passed to exec/eval/subprocess — AI-generated code execution risk
   pattern: (?:exec|eval|subprocess\.run|os\.system|os\.popen)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
 - category: security
   id: llm-output-to-sql
   message: LLM output used in SQL query — SQL injection via AI-generated content
   pattern: (?:\.execute|\.raw|cursor\.)\s*\(\s*(?:response|completion|result|output|generated|answer|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never pass LLM output to SQL queries; validate and parameterize any AI-generated query components
 - category: security
   id: llm-output-to-file
   message: LLM output used as file path — path traversal via AI-generated content
   pattern: (?:open|Path)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never use LLM output as file paths; validate against an allowlist of safe paths
 - category: security
   id: llm-output-to-html
   message: LLM output rendered as HTML template — XSS and SSTI via AI-generated content
   pattern: (?:render_template_string|Markup|mark_safe)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Use textContent or escape LLM output before rendering as HTML
 - category: security
   id: llm-output-to-import
   message: LLM output used in dynamic import — arbitrary module loading
   pattern: (?:importlib\.import_module|__import__)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never import modules based on LLM output; use a fixed allowlist
 - category: security
   id: llm-output-to-pickle
   message: LLM output deserialized with pickle — remote code execution
   pattern: pickle\.loads?\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
-  severity: critical
+  severity: warning
   suggestion: Never deserialize LLM output with pickle; use json.loads() with schema validation
 - category: security
   id: llm-no-refusal-check
@@ -953,7 +957,8 @@ rules:
   pattern: (?:\.choices\[0\]\.message\.content|\.choices\[0\]\.text)(?![\s\S]{0,100}(?:refusal|finish_reason|stop_reason))
   severity: info
   suggestion: Check response.choices[0].message.refusal and finish_reason before using content
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: llm-rag-unsanitized-ingest
   message: Documents loaded directly into vector store without sanitization — RAG poisoning risk
@@ -966,11 +971,13 @@ rules:
   pattern: (?:@(?:mcp\.tool|server\.tool|tool)\s*\(\s*\)[\s\S]{0,500})(?:os\.system|subprocess\.|os\.popen|exec\()
   severity: critical
   suggestion: Never use shell execution inside MCP tools; use parameterized operations with input validation
-  flags: [DOTALL]
+  flags:
+  - DOTALL
 - category: security
   id: llm-mcp-tool-file-delete
   message: MCP tool function performs file deletion without confirmation — excessive agency
   pattern: (?:@(?:mcp\.tool|server\.tool|tool)\s*\(\s*\)[\s\S]{0,500})(?:os\.remove|os\.unlink|shutil\.rmtree|Path.*\.unlink)
   severity: warning
   suggestion: Require explicit user confirmation for destructive operations in MCP tools
-  flags: [DOTALL]
+  flags:
+  - DOTALL
