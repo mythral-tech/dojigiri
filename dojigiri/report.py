@@ -581,9 +581,68 @@ def print_project_json(analysis: ProjectAnalysis) -> None:
     print(json.dumps(analysis.to_dict(), indent=2))
 
 
+def stream_json(report: ScanReport, outfile=None) -> None:
+    """Stream report as JSON to a file or stdout, file-by-file to avoid OOM on large repos."""
+    import io
+
+    f = outfile if outfile else sys.stdout
+    close_after = False
+    if isinstance(f, str):
+        from pathlib import Path as _P
+        f = open(_P(f), "w", encoding="utf-8")
+        close_after = True
+
+    try:
+        # Write header fields
+        header = {
+            "root": report.root,
+            "mode": report.mode,
+            "files_scanned": report.files_scanned,
+            "files_skipped": report.files_skipped,
+            "total_findings": report.total_findings,
+            "critical": report.critical,
+            "warnings": report.warnings,
+            "info": report.info,
+            "llm_cost_usd": report.llm_cost_usd,
+            "llm_models_used": report.llm_models_used,
+            "timestamp": report.timestamp,
+        }
+        f.write("{\n")
+        for i, (k, v) in enumerate(header.items()):
+            f.write(f"  {json.dumps(k)}: {json.dumps(v)}")
+            f.write(",\n")
+
+        # Stream files array one entry at a time
+        f.write('  "files": [\n')
+        for idx, fa in enumerate(report.file_analyses):
+            entry = {
+                "path": fa.path,
+                "language": fa.language,
+                "lines": fa.lines,
+                "findings": [finding.to_dict() for finding in fa.findings],
+            }
+            prefix = "    " if idx == 0 else ",\n    "
+            f.write(prefix + json.dumps(entry))
+        f.write("\n  ]")
+
+        # Cross-file findings
+        if report.cross_file_findings:
+            f.write(',\n  "cross_file_findings": [\n')
+            for idx, cf in enumerate(report.cross_file_findings):
+                prefix = "    " if idx == 0 else ",\n    "
+                f.write(prefix + json.dumps(cf.to_dict()))
+            f.write("\n  ]")
+
+        f.write("\n}\n")
+        f.flush()
+    finally:
+        if close_after:
+            f.close()
+
+
 def print_json(report: ScanReport) -> None:
     """Print report as JSON to stdout (pipe-friendly for CI/CD)."""
-    print(json.dumps(report.to_dict(), indent=2))
+    stream_json(report)
 
 
 def print_sarif(report: ScanReport) -> None:

@@ -121,7 +121,12 @@ def _output_report(report_obj, output_format, scan_duration, args) -> int | None
     classification = getattr(args, "classification", None)
 
     if output_format == "json":
-        rpt.print_json(report_obj)
+        output_file = getattr(args, "output_file", None)
+        if output_file:
+            rpt.stream_json(report_obj, outfile=output_file)
+            print(f"JSON report written to {output_file}", file=sys.stderr)
+        else:
+            rpt.stream_json(report_obj)
     elif output_format == "sarif":
         rpt.print_sarif(report_obj)
     elif output_format == "html":

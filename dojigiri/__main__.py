@@ -67,7 +67,7 @@ def _register_scan(subparsers) -> None:
                    help="Minimum LLM confidence to display (default: show all)")
     p.add_argument("--output", choices=["text", "json", "sarif", "html", "pdf"], default="text",
                    help="Output format: text, json, sarif, html, pdf")
-    p.add_argument("--output-file", metavar="PATH", help="Write HTML/PDF output to file instead of stdout")
+    p.add_argument("--output-file", metavar="PATH", help="Write JSON/HTML/PDF output to file instead of stdout")
     p.add_argument("--project-name", metavar="NAME", help="Project name for HTML/PDF reports")
     p.add_argument("--classification", choices=CLASSIFICATION_LEVELS, default=None,
                    help="Classification marking for reports (e.g., CUI, SECRET)")
