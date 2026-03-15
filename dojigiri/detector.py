@@ -53,6 +53,11 @@ _SKIP_IN_TEST_FILES = {
     "requests-no-timeout",   # test HTTP calls don't need timeouts
     "hardcoded-ip",          # test fixtures use literal IPs
     "hardcoded-secret",      # test credentials are intentional
+    "hardcoded-secret-dict", # test config dicts with fake keys
+    "hardcoded-password",    # test passwords are intentional
+    "hardcoded-api-key",     # test API keys are fake
+    "db-connection-string",  # test connection strings are local/fake
+    "flask-secret-hardcoded",  # test Flask configs use dummy secrets
     "subprocess-audit",      # test harness subprocess calls
     "resource-leak",         # test client responses, fixtures handle cleanup
     "null-dereference",      # TestClient.get() never returns None
@@ -70,13 +75,17 @@ _SKIP_IN_EXAMPLE_FILES = {
     "console-log",
     "assert-statement",      # tutorial code uses assert for illustration
     "hardcoded-secret",      # example credentials are intentional
+    "hardcoded-secret-dict", # example config dicts with fake keys
+    "hardcoded-password",    # example passwords are intentional
+    "hardcoded-api-key",     # example API keys are fake
+    "db-connection-string",  # example connection strings are illustrative
     "hardcoded-ip",          # example IPs are illustrative
     "subprocess-audit",      # example shell commands are instructional
     "unused-variable",       # snippets often declare without using
 }
 
 # Path segments identifying test and example files
-_TEST_PATH_SEGMENTS = ("/test/", "/tests/", "test_", "_test.", "/spec/", "/specs/")
+_TEST_PATH_SEGMENTS = ("/test/", "/tests/", "test_", "_test.", ".test.", ".spec.", "/spec/", "/specs/", "/__tests__/", "/__mocks__/")
 _TEST_FILENAMES = ("conftest.py",)  # exact filenames that are always test infra
 _EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/", "/docs_src/", "/doc/", "/scripts/")
 
