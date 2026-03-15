@@ -19,7 +19,7 @@ import subprocess
 import sys
 import tempfile
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -96,6 +96,62 @@ def _analyze_single_file(
         semantics=result.semantics,
     )
     return fa, current_hash, False
+
+
+def _analyze_file_mp(filepath: Path) -> tuple[FileAnalysis | None, bool]:
+    """Analyze a single file in a worker process (no shared state).
+
+    Returns (FileAnalysis, is_error). FileAnalysis.semantics has _tree_root
+    stripped for pickling.
+    """
+    fp_str = str(filepath)
+    lang = detect_language(filepath)
+
+    try:
+        content = filepath.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None, True
+
+    result = analyze_file_static(fp_str, content, lang or "")
+    # Strip unpicklable tree-sitter node before returning across process boundary
+    if result.semantics and hasattr(result.semantics, "_tree_root"):
+        result.semantics._tree_root = None
+    fa = FileAnalysis(
+        path=fp_str,
+        language=lang or "",
+        lines=content.count("\n") + 1,
+        findings=result.findings,
+        file_hash=file_hash(fp_str),
+        semantics=result.semantics,
+    )
+    return fa, False
+
+
+def _scan_files_multiprocess(files: list[Path], max_workers: int) -> tuple[list[FileAnalysis], int]:
+    """Scan files with ProcessPoolExecutor for true CPU parallelism. Returns (analyses, errors_count)."""
+    analyses = []
+    errors = 0
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        future_to_file = {
+            executor.submit(_analyze_file_mp, fp): fp
+            for fp in files
+        }
+        for future in as_completed(future_to_file):
+            filepath = future_to_file[future]
+            try:
+                fa, is_error = future.result()
+                if fa:
+                    analyses.append(fa)
+                elif is_error:
+                    errors += 1
+            except (OSError, ValueError, RuntimeError, UnicodeDecodeError) as e:
+                logger.warning("Error analyzing %s: %s", filepath, e)
+                errors += 1
+            except Exception as e:
+                # Catch pickling errors and other unexpected failures gracefully
+                logger.warning("Worker error on %s: %s", filepath, e)
+                errors += 1
+    return analyses, errors
 
 
 def _scan_files_sequential(files: list[Path], cache: dict, use_cache: bool, custom_rules: list | None) -> tuple[list[FileAnalysis], int]:
@@ -230,8 +286,12 @@ def scan_quick(
 
     if max_workers == 1:
         analyses, errors = _scan_files_sequential(files, cache, False, custom_rules)
-    else:
+    elif custom_rules:
+        # Custom rules can't be pickled across processes — fall back to threads
         analyses, errors = _scan_files_parallel(files, cache, False, max_workers, custom_rules)
+    else:
+        # Use multiprocessing for true CPU parallelism (bypasses GIL)
+        analyses, errors = _scan_files_multiprocess(files, max_workers)
     skipped += errors
 
     cross_file_findings = _detect_semantic_clones(analyses)
