@@ -436,3 +436,98 @@ def handle(user_input):
 '''
         findings = analyze_taint_ast("test.py", code)
         assert len(findings) >= 1
+
+
+# ─── Class attribute taint tracking ──────────────────────────────────────────
+
+
+class TestClassAttributeTaint:
+    """Track self.x assignments from __init__ into other methods."""
+
+    def test_param_to_attr_to_sql_sink(self):
+        """self.table_name from param → f-string execute → taint-flow finding."""
+        code = '''
+class VectorDB:
+    def __init__(self, table_name):
+        self.table_name = table_name
+
+    def delete(self, ids):
+        placeholders = ",".join(ids)
+        cursor.execute(f"DELETE FROM {self.table_name} WHERE id IN ({placeholders})")
+'''
+        findings = analyze_taint_ast("test.py", code)
+        assert len(findings) >= 1
+        f = findings[0]
+        assert f.rule == "taint-flow"
+        assert "self.table_name" in f.message
+        assert f.severity == Severity.WARNING  # parameter source
+
+    def test_literal_attr_no_finding(self):
+        """self.table_name from literal → no taint finding."""
+        code = '''
+class VectorDB:
+    def __init__(self):
+        self.table_name = "users"
+
+    def query(self):
+        cursor.execute(f"SELECT * FROM {self.table_name}")
+'''
+        findings = analyze_taint_ast("test.py", code)
+        sql_taint = [f for f in findings if f.rule == "taint-flow"]
+        assert len(sql_taint) == 0
+
+    def test_config_attr_no_finding(self):
+        """self.table_name from config constant → no taint finding."""
+        code = '''
+class VectorDB:
+    def __init__(self, config):
+        self.table_name = "embeddings"
+        self.schema = "public"
+
+    def create_table(self):
+        cursor.execute(f"CREATE TABLE {self.schema}.{self.table_name} (id INT)")
+'''
+        findings = analyze_taint_ast("test.py", code)
+        sql_taint = [f for f in findings if f.rule == "taint-flow"]
+        assert len(sql_taint) == 0
+
+    def test_mixed_attrs_only_tainted_flagged(self):
+        """Only tainted attrs produce findings, clean ones don't."""
+        code = '''
+class DB:
+    def __init__(self, user_table, safe_limit=100):
+        self.user_table = user_table  # tainted (param)
+        self.default_limit = 100      # clean (literal)
+
+    def query(self):
+        cursor.execute(f"SELECT * FROM {self.user_table} LIMIT {self.default_limit}")
+'''
+        findings = analyze_taint_ast("test.py", code)
+        taint_findings = [f for f in findings if f.rule == "taint-flow"]
+        assert len(taint_findings) >= 1
+        assert any("self.user_table" in f.message for f in taint_findings)
+
+    def test_attr_propagation_through_local(self):
+        """self.x assigned from local var that came from param."""
+        code = '''
+class DB:
+    def __init__(self, raw_name):
+        name = raw_name.strip()
+        self.table_name = name
+
+    def drop(self):
+        cursor.execute(f"DROP TABLE {self.table_name}")
+'''
+        findings = analyze_taint_ast("test.py", code)
+        taint_findings = [f for f in findings if f.rule == "taint-flow"]
+        assert len(taint_findings) >= 1
+
+    def test_no_init_no_crash(self):
+        """Class without __init__ should not crash."""
+        code = '''
+class Helper:
+    def run(self):
+        cursor.execute(f"SELECT 1")
+'''
+        findings = analyze_taint_ast("test.py", code)
+        assert isinstance(findings, list)

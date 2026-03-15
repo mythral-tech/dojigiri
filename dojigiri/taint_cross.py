@@ -222,6 +222,9 @@ def _expr_contains_name_call(node: ast.Call, name: str) -> bool:
     call_name = _get_call_name(node)
     if call_name and call_name in SANITIZER_CALLS:
         return False  # sanitized
+    # Check receiver (e.g. raw_name.strip() — raw_name is in func.value)
+    if isinstance(node.func, ast.Attribute) and _expr_contains_name(node.func.value, name):
+        return True
     for arg in node.args:
         if _expr_contains_name(arg, name):
             return True
@@ -258,6 +261,9 @@ def _expr_contains_name(node: ast.expr, name: str) -> bool:
             isinstance(node.slice, ast.expr) and _expr_contains_name(node.slice, name)
         )
     if isinstance(node, ast.Attribute):
+        # Check dotted name match (e.g. name="self.table_name")
+        if isinstance(node.value, ast.Name) and f"{node.value.id}.{node.attr}" == name:
+            return True
         return _expr_contains_name(node.value, name)
     if isinstance(node, ast.IfExp):
         return (
@@ -317,6 +323,94 @@ def _call_is_sanitizer(call_name: str) -> bool:
 # ─── Intra-file taint analysis (AST-based) ───────────────────────────
 
 
+def _extract_init_assignments(
+    stmts: list[ast.stmt],
+    local_taint: dict[str, TaintVar],
+    attr_taint: dict[str, TaintVar],
+    filepath: str,
+) -> None:
+    """Walk statements in source order, tracking assignments for __init__ attr extraction."""
+    for stmt in stmts:
+        if isinstance(stmt, ast.Assign):
+            for target in stmt.targets:
+                if (isinstance(target, ast.Attribute)
+                        and isinstance(target.value, ast.Name)
+                        and target.value.id == "self"):
+                    attr_name = f"self.{target.attr}"
+                    _update_taint_from_expr(
+                        attr_name, stmt.value, stmt.lineno, local_taint, filepath,
+                    )
+                    if attr_name in local_taint:
+                        attr_taint[attr_name] = local_taint[attr_name]
+                elif isinstance(target, ast.Name):
+                    _update_taint_from_expr(
+                        target.id, stmt.value, stmt.lineno, local_taint, filepath,
+                    )
+        # Recurse into compound statements
+        elif isinstance(stmt, ast.If):
+            _extract_init_assignments(stmt.body, local_taint, attr_taint, filepath)
+            _extract_init_assignments(stmt.orelse, local_taint, attr_taint, filepath)
+        elif isinstance(stmt, (ast.For, ast.While)):
+            _extract_init_assignments(stmt.body, local_taint, attr_taint, filepath)
+        elif isinstance(stmt, ast.With):
+            _extract_init_assignments(stmt.body, local_taint, attr_taint, filepath)
+        elif isinstance(stmt, ast.Try):
+            _extract_init_assignments(stmt.body, local_taint, attr_taint, filepath)
+            for handler in stmt.handlers:
+                _extract_init_assignments(handler.body, local_taint, attr_taint, filepath)
+            _extract_init_assignments(stmt.finalbody, local_taint, attr_taint, filepath)
+
+
+def _extract_class_attr_taint(
+    class_node: ast.ClassDef,
+    filepath: str,
+) -> dict[str, TaintVar]:
+    """Extract taint status of class attributes from __init__.
+
+    Scans __init__ for `self.x = <expr>` assignments and determines whether
+    each attribute is tainted (from a parameter or taint source) or clean
+    (from a literal, constant, or config).
+
+    Returns a dict mapping "self.attr_name" → TaintVar.
+    """
+    attr_taint: dict[str, TaintVar] = {}
+
+    # Find __init__
+    init_func = None
+    for node in class_node.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "__init__":
+            init_func = node
+            break
+    if not init_func:
+        return attr_taint
+
+    # Build param taint map for __init__ (same as _analyze_function_taint)
+    param_taint: dict[str, TaintVar] = {}
+    for arg in init_func.args.args + init_func.args.posonlyargs + init_func.args.kwonlyargs:
+        if arg.arg in ("self", "cls"):
+            continue
+        param_taint[arg.arg] = TaintVar(
+            name=arg.arg, tainted=True, source_kind="parameter",
+            source_line=init_func.lineno, source_file=filepath,
+        )
+    if init_func.args.vararg:
+        param_taint[init_func.args.vararg.arg] = TaintVar(
+            name=init_func.args.vararg.arg, tainted=True, source_kind="parameter",
+            source_line=init_func.lineno, source_file=filepath,
+        )
+    if init_func.args.kwarg:
+        param_taint[init_func.args.kwarg.arg] = TaintVar(
+            name=init_func.args.kwarg.arg, tainted=True, source_kind="parameter",
+            source_line=init_func.lineno, source_file=filepath,
+        )
+
+    # Walk __init__ body in source order, tracking local taint + self.x assignments
+    local_taint = dict(param_taint)
+    _extract_init_assignments(init_func.body, local_taint, attr_taint, filepath)
+
+    return attr_taint
+
+
 def analyze_taint_ast(filepath: str, content: str) -> list[Finding]:
     """AST-based intra-file taint analysis with variable indirection tracking.
 
@@ -324,8 +418,9 @@ def analyze_taint_ast(filepath: str, content: str) -> list[Finding]:
     - f-string interpolation: query = f"SELECT {user_input}"
     - Variable chains: a = input(); b = f"SELECT {a}"; c = b; execute(c)
     - Function parameter taint: def f(x): execute(x)
+    - Class attribute taint: self.x assigned from param in __init__ → tracked in methods
 
-    This analysis works per-function (intra-procedural).
+    This analysis works per-function (intra-procedural) with class-level attribute flow.
     """
     try:
         tree = ast.parse(content, filename=filepath)
@@ -335,12 +430,39 @@ def analyze_taint_ast(filepath: str, content: str) -> list[Finding]:
     findings: list[Finding] = []
     seen: set[tuple[int, int]] = set()  # (source_line, sink_line)
 
+    # First pass: extract class attribute taint from __init__ methods
+    class_attr_taint: dict[int, dict[str, TaintVar]] = {}  # class node id → attr taint
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            attr_taint = _extract_class_attr_taint(node, filepath)
+            if attr_taint:
+                class_attr_taint[id(node)] = attr_taint
+
+    # Second pass: analyze all functions
+    # Track which functions belong to classes with attr taint (to avoid double-processing)
+    class_method_ids: set[int] = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and id(node) in class_attr_taint:
+            for child in node.body:
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    class_method_ids.add(id(child))
+                    func_findings = _analyze_function_taint(
+                        child, filepath, class_attr_taint=class_attr_taint[id(node)],
+                    )
+                    for f in func_findings:
+                        key = (f.line, id(f))
+                        if key not in seen:
+                            seen.add(key)
+                            findings.append(f)
+
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if id(node) in class_method_ids:
+                continue  # Already handled with class attr context
             func_findings = _analyze_function_taint(node, filepath)
             for f in func_findings:
-                key = (f.line, id(f))  # Use source line for dedup
-                # Extract source line from message for dedup
+                key = (f.line, id(f))
                 if key not in seen:
                     seen.add(key)
                     findings.append(f)
@@ -351,6 +473,7 @@ def analyze_taint_ast(filepath: str, content: str) -> list[Finding]:
 def _analyze_function_taint(
     func_node: ast.FunctionDef | ast.AsyncFunctionDef,
     filepath: str,
+    class_attr_taint: dict[str, TaintVar] | None = None,
 ) -> list[Finding]:
     """Analyze a single function for taint flows including parameter taint."""
     findings: list[Finding] = []
@@ -358,6 +481,10 @@ def _analyze_function_taint(
 
     # Track taint state: variable_name → TaintVar
     taint_map: dict[str, TaintVar] = {}
+
+    # Pre-seed with class attribute taint from __init__ analysis
+    if class_attr_taint:
+        taint_map.update(class_attr_taint)
 
     # Treat function parameters as potential taint sources
     for arg in func_node.args.args + func_node.args.posonlyargs + func_node.args.kwonlyargs:
@@ -467,6 +594,12 @@ def _process_assign(
     for target in stmt.targets:
         if isinstance(target, ast.Name):
             _update_taint_from_expr(target.id, stmt.value, stmt.lineno, taint_map, filepath)
+        elif (isinstance(target, ast.Attribute)
+              and isinstance(target.value, ast.Name)
+              and target.value.id == "self"):
+            # self.x = <expr> — track as "self.attr_name"
+            attr_key = f"self.{target.attr}"
+            _update_taint_from_expr(attr_key, stmt.value, stmt.lineno, taint_map, filepath)
         elif isinstance(target, (ast.Tuple, ast.List)):
             # Tuple unpacking — conservatively taint all targets if RHS is tainted
             for elt in target.elts:
@@ -654,6 +787,14 @@ def _find_tainted_in_expr(
     elif isinstance(expr, ast.Subscript):
         return _find_tainted_in_expr(expr.value, taint_map)
     elif isinstance(expr, ast.Attribute):
+        # Check self.x as a dotted key in taint_map
+        if isinstance(expr.value, ast.Name) and expr.value.id == "self":
+            attr_key = f"self.{expr.attr}"
+            tv = taint_map.get(attr_key)
+            if tv and tv.tainted:
+                return tv
+            if tv and not tv.tainted:
+                return None  # explicitly clean
         return _find_tainted_in_expr(expr.value, taint_map)
     return None
 
