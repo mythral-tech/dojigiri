@@ -379,7 +379,7 @@ rules:
 - category: security
   id: ssrf-fetch-user-url
   message: fetch() with user-controlled URL — SSRF risk
-  pattern: \bfetch\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|url|userUrl|targetUrl)
+  pattern: \bfetch\s*\(\s*(?:req\.|params\.|query\.|body\.|args\.|input\.|userUrl|targetUrl|unsafeUrl)
   severity: critical
   suggestion: Validate URLs against an allowlist of domains and block internal IPs
 - category: security

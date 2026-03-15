@@ -87,7 +87,7 @@ rules:
 - category: security
   id: ssti-risk
   message: Template constructed from string — server-side template injection enables remote code execution
-  pattern: (?:(?:jinja2|mako|django\.template|chameleon)\.Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|\.from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|new\s+Function\s*\()
+  pattern: (?:(?:jinja2|mako|django\.template|chameleon)\.Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|(?:Environment|SandboxedEnvironment)\s*\([^)]*\)\.from_string\s*\((?!\s*['"])|new\s+Function\s*\()
   severity: critical
   suggestion: Use pre-compiled templates from files, never from user-controlled strings
   cwe: CWE-94
@@ -200,7 +200,7 @@ rules:
 - category: security
   id: insecure-ssl-context
   message: SSL context with no verification — man-in-the-middle attack risk
-  pattern: (?i)(?:ssl\.create_default_context\s*\([^)]*\)\s*\n\s*.*check_hostname\s*=\s*False|ssl\._create_unverified_context|CERT_NONE|verify_mode\s*=\s*ssl\.CERT_NONE)
+  pattern: (?:ssl\.create_default_context\s*\([^)]*\)\s*\n\s*.*check_hostname\s*=\s*False|ssl\._create_unverified_context|verify_mode\s*=\s*ssl\.CERT_NONE|=\s*ssl\.CERT_NONE\b)
   severity: critical
   suggestion: Enable certificate verification; configure proper CA certificates
   cwe: CWE-295
