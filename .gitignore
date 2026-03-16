@@ -66,3 +66,4 @@ semgrep_benchmark.json
 .pytest_cache/
 site/
 dojigiri-ai/
+benchmarks/scans/
