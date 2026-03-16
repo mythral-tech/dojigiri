@@ -101,7 +101,7 @@ SECURITY_RULES: list[Rule] = _compile(
         # SSRF — URL constructed from user input passed to HTTP clients
         # Skip url_for() (framework-generated URLs) and fetch('/...' (relative paths)
         (
-            r"""(?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|fetch\s*\(\s*(?!['"]/)(?!url_for)|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()(?!.*url_for\s*\()""",
+            r"""(?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|(?<![A-Za-z])fetch\s*\(\s*(?!['"]/)(?!url_for)|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()(?!.*url_for\s*\()""",
             Severity.WARNING,
             Category.SECURITY,
             "ssrf-risk",

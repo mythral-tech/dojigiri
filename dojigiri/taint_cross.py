@@ -148,6 +148,14 @@ SANITIZER_CALLS = frozenset({
     "bool",
     "parameterize",
     "escape",
+    # ORM query builders — produce parameterized queries
+    "filter_by",
+    "Prefetch",
+    "Q",
+    "paginated_select",
+    "create_query",
+    "build_query",
+    "get_query",
 })
 
 
@@ -328,9 +336,24 @@ def _call_is_sink(call_name: str) -> str | None:
     return None
 
 
+# ORM method names that sanitize SQL taint when called on query objects
+_ORM_SANITIZER_METHODS = frozenset({
+    "filter", "filter_by", "where", "exclude", "select", "values",
+    "insert", "update", "delete", "order_by", "group_by", "join",
+    "outerjoin", "subquery", "exists", "union", "intersect",
+})
+
+
 def _call_is_sanitizer(call_name: str) -> bool:
     """Check if a call is a known sanitizer."""
-    return call_name in SANITIZER_CALLS
+    if call_name in SANITIZER_CALLS:
+        return True
+    # Check if it's an ORM method call (e.g., "queryset.filter", "stmt.where")
+    if "." in call_name:
+        method = call_name.rsplit(".", 1)[1]
+        if method in _ORM_SANITIZER_METHODS:
+            return True
+    return False
 
 
 # ─── Intra-file taint analysis (AST-based) ───────────────────────────

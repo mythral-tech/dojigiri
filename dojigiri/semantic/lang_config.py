@@ -219,6 +219,28 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
             "re.sub",
             "os.path.basename",
             "pathlib.PurePath",
+            # ORM query builders — produce parameterized queries, not raw SQL
+            "select(",
+            ".where(",
+            ".filter(",
+            ".filter_by(",
+            ".exclude(",
+            "insert(",
+            "update(",
+            "delete(",
+            ".values(",
+            "paginated_select(",
+            # Common ORM wrapper function names
+            "create_query(",
+            "build_query(",
+            "get_query(",
+            # Django ORM
+            ".objects.get(",
+            ".objects.filter(",
+            ".objects.exclude(",
+            ".objects.create(",
+            "Prefetch(",
+            "Q(",
         ],
         # CFG control flow
         cfg_if_node_types=["if_statement"],

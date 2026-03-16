@@ -1073,6 +1073,12 @@ _SSRF_SAFE_KWARGS = re.compile(
     r"|allow_redirects|params|files|json)\s*=\s*"
 )
 
+# Variable names that indicate ORM query objects (parameterized, safe for SQL sinks)
+_ORM_QUERY_VAR_RE = re.compile(
+    r"(?:_select$|_select_filter$|select_filter$|_stmt$|^select_stmt$"
+    r"|_query$|^base_query$|^qs$|^queryset$|_qs$)",
+)
+
 
 def _find_tainted_arg_at_sink(tainted_vars: list[str], call: object, pattern: str, line_text: str, assigned_on_line: set, sink_kind: str = "") -> str | None:
     """Find the first tainted variable that appears as an argument at a sink call."""
