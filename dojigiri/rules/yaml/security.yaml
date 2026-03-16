@@ -213,7 +213,7 @@ rules:
 - category: security
   id: file-upload-unrestricted
   message: File upload — verify file type, size, and name are validated
-  pattern: (?i)(?:request\.files|uploaded_file|multipart|file_field|FileField|multer|formidable|busboy)
+  pattern: (?i)(?:\.save\s*\(\s*(?:os\.path\.join|upload|file)|request\.files\s*\[\s*['"]|multer\s*\(\s*\{|formidable\s*\(\s*\{|busboy\s*\()
   severity: info
   suggestion: Validate file type (allowlist), enforce size limits, sanitize filenames
 - category: security
@@ -267,7 +267,7 @@ rules:
 - category: security
   id: generic-insecure-cookie
   message: Cookie set without security flags
-  pattern: (?i)(?:set_cookie|setCookie|document\.cookie)\s*(?:\(|=)(?!.*(?:secure|httponly|samesite))
+  pattern: (?i)document\.cookie\s*=(?!.*(?:secure|httponly|samesite))
   severity: warning
   suggestion: Set Secure, HttpOnly, and SameSite attributes on cookies
 - category: security

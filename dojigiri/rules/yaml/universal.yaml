@@ -171,12 +171,8 @@ rules:
   pattern: SK[0-9a-fA-F]{32}
   severity: warning
   suggestion: Use environment variables; rotate the key
-- category: bug
-  id: trailing-whitespace
-  message: Trailing whitespace
-  pattern: '[ \t]+$'
-  severity: info
-  suggestion: Remove trailing whitespace
+## trailing-whitespace removed — formatter concern, not SAST.
+## Was drowning signal (100+ findings per project) with zero security value.
 - category: bug
   id: mixed-indentation
   message: Mixed tabs and spaces in indentation

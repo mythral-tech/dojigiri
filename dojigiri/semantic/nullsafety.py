@@ -229,6 +229,10 @@ def _check_block_guards(
             return
 
 
+# Lines with type: ignore comments are developer-acknowledged nullable accesses
+_TYPE_IGNORE_RE = re.compile(r"#\s*type:\s*ignore")
+
+
 def _find_guarded_lines(
     source_bytes: bytes,
     language: str,
@@ -236,9 +240,17 @@ def _find_guarded_lines(
     """Find lines where a variable is guarded by a None check.
 
     Returns {variable_name: {set of guarded line numbers}}.
+    Also treats `# type: ignore` as developer acknowledgment of nullability.
     """
     lines = source_bytes.decode("utf-8", errors="replace").splitlines()
     guarded: dict[str, set[int]] = {}
+
+    # Pre-scan: lines with # type: ignore guard ALL variables on that line
+    for i, line in enumerate(lines):
+        if _TYPE_IGNORE_RE.search(line):
+            # Extract any attribute-access variable names on this line
+            for m in re.finditer(r"(?:self\.)?(\w+)\.", line):
+                _guard_var(guarded, m.group(1), i + 1)
 
     active_guards: list[tuple[str, int, int]] = []
     early_exit_guards: list[tuple[str, int, int, bool]] = []
