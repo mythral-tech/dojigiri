@@ -379,7 +379,8 @@ def check_empty_catch(tree, source_bytes: bytes, config: LanguageConfig, filepat
 
         # Check if body is empty or pass-only
         named = _get_named_children(body)
-        # Filter out comments
+        # Separate comments from meaningful statements
+        comments = [n for n in named if n.type in config.comment_node_types]
         meaningful = [n for n in named if n.type not in config.comment_node_types]
 
         is_empty = False
@@ -387,18 +388,34 @@ def check_empty_catch(tree, source_bytes: bytes, config: LanguageConfig, filepat
             is_empty = True
 
         if is_empty:
-            findings.append(
-                Finding(
-                    file=filepath,
-                    line=_node_line(node),
-                    severity=Severity.WARNING,
-                    category=Category.BUG,
-                    source=Source.AST,
-                    rule="empty-exception-handler",
-                    message="Exception caught and silently ignored",
-                    suggestion="Log the exception or handle it explicitly",
+            # If the handler has explanatory comments, downgrade to INFO
+            # (the developer acknowledged the empty handler)
+            if comments:
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=_node_line(node),
+                        severity=Severity.INFO,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="empty-exception-handler",
+                        message="Exception caught and silently ignored — comment explains intent",
+                        suggestion="Acknowledged via comment; consider logging for observability",
+                    )
                 )
-            )
+            else:
+                findings.append(
+                    Finding(
+                        file=filepath,
+                        line=_node_line(node),
+                        severity=Severity.WARNING,
+                        category=Category.BUG,
+                        source=Source.AST,
+                        rule="empty-exception-handler",
+                        message="Exception caught and silently ignored",
+                        suggestion="Log the exception or handle it explicitly",
+                    )
+                )
 
     return findings
 

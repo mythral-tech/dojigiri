@@ -96,12 +96,17 @@ _DUNDER_SKIP = frozenset({
 # Minimum method body size (lines) to meaningfully assess feature envy.
 _MIN_METHOD_LINES = 5
 
-# Builder/mapper/factory prefixes — these methods deliberately access external
-# objects because constructing/transforming is their entire purpose.
+# Builder/mapper/factory/handler prefixes — these methods deliberately access
+# external objects because constructing/transforming/dispatching is their purpose.
 _BUILDER_PREFIXES = (
     "build_", "create_", "make_", "from_", "to_",
     "_encode_", "_decode_", "_convert_", "_transform_",
     "_serialize_", "_deserialize_",
+    "register_", "setup_", "configure_", "handle_",
+    "process_", "dispatch_", "render_", "validate_",
+    "add_", "remove_", "update_", "apply_",
+    "_register_", "_setup_", "_configure_", "_handle_",
+    "_process_", "_dispatch_", "_render_", "_validate_",
 )
 
 # Maximum effective body lines for delegation suppression.
@@ -197,9 +202,13 @@ def _excluded_receivers(semantics: FileSemantics, fdef: FunctionDef) -> frozense
         if fdef.line <= asgn.line <= fdef.end_line and not asgn.is_parameter:
             excluded.add(asgn.name)
 
-    # Note: we do NOT exclude parameter names — a method that heavily
-    # accesses a parameter's attributes IS feature envy.  The parameter
-    # is a foreign object; the method should probably live on that class.
+    # Exclude parameter names — a method's parameters are its declared inputs,
+    # and accessing their attributes is the method's job.  The original theory
+    # (the method should move to the parameter's class) breaks for framework
+    # patterns: request handlers, validators, serializers, etc.
+    for asgn in semantics.assignments:
+        if asgn.is_parameter and fdef.line <= asgn.line <= fdef.end_line:
+            excluded.add(asgn.name)
 
     return frozenset(excluded)
 
@@ -251,7 +260,7 @@ def check_feature_envy(
     semantics: FileSemantics,
     filepath: str,
     external_ratio: float = 3.0,
-    min_external: int = 5,
+    min_external: int = 8,
 ) -> list[Finding]:
     """Flag methods that use more external state than internal state.
 

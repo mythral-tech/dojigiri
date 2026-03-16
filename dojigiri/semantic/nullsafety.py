@@ -54,14 +54,33 @@ _GUARD_PATTERNS = _build_patterns(
         r"if\s*\(\s*{var}\s*!==?\s*null\s*\)",  # JS/TS/Java/C#: if (x !== null)
         r"if\s*\(\s*{var}\s*!=\s*null\s*\)",  # JS/TS/Java/C#: if (x != null)
         r"if\s*\(\s*{var}\s*\)",  # JS/TS: if (x)
+        r"elif\s+{self_var}\s+is\s+not\s+None\b",  # Python: elif self.x is not None
+        r"elif\s+{var}\s+is\s+not\s+None\b",  # Python: elif x is not None
+        r"elif\s+{self_var}\s*:",  # Python: elif self.x:
+        r"elif\s+{var}\s*:",  # Python: elif x:
     ]
 )
+
+# isinstance guards: `if isinstance(x, SomeType):` — block body is guarded
+_ISINSTANCE_GUARD_RE = [
+    re.compile(r"if\s+isinstance\s*\(\s*self\.(\w+)\s*,"),
+    re.compile(r"if\s+isinstance\s*\(\s*(\w+)\s*,"),
+    re.compile(r"elif\s+isinstance\s*\(\s*self\.(\w+)\s*,"),
+    re.compile(r"elif\s+isinstance\s*\(\s*(\w+)\s*,"),
+]
+
+# hasattr guards: `if hasattr(obj, 'attr'):` — block body is guarded for the object
+_HASATTR_GUARD_RE = [
+    re.compile(r"if\s+hasattr\s*\(\s*(\w+)\s*,"),
+    re.compile(r"elif\s+hasattr\s*\(\s*(\w+)\s*,"),
+]
 
 # Early-exit patterns: `if x is None: raise/return` — continuation is guarded
 _EARLY_EXIT_PATTERNS = _build_patterns(
     [
         r"if\s+{self_var}\s+is\s+None\s*:",  # Python: if self.x is None:
         r"if\s+{var}\s+is\s+None\s*:",  # Python: if x is None:
+        r"if\s+{var}\s*==\s*None\s*:",  # Python: if x == None:
         r"if\s+not\s+{self_var}\s*:",  # Python: if not self.x:
         r"if\s+not\s+{var}\s*:",  # Python: if not x:
         r"if\s*\(\s*{var}\s*===?\s*null\s*\)",  # JS/TS: if (x === null)
@@ -184,14 +203,30 @@ def _check_block_guards(
     stripped: str, indent: int, lineno: int, guarded: dict[str, set[int]],
     active_guards: list[tuple[str, int, int]],
 ) -> None:
-    """Detect block guard patterns: `if x is not None:`."""
+    """Detect block guard patterns: `if x is not None:`, `isinstance()`, `hasattr()`."""
     for pattern in _GUARD_PATTERNS:
         m = pattern.match(stripped)
         if m:
             var_name = m.group(1)
             active_guards.append((var_name, indent, lineno))
             _guard_var(guarded, var_name, lineno)
-            break
+            return
+
+    for pattern in _ISINSTANCE_GUARD_RE:
+        m = pattern.match(stripped)
+        if m:
+            var_name = m.group(1)
+            active_guards.append((var_name, indent, lineno))
+            _guard_var(guarded, var_name, lineno)
+            return
+
+    for pattern in _HASATTR_GUARD_RE:
+        m = pattern.match(stripped)
+        if m:
+            var_name = m.group(1)
+            active_guards.append((var_name, indent, lineno))
+            _guard_var(guarded, var_name, lineno)
+            return
 
 
 def _find_guarded_lines(

@@ -88,8 +88,8 @@ def scan_repo(repo_dir: Path, repo_info: dict) -> list[dict]:
             except OSError:
                 continue
 
-            findings = analyze_file_static(str(filepath), content, lang)
-            for f in findings:
+            result = analyze_file_static(str(filepath), content, lang)
+            for f in result.findings:
                 # Normalize file path relative to repo root
                 rel_path = str(filepath.relative_to(repo_dir))
                 all_findings.append({
