@@ -332,11 +332,27 @@ _JS_BASE = dict(
     attribute_access_types=["member_expression"],
     block_scoped=True,
     taint_source_patterns=[
+        # Express
         ("req.body", "user_input"),
         ("req.params", "user_input"),
         ("req.query", "user_input"),
+        ("req.headers", "user_input"),
+        ("req.cookies", "user_input"),
+        # Koa
+        ("ctx.request.body", "user_input"),
+        ("ctx.params", "user_input"),
+        ("ctx.query", "user_input"),
+        # Fastify
+        ("request.body", "user_input"),
+        ("request.params", "user_input"),
+        ("request.query", "user_input"),
+        # Browser
         ("document.getElementById", "user_input"),
         ("window.location", "user_input"),
+        ("location.search", "user_input"),
+        ("location.hash", "user_input"),
+        # Environment
+        ("process.env", "env_var"),
         # LLM response outputs — tainted because model output is untrusted
         ("response.choices", "llm_output"),
         ("completion.choices", "llm_output"),
@@ -346,9 +362,35 @@ _JS_BASE = dict(
     ],
     taint_sink_patterns=[
         ("eval", "eval"),
+        ("Function", "eval"),
         (".innerHTML", "html_output"),
         ("document.write", "html_output"),
         ("child_process.exec", "system_cmd"),
+        ("child_process.execSync", "system_cmd"),
+        ("child_process.spawn", "system_cmd"),
+        ("execSync", "system_cmd"),
+        # SQL — raw queries
+        ("sql.raw", "sql_query"),
+        (".raw", "sql_query"),
+        ("sequelize.query", "sql_query"),
+        ("knex.raw", "sql_query"),
+        # SSRF
+        ("fetch", "ssrf"),
+        ("axios.get", "ssrf"),
+        ("axios.post", "ssrf"),
+        ("axios.request", "ssrf"),
+        ("http.get", "ssrf"),
+        ("http.request", "ssrf"),
+        ("https.get", "ssrf"),
+        ("https.request", "ssrf"),
+        # Path traversal
+        ("fs.readFile", "path_traversal"),
+        ("fs.readFileSync", "path_traversal"),
+        ("fs.writeFile", "path_traversal"),
+        ("fs.writeFileSync", "path_traversal"),
+        ("fs.createReadStream", "path_traversal"),
+        # Deserialization
+        ("JSON.parse", "deserialization"),
         # LLM API calls — user input flowing here is prompt injection
         ("openai.chat.completions.create", "llm_input"),
         ("openai.completions.create", "llm_input"),
