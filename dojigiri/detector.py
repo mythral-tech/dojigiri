@@ -69,6 +69,12 @@ _SKIP_IN_TEST_FILES = {
     "exception-swallowed-continue",  # same pattern with continue
     "debug-enabled",         # tests intentionally enable debug mode
     "weak-hash",             # test cryptographic operations
+    "generic-password-assignment",  # test fixtures always have fake passwords
+    "generic-password-in-url",      # test URLs with fake credentials
+    "timing-attack-comparison",     # test comparisons aren't security-critical
+    "rmtree-audit",          # test cleanup using rmtree
+    "shell-true",            # test subprocess calls
+    "generic-debug-enabled", # tests enable debug mode
 }
 _SKIP_IN_EXAMPLE_FILES = {
     "console-log",
@@ -82,10 +88,36 @@ _SKIP_IN_EXAMPLE_FILES = {
     "unused-variable",       # snippets often declare without using
 }
 
+# Style/linter rules suppressed by default — every IDE already catches these.
+# SAST should focus on security and bugs, not duplicate linter output.
+_DEFAULT_SKIP_RULES = {
+    "variable-shadowing",    # IDE/linter territory, massive FP in real codebases
+    "unused-variable",       # IDE/linter territory
+    "unused-import",         # IDE/linter territory
+    "shadowed-builtin",      # Python id/type/input overrides — too noisy
+    "shadowed-builtin-param",  # Same for params
+    "long-method",           # code-smell, not security
+    "feature-envy",          # code-smell, not security
+    "god-class",             # code-smell, not security
+    "too-many-args",         # code-smell, not security
+    "high-complexity",       # code-smell, not security
+    "unchecked-error",       # Go/general — too noisy, not security-critical
+    "possibly-uninitialized",  # high FP in conditional assignment patterns
+}
+
 # Path segments identifying test and example files
 _TEST_PATH_SEGMENTS = ("/test/", "/tests/", "test_", "_test.", ".test.", ".spec.", "/spec/", "/specs/", "/__tests__/", "/__mocks__/")
 _TEST_FILENAMES = ("conftest.py",)  # exact filenames that are always test infra
 _EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/", "/docs_src/", "/doc/", "/scripts/")
+
+# File-level LLM context: llm-* rules only fire in files that mention LLM frameworks
+_HAS_LLM_CONTEXT_RE = re.compile(
+    r"(?:openai|anthropic|langchain|llama_?index|hugging_?face|transformers"
+    r"|ChatCompletion|Claude|GPT|LLM|llm_|_llm|chat\.completions"
+    r"|GenerativeModel|gemini|cohere|replicate|together_?ai"
+    r"|AutoModelFor|pipeline\s*\(\s*['\"]text)",
+    re.IGNORECASE,
+)
 
 # Inline comment patterns per language family
 _INLINE_COMMENT_RE = {
@@ -382,6 +414,12 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules: l
         skip_rules |= _SKIP_IN_TEST_FILES
     if is_example_file:
         skip_rules |= _SKIP_IN_EXAMPLE_FILES
+
+    # LLM rules only fire in files with LLM-related content (skip for real files, not snippets)
+    if content.count("\n") > 20 and not _HAS_LLM_CONTEXT_RE.search(content):
+        skip_rules |= {name for _, _, _, name, _, _ in rules if name.startswith("llm-")}
+        skip_rules |= {name for _, _, _, name, _, _ in rules if name.startswith("prompt-injection-")}
+        skip_rules |= {name for _, _, _, name, _, _ in rules if name.startswith("rag-")}
 
     # Collect applicable custom rules (processed separately — match full line)
     applicable_custom_rules = []
@@ -703,11 +741,19 @@ def _record_metrics(findings: list[Finding], scan_ms: float) -> None:
         logger.debug("Failed to record metrics: %s", e)
 
 
-def analyze_file_static(filepath: str, content: str, language: str, custom_rules: list | None = None) -> StaticAnalysisResult:
+def analyze_file_static(
+    filepath: str, content: str, language: str,
+    custom_rules: list | None = None,
+    suppress_noise: bool = True,
+) -> StaticAnalysisResult:
     """Run all static checks (regex + tree-sitter AST + Python AST fallback + semantic).
 
     Always returns a StaticAnalysisResult with findings, semantics, and type_map.
     Callers that only need findings can use result.findings.
+
+    Args:
+        suppress_noise: If True (default), filters out style/linter rules that
+            overlap with IDE tooling. Set False for benchmarking or full audit.
     """
     import time as _time
 
@@ -717,6 +763,9 @@ def analyze_file_static(filepath: str, content: str, language: str, custom_rules
 
     findings, semantics, _file_type_map = _run_all_checks(filepath, content, language, custom_rules)
     unique = _postprocess_findings(findings, filepath, content, language)
+
+    if suppress_noise:
+        unique = [f for f in unique if f.rule not in _DEFAULT_SKIP_RULES]
 
     _scan_ms = (_time.perf_counter() - _scan_start) * 1000
     _record_metrics(unique, _scan_ms)

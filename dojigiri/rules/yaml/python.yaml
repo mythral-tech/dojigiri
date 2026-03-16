@@ -16,17 +16,20 @@ rules:
   message: Use 'is None' or 'is not None' instead of == / !=
   pattern: (?:==|!=)\s*None
   severity: info
-  suggestion: Replace with 'is None' or 'is not None' — identity check is more reliable and Pythonic
+  suggestion: Replace with 'is None' or 'is not None' — identity check is more reliable
+    and Pythonic
 - category: security
   id: eval-usage
-  message: eval() can execute arbitrary code — remote code execution if input is user-controlled
+  message: eval() can execute arbitrary code — remote code execution if input is
+    user-controlled
   pattern: (?<!\w)(?<!\.)eval\s*\(
   severity: warning
   suggestion: Use ast.literal_eval() for safe evaluation, or avoid entirely
   cwe: CWE-95
 - category: security
   id: exec-usage
-  message: exec() can execute arbitrary code — remote code execution if input is user-controlled
+  message: exec() can execute arbitrary code — remote code execution if input is
+    user-controlled
   pattern: \bexec\s*\(
   severity: warning
   suggestion: Avoid exec() — restructure code to not need dynamic code execution
@@ -39,14 +42,16 @@ rules:
   suggestion: Use 'with open(...) as f:' for automatic cleanup
 - category: security
   id: os-system
-  message: os.system() passes command to shell — command injection risk if arguments are user-controlled
+  message: os.system() passes command to shell — command injection risk if arguments
+    are user-controlled
   pattern: \bos\.system\s*\(
   severity: warning
   suggestion: Use subprocess.run() with a list of arguments (no shell=True)
   cwe: CWE-78
 - category: security
   id: shell-true
-  message: subprocess with shell=True — command injection risk if arguments contain user input
+  message: subprocess with shell=True — command injection risk if arguments contain
+    user input
   pattern: subprocess\.\w+\([^)]*shell\s*=\s*True
   severity: warning
   suggestion: Pass command as a list without shell=True
@@ -56,23 +61,20 @@ rules:
   message: subprocess call — verify input is not constructed from untrusted data
   pattern: subprocess\.(?:run|call|check_call|check_output|Popen)\s*\((?!\s*\[)
   severity: info
-  suggestion: Ensure command arguments are hardcoded or validated, never from raw user input
-- category: style
-  id: star-import
-  message: Star import pollutes namespace and hides dependencies
-  pattern: ^from\s+\S+\s+import\s+\*
-  severity: warning
-  suggestion: Import specific names instead
+  suggestion: Ensure command arguments are hardcoded or validated, never from raw
+    user input
 - category: security
   id: pickle-unsafe
-  message: Unsafe deserialization via pickle/dill/cloudpickle/shelve/jsonpickle — can execute arbitrary code
+  message: Unsafe deserialization via pickle/dill/cloudpickle/shelve/jsonpickle —
+    can execute arbitrary code
   pattern: \b(?:pickle|cPickle|_pickle)\.(?:loads?\s*\(|Unpickler\s*\()|\b(?:dill|cloudpickle|shelve)\.loads?\s*\(|\bjsonpickle\.(?:decode|loads?)\s*\(
   severity: critical
   suggestion: Use json, msgpack, or a safe serialization format instead
   cwe: CWE-502
 - category: security
   id: yaml-unsafe
-  message: yaml.load()/load_all()/unsafe_load() can execute arbitrary code without SafeLoader
+  message: yaml.load()/load_all()/unsafe_load() can execute arbitrary code without
+    SafeLoader
   pattern: \byaml\.(?:load|load_all|unsafe_load|unsafe_load_all)\s*\(
   severity: critical
   suggestion: Use yaml.safe_load() or yaml.safe_load_all() instead
@@ -98,7 +100,8 @@ rules:
   suggestion: Use json or msgpack for untrusted data; shelve is pickle-backed
 - category: security
   id: insecure-tempfile
-  message: mktemp/tempnam/tmpnam are vulnerable to race conditions (TOCTOU) — symlink attacks possible
+  message: mktemp/tempnam/tmpnam are vulnerable to race conditions (TOCTOU) — symlink
+    attacks possible
   pattern: \b(?:tempfile\.mktemp\s*\(|os\.tempnam\s*\(|os\.tmpnam\s*\()
   severity: warning
   suggestion: Use tempfile.mkstemp() or tempfile.NamedTemporaryFile() instead
@@ -117,14 +120,16 @@ rules:
   suggestion: Use subprocess.run() for better control and input validation
 - category: security
   id: os-popen
-  message: os.popen() starts a shell process — command injection risk if argument is user-controlled
+  message: os.popen() starts a shell process — command injection risk if argument
+    is user-controlled
   pattern: \bos\.popen\s*\(
   severity: warning
   suggestion: Use subprocess.run() with a list of arguments instead
   cwe: CWE-78
 - category: security
   id: subprocess-shell
-  message: subprocess.getoutput()/getstatusoutput() always uses shell — vulnerable to injection
+  message: subprocess.getoutput()/getstatusoutput() always uses shell — vulnerable
+    to injection
   pattern: \bsubprocess\.(?:getoutput|getstatusoutput)\s*\(
   severity: warning
   suggestion: Use subprocess.run() with a list of arguments instead
@@ -136,7 +141,8 @@ rules:
   suggestion: Validate file type and path before opening
 - category: security
   id: insecure-file-permissions
-  message: os.chmod() with overly permissive mode — group or world permissions are non-zero
+  message: os.chmod() with overly permissive mode — group or world permissions are
+    non-zero
   pattern: \bos\.chmod\s*\([^)]*,\s*0o?[0-7](?:[1-7][0-7]|[0-7][1-7])\b
   severity: warning
   suggestion: Use restrictive permissions (e.g., 0o600 for owner-only read/write)
@@ -161,7 +167,8 @@ rules:
   suggestion: Use ssl.SSLContext.wrap_socket() with proper cert verification
 - category: security
   id: requests-no-verify
-  message: requests call with verify=False disables SSL certificate verification — MITM risk
+  message: requests call with verify=False disables SSL certificate verification —
+    MITM risk
   pattern: (?:requests|httpx)\.(?:get|post|put|delete|patch|head|options|request)\s*\([^)]*verify\s*=\s*False
   severity: warning
   suggestion: Remove verify=False to enable certificate verification (default behavior)
@@ -171,16 +178,19 @@ rules:
   message: SSL certificate verification disabled — vulnerable to MITM attacks
   pattern: \.verify\s*=\s*False|\bssl\._create_unverified_context\s*\(|\bssl\.CERT_NONE\b
   severity: warning
-  suggestion: Enable certificate verification (use ssl.create_default_context() or remove verify=False)
+  suggestion: Enable certificate verification (use ssl.create_default_context() or
+    remove verify=False)
 - category: security
   id: hardcoded-tmp
   message: Hardcoded /tmp path — predictable location vulnerable to symlink attacks
   pattern: '[''"]\/(?:tmp|var\/tmp)\/'
   severity: info
-  suggestion: Use tempfile.mkdtemp() or tempfile.NamedTemporaryFile() for secure temp files
+  suggestion: Use tempfile.mkdtemp() or tempfile.NamedTemporaryFile() for secure temp
+    files
 - category: security
   id: hardcoded-password-default
-  message: Default secret/password in function signature — visible in source and help()
+  message: Default secret/password in function signature — visible in source and
+    help()
   pattern: def\s+\w+\s*\([^)]*(?:password|secret|secret_key|api_key|token)\s*(?::\s*\w+\s*)?=\s*['"][^'"]+['"]
   severity: warning
   suggestion: Use None as default and require explicit argument or env var
@@ -216,7 +226,8 @@ rules:
   suggestion: Validate member paths before extraction or use extraction filters
 - category: security
   id: tarfile-open
-  message: tarfile.open() — ensure extractall() uses data_filter or validates member paths
+  message: tarfile.open() — ensure extractall() uses data_filter or validates member
+    paths
   pattern: \btarfile\.open\b
   severity: info
   suggestion: Use tf.extractall(filter='data') (Python 3.12+) or validate each member
@@ -246,7 +257,8 @@ rules:
   suggestion: Validate the URL scheme against an allowlist before opening
 - category: security
   id: ctypes-load-library
-  message: Loading shared library via ctypes — arbitrary code execution if path is user-controlled
+  message: Loading shared library via ctypes — arbitrary code execution if path
+    is user-controlled
   pattern: \bctypes\.(?:cdll|windll|oledll)\.LoadLibrary\s*\(
   severity: warning
   suggestion: Validate library path against allowlist, never accept user input
@@ -276,7 +288,8 @@ rules:
   suggestion: Avoid dynamic sys.path changes with untrusted paths
 - category: security
   id: django-mark-safe
-  message: mark_safe() bypasses Django's auto-escaping — XSS risk if content is user-controlled
+  message: mark_safe() bypasses Django's auto-escaping — XSS risk if content is
+    user-controlled
   pattern: \bmark_safe\s*\(
   severity: warning
   suggestion: Use format_html() or escape user content before marking safe
@@ -358,7 +371,8 @@ rules:
   message: Weak TLS protocol version — SSLv2/v3/TLS1.0/1.1 are broken or deprecated
   pattern: \bssl\.PROTOCOL_(?:SSLv2|SSLv3|SSLv23|TLSv1(?:_1)?)\b|minimum_version\s*=\s*ssl\.TLSVersion\.(?:SSLv3|TLSv1(?:_1)?)\b|\bSSL\.(?:SSLv2_METHOD|SSLv3_METHOD|SSLv23_METHOD|TLSv1_METHOD|TLSv1_1_METHOD)\b
   severity: critical
-  suggestion: Use TLS 1.2+ minimum (ssl.PROTOCOL_TLS_CLIENT, ssl.TLSVersion.TLSv1_2, or SSL.TLSv1_2_METHOD)
+  suggestion: Use TLS 1.2+ minimum (ssl.PROTOCOL_TLS_CLIENT, ssl.TLSVersion.TLSv1_2,
+    or SSL.TLSv1_2_METHOD)
 - category: security
   id: weak-cipher-suite
   message: Weak cipher suite configured — RC4/DES/NULL/EXPORT/anon ciphers are broken
@@ -424,7 +438,8 @@ rules:
   message: Django .raw() with f-string — SQL injection via string interpolation
   pattern: \.raw\s*\(\s*f['"]
   severity: warning
-  suggestion: 'Use .raw() with params: Model.objects.raw(''SELECT ... WHERE id = %s'', [user_id])'
+  suggestion: 'Use .raw() with params: Model.objects.raw(''SELECT ... WHERE id = %s'',
+    [user_id])'
 - category: security
   id: django-rawsql-format
   message: RawSQL() with .format() or f-string — SQL injection risk
@@ -493,7 +508,8 @@ rules:
   suggestion: 'Use text() with :param bindparams: text(''SELECT ... WHERE id = :id'').bindparams(id=val)'
 - category: security
   id: crypto-static-iv
-  message: Static or hardcoded IV/nonce — defeats the purpose of initialization vectors
+  message: Static or hardcoded IV/nonce — defeats the purpose of initialization
+    vectors
   pattern: (?<![a-zA-Z])(?:iv|nonce|IV|NONCE)\s*=\s*b?['"][^'"]{1,}['"]
   severity: critical
   suggestion: Generate a random IV/nonce for each encryption operation using os.urandom()
@@ -511,10 +527,12 @@ rules:
   suggestion: Use hmac.new(key, msg, hashlib.sha256)
 - category: security
   id: file-open-fstring
-  message: open() with f-string path — potential path injection if variables are user-controlled
+  message: open() with f-string path — potential path injection if variables are
+    user-controlled
   pattern: \bopen\s*\(\s*f['"]
   severity: info
-  suggestion: Validate and sanitize file paths, use os.path.realpath() to resolve symlinks
+  suggestion: Validate and sanitize file paths, use os.path.realpath() to resolve
+    symlinks
 - category: security
   id: file-world-writable
   message: File created with world-writable permissions (0o777 or 0o666)
@@ -523,7 +541,8 @@ rules:
   suggestion: Use restrictive permissions (0o600 for files, 0o700 for directories)
 - category: security
   id: file-mkdtemp-ignore
-  message: tempfile.mkdtemp() return value ignored — temp directory never cleaned up
+  message: tempfile.mkdtemp() return value ignored — temp directory never cleaned
+    up
   pattern: ^\s*tempfile\.mkdtemp\s*\(
   severity: info
   suggestion: Assign return value and clean up with shutil.rmtree() or use tempfile.TemporaryDirectory()
@@ -580,7 +599,8 @@ rules:
   message: subprocess with shell=True using request/input data — command injection
   pattern: subprocess\.\w+\([^)]*(?:request\.|input\(|sys\.argv|args\.).*shell\s*=\s*True
   severity: warning
-  suggestion: Never pass user input to shell commands — use a list of arguments without shell=True
+  suggestion: Never pass user input to shell commands — use a list of arguments
+    without shell=True
 - category: security
   id: boto3-hardcoded-key
   message: boto3 client/resource with hardcoded AWS credentials
@@ -595,7 +615,8 @@ rules:
   suggestion: Use private ACL and grant access via IAM policies or pre-signed URLs
 - category: security
   id: lambda-env-secret
-  message: Lambda function with secrets in environment variables — visible in console and logs
+  message: Lambda function with secrets in environment variables — visible in console
+    and logs
   pattern: (?i)(?:Environment|environment)\s*=\s*\{[^}]*Variables[^}]*(?:PASSWORD|SECRET|TOKEN|API_KEY)
   severity: warning
   suggestion: Use AWS Secrets Manager or SSM Parameter Store for Lambda secrets
@@ -613,10 +634,12 @@ rules:
   suggestion: Never include raw credentials in log messages — log events, not secrets
 - category: security
   id: marshal-loads-unsafe
-  message: marshal.loads() can crash interpreter or execute code — unsafe for untrusted data
+  message: marshal.loads() can crash interpreter or execute code — unsafe for untrusted
+    data
   pattern: \bmarshal\.loads?\s*\(
   severity: critical
-  suggestion: Use json.loads() for untrusted data — marshal is only safe for trusted bytecode
+  suggestion: Use json.loads() for untrusted data — marshal is only safe for trusted
+    bytecode
 - category: security
   id: code-interactive-console
   message: code.InteractiveConsole/interact() allows arbitrary code execution
@@ -652,7 +675,8 @@ rules:
   message: Pydantic model with arbitrary_types_allowed — bypasses type validation
   pattern: arbitrary_types_allowed\s*=\s*True
   severity: info
-  suggestion: Define proper validators for custom types instead of allowing arbitrary types
+  suggestion: Define proper validators for custom types instead of allowing arbitrary
+    types
 - category: security
   id: password-in-url
   message: Password embedded in URL string — visible in logs, browser history, referrer
@@ -673,7 +697,8 @@ rules:
   suggestion: Use absolute paths for executables instead of modifying PATH
 - category: security
   id: xml-sax-parser
-  message: xml.sax.make_parser() without entity expansion limits — billion laughs DoS
+  message: xml.sax.make_parser() without entity expansion limits — billion laughs
+    DoS
   pattern: xml\.sax\.make_parser\s*\(
   severity: warning
   suggestion: Use defusedxml.sax instead, which limits entity expansion
@@ -721,22 +746,26 @@ rules:
   suggestion: Add ServerSideEncryption='aws:kms' or 'AES256' to encrypt data at rest
 - category: security
   id: crypto-ecb-aes-new
-  message: AES.new() in ECB mode — identical plaintext blocks produce identical ciphertext
+  message: AES.new() in ECB mode — identical plaintext blocks produce identical
+    ciphertext
   pattern: AES\.new\s*\([^)]*AES\.MODE_ECB
   severity: warning
   suggestion: Use AES.MODE_GCM or AES.MODE_CBC with random IV
 - category: security
   id: hashlib-new-weak
-  message: hashlib.new() with weak algorithm name from variable — may resolve to MD5/SHA1
+  message: hashlib.new() with weak algorithm name from variable — may resolve to
+    MD5/SHA1
   pattern: hashlib\.new\s*\(\s*(?![bruf]*['\"])\w+
   severity: info
-  suggestion: Validate algorithm name against allowlist of strong algorithms (sha256, sha384, sha512)
+  suggestion: Validate algorithm name against allowlist of strong algorithms (sha256,
+    sha384, sha512)
 - category: security
   id: os-link-toctou
   message: os.link/symlink with user-controlled path — symlink race condition
   pattern: os\.(?:symlink|link)\s*\(\s*(?![bruf]*['\"])\w+
   severity: info
-  suggestion: Validate source and destination paths, use os.path.realpath() to resolve links
+  suggestion: Validate source and destination paths, use os.path.realpath() to resolve
+    links
 - category: security
   id: tempfile-predictable-name
   message: tempfile with predictable prefix/suffix — may enable targeted attacks
@@ -745,10 +774,12 @@ rules:
   suggestion: Use random or default prefix/suffix, never user-controlled values
 - category: security
   id: python-http-server
-  message: http.server is not designed for production — no auth, no TLS, directory traversal risks
+  message: http.server is not designed for production — no auth, no TLS, directory
+    traversal risks
   pattern: (?:http\.server\.HTTPServer|HTTPServer|SimpleHTTPRequestHandler|BaseHTTPRequestHandler)\s*\(
   severity: warning
-  suggestion: Use a production WSGI/ASGI server (gunicorn, uvicorn) behind a reverse proxy
+  suggestion: Use a production WSGI/ASGI server (gunicorn, uvicorn) behind a reverse
+    proxy
 - category: security
   id: jwt-none-algorithm
   message: JWT with 'none' algorithm — signature verification bypassed entirely
@@ -787,34 +818,42 @@ rules:
   suggestion: Use cert_reqs='CERT_REQUIRED' for proper SSL verification
 - category: security
   id: xml-parse-untrusted
-  message: xmlrpc client/server — XML-RPC is vulnerable to XXE and deserialization attacks
+  message: xmlrpc client/server — XML-RPC is vulnerable to XXE and deserialization
+    attacks
   pattern: \bxmlrpc\.(?:client|server)\.\w+\s*\(
   severity: info
   suggestion: Consider using JSON-RPC or REST APIs instead of XML-RPC
 - category: security
   id: multiprocessing-pickle
-  message: multiprocessing uses pickle for IPC — unsafe if processes handle untrusted data
+  message: multiprocessing uses pickle for IPC — unsafe if processes handle untrusted
+    data
   pattern: multiprocessing\.(?:Queue|Pipe|Pool|Manager)\s*\(
   severity: info
   suggestion: Validate data before sending through multiprocessing channels
 - category: security
   id: werkzeug-debugger
-  message: Werkzeug debugger pin — interactive debugger exposed in production is RCE
+  message: Werkzeug debugger pin — interactive debugger exposed in production is
+    RCE
   pattern: (?:werkzeug|debugger).*(?:use_debugger|use_reloader)\s*=\s*True
   severity: critical
-  suggestion: Never enable Werkzeug debugger in production — it provides a Python shell
+  suggestion: Never enable Werkzeug debugger in production — it provides a Python
+    shell
 - category: security
   id: prompt-injection-openai-fstring
-  message: OpenAI API call with f-string interpolation — prompt injection if user data is interpolated
+  message: OpenAI API call with f-string interpolation — prompt injection if user
+    data is interpolated
   pattern: (?:chat\.completions\.create|ChatCompletion\.create)\s*\([^)]*f['"]
   severity: warning
-  suggestion: Pass user content via the 'user' role message; never interpolate into system messages
+  suggestion: Pass user content via the 'user' role message; never interpolate into
+    system messages
 - category: security
   id: prompt-injection-openai-format
-  message: OpenAI API call with .format() in message content — prompt injection risk
+  message: OpenAI API call with .format() in message content — prompt injection
+    risk
   pattern: (?:chat\.completions\.create|ChatCompletion\.create)\s*\([^)]*\.format\s*\(
   severity: warning
-  suggestion: Use structured messages with role separation; never format user input into prompts
+  suggestion: Use structured messages with role separation; never format user input
+    into prompts
 - category: security
   id: prompt-injection-anthropic-fstring
   message: Anthropic API call with f-string interpolation — prompt injection risk
@@ -823,38 +862,47 @@ rules:
   suggestion: Use structured message content blocks; separate system from user content
 - category: security
   id: prompt-injection-anthropic-format
-  message: Anthropic API call with .format() in message content — prompt injection risk
+  message: Anthropic API call with .format() in message content — prompt injection
+    risk
   pattern: (?i)messages\.create\s*\([\s\S]{0,300}['"][^'"]*['"]\.format\s*\(
   severity: warning
-  suggestion: Use validated inputs; never format user data into Anthropic message content
+  suggestion: Use validated inputs; never format user data into Anthropic message
+    content
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-anthropic-concat
-  message: Anthropic API call with string concatenation in message content — prompt injection risk
+  message: Anthropic API call with string concatenation in message content — prompt
+    injection risk
   pattern: (?i)messages\.create\s*\([\s\S]{0,300}['\"]content['\"]\s*:\s*['"][^'"]*['"]\s*\+
   severity: warning
-  suggestion: Use validated inputs; never concatenate user data into Anthropic message content
+  suggestion: Use validated inputs; never concatenate user data into Anthropic message
+    content
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-langchain-fstring
-  message: LangChain prompt template constructed with f-string — prompt injection risk
+  message: LangChain prompt template constructed with f-string — prompt injection
+    risk
   pattern: (?:LLMChain|ChatPromptTemplate|PromptTemplate|SystemMessagePromptTemplate|HumanMessagePromptTemplate)\s*\([^)]*f['"]
   severity: warning
-  suggestion: Use LangChain's input_variables for parameterized templates instead of f-string interpolation
+  suggestion: Use LangChain's input_variables for parameterized templates instead
+    of f-string interpolation
 - category: security
   id: prompt-injection-langchain-system-var
-  message: LangChain prompt template with variable in system/instruction position — injection if user-controlled
+  message: LangChain prompt template with variable in system/instruction position
+    — injection if user-controlled
   pattern: (?:SystemMessagePromptTemplate|SystemMessage)\s*\(\s*(?:content\s*=\s*)?(?:f['"]|['"][^'"]*['"]\.format\s*\(|['"][^'"]*['"]\s*\+)
   severity: warning
-  suggestion: System messages must be static strings; use input_variables only for user content fields
+  suggestion: System messages must be static strings; use input_variables only for
+    user content fields
 - category: security
   id: prompt-injection-litellm
   message: LiteLLM completion call with f-string — prompt injection risk
   pattern: litellm\.completion\s*\([^)]*f['"]
   severity: warning
-  suggestion: Construct messages array with proper role separation; never interpolate user input
+  suggestion: Construct messages array with proper role separation; never interpolate
+    user input
 - category: security
   id: prompt-injection-genai
   message: Google GenerativeAI API call with f-string — prompt injection risk
@@ -872,58 +920,72 @@ rules:
   message: LlamaIndex prompt template with f-string — prompt injection risk
   pattern: (?:PromptTemplate|ChatMessage|Prompt)\s*\(\s*(?:template\s*=\s*)?f['"]
   severity: warning
-  suggestion: Use LlamaIndex's template variables for user content; keep system prompts static
+  suggestion: Use LlamaIndex's template variables for user content; keep system prompts
+    static
 - category: security
   id: prompt-injection-jinja-prompt
-  message: Jinja2 template constructed from variable for prompt generation — template injection + prompt injection
+  message: Jinja2 template constructed from variable for prompt generation — template
+    injection + prompt injection
   pattern: (?:jinja2\.Template|Environment\(\)\.from_string)\s*\(\s*(?!['\"]).*(?:prompt|system|instruction|message)
   severity: warning
-  suggestion: Use pre-defined template files; never construct Jinja2 templates from user-controlled strings for LLM prompts
+  suggestion: Use pre-defined template files; never construct Jinja2 templates from
+    user-controlled strings for LLM prompts
 - category: security
   id: prompt-injection-request-to-llm
-  message: HTTP request data passed to LLM API without visible validation — prompt injection risk
+  message: HTTP request data passed to LLM API without visible validation — prompt
+    injection risk
   pattern: (?:request\.(?:form|args|json|data|get_json)\s*(?:\[|\.get))[^;]*(?:chat\.completions\.create|messages\.create|completion|generate_content|\.invoke|\.run|\.predict)
   severity: warning
-  suggestion: Validate, sanitize, and length-limit user input before passing to LLM; use allowlists where possible
+  suggestion: Validate, sanitize, and length-limit user input before passing to LLM;
+    use allowlists where possible
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-email-to-prompt
-  message: Email content loaded into LLM prompt — classic indirect prompt injection vector
+  message: Email content loaded into LLM prompt — classic indirect prompt injection
+    vector
   pattern: (?i)(?:email|mail|imap|pop3).*(?:\.get_payload|\.body|\.text|\.content)[\s\S]{0,200}(?:prompt|messages|context)\s*(?:=|\+=)
   severity: warning
-  suggestion: Emails are untrusted by definition; sanitize aggressively and instruct the model to ignore embedded instructions
+  suggestion: Emails are untrusted by definition; sanitize aggressively and instruct
+    the model to ignore embedded instructions
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-scrape-to-prompt
-  message: Scraped web content used in LLM prompt — attacker-controlled HTML can contain injections
+  message: Scraped web content used in LLM prompt — attacker-controlled HTML can
+    contain injections
   pattern: (?:BeautifulSoup|Selector|\.select\(|\.find_all\()[\s\S]{0,300}(?:prompt|messages|content|context)\s*(?:=|\+=|\.append)
   severity: warning
-  suggestion: Strip HTML tags, sanitize content, and use delimiter-based prompt isolation before including in prompts
+  suggestion: Strip HTML tags, sanitize content, and use delimiter-based prompt isolation
+    before including in prompts
   flags:
   - DOTALL
 - category: security
   id: llm-output-to-exec
-  message: LLM output passed to exec/eval/subprocess — AI-generated code execution risk
+  message: LLM output passed to exec/eval/subprocess — AI-generated code execution
+    risk
   pattern: (?:exec|eval|subprocess\.run|os\.system|os\.popen)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
   severity: warning
-  suggestion: Never execute LLM output directly; sandbox generated code or validate against an allowlist
+  suggestion: Never execute LLM output directly; sandbox generated code or validate
+    against an allowlist
 - category: security
   id: llm-output-to-sql
   message: LLM output used in SQL query — SQL injection via AI-generated content
   pattern: (?:\.execute|\.raw|cursor\.)\s*\(\s*(?:response|completion|result|output|generated|answer|chunk|delta|stream)
   severity: warning
-  suggestion: Never pass LLM output to SQL queries; validate and parameterize any AI-generated query components
+  suggestion: Never pass LLM output to SQL queries; validate and parameterize any
+    AI-generated query components
 - category: security
   id: llm-output-to-file
   message: LLM output used as file path — path traversal via AI-generated content
   pattern: (?:open|Path)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
   severity: warning
-  suggestion: Never use LLM output as file paths; validate against an allowlist of safe paths
+  suggestion: Never use LLM output as file paths; validate against an allowlist of
+    safe paths
 - category: security
   id: llm-output-to-html
-  message: LLM output rendered as HTML template — XSS and SSTI via AI-generated content
+  message: LLM output rendered as HTML template — XSS and SSTI via AI-generated
+    content
   pattern: (?:render_template_string|Markup|mark_safe)\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
   severity: warning
   suggestion: Use textContent or escape LLM output before rendering as HTML
@@ -938,34 +1000,43 @@ rules:
   message: LLM output deserialized with pickle — remote code execution
   pattern: pickle\.loads?\s*\(\s*(?:response|completion|result|output|generated|answer|reply|chunk|delta|stream)
   severity: warning
-  suggestion: Never deserialize LLM output with pickle; use json.loads() with schema validation
+  suggestion: Never deserialize LLM output with pickle; use json.loads() with schema
+    validation
 - category: security
   id: llm-no-refusal-check
-  message: OpenAI response used without checking refusal field — may miss safety-triggered refusals
+  message: OpenAI response used without checking refusal field — may miss safety-triggered
+    refusals
   pattern: (?:\.choices\[0\]\.message\.content|\.choices\[0\]\.text)(?![\s\S]{0,100}(?:refusal|finish_reason|stop_reason))
   severity: info
-  suggestion: Check response.choices[0].message.refusal and finish_reason before using content
+  suggestion: Check response.choices[0].message.refusal and finish_reason before using
+    content
   flags:
   - DOTALL
 - category: security
   id: llm-rag-unsanitized-ingest
-  message: Documents loaded directly into vector store without sanitization — RAG poisoning risk
+  message: Documents loaded directly into vector store without sanitization — RAG
+    poisoning risk
   pattern: (?:SimpleDirectoryReader|DirectoryLoader|WebBaseLoader|TextLoader)\s*\(\s*(?:upload|user_|request\.|req\.)
   severity: warning
-  suggestion: Sanitize and validate documents before ingesting into vector stores; strip potential injection payloads
+  suggestion: Sanitize and validate documents before ingesting into vector stores;
+    strip potential injection payloads
 - category: security
   id: llm-mcp-tool-shell
-  message: MCP tool function contains shell execution — command injection if arguments are LLM-controlled
+  message: MCP tool function contains shell execution — command injection if arguments
+    are LLM-controlled
   pattern: (?:@(?:mcp\.tool|server\.tool|tool)\s*\(\s*\)[\s\S]{0,500})(?:os\.system|subprocess\.|os\.popen|exec\()
   severity: critical
-  suggestion: Never use shell execution inside MCP tools; use parameterized operations with input validation
+  suggestion: Never use shell execution inside MCP tools; use parameterized operations
+    with input validation
   flags:
   - DOTALL
 - category: security
   id: llm-mcp-tool-file-delete
-  message: MCP tool function performs file deletion without confirmation — excessive agency
+  message: MCP tool function performs file deletion without confirmation — excessive
+    agency
   pattern: (?:@(?:mcp\.tool|server\.tool|tool)\s*\(\s*\)[\s\S]{0,500})(?:os\.remove|os\.unlink|shutil\.rmtree|Path.*\.unlink)
   severity: warning
-  suggestion: Require explicit user confirmation for destructive operations in MCP tools
+  suggestion: Require explicit user confirmation for destructive operations in MCP
+    tools
   flags:
   - DOTALL

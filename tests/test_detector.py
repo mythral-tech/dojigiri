@@ -26,9 +26,7 @@ def test_run_regex_checks_javascript(sample_javascript_code):
     findings = run_regex_checks(sample_javascript_code, "test.js", "javascript")
     
     rules_found = {f.rule for f in findings}
-    # var-usage rule was removed (style opinion, not correctness)
-    assert "console-log" in rules_found
-    assert "loose-equality" in rules_found
+    # console-log and loose-equality removed (linter territory, not SAST)
     assert "eval-usage" in rules_found
 
 
@@ -633,12 +631,12 @@ def outer():
 
 def test_analyze_file_static_python(sample_python_code):
     """Test full static analysis on Python code."""
-    findings = analyze_file_static("test.py", sample_python_code, "python").findings
+    findings = analyze_file_static("test.py", sample_python_code, "python", suppress_noise=False).findings
     # Should have both regex and AST findings
     sources = {f.source for f in findings}
     assert Source.STATIC in sources
     assert Source.AST in sources
-    
+
     # Check some expected findings
     rules = {f.rule for f in findings}
     assert "hardcoded-secret" in rules
@@ -648,7 +646,6 @@ def test_analyze_file_static_python(sample_python_code):
     assert "shadowed-builtin" in rules
     assert "type-comparison" in rules
     assert "unreachable-code" in rules
-    # Note: high-complexity detection may not trigger on all sample code
     assert "too-many-args" in rules
 
 
@@ -659,8 +656,7 @@ def test_analyze_file_static_javascript(sample_javascript_code):
     assert all(f.source in (Source.STATIC, Source.AST) for f in findings)
 
     rules = {f.rule for f in findings}
-    # var-usage rule was removed (style opinion, not correctness)
-    assert "console-log" in rules
+    # console-log removed (linter territory, not SAST)
     assert "eval-usage" in rules
 
 
@@ -713,10 +709,9 @@ password = "hardcoded_secret_12345"
 
 def test_analyze_file_static_go(sample_go_code):
     """Test static analysis on Go code."""
-    findings = analyze_file_static("test.go", sample_go_code, "go").findings
+    findings = analyze_file_static("test.go", sample_go_code, "go", suppress_noise=False).findings
     rules = {f.rule for f in findings}
     assert "unchecked-error" in rules
-    assert "fmt-print" in rules
 
 
 def test_analyze_file_static_rust(sample_rust_code):

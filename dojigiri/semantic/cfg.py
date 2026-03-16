@@ -105,6 +105,10 @@ class _CfgBuilder:
         # Each entry is the finally body AST node.
         self._finally_stack: list[object] = []
 
+        # Recursion depth guard for deeply nested code
+        self._depth = 0
+        self._max_depth = 150
+
     def _new_block(self, is_entry=False, is_exit=False) -> BasicBlock:
         self._block_counter += 1
         blk = BasicBlock(id=self._block_counter, is_entry=is_entry, is_exit=is_exit)
@@ -229,6 +233,10 @@ class _CfgBuilder:
     def _process_body(self, body_node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:
         """Process a sequence of statements. Returns list of block IDs that
         are the 'tails' (blocks that fall through to the next statement)."""
+        self._depth += 1
+        if self._depth > self._max_depth:
+            self._depth -= 1
+            return [current_block.id]
         tails = [current_block.id]
 
         for child in self._get_statement_children(body_node):
@@ -253,6 +261,7 @@ class _CfgBuilder:
                 self._add_stmt(cur, child)
                 tails = [cur.id]
 
+        self._depth -= 1
         return tails
 
     def _process_if(self, node, current_block: BasicBlock, exit_block: BasicBlock) -> list[int]:

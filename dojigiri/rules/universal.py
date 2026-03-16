@@ -33,15 +33,6 @@ UNIVERSAL_RULES: list[Rule] = _compile(
             "Possible hardcoded AWS credentials",
             "Use IAM roles or environment variables",
         ),
-        # Long lines
-        (
-            r"^.{201,}$",
-            Severity.INFO,
-            Category.STYLE,
-            "long-line",
-            "Line exceeds 200 characters",
-            "Break into multiple lines for readability",
-        ),
         # Insecure HTTP — skip namespace URIs (xmlns, W3C, schemas, purl),
         # data: URIs, and XML namespace declarations
         (

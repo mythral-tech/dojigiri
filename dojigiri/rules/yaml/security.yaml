@@ -953,6 +953,6 @@ rules:
 - category: security
   id: generic-password-assignment
   message: Password appears to be hardcoded as a string literal
-  pattern: (?i)(?:password|passwd|pass_?word)\s*[:=]\s*['"][^'"]{6,}['"]
+  pattern: (?i)(?:^|[^_a-z])(?:password|passwd|pass_?word)\s*[:=]\s*['"][^'"]{8,}['"]
   severity: warning
   suggestion: Use environment variables or a secrets manager instead of hardcoding passwords

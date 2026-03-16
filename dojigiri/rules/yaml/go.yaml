@@ -1,15 +1,16 @@
 rules:
-# ── Security: SQL Injection ──────────────────────────────────────────────
 - category: security
   id: go-sql-sprintf
-  message: SQL query built with fmt.Sprintf — verify interpolated values are not user-controlled
+  message: SQL query built with fmt.Sprintf — verify interpolated values are not
+    user-controlled
   pattern: (?i)fmt\.Sprintf\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b
   severity: warning
   suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
   cwe: CWE-89
 - category: security
   id: go-sql-concat
-  message: SQL query built with string concatenation — verify concatenated values are not user-controlled
+  message: SQL query built with string concatenation — verify concatenated values
+    are not user-controlled
   pattern: (?i)(?:['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*['"]\s*\+)
   severity: warning
   suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
@@ -20,7 +21,6 @@ rules:
   pattern: (?i)(?:strings\.Join\s*\([^)]*(?:SELECT|INSERT|UPDATE|DELETE|DROP))
   severity: warning
   suggestion: Use parameterized queries; never build SQL from user-controlled slices
-# ── Security: Command Injection ──────────────────────────────────────────
 - category: security
   id: go-command-injection
   message: exec.Command() with dynamic argument — command injection risk if user-controlled
@@ -34,7 +34,6 @@ rules:
   pattern: exec\.CommandContext\s*\(\s*\w+\s*,\s*(?!['"])
   severity: warning
   suggestion: Validate command and arguments; never pass unsanitized user input
-# ── Security: Path Traversal / File ──────────────────────────────────────
 - category: security
   id: go-path-traversal
   message: File operation with dynamic path — path traversal risk if path is user-controlled
@@ -48,7 +47,6 @@ rules:
   pattern: filepath\.Join\s*\([^)]*(?:r\.|req\.|request\.|params\.|query\.)
   severity: warning
   suggestion: Validate that the resolved path starts with the expected base directory
-# ── Security: Credentials & Secrets ──────────────────────────────────────
 - category: security
   id: go-hardcoded-credential
   message: Hardcoded credential in Go source — extractable from binary or repository
@@ -62,7 +60,6 @@ rules:
   pattern: '["'']\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?["'']'
   severity: info
   suggestion: Use configuration files or environment variables for host addresses
-# ── Security: Crypto ─────────────────────────────────────────────────────
 - category: security
   id: go-weak-crypto-md5
   message: MD5 is cryptographically broken — collisions are trivial
@@ -112,10 +109,10 @@ rules:
   pattern: bcrypt\.GenerateFromPassword\s*\([^,]+,\s*(?:[1-9])\s*\)
   severity: warning
   suggestion: Use bcrypt.DefaultCost (10) or higher
-# ── Security: TLS / Network ─────────────────────────────────────────────
 - category: security
   id: go-insecure-tls
-  message: 'TLS certificate verification disabled (InsecureSkipVerify: true) — MITM risk'
+  message: 'TLS certificate verification disabled (InsecureSkipVerify: true) — MITM
+    risk'
   pattern: InsecureSkipVerify\s*:\s*true
   severity: critical
   suggestion: Enable certificate verification; configure proper CA certificates
@@ -131,8 +128,8 @@ rules:
   message: Listening on 0.0.0.0 exposes service to all network interfaces
   pattern: (?:Listen|ListenAndServe|ListenAndServeTLS)\s*\(\s*['"](?:0\.0\.0\.0|:)\d
   severity: info
-  suggestion: Bind to 127.0.0.1 for local-only services; use explicit interface for production
-# ── Security: HTTP / Web ─────────────────────────────────────────────────
+  suggestion: Bind to 127.0.0.1 for local-only services; use explicit interface for
+    production
 - category: security
   id: go-ssrf
   message: HTTP request with dynamic URL — SSRF risk if URL is user-controlled
@@ -175,7 +172,6 @@ rules:
   pattern: http\.DefaultClient\.(?:Get|Post|Do|Head)\b
   severity: warning
   suggestion: Create an http.Client with explicit Timeout
-# ── Security: Template Injection ─────────────────────────────────────────
 - category: security
   id: go-template-html-unescaped
   message: text/template used for HTML — no auto-escaping, XSS risk
@@ -188,26 +184,27 @@ rules:
   pattern: template\.(?:JS|HTML|HTMLAttr|URL)\s*\(
   severity: warning
   suggestion: Only use template.JS/HTML with trusted, pre-sanitized data
-# ── Security: Deserialization / Encoding ─────────────────────────────────
 - category: security
   id: go-gob-decode
   message: gob.Decode on untrusted input can instantiate arbitrary types
   pattern: gob\.NewDecoder\s*\([^)]*(?:r\.|req\.|request\.|body|conn)
   severity: warning
-  suggestion: Validate and restrict types before decoding; prefer JSON for untrusted input
+  suggestion: Validate and restrict types before decoding; prefer JSON for untrusted
+    input
 - category: security
   id: go-xml-external-entity
   message: xml.NewDecoder may be vulnerable to XXE attacks
   pattern: xml\.NewDecoder\s*\(
   severity: info
-  suggestion: Go's xml package is safe by default, but verify no custom entity resolvers are used
+  suggestion: Go's xml package is safe by default, but verify no custom entity resolvers
+    are used
 - category: security
   id: go-json-number-overflow
-  message: json.Unmarshal into interface{} uses float64 — may lose precision for large integers
+  message: json.Unmarshal into interface{} uses float64 — may lose precision for
+    large integers
   pattern: json\.Unmarshal\s*\([^,]+,\s*&?\w+\s*\)\s*.*interface\{\}
   severity: info
   suggestion: Use json.Number or decode into a struct with explicit numeric types
-# ── Security: LDAP / Injection ───────────────────────────────────────────
 - category: security
   id: go-ldap-injection
   message: LDAP filter built with string formatting — injection risk
@@ -220,7 +217,6 @@ rules:
   pattern: regexp\.(?:Compile|MustCompile)\s*\(\s*(?!['"`])
   severity: warning
   suggestion: Validate/sanitize regex input or use regexp.QuoteMeta() for literals
-# ── Security: Unsafe ─────────────────────────────────────────────────────
 - category: security
   id: go-unsafe-pointer
   message: unsafe.Pointer bypasses Go type safety — memory corruption risk
@@ -242,24 +238,23 @@ rules:
 - category: security
   id: go-cgo-usage
   message: CGo introduces unsafe C code into Go binary — memory safety lost
-  pattern: '^\s*(?://\s*)?#include\s|import\s+"C"'
+  pattern: ^\s*(?://\s*)?#include\s|import\s+"C"
   severity: info
   suggestion: Minimize CGo usage; validate all data crossing the Go/C boundary
-# ── Security: Log Injection ──────────────────────────────────────────────
 - category: security
   id: go-log-injection
   message: User input logged directly — log injection/forging risk
   pattern: (?:log\.(?:Print|Fatal|Panic)|slog\.(?:Info|Warn|Error|Debug))\w*\s*\(\s*(?:fmt\.Sprintf|.*\+)
   severity: info
-  suggestion: Sanitize user input before logging; use structured logging with key-value pairs
-# ── Security: Zip Slip ───────────────────────────────────────────────────
+  suggestion: Sanitize user input before logging; use structured logging with key-value
+    pairs
 - category: security
   id: go-zip-slip
   message: archive extraction without path validation — zip slip vulnerability
   pattern: (?:zip|tar)\.(?:OpenReader|NewReader)\s*\(
   severity: info
-  suggestion: Validate extracted file paths start with target directory; reject paths with ..
-# ── Bug: Error Handling ──────────────────────────────────────────────────
+  suggestion: Validate extracted file paths start with target directory; reject paths
+    with ..
 - category: bug
   id: unchecked-error
   message: Error return value discarded with _
@@ -273,80 +268,39 @@ rules:
   severity: info
   suggestion: 'Use fmt.Errorf("context: %w", err) for proper error wrapping'
 - category: bug
-  id: go-error-string-compare
-  message: Comparing error by string — fragile and breaks with wrapped errors
-  pattern: (?:err\.Error\(\)\s*==|strings\.Contains\s*\(\s*err\.Error\(\))
-  severity: warning
-  suggestion: Use errors.Is() or errors.As() for robust error comparison
-- category: bug
-  id: go-error-type-assert
-  message: Direct type assertion on error — fails with wrapped errors
-  pattern: \w+\.\(\*?\w+Error\)
-  severity: info
-  suggestion: Use errors.As() to unwrap and match error types
-- category: bug
   id: go-swallowed-error
   message: Error checked but not returned or logged — silently swallowed
   pattern: if\s+err\s*!=\s*nil\s*\{\s*\}
   severity: warning
   suggestion: Return the error, log it, or document why it is intentionally ignored
 - category: bug
-  id: go-bare-return-error
-  message: Named return with bare return in error path — may return zero-value unintentionally
-  pattern: ^\s*return\s*$
-  severity: info
-  suggestion: Use explicit return values for clarity in error paths
-# ── Bug: Nil / Pointer ───────────────────────────────────────────────────
-- category: bug
   id: go-nil-map
-  message: Map declared with var (nil) — assignment will panic if not initialized with make()
+  message: Map declared with var (nil) — assignment will panic if not initialized
+    with make()
   pattern: var\s+\w+\s+map\[
   severity: info
   suggestion: Initialize with make() or a map literal before use
-- category: bug
-  id: go-nil-slice-append
-  message: Append to nil slice is safe, but a nil map write panics — verify this is a slice
-  pattern: var\s+\w+\s+\[\]
-  severity: info
-  suggestion: Consider pre-allocating with make([]T, 0, expectedCap) for performance
-- category: bug
-  id: go-nil-interface-method
-  message: Method call on interface without nil check — may panic
-  pattern: \b\w+\.(?:Close|Flush|Write|Read|Seek)\s*\(\s*\)(?!\s*//\s*nil)
-  severity: info
-  suggestion: Check for nil before calling methods on interfaces
-# ── Bug: Defer / Panic ───────────────────────────────────────────────────
 - category: bug
   id: go-defer-in-loop
   message: defer inside loop — deferred calls accumulate until function returns
   pattern: ^\s*for\s.*\{[\s\S]*?\bdefer\b
   severity: warning
-  suggestion: Move deferred cleanup into a separate function called from the loop body
+  suggestion: Move deferred cleanup into a separate function called from the loop
+    body
 - category: bug
   id: go-panic
-  message: panic() crashes the program — inappropriate for library code and most application code
+  message: panic() crashes the program — inappropriate for library code and most
+    application code
   pattern: ^\s*panic\s*\(
   severity: warning
-  suggestion: Return an error instead of panicking; reserve panic for truly unrecoverable states
+  suggestion: Return an error instead of panicking; reserve panic for truly unrecoverable
+    states
 - category: bug
   id: go-recover-all
   message: recover() catches all panics — may mask bugs
   pattern: \brecover\s*\(\s*\)
   severity: info
   suggestion: Log recovered panics and re-panic for unexpected errors
-- category: bug
-  id: go-defer-os-exit
-  message: os.Exit() prevents deferred functions from running
-  pattern: \bos\.Exit\s*\(
-  severity: info
-  suggestion: Return from main() instead, or ensure cleanup happens before os.Exit
-# ── Bug: Goroutine / Concurrency ─────────────────────────────────────────
-- category: bug
-  id: go-goroutine-anonymous
-  message: Anonymous goroutine — verify it has a termination mechanism (channel, context, WaitGroup)
-  pattern: \bgo\s+func\s*\(
-  severity: info
-  suggestion: Ensure goroutines can be cancelled and their completion is tracked
 - category: bug
   id: go-goroutine-loop-var
   message: Loop variable captured by goroutine closure — data race in Go < 1.22
@@ -372,19 +326,6 @@ rules:
   severity: warning
   suggestion: Call wg.Add(1) before launching the goroutine
 - category: bug
-  id: go-global-var
-  message: Package-level mutable variable — data race risk if accessed from goroutines
-  pattern: ^var\s+\w+\s+(?:map|int|string|bool|\[\])\b
-  severity: info
-  suggestion: Protect with sync.Mutex/RWMutex, use sync.Map, or channel-based access
-- category: bug
-  id: go-once-reset
-  message: sync.Once should not be reset — it is designed for one-time initialization
-  pattern: \bsync\.Once\s*\{\s*\}
-  severity: info
-  suggestion: Create a new sync.Once variable if you need to re-initialize
-# ── Bug: Type / Conversion ───────────────────────────────────────────────
-- category: bug
   id: go-integer-overflow
   message: Integer conversion may overflow — int to int32/int16/int8/uint
   pattern: (?:int32|int16|int8|uint8|uint16|uint32)\s*\(\s*\w+\s*\)
@@ -397,31 +338,11 @@ rules:
   severity: info
   suggestion: Use a tolerance-based comparison (math.Abs(a-b) < epsilon)
 - category: bug
-  id: go-time-equal
-  message: Time comparison with == ignores monotonic clock and timezone
-  pattern: time\.(?:Now|Time)\b[\s\S]*?==
-  severity: info
-  suggestion: Use t1.Equal(t2) for time comparison
-- category: bug
-  id: go-string-index-rune
-  message: Indexing string gives byte, not rune — breaks with multibyte UTF-8
-  pattern: \w+\[\w+\]\s*==\s*'
-  severity: info
-  suggestion: Use range over string for rune iteration, or []rune() conversion
-# ── Bug: Context ─────────────────────────────────────────────────────────
-- category: bug
   id: go-context-background-http
   message: context.Background() in HTTP handler — should use request context
   pattern: context\.Background\s*\(\s*\).*(?:http\.Handler|ServeHTTP|HandleFunc)
   severity: warning
   suggestion: Use r.Context() to propagate cancellation from the HTTP request
-- category: bug
-  id: go-context-todo
-  message: context.TODO() left in code — indicates unfinished context propagation
-  pattern: context\.TODO\s*\(\s*\)
-  severity: info
-  suggestion: Replace with a proper context (context.Background or parent context)
-# ── Bug: Resource Leak ───────────────────────────────────────────────────
 - category: bug
   id: go-body-not-closed
   message: HTTP response body must be closed to avoid resource leak
@@ -441,13 +362,6 @@ rules:
   severity: info
   suggestion: Always defer f.Close() after checking err
 - category: bug
-  id: go-ticker-not-stopped
-  message: time.NewTicker without Stop — goroutine and timer leak
-  pattern: time\.NewTicker\s*\([^)]*\)[\s\S]*?(?!\.Stop)
-  severity: info
-  suggestion: Always defer ticker.Stop()
-# ── Bug: Testing ─────────────────────────────────────────────────────────
-- category: bug
   id: go-test-fatal-goroutine
   message: t.Fatal/t.FailNow in goroutine — panics instead of failing test
   pattern: go\s+func[\s\S]*?t\.(?:Fatal|FailNow|Skip)\b
@@ -459,25 +373,19 @@ rules:
   pattern: t\.Parallel\s*\(\s*\)[\s\S]*?\bvar\s+\w+
   severity: info
   suggestion: Use test-local variables or proper synchronization in parallel tests
-# ── Performance ──────────────────────────────────────────────────────────
 - category: performance
   id: go-string-byte-copy
   message: string([]byte(...)) creates a copy — may impact performance in hot paths
   pattern: \bstring\(\[\]byte\(
   severity: info
-  suggestion: Consider using unsafe.String() (Go 1.20+) in performance-critical code after benchmarking
+  suggestion: Consider using unsafe.String() (Go 1.20+) in performance-critical code
+    after benchmarking
 - category: performance
   id: go-append-prealloc
   message: Slice append in loop without pre-allocation — causes repeated copying
   pattern: for\s.*\{[\s\S]*?=\s*append\s*\(\s*\w+\s*,
   severity: info
   suggestion: Pre-allocate with make([]T, 0, expectedLen) before the loop
-- category: performance
-  id: go-map-prealloc
-  message: Map without size hint — causes rehashing as it grows
-  pattern: make\s*\(\s*map\[\w+\]\w+\s*\)(?!\s*//\s*(?:small|few))
-  severity: info
-  suggestion: Use make(map[K]V, expectedLen) to avoid rehashing
 - category: performance
   id: go-regexp-compile-loop
   message: regexp.Compile inside loop — recompiles pattern on every iteration
@@ -531,105 +439,37 @@ rules:
   message: ioutil package is deprecated since Go 1.16 — use io and os instead
   pattern: \bioutil\.(?:ReadAll|ReadFile|WriteFile|ReadDir|TempDir|TempFile|NopCloser|Discard)\b
   severity: info
-  suggestion: Use io.ReadAll, os.ReadFile, os.WriteFile, os.ReadDir, os.MkdirTemp, os.CreateTemp
-- category: performance
-  id: go-large-struct-value
-  message: Large struct passed by value — causes full copy on every call
-  pattern: func\s+\w+\s*\(\s*\w+\s+[A-Z]\w{15,}\s*\)
-  severity: info
-  suggestion: Pass large structs by pointer to avoid copying
-# ── Style ────────────────────────────────────────────────────────────────
-- category: style
-  id: fmt-print
-  message: fmt.Print left in code
-  pattern: \bfmt\.Print(?:ln|f)?\s*\(
-  severity: info
-  suggestion: Use structured logging instead
-- category: style
-  id: go-todo-fixme
-  message: TODO/FIXME comment found — track in issue tracker
-  pattern: //\s*(?:TODO|FIXME|HACK|XXX)\b
-  severity: info
-  suggestion: Create a ticket and reference it in the comment
-- category: style
-  id: go-empty-interface
-  message: interface{} loses type safety — consider a concrete type or type constraint
-  pattern: \binterface\s*\{\s*\}
-  severity: info
-  suggestion: Use any (Go 1.18+) or define a specific interface
-- category: style
-  id: go-init-function
-  message: init() functions make testing and dependency tracking harder
-  pattern: ^func\s+init\s*\(\s*\)\s*\{
-  severity: info
-  suggestion: Use explicit initialization in main() or constructors for testability
-- category: style
-  id: go-exported-no-doc
-  message: Exported function without doc comment
-  pattern: ^(?!//)\s*func\s+[A-Z]\w+\s*\(
-  severity: info
-  suggestion: Add a doc comment starting with the function name per Go conventions
-- category: style
-  id: go-magic-number
-  message: Magic number in code — use a named constant for clarity
-  pattern: (?:==|!=|<|>|<=|>=)\s*(?:[3-9]\d{2,}|[1-9]\d{3,})\b
-  severity: info
-  suggestion: Extract to a named const with a descriptive name
-- category: style
-  id: go-naked-return
-  message: Naked return in long function — harder to read
-  pattern: ^\s*return\s*$
-  severity: info
-  suggestion: Use explicit return values in functions longer than a few lines
-- category: style
-  id: go-stuttering-name
-  message: Package-stuttering name (e.g., http.HTTPClient) — avoid in Go
-  pattern: ^\s*(?:type|func|var|const)\s+[A-Z]\w*(?:HTTP|URL|API|SQL|XML|JSON|HTML)\w*\b
-  severity: info
-  suggestion: Drop the package-name prefix per Go naming conventions
-- category: style
-  id: go-getter-prefix
-  message: Go getters should not have Get prefix — use Name() not GetName()
-  pattern: func\s+\(\w+\s+\*?\w+\)\s+Get[A-Z]\w*\s*\(\s*\)
-  severity: info
-  suggestion: Remove Get prefix — use Name() instead of GetName()
-- category: style
-  id: go-bool-param
-  message: Boolean parameter makes call site unclear — consider functional options
-  pattern: func\s+\w+\s*\([^)]*\bbool\b[^)]*\bbool\b
-  severity: info
-  suggestion: Use functional options pattern or a config struct instead of multiple bools
-- category: style
-  id: go-underscore-name
-  message: Underscore in Go name — use camelCase per convention
-  pattern: (?:func|var|const|type)\s+\w+_\w+\b
-  severity: info
-  suggestion: Use camelCase for Go identifiers (myFunc not my_func)
+  suggestion: Use io.ReadAll, os.ReadFile, os.WriteFile, os.ReadDir, os.MkdirTemp,
+    os.CreateTemp
 - category: security
   id: go-unvalidated-redirect-url
-  message: 'URL parsed from user input without scheme validation — may allow javascript: or data: URIs'
+  message: 'URL parsed from user input without scheme validation — may allow javascript:
+    or data: URIs'
   pattern: url\.Parse\s*\(\s*(?!['"])
   severity: info
   suggestion: Validate scheme is http/https after parsing; reject unexpected schemes
-# ── Prompt Injection (LLM SDK) ────────────────────────────────────
 - category: security
   id: prompt-injection-go-sprintf
-  message: LLM prompt built with fmt.Sprintf — prompt injection risk if arguments are user-controlled
+  message: LLM prompt built with fmt.Sprintf — prompt injection risk if arguments
+    are user-controlled
   pattern: (?i)fmt\.Sprintf\s*\(\s*["'].*(?:prompt|system_prompt|system_message|instruction|llm_input)
   severity: critical
-  suggestion: Use structured message types with proper role separation; validate all user input
+  suggestion: Use structured message types with proper role separation; validate all
+    user input
 - category: security
   id: prompt-injection-go-concat
   message: LLM prompt built with string concatenation — prompt injection risk
   pattern: (?i)(?:prompt|systemPrompt|systemMessage|instructions)\s*(?::=|=)\s*["'][^"']*["']\s*\+
   severity: critical
-  suggestion: Separate system instructions from user content using the API's message/role structure
+  suggestion: Separate system instructions from user content using the API's message/role
+    structure
 - category: security
   id: prompt-injection-go-builder
   message: LLM prompt built with strings.Builder — prompt injection risk
   pattern: (?i)(?:\w*(?:prompt|system|msg|message|instruction|context|query)\w*)\s*\.WriteString\s*\(
   severity: warning
-  suggestion: Use structured message types; never build prompts from user-controlled strings
+  suggestion: Use structured message types; never build prompts from user-controlled
+    strings
 - category: security
   id: llm-output-to-exec-go
   message: LLM output passed to exec.Command — AI-generated code execution risk

@@ -87,15 +87,6 @@ PYTHON_RULES: list[Rule] = _compile(
             "subprocess call — verify input is not constructed from untrusted data",
             "Ensure command arguments are hardcoded or validated, never from raw user input",
         ),
-        # Star imports
-        (
-            r"^from\s+\S+\s+import\s+\*",
-            Severity.WARNING,
-            Category.STYLE,
-            "star-import",
-            "Star import pollutes namespace and hides dependencies",
-            "Import specific names instead",
-        ),
         # Unsafe pickle deserialization
         (
             r"\bpickle\.(?:loads?\s*\(|Unpickler\s*\()",  # doji:ignore(pickle-unsafe)

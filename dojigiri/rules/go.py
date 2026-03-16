@@ -148,15 +148,6 @@ GO_RULES: list[Rule] = _compile(
             "Error return value discarded with _",
             "Handle the error explicitly",
         ),
-        # fmt.Println in production
-        (
-            r"\bfmt\.Print(?:ln|f)?\s*\(",
-            Severity.INFO,
-            Category.STYLE,
-            "fmt-print",
-            "fmt.Print left in code",
-            "Use structured logging instead",
-        ),
         # defer in loop
         (
             r"^\s*for\s.*\{[\s\S]*?\bdefer\b",

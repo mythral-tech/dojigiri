@@ -1,10 +1,12 @@
 rules:
 - category: security
   id: hardcoded-secret
-  message: Possible hardcoded secret or API key — credential exposure if repository is shared or leaked
+  message: Possible hardcoded secret or API key — credential exposure if repository
+    is shared or leaked
   pattern: (?i)(?<!\w)(?!(?:fake|mock|dummy|stub|cookie[_-]?name|header[_-]?name|field[_-]?name|content[_-]?key|config[_-]?key)[_-]?)(?:api[_-]?key|secret[_-]?key|secret|password|passwd|token|auth[_-]?token|jwt[_-]?secret|signing[_-]?key|encryption[_-]?key|private[_-]?key|client[_-]?secret|\w+[_-](?:secret|token|password|passwd|pass|key))\s*[:=]\s*['"](?!(?:demo|example|placeholder|test|sample|changeme|change[_-]me|your[_-]?|xxx|TODO|INSERT|REPLACE)[_\-0-9'"])(?![a-z][a-z_]{6,}['"])[A-Za-z0-9+/=_\-!@#$%^&*]{8,}['"]
   severity: critical
-  suggestion: Use environment variables or a secrets manager; rotate the exposed credential immediately
+  suggestion: Use environment variables or a secrets manager; rotate the exposed credential
+    immediately
   cwe: CWE-798
 - category: security
   id: hardcoded-secret-dict
@@ -18,12 +20,6 @@ rules:
   pattern: (?i)(?:aws[_-]?access|aws[_-]?secret)\s*[:=]\s*['"][A-Za-z0-9+/=]{16,}['"]
   severity: critical
   suggestion: Use IAM roles or environment variables
-- category: style
-  id: long-line
-  message: Line exceeds 200 characters
-  pattern: ^.{201,}$
-  severity: info
-  suggestion: Break into multiple lines for readability
 - category: security
   id: insecure-http
   message: Insecure HTTP URL (not localhost) — data transmitted in cleartext
@@ -33,7 +29,8 @@ rules:
   cwe: CWE-319
 - category: security
   id: sql-injection-execute
-  message: SQL injection — string interpolation in query allows attacker to modify SQL logic
+  message: SQL injection — string interpolation in query allows attacker to modify
+    SQL logic
   pattern: (?i)(?:execute(?:many)?|cursor\.execute(?:many)?|query|\.execute)\s*\(\s*(?:f['"]|['"].*?%s|['"].*?\+\s*\w+|['"].*?\{)
   severity: warning
   suggestion: Use parameterized queries with placeholders (?, %s, $1) and bind parameters
@@ -68,7 +65,8 @@ rules:
   message: Django .raw() with string interpolation — SQL injection
   pattern: \.raw\s*\(\s*(?:f['"]|['"].*?\.format\s*\(|['"].*?%s)
   severity: warning
-  suggestion: 'Use .raw() with parameterized query: Model.objects.raw(''SELECT ... WHERE id = %s'', [user_id])'
+  suggestion: 'Use .raw() with parameterized query: Model.objects.raw(''SELECT ...
+    WHERE id = %s'', [user_id])'
 - category: security
   id: google-api-key
   message: Possible Google API key in source
@@ -153,11 +151,3 @@ rules:
   pattern: SK[0-9a-fA-F]{32}
   severity: warning
   suggestion: Use environment variables; rotate the key
-## trailing-whitespace removed — formatter concern, not SAST.
-## Was drowning signal (100+ findings per project) with zero security value.
-- category: bug
-  id: mixed-indentation
-  message: Mixed tabs and spaces in indentation
-  pattern: ^(?:\t+ +| +\t+)\S
-  severity: info
-  suggestion: Use consistent indentation (tabs or spaces, not both)

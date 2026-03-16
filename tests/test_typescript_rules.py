@@ -23,12 +23,12 @@ class TestTypescriptRuleLoading:
     """Verify TypeScript rules load and integrate correctly."""
 
     def test_typescript_rules_loaded(self):
-        assert len(TYPESCRIPT_RULES) == 40
+        assert len(TYPESCRIPT_RULES) == 28
 
     def test_typescript_gets_js_plus_ts_rules(self):
         ts_rules = get_rules_for_language("typescript")
         js_rules = get_rules_for_language("javascript")
-        assert len(ts_rules) == len(js_rules) + 40
+        assert len(ts_rules) == len(js_rules) + 28
 
     def test_typescript_includes_js_rules(self):
         ts_rules = get_rules_for_language("typescript")
@@ -36,7 +36,6 @@ class TestTypescriptRuleLoading:
         # Spot-check some JS rule IDs are present
         assert "eval-usage" in ts_ids
         assert "innerhtml" in ts_ids
-        assert "loose-equality" in ts_ids
 
     def test_all_ts_rules_have_unique_ids(self):
         ids = [r[3] for r in TYPESCRIPT_RULES]
@@ -48,40 +47,6 @@ class TestTypescriptRuleLoading:
 
 
 # ─── Type Safety Bypass Rules ────────────────────────────────────────────────
-
-
-class TestAsAnyCast:
-    def test_matches_as_any(self):
-        assert _pattern("ts-as-any-cast").search("const x = value as any;")
-
-    def test_matches_as_any_in_expression(self):
-        assert _pattern("ts-as-any-cast").search("foo(bar as any)")
-
-    def test_no_match_as_string(self):
-        assert not _pattern("ts-as-any-cast").search("const x = value as string;")
-
-    def test_no_match_as_unknown(self):
-        assert not _pattern("ts-as-any-cast").search("const x = value as unknown;")
-
-
-class TestNonNullAssertion:
-    def test_matches_non_null_property_access(self):
-        assert _pattern("ts-non-null-assertion").search("user! .name")
-
-    def test_no_match_exclamation_in_condition(self):
-        # != is not a non-null assertion
-        assert not _pattern("ts-non-null-assertion").search("if (x !== null)")
-
-
-class TestAngleBracketAny:
-    def test_matches_angle_bracket_any(self):
-        assert _pattern("ts-angle-bracket-any").search("<any>value")
-
-    def test_matches_angle_bracket_any_paren(self):
-        assert _pattern("ts-angle-bracket-any").search("<any>(someValue)")
-
-    def test_no_match_angle_bracket_string(self):
-        assert not _pattern("ts-angle-bracket-any").search("<string>value")
 
 
 class TestTsIgnore:
@@ -103,28 +68,6 @@ class TestTsExpectError:
         assert _pattern("ts-expect-error-bypass").search("// @ts-expect-error testing")
 
 
-class TestAnyParam:
-    def test_matches_single_any_param(self):
-        assert _pattern("ts-any-param").search("function foo(x: any)")
-
-    def test_matches_any_after_other_params(self):
-        assert _pattern("ts-any-param").search("function bar(a: string, b: any)")
-
-    def test_no_match_unknown_param(self):
-        assert not _pattern("ts-any-param").search("function foo(x: unknown)")
-
-
-class TestAnyReturn:
-    def test_matches_any_return_brace(self):
-        assert _pattern("ts-any-return").search("function foo(): any {")
-
-    def test_matches_any_return_arrow(self):
-        assert _pattern("ts-any-return").search("const fn = (): any => {")
-
-    def test_no_match_string_return(self):
-        assert not _pattern("ts-any-return").search("function foo(): string {")
-
-
 class TestExcessiveAnyAnnotation:
     def test_matches_let_any(self):
         assert _pattern("ts-excessive-any-annotation").search("let data: any =")
@@ -134,20 +77,6 @@ class TestExcessiveAnyAnnotation:
 
     def test_no_match_specific_type(self):
         assert not _pattern("ts-excessive-any-annotation").search("let data: string = 'hello';")
-
-
-class TestObjectType:
-    def test_matches_object_annotation(self):
-        assert _pattern("ts-object-type").search("param: Object;")
-
-    def test_matches_object_in_parens(self):
-        assert _pattern("ts-object-type").search("function foo(x: Object)")
-
-    def test_no_match_lowercase_object(self):
-        assert not _pattern("ts-object-type").search("param: object;")
-
-
-# ─── Runtime Safety Rules ────────────────────────────────────────────────────
 
 
 class TestJsonParseAssertion:
@@ -163,17 +92,6 @@ class TestJsonParseAssertion:
     def test_no_match_json_parse_as_any(self):
         # as any is caught by ts-as-any-cast, not this rule
         assert not _pattern("ts-json-parse-assertion").search("JSON.parse(data) as any")
-
-
-class TestRecordStringAny:
-    def test_matches_record_string_any(self):
-        assert _pattern("ts-record-string-any").search("Record<string, any>")
-
-    def test_matches_in_type_annotation(self):
-        assert _pattern("ts-record-string-any").search("const map: Record<string, any> = {}")
-
-    def test_no_match_record_string_unknown(self):
-        assert not _pattern("ts-record-string-any").search("Record<string, unknown>")
 
 
 class TestDeclareAmbient:
@@ -318,20 +236,6 @@ class TestGenericAnyConstraint:
         )
 
 
-class TestMissingReadonlyConfig:
-    def test_matches_let_config(self):
-        assert _pattern("ts-missing-readonly-config").search("let appConfig = {")
-
-    def test_matches_var_secret(self):
-        assert _pattern("ts-missing-readonly-config").search("var dbSecret = {")
-
-    def test_matches_let_credentials(self):
-        assert _pattern("ts-missing-readonly-config").search("let awsCredentials: {")
-
-    def test_no_match_const_config(self):
-        assert not _pattern("ts-missing-readonly-config").search("const appConfig = {")
-
-
 class TestPartialSecurityType:
     def test_matches_partial_auth(self):
         assert _pattern("ts-partial-security-type").search("Partial<AuthConfig>")
@@ -344,12 +248,3 @@ class TestPartialSecurityType:
 
     def test_no_match_partial_regular(self):
         assert not _pattern("ts-partial-security-type").search("Partial<UserProfile>")
-
-
-class TestSatisfiesNoValidation:
-    def test_matches_satisfies_semicolon(self):
-        assert _pattern("ts-satisfies-no-validation").search("data satisfies Config;")
-
-    def test_no_match_without_semicolon(self):
-        # Intentionally tight pattern to reduce false positives
-        assert not _pattern("ts-satisfies-no-validation").search("satisfies in documentation")

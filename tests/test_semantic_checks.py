@@ -537,7 +537,7 @@ class TestIntegration:
             "def f():\n    return 1\n    print('dead')\n\n"
             "result = os.getcwd()\n"
         )
-        findings = analyze_file_static("test.py", code, "python").findings
+        findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
         rules = {f.rule for f in findings}
         assert "unused-import" in rules
         assert "unreachable-code" in rules

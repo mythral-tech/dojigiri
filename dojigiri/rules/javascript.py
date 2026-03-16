@@ -204,24 +204,6 @@ JAVASCRIPT_RULES: list[Rule] = _compile(
 
         # ── Quality / Bugs ───────────────────────────────────────────
 
-        # == instead of ===
-        (
-            r"(?<![=!<>])={2}(?!=)",
-            Severity.WARNING,
-            Category.BUG,
-            "loose-equality",
-            "Loose equality (==) can cause type coercion bugs",
-            "Use strict equality (===) instead",
-        ),
-        # console.log leftover
-        (
-            r"\bconsole\.log\s*\(",
-            Severity.INFO,
-            Category.STYLE,
-            "console-log",
-            "console.log() left in code",
-            "Remove or replace with proper logging",
-        ),
         # debugger statement
         (
             r"^\s*debugger\s*;?\s*$",
@@ -234,15 +216,6 @@ JAVASCRIPT_RULES: list[Rule] = _compile(
         # Note: var-usage rule intentionally omitted — it's a style opinion.
         # Projects using var intentionally (Express, CommonJS) get massive noise.
         # Users who want it can add it as a custom rule via .doji.toml.
-        # delete on array (creates sparse holes)
-        (
-            r"\bdelete\s+\w+\s*\[\s*\w+\s*\]",
-            Severity.WARNING,
-            Category.BUG,
-            "delete-array",
-            "delete on array creates a sparse hole — does not update .length",
-            "Use Array.splice() to remove elements properly",
-        ),
         # Empty catch block (swallowed error)
         (
             r"catch\s*\(\s*\w*\s*\)\s*\{\s*\}",
@@ -314,15 +287,6 @@ JAVASCRIPT_RULES: list[Rule] = _compile(
             "bitwise-in-condition",
             "Bitwise operator in boolean context — possibly intended && or ||",
             "Use && (logical AND) or || (logical OR) for boolean logic",
-        ),
-        # Void 0 instead of undefined
-        (
-            r"\bvoid\s+0\b",
-            Severity.INFO,
-            Category.STYLE,
-            "void-zero",
-            "void 0 is an archaic way to get undefined",
-            "Use undefined directly in modern JavaScript",
         ),
     ]
 )

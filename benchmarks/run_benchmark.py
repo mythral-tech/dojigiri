@@ -45,6 +45,36 @@ REPOS = {
         "language": "javascript",
         "paths": ["lib"],
     },
+    "airflow": {
+        "url": "https://github.com/apache/airflow.git",
+        "paths": ["airflow-core/src/airflow"],
+    },
+    "gitea": {
+        "url": "https://github.com/go-gitea/gitea.git",
+        "paths": ["models", "modules", "routers", "services"],
+    },
+    "immich": {
+        "url": "https://github.com/immich-app/immich.git",
+        "paths": ["server/src", "web/src", "mobile/lib"],
+    },
+    "keycloak": {
+        "url": "https://github.com/keycloak/keycloak.git",
+        "paths": ["services/src", "server-spi/src", "server-spi-private/src", "core/src"],
+    },
+    "open-interpreter": {
+        "url": "https://github.com/OpenInterpreter/open-interpreter.git",
+        "language": "python",
+        "paths": ["interpreter"],
+    },
+    "paperless-ngx": {
+        "url": "https://github.com/paperless-ngx/paperless-ngx.git",
+        "paths": ["src"],
+    },
+    "saleor": {
+        "url": "https://github.com/saleor/saleor.git",
+        "language": "python",
+        "paths": ["saleor"],
+    },
 }
 
 
@@ -60,7 +90,7 @@ def clone_or_update(repo_name: str, repo_info: dict) -> Path:
         REPOS_DIR.mkdir(parents=True, exist_ok=True)
         subprocess.run(
             ["git", "clone", "--depth=1", "--quiet", repo_info["url"], str(repo_dir)],
-            timeout=120,
+            timeout=300,
         )
     return repo_dir
 
@@ -88,7 +118,7 @@ def scan_repo(repo_dir: Path, repo_info: dict) -> list[dict]:
             except OSError:
                 continue
 
-            result = analyze_file_static(str(filepath), content, lang)
+            result = analyze_file_static(str(filepath), content, lang, suppress_noise=False)
             for f in result.findings:
                 # Normalize file path relative to repo root
                 rel_path = str(filepath.relative_to(repo_dir))

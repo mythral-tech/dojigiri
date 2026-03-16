@@ -110,18 +110,10 @@ def test_universal_aws_credentials():
 
 
 
-def test_universal_long_line():
-    """Test long line detection."""
+def test_universal_long_line_removed():
+    """long-line rule removed — linter territory, not SAST."""
     rules = get_rules_for_language("python")
-    pattern = next(r for r in rules if r[3] == "long-line")[0]
-    
-    # Should match (>200 chars)
-    long_line = "x" * 201
-    assert pattern.search(long_line)
-    
-    # Should NOT match (<=200 chars)
-    short_line = "x" * 200
-    assert not pattern.search(short_line)
+    assert not any(r[3] == "long-line" for r in rules)
 
 
 def test_universal_insecure_http():
@@ -261,18 +253,10 @@ def test_python_shell_true():
     assert pattern.search("subprocess.call(cmd, shell = True)")
 
 
-def test_python_star_import():
-    """Test star import detection."""
+def test_python_star_import_removed():
+    """star-import rule removed — linter territory, not SAST."""
     rules = get_rules_for_language("python")
-    pattern = next(r for r in rules if r[3] == "star-import")[0]
-    
-    # Should match
-    assert pattern.search("from module import *")
-    assert pattern.search("from package.module import *")
-    
-    # Should NOT match
-    assert not pattern.search("from module import Class")
-    assert not pattern.search("import module")
+    assert not any(r[3] == "star-import" for r in rules)
 
 
 
@@ -342,29 +326,16 @@ def test_javascript_var_usage_removed():
     assert "var-usage" not in rule_names
 
 
-def test_javascript_loose_equality():
-    """Test loose equality (==) detection."""
+def test_javascript_loose_equality_removed():
+    """loose-equality rule removed — linter territory."""
     rules = get_rules_for_language("javascript")
-    pattern = next(r for r in rules if r[3] == "loose-equality")[0]
-    
-    # Should match
-    assert pattern.search("if (x == 5)")
-    assert pattern.search("x == y")
-    
-    # Should NOT match
-    assert not pattern.search("if (x === 5)")
-    assert not pattern.search("x !== y")
-    assert not pattern.search("x = 5")  # assignment
+    assert not any(r[3] == "loose-equality" for r in rules)
 
 
-def test_javascript_console_log():
-    """Test console.log detection."""
+def test_javascript_console_log_removed():
+    """console-log rule removed — linter territory."""
     rules = get_rules_for_language("javascript")
-    pattern = next(r for r in rules if r[3] == "console-log")[0]
-    
-    # Should match
-    assert pattern.search("console.log('debug');")
-    assert pattern.search("console.log(value)")
+    assert not any(r[3] == "console-log" for r in rules)
 
 
 def test_javascript_eval():
@@ -421,15 +392,10 @@ def test_go_unchecked_error():
     assert pattern.match("    value, _ := getValue()")  # With leading whitespace
 
 
-def test_go_fmt_print():
-    """Test fmt.Print detection."""
+def test_go_fmt_print_removed():
+    """fmt-print rule removed — linter territory."""
     rules = get_rules_for_language("go")
-    pattern = next(r for r in rules if r[3] == "fmt-print")[0]
-    
-    # Should match
-    assert pattern.search("fmt.Println(value)")
-    assert pattern.search("fmt.Print(x)")
-    assert pattern.search("fmt.Printf('value: %d', x)")
+    assert not any(r[3] == "fmt-print" for r in rules)
 
 
 # ───────────────────────────────────────────────────────────────────────────

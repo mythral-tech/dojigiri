@@ -38,14 +38,16 @@ rules:
   suggestion: Use cookie.setSecure(true) to restrict cookies to HTTPS
 - category: security
   id: java-sql-injection
-  message: SQL string concatenation in DB API call — verify concatenated values are not user-controlled
+  message: SQL string concatenation in DB API call — verify concatenated values
+    are not user-controlled
   pattern: \.(?:prepareCall|prepareStatement|queryForObject|queryForList|batchUpdate)\s*\([^)]*\+
   severity: warning
   suggestion: Use PreparedStatement with ? placeholders and bind parameters
   cwe: CWE-89
 - category: security
   id: java-sql-injection
-  message: SQL string concatenation in execute call — verify concatenated values are not user-controlled
+  message: SQL string concatenation in execute call — verify concatenated values
+    are not user-controlled
   pattern: \.(?:executeQuery|executeUpdate|execute)\s*\([^)]*\+
   severity: warning
   suggestion: Use PreparedStatement with ? placeholders and bind parameters
@@ -60,19 +62,22 @@ rules:
   message: XSS — user-controlled format string written to HTTP response
   pattern: \.getWriter\s*\(\s*\)\s*\.(?:format|printf)\s*\(\s*(?:java\.util\.Locale\.\w+\s*,\s*)?(?!["'])(\w+)
   severity: critical
-  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating
+    engine with auto-escaping
 - category: security
   id: java-xss
   message: XSS — variable written directly to HTTP response
   pattern: \.getWriter\s*\(\s*\)\s*\.(?:write|print|println)\s*\(\s*(?!["'])(\w+)
   severity: critical
-  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating
+    engine with auto-escaping
 - category: security
   id: java-xss
   message: XSS — string concatenation with variable written to HTTP response
   pattern: \.getWriter\s*\(\s*\)\s*\.(?:write|print|println)\s*\(\s*["'][^"']*["']\s*\+\s*\w+
   severity: critical
-  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating
+    engine with auto-escaping
 - category: security
   id: java-xss
   message: XSS — format string output may contain user-controlled data in arguments
@@ -84,31 +89,36 @@ rules:
   message: XSS — variable written to HTTP response via PrintWriter
   pattern: (?<!System\.)(?<!System)\bout\.(?:write|print|println|printf|format)\s*\(\s*(?!["'])(\w+)
   severity: critical
-  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating engine with auto-escaping
+  suggestion: Escape output with ESAPI.encoder().encodeForHTML() or use a templating
+    engine with auto-escaping
 - category: security
   id: java-cmdi
   message: Command injection — string concatenation in exec()
   pattern: \.exec\s*\([^)]*\+
   severity: critical
-  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate
+    inputs against allowlist
 - category: security
   id: java-cmdi
   message: Command injection — string concatenation in process command argument
   pattern: (?:ProcessBuilder|\.command)\s*\(.*\.add\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])\w+
   severity: critical
-  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate
+    inputs against allowlist
 - category: security
   id: java-cmdi
   message: Command injection — string concatenation in command array
   pattern: (?:new\s+String\s*\[\s*\]\s*|String\s*\[\s*\]\s*\w+\s*=\s*)\{[^}]*["']\s*\+\s*\w+[^}]*\}
   severity: critical
-  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate
+    inputs against allowlist
 - category: security
   id: java-cmdi
   message: Command injection — variable concatenation in command array
   pattern: (?:new\s+String\s*\[\s*\]\s*|String\s*\[\s*\]\s*\w+\s*=\s*)\{[^}]*\b(?:cmd|command)\s*\+\s*\w+[^}]*\}
   severity: critical
-  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate inputs against allowlist
+  suggestion: Use ProcessBuilder with explicit argument list (no shell), validate
+    inputs against allowlist
 - category: security
   id: java-cmdi
   message: Command injection — variable passed to ProcessBuilder.command()
@@ -132,7 +142,8 @@ rules:
   message: XPath injection — string concatenation in XPath expression
   pattern: '["''].*(?:@\w+|/\w+)\s*=\s*''["'']\s*\+\s*\w+'
   severity: critical
-  suggestion: Use XPath parameterization (XPathVariableResolver) or validate/escape input
+  suggestion: Use XPath parameterization (XPathVariableResolver) or validate/escape
+    input
 - category: security
   id: java-path-traversal
   message: Path traversal — variable input in file I/O constructor
@@ -163,13 +174,13 @@ rules:
   pattern: (?:java\.nio\.file\.)?Paths\.get\s*\(\s*[a-z]\w*\s*[,)]
   severity: critical
   suggestion: Validate and canonicalize file paths before use
-# --- Spring Security ---
 - category: security
   id: java-spring-csrf-disabled
   message: CSRF protection explicitly disabled in Spring Security
   pattern: \.csrf\s*\(\s*\)\s*\.disable\s*\(\s*\)|\.csrf\s*\(\s*(?:csrf|c)\s*->\s*(?:csrf|c)\.disable\s*\(\s*\)\s*\)
   severity: critical
-  suggestion: Enable CSRF protection or use stateless token-based auth (e.g., JWT) where CSRF is not applicable
+  suggestion: Enable CSRF protection or use stateless token-based auth (e.g., JWT)
+    where CSRF is not applicable
 - category: security
   id: java-spring-permit-all-sensitive
   message: Spring Security permitAll on sensitive endpoint (admin, actuator, api)
@@ -206,11 +217,10 @@ rules:
   pattern: \.(?:antMatchers|requestMatchers|mvcMatchers)\s*\(\s*["']/\*\*["']\s*\)\s*\.permitAll\s*\(
   severity: critical
   suggestion: Use fine-grained access rules instead of permitting all paths
-# --- Spring MVC ---
 - category: security
   id: java-spring-open-redirect
   message: Open redirect — user input in redirect URL
-  pattern: 'return\s+["'']redirect:\s*["'']\s*\+\s*(?!["''])(\w+)|(?:RedirectView|ModelAndView)\s*\(\s*(?!["''])(\w+)'
+  pattern: return\s+["']redirect:\s*["']\s*\+\s*(?!["'])(\w+)|(?:RedirectView|ModelAndView)\s*\(\s*(?!["'])(\w+)
   severity: critical
   suggestion: Validate redirect URLs against an allowlist of trusted destinations
 - category: security
@@ -222,7 +232,7 @@ rules:
 - category: security
   id: java-spring-unvalidated-forward
   message: Server-side forward with user-controlled path
-  pattern: 'return\s+["'']forward:\s*["'']\s*\+\s*(?!["''])(\w+)|request\.getRequestDispatcher\s*\(\s*(?!["''])(\w+)'
+  pattern: return\s+["']forward:\s*["']\s*\+\s*(?!["'])(\w+)|request\.getRequestDispatcher\s*\(\s*(?!["'])(\w+)
   severity: critical
   suggestion: Validate and allowlist forward targets
 - category: security
@@ -231,10 +241,10 @@ rules:
   pattern: '@PathVariable[^)]*\)\s*String\s+(\w+)(?:[\s\S]{0,200})new\s+File\s*\(\s*\1'
   severity: critical
   suggestion: Validate and sanitize @PathVariable before use in file operations
-# --- Deserialization ---
 - category: security
   id: java-unsafe-deserialization
-  message: Unsafe deserialization — ObjectInputStream.readObject() on untrusted data enables RCE
+  message: Unsafe deserialization — ObjectInputStream.readObject() on untrusted
+    data enables RCE
   pattern: \.readObject\s*\(\s*\)|\.readUnshared\s*\(\s*\)
   severity: critical
   suggestion: Use ObjectInputFilter (JEP 290), or switch to safe formats like JSON
@@ -263,13 +273,14 @@ rules:
   pattern: new\s+XStream\s*\(\s*\)(?![\s\S]{0,100}(?:allowTypes|setupDefaultSecurity|addPermission))
   severity: critical
   suggestion: Use XStream.setupDefaultSecurity() and explicitly allow types
-# --- XXE ---
 - category: security
   id: java-xxe-documentbuilder
-  message: DocumentBuilderFactory without XXE protection — external entity injection enables file read and SSRF
+  message: DocumentBuilderFactory without XXE protection — external entity injection
+    enables file read and SSRF
   pattern: DocumentBuilderFactory\.newInstance\s*\(\s*\)(?![\s\S]{0,200}(?:setFeature|FEATURE_SECURE_PROCESSING|disallow-doctype-decl))
   severity: critical
-  suggestion: 'Set factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)'
+  suggestion: Set factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",
+    true)
   cwe: CWE-611
 - category: security
   id: java-xxe-saxparser
@@ -282,14 +293,14 @@ rules:
   message: XMLReader or XMLInputFactory without secure configuration
   pattern: XMLInputFactory\.newInstance\s*\(\s*\)|XMLInputFactory\.newFactory\s*\(\s*\)(?![\s\S]{0,100}(?:IS_SUPPORTING_EXTERNAL_ENTITIES|SUPPORT_DTD))
   severity: critical
-  suggestion: Set XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES and SUPPORT_DTD to false
+  suggestion: Set XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES and SUPPORT_DTD
+    to false
 - category: security
   id: java-xxe-transformer
   message: TransformerFactory without secure processing — XXE risk
   pattern: TransformerFactory\.newInstance\s*\(\s*\)(?![\s\S]{0,200}(?:setAttribute|ACCESS_EXTERNAL|FEATURE_SECURE_PROCESSING))
   severity: critical
   suggestion: Set ACCESS_EXTERNAL_DTD and ACCESS_EXTERNAL_STYLESHEET to empty string
-# --- SSRF ---
 - category: security
   id: java-ssrf-url
   message: SSRF — URL constructed from user-controlled input
@@ -314,7 +325,6 @@ rules:
   pattern: WebClient\.(?:create|builder).*\.(?:uri|baseUrl)\s*\(\s*(?!["'])([a-z]\w*)
   severity: critical
   suggestion: Validate URIs against an allowlist before passing to WebClient
-# --- Cryptography ---
 - category: security
   id: java-ecb-mode
   message: ECB cipher mode — identical plaintext blocks produce identical ciphertext
@@ -363,7 +373,6 @@ rules:
   pattern: SSLContext\.getInstance\s*\(\s*["'](?:SSL|SSLv[23]|TLSv?1(?:\.0|\.1)?)["']
   severity: critical
   suggestion: Use TLSv1.2 or TLSv1.3
-# --- File Upload ---
 - category: security
   id: java-unrestricted-upload
   message: File upload without type validation — arbitrary file upload risk
@@ -381,8 +390,8 @@ rules:
   message: File upload without size validation
   pattern: \.getInputStream\s*\(\s*\)[\s\S]{0,200}(?:Files\.copy|IOUtils\.copy|transferTo)(?![\s\S]{0,100}(?:getSize|maxFileSize|limitedInputStream))
   severity: warning
-  suggestion: Enforce file size limits via spring.servlet.multipart.max-file-size or manual check
-# --- JNDI Injection ---
+  suggestion: Enforce file size limits via spring.servlet.multipart.max-file-size
+    or manual check
 - category: security
   id: java-jndi-injection
   message: JNDI lookup with user-controlled input — remote code execution risk
@@ -398,22 +407,23 @@ rules:
 - category: security
   id: java-jndi-ldap-rmi
   message: JNDI lookup with LDAP or RMI scheme — remote classloading risk
-  pattern: '\.lookup\s*\(\s*["''](?:ldap|rmi|ldaps|iiop)://'
+  pattern: \.lookup\s*\(\s*["'](?:ldap|rmi|ldaps|iiop)://
   severity: critical
-  suggestion: "Restrict JNDI to java: namespace only, disable remote classloading"
+  suggestion: 'Restrict JNDI to java: namespace only, disable remote classloading'
 - category: security
   id: java-jndi-lookup-variable
   message: JNDI lookup with variable argument — injection risk if value is user-controlled
   pattern: (?:ctx|context|initialContext|jndiContext|namingContext)\s*\.\s*lookup\s*\(\s*(?!["'])([a-z]\w*)
   severity: critical
-  suggestion: Validate JNDI names against a strict allowlist; never pass user-controlled input to lookup()
-# --- Expression Language Injection ---
+  suggestion: Validate JNDI names against a strict allowlist; never pass user-controlled
+    input to lookup()
 - category: security
   id: java-spel-injection
   message: SpEL expression with user-controlled input — code execution risk
   pattern: (?:SpelExpressionParser|ExpressionParser)\s*\(\s*\)\.parseExpression\s*\(\s*(?!["'])([a-z]\w*)
   severity: critical
-  suggestion: Use SimpleEvaluationContext instead of StandardEvaluationContext, never parse user input as SpEL
+  suggestion: Use SimpleEvaluationContext instead of StandardEvaluationContext, never
+    parse user input as SpEL
 - category: security
   id: java-spel-injection-concat
   message: SpEL expression built from string concatenation
@@ -434,11 +444,12 @@ rules:
   suggestion: Use @RequestParam instead of SpEL to access request data
 - category: security
   id: java-spel-parse-variable
-  message: SpEL parseExpression() with variable argument — code execution risk if user-controlled
+  message: SpEL parseExpression() with variable argument — code execution risk if
+    user-controlled
   pattern: (?:parser|expressionParser|spelParser|exprParser)\s*\.\s*parseExpression\s*\(\s*(?!["'])([a-z]\w*)
   severity: critical
-  suggestion: Use SimpleEvaluationContext instead of StandardEvaluationContext; never parse user input as SpEL
-# --- Logging Injection ---
+  suggestion: Use SimpleEvaluationContext instead of StandardEvaluationContext; never
+    parse user input as SpEL
 - category: security
   id: java-log-injection
   message: Log injection — user input written to log without sanitization
@@ -451,13 +462,6 @@ rules:
   pattern: '(?:log|logger|LOG|LOGGER)\.(?:info|warn|error|debug|trace|fatal)\s*\([^)]*\$\{jndi:'
   severity: critical
   suggestion: Upgrade Log4j to 2.17.1+, set log4j2.formatMsgNoLookups=true
-- category: security
-  id: java-log-format-string
-  message: User input in log format string position — format string injection
-  pattern: (?:log|logger|LOG|LOGGER)\.(?:info|warn|error|debug|trace|fatal)\s*\(\s*(?!["'])([a-z]\w*)\s*\)
-  severity: warning
-  suggestion: Use parameterized logging — logger.info("message {}", userInput)
-# --- Authentication ---
 - category: security
   id: java-hardcoded-password
   message: Hardcoded password or secret in source code
@@ -479,16 +483,15 @@ rules:
 - category: security
   id: java-trust-all-certs
   message: TrustManager that accepts all certificates — MITM attack risk
-  pattern: 'X509TrustManager[\s\S]{0,200}(?:checkClientTrusted|checkServerTrusted)[\s\S]{0,50}\{\s*\}'
+  pattern: X509TrustManager[\s\S]{0,200}(?:checkClientTrusted|checkServerTrusted)[\s\S]{0,50}\{\s*\}
   severity: critical
   suggestion: Use the default TrustManager with proper CA certificates
 - category: security
   id: java-hostname-verifier-bypass
   message: HostnameVerifier that accepts all hostnames — MITM risk
-  pattern: 'new\s+HostnameVerifier[\s\S]{0,100}verify[\s\S]{0,50}return\s+true'
+  pattern: new\s+HostnameVerifier[\s\S]{0,100}verify[\s\S]{0,50}return\s+true
   severity: critical
   suggestion: Use the default HostnameVerifier or implement proper hostname checks
-# --- JWT ---
 - category: security
   id: java-jwt-none-algorithm
   message: JWT with "none" algorithm — signature bypass
@@ -513,16 +516,17 @@ rules:
   pattern: \.parseClaimsJwt\s*\(|\.parse\s*\([^)]*\)\.getBody\s*\(|\.decode\s*\(\s*token
   severity: critical
   suggestion: Use parseClaimsJws() with proper signing key verification
-# --- Hibernate / HQL ---
 - category: security
   id: java-hql-injection
-  message: HQL string concatenation in query — verify concatenated values are not user-controlled
+  message: HQL string concatenation in query — verify concatenated values are not
+    user-controlled
   pattern: \.createQuery\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
   severity: warning
   suggestion: Use parameterized queries with .setParameter()
 - category: security
   id: java-hql-injection-var
-  message: Variable passed to createQuery — may be HQL injection if string, safe if CriteriaQuery
+  message: Variable passed to createQuery — may be HQL injection if string, safe
+    if CriteriaQuery
   pattern: \.createQuery\s*\(\s*(?!["'])([a-z]\w*)\s*\)
   severity: warning
   suggestion: Use Criteria API or parameterized HQL with .setParameter()
@@ -532,7 +536,6 @@ rules:
   pattern: \.createNativeQuery\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
   severity: critical
   suggestion: Use parameterized native queries with ?1 placeholders
-# --- XML ---
 - category: security
   id: java-xstream-no-allowlist
   message: XStream without type allowlist — deserialization RCE risk
@@ -551,7 +554,6 @@ rules:
   pattern: (?:JAXBContext|Unmarshaller)[\s\S]{0,200}\.unmarshal\s*\(\s*(?:new\s+)?(?:StreamSource|InputSource|StringReader)
   severity: warning
   suggestion: Unmarshal from a SAXSource with XXE-safe SAXParserFactory
-# --- Error Handling ---
 - category: security
   id: java-stacktrace-exposure
   message: Stack trace printed to response — information disclosure
@@ -565,77 +567,75 @@ rules:
   severity: warning
   suggestion: Return a generic error message, log details server-side
 - category: security
-  id: java-catch-generic-exception
-  message: Catching generic Exception or Throwable — may swallow critical errors
-  pattern: 'catch\s*\(\s*(?:Exception|Throwable)\s+\w+\s*\)\s*\{'
-  severity: info
-  suggestion: Catch specific exception types to handle errors appropriately
-- category: security
   id: java-empty-catch-block
   message: Empty catch block — silently swallows exceptions
-  pattern: 'catch\s*\(\s*\w+\s+\w+\s*\)\s*\{\s*\}'
+  pattern: catch\s*\(\s*\w+\s+\w+\s*\)\s*\{\s*\}
   severity: warning
   suggestion: At minimum log the exception, or rethrow as appropriate
 - category: security
   id: java-printstacktrace
   message: printStackTrace() in production code — should use proper logging
-  pattern: '\.printStackTrace\s*\(\s*\)'
+  pattern: \.printStackTrace\s*\(\s*\)
   severity: info
   suggestion: Replace with logger.error("message", exception) using a logging framework
-# --- Concurrency ---
 - category: security
   id: java-double-checked-locking
   message: Double-checked locking without volatile — broken under Java Memory Model
-  pattern: 'if\s*\(\s*\w+\s*==\s*null\s*\)\s*\{\s*synchronized\s*\([^)]*\)\s*\{\s*if\s*\(\s*\w+\s*==\s*null\s*\)'
+  pattern: if\s*\(\s*\w+\s*==\s*null\s*\)\s*\{\s*synchronized\s*\([^)]*\)\s*\{\s*if\s*\(\s*\w+\s*==\s*null\s*\)
   severity: warning
-  suggestion: Declare the field as volatile, or use an initialization-on-demand holder pattern
+  suggestion: Declare the field as volatile, or use an initialization-on-demand holder
+    pattern
 - category: security
   id: java-non-atomic-check-then-act
   message: Non-atomic check-then-act on File — race condition (TOCTOU)
-  pattern: '\.exists\s*\(\s*\)\s*\)\s*\{[\s\S]{0,100}\.(?:create|delete|mkdir|renameTo)\s*\('
+  pattern: \.exists\s*\(\s*\)\s*\)\s*\{[\s\S]{0,100}\.(?:create|delete|mkdir|renameTo)\s*\(
   severity: warning
   suggestion: Use atomic file operations (Files.createFile with CREATE_NEW, etc.)
 - category: security
   id: java-toctou-file-check-then-act
-  message: TOCTOU race condition — Files.exists() as precondition is not atomic with subsequent file operations (CWE-367)
-  pattern: '(?:if\s*\(\s*!?\s*)?Files\.exists\s*\([^)]+\)'
+  message: TOCTOU race condition — Files.exists() as precondition is not atomic
+    with subsequent file operations (CWE-367)
+  pattern: (?:if\s*\(\s*!?\s*)?Files\.exists\s*\([^)]+\)
   severity: warning
-  suggestion: Use atomic file operations (Files.copy with REPLACE_EXISTING, try-catch on NoSuchFileException/FileAlreadyExistsException) instead of check-then-act
+  suggestion: Use atomic file operations (Files.copy with REPLACE_EXISTING, try-catch
+    on NoSuchFileException/FileAlreadyExistsException) instead of check-then-act
 - category: security
   id: java-async-file-operation
   message: Filesystem mutation in @Async method — inherently race-prone (CWE-367)
-  pattern: 'Files\.(?:copy|delete|move|write|newOutputStream|createFile|createDirectory)\s*\('
+  pattern: Files\.(?:copy|delete|move|write|newOutputStream|createFile|createDirectory)\s*\(
   severity: info
-  suggestion: Use file locks (FileChannel.lock) or atomic operations in async contexts to prevent race conditions
+  suggestion: Use file locks (FileChannel.lock) or atomic operations in async contexts
+    to prevent race conditions
 - category: security
   id: java-synchronized-on-boxed
-  message: Synchronizing on boxed primitive — shared instances cause unintended locking
-  pattern: 'synchronized\s*\(\s*(?:Integer|Long|Boolean|Short|Byte|Character|Float|Double)\b'
+  message: Synchronizing on boxed primitive — shared instances cause unintended
+    locking
+  pattern: synchronized\s*\(\s*(?:Integer|Long|Boolean|Short|Byte|Character|Float|Double)\b
   severity: warning
   suggestion: Synchronize on a dedicated private final Object lock = new Object()
-# --- Android ---
 - category: security
   id: java-android-exported-component
   message: Android component exported without permission — accessible to other apps
-  pattern: 'android:exported\s*=\s*["'']true["''](?![\s\S]{0,100}android:permission)'
+  pattern: android:exported\s*=\s*["']true["'](?![\s\S]{0,100}android:permission)
   severity: critical
   suggestion: Set android:exported="false" or require a permission
 - category: security
   id: java-android-webview-js
   message: WebView with JavaScript enabled — XSS and code execution risk
-  pattern: '\.getSettings\s*\(\s*\)\s*\.setJavaScriptEnabled\s*\(\s*true\s*\)'
+  pattern: \.getSettings\s*\(\s*\)\s*\.setJavaScriptEnabled\s*\(\s*true\s*\)
   severity: warning
-  suggestion: Disable JavaScript unless strictly required, use addJavascriptInterface carefully
+  suggestion: Disable JavaScript unless strictly required, use addJavascriptInterface
+    carefully
 - category: security
   id: java-android-cleartext-traffic
   message: Android app allows cleartext HTTP traffic
-  pattern: 'android:usesCleartextTraffic\s*=\s*["'']true["'']|\.setCleartextTrafficPermitted\s*\(\s*true\s*\)'
+  pattern: android:usesCleartextTraffic\s*=\s*["']true["']|\.setCleartextTrafficPermitted\s*\(\s*true\s*\)
   severity: warning
   suggestion: Use HTTPS only — set android:usesCleartextTraffic="false"
 - category: security
   id: java-android-webview-file-access
   message: WebView allows file system access — local file theft risk
-  pattern: '\.setAllowFileAccess\s*\(\s*true\s*\)|\.setAllowUniversalAccessFromFileURLs\s*\(\s*true\s*\)'
+  pattern: \.setAllowFileAccess\s*\(\s*true\s*\)|\.setAllowUniversalAccessFromFileURLs\s*\(\s*true\s*\)
   severity: critical
   suggestion: Disable file access on WebView unless absolutely necessary
 - category: security
@@ -644,20 +644,6 @@ rules:
   pattern: MODE_WORLD_READABLE|openFileOutput\s*\([^)]*,\s*1\s*\)
   severity: critical
   suggestion: Use MODE_PRIVATE and ContentProvider for controlled sharing
-# --- Kotlin Interop ---
-- category: security
-  id: java-kotlin-platform-type
-  message: Platform type from Java used without null check in Kotlin — NPE risk
-  pattern: '(?:fun|val|var)\s+\w+[^?:]*=\s*\w+\.(?:get|find|query|load|fetch|retrieve)\w*\s*\([^)]*\)(?!\s*[?!])'
-  severity: info
-  suggestion: Explicitly declare nullable types for Java return values in Kotlin
-- category: security
-  id: java-nullable-annotation-missing
-  message: Public Java method lacks @Nullable/@NonNull — unsafe for Kotlin callers
-  pattern: 'public\s+(?:static\s+)?(?:String|Object|List|Map|Set|Optional)\s+\w+\s*\([^)]*\)\s*\{(?![\s\S]{0,10}@(?:Nullable|NonNull|NotNull|Nonnull))'
-  severity: info
-  suggestion: Add @Nullable or @NonNull annotations for Kotlin interop safety
-# --- Additional Injection ---
 - category: security
   id: java-template-injection
   message: Server-side template injection — user input in template engine
@@ -688,7 +674,6 @@ rules:
   pattern: SSLSocketFactory\.getDefault\s*\(\s*\)|\.setSSLSocketFactory\s*\(\s*(?!null)(?:[a-z]\w*)\s*\)
   severity: warning
   suggestion: Use the default SSLSocketFactory with proper CA trust store
-# --- Miscellaneous ---
 - category: security
   id: java-system-exit
   message: System.exit() in library/web code — kills the entire JVM
@@ -698,7 +683,7 @@ rules:
 - category: security
   id: java-thread-sleep-in-sync
   message: Thread.sleep() inside synchronized block — holds lock while sleeping
-  pattern: 'synchronized[\s\S]{0,100}Thread\.sleep\s*\('
+  pattern: synchronized[\s\S]{0,100}Thread\.sleep\s*\(
   severity: warning
   suggestion: Use wait() with timeout instead, or move sleep outside synchronized
 - category: security
@@ -718,11 +703,12 @@ rules:
   message: Runtime.exec() with user-controlled argument
   pattern: Runtime\.getRuntime\s*\(\s*\)\.exec\s*\(\s*(?!["'])([a-z]\w*)
   severity: critical
-  suggestion: Use ProcessBuilder with an explicit argument list, validate input against allowlist
+  suggestion: Use ProcessBuilder with an explicit argument list, validate input against
+    allowlist
 - category: security
   id: java-cors-credentials-wildcard
   message: CORS with credentials and wildcard origin — cookie theft risk
-  pattern: '\.allowCredentials\s*\(\s*true\s*\)[\s\S]{0,200}\.allowedOrigins\s*\(\s*["'']\*["'']\s*\)'
+  pattern: \.allowCredentials\s*\(\s*true\s*\)[\s\S]{0,200}\.allowedOrigins\s*\(\s*["']\*["']\s*\)
   severity: critical
   suggestion: Never combine Access-Control-Allow-Credentials with wildcard origin
 - category: security
@@ -755,41 +741,50 @@ rules:
   pattern: '@(?:ModelAttribute|RequestBody)\s+(?!.*(?:Dto|DTO|Request|Form|Command|Input))\w+Entity\s+'
   severity: warning
   suggestion: Use a DTO/Form object instead of binding directly to entity classes
-# ── Prompt Injection (LLM SDK) ────────────────────────────────────
 - category: security
   id: prompt-injection-java-format
-  message: LLM prompt built with String.format — prompt injection risk if arguments are user-controlled
+  message: LLM prompt built with String.format — prompt injection risk if arguments
+    are user-controlled
   pattern: (?i)(?:prompt|system_prompt|system_message|instruction|llm_input)\w*\s*=\s*String\.format\s*\(
   severity: critical
-  suggestion: Use structured message types with proper role separation; validate all user input
+  suggestion: Use structured message types with proper role separation; validate all
+    user input
 - category: security
   id: prompt-injection-java-concat
   message: LLM prompt built with string concatenation — prompt injection risk
   pattern: (?i)(?:prompt|systemPrompt|systemMessage|instructions)\s*=\s*["'][^"']*["']\s*\+
   severity: critical
-  suggestion: Separate system instructions from user content using the API's message/role structure
+  suggestion: Separate system instructions from user content using the API's message/role
+    structure
 - category: security
   id: prompt-injection-java-stringbuilder
   message: LLM prompt built with StringBuilder — prompt injection risk
   pattern: (?i)(?:StringBuilder|StringBuffer)\s*\(\s*["'].*(?:prompt|system|instruction).*["']\s*\)[\s\S]{0,200}\.append\s*\(
   severity: critical
-  suggestion: Use the LLM SDK's structured message types; never build prompts with StringBuilder from user input
-  flags: [DOTALL]
+  suggestion: Use the LLM SDK's structured message types; never build prompts with
+    StringBuilder from user input
+  flags:
+  - DOTALL
 - category: security
   id: prompt-injection-spring-ai
-  message: Spring AI prompt constructed with string interpolation — prompt injection risk
+  message: Spring AI prompt constructed with string interpolation — prompt injection
+    risk
   pattern: (?:ChatClient|PromptTemplate|SystemPromptTemplate)\s*\.(?:create|builder|from)\s*\([^)]*(?:String\.format|\+\s*\w+)
   severity: critical
-  suggestion: Use Spring AI's PromptTemplate with validated parameters; keep system prompts static
+  suggestion: Use Spring AI's PromptTemplate with validated parameters; keep system
+    prompts static
 - category: security
   id: prompt-injection-system-msg-java
-  message: System message in LLM call built with concatenation — full prompt takeover risk
+  message: System message in LLM call built with concatenation — full prompt takeover
+    risk
   pattern: (?i)(?:setSystemMessage|systemMessage|addSystemMessage)\s*\(\s*(?:String\.format\s*\(|["'][^"']*["']\s*\+)
   severity: critical
-  suggestion: Use static system messages; pass user data through designated user input channels
+  suggestion: Use static system messages; pass user data through designated user input
+    channels
 - category: security
   id: llm-output-to-exec-java
-  message: LLM output passed to Runtime.exec or ProcessBuilder — AI-generated code execution risk
+  message: LLM output passed to Runtime.exec or ProcessBuilder — AI-generated code
+    execution risk
   pattern: (?:Runtime\.getRuntime\(\)\.exec|ProcessBuilder)\s*\(\s*(?:response|completion|result|output|generated|answer)
   severity: critical
   suggestion: Never execute LLM output directly; validate against an allowlist

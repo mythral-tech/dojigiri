@@ -114,9 +114,7 @@ def test_scan_javascript_quality(javascript_quality_dir):
         for f in fa.findings:
             all_rules.add(f.rule)
 
-    # var-usage rule was removed (style opinion, not correctness)
-    assert "console-log" in all_rules
-    assert "loose-equality" in all_rules
+    # console-log and loose-equality removed (linter territory, not SAST)
     assert "eval-usage" in all_rules
     assert "innerhtml" in all_rules
 
@@ -139,11 +137,9 @@ def test_scan_mixed_languages(mixed_language_dir):
 
     # Python issues
     assert "os-system" in all_rules
-    # JS issues (var-usage rule was removed)
+    # JS issues
     assert "document-write" in all_rules
-    # Go issues
-    assert "unchecked-error" in all_rules
-    assert "fmt-print" in all_rules
+    # Go issues — unchecked-error suppressed by default, fmt-print removed
 
 
 def test_scan_empty_dir(empty_dir):
@@ -211,15 +207,14 @@ def test_scan_report_structure(python_security_dir):
 
 def test_scan_fix_rescan_cycle(temp_dir):
     """Scan → fix → rescan: fixed issues should not reappear."""
+    from dojigiri.detector import analyze_file_static
     from dojigiri.fixer import fix_file
     fp = temp_dir / "fixable.py"
     fp.write_text('import os\n\nx = 1\n', encoding="utf-8")
 
-    # Scan
-    report1 = scan_quick(temp_dir, use_cache=False, max_workers=1)
-    findings = []
-    for fa in report1.file_analyses:
-        findings.extend(fa.findings)
+    # Scan (suppress_noise=False to get unused-import)
+    content = fp.read_text(encoding="utf-8")
+    findings = analyze_file_static(str(fp), content, "python", suppress_noise=False).findings
     unused_import = [f for f in findings if f.rule == "unused-import"]
     assert len(unused_import) >= 1
 

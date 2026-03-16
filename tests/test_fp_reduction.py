@@ -24,7 +24,7 @@ class UserModel:
 def func():
     unused_local = 42
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     # The class attributes (name, age, items) should NOT be flagged
     flagged_names = {f.message for f in unused_var}
@@ -33,18 +33,21 @@ def func():
     assert not any("'items'" in msg for msg in flagged_names)
 
 
-def test_unused_variable_local_still_flagged():
-    """Local variables that are genuinely unused should still be flagged."""
+def test_unused_variable_suppressed_by_default():
+    """unused-variable is suppressed by default but detected when suppress_noise=False."""
     code = '''
 def func():
     used = 42
     unused = 99
     return used
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
-    unused_var = [f for f in findings if f.rule == "unused-variable"]
-    flagged_names = [f.message for f in unused_var]
-    assert any("unused" in msg for msg in flagged_names)
+    # Default: suppressed
+    findings_default = analyze_file_static("test.py", code, "python").findings
+    assert not any(f.rule == "unused-variable" for f in findings_default)
+    # Full mode: detected
+    findings_full = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
+    unused_var = [f for f in findings_full if f.rule == "unused-variable"]
+    assert any("unused" in msg for msg in [f.message for f in unused_var])
 
 
 # ─── 2. var-usage: removed from default rules ────────────────────────
@@ -269,25 +272,11 @@ def test_insecure_http_flagged_in_production():
 
 # ─── 7. console-log: skip test/example dirs ──────────────────────────
 
-def test_console_log_skipped_in_test_dir():
-    """console.log should not be flagged in test files."""
+def test_console_log_removed():
+    """console-log rule removed — linter territory, not SAST."""
     code = 'console.log("test output");\n'
-    findings = run_regex_checks(code, "/project/test/helper.js", "javascript")
-    assert not any(f.rule == "console-log" for f in findings)
-
-
-def test_console_log_skipped_in_examples_dir():
-    """console.log should not be flagged in examples/ directory."""
-    code = 'console.log("example output");\n'
-    findings = run_regex_checks(code, "/project/examples/demo.js", "javascript")
-    assert not any(f.rule == "console-log" for f in findings)
-
-
-def test_console_log_flagged_in_lib():
-    """console.log should still be flagged in lib/ (production code)."""
-    code = 'console.log("debug");\n'
     findings = run_regex_checks(code, "/project/lib/server.js", "javascript")
-    assert any(f.rule == "console-log" for f in findings)
+    assert not any(f.rule == "console-log" for f in findings)
 
 
 # ─── 8. possibly-uninitialized: parameters and loop vars ─────────────
@@ -301,7 +290,7 @@ def process(data, config):
         result.append(item)
     return result
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     uninit = [f for f in findings if f.rule == "possibly-uninitialized"]
     flagged_names = [f.message for f in uninit]
     assert not any("data" in msg for msg in flagged_names)
@@ -317,7 +306,7 @@ def func():
         print(item)
     total = item
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     uninit = [f for f in findings if f.rule == "possibly-uninitialized"]
     flagged_names = [f.message for f in uninit]
     # 'item' is a loop variable, should not be flagged
@@ -333,7 +322,7 @@ def func():
     session = app.open_session(request)
     return session
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     leaks = [f for f in findings if f.rule == "resource-leak"]
     assert not any("session" in f.message for f in leaks)
 
@@ -346,7 +335,7 @@ def func():
     data = f.read()
     return data
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     leaks = [f for f in findings if f.rule == "resource-leak"]
     # Should flag 'f' as unclosed resource
     assert any("'f'" in f.message for f in leaks)
@@ -395,7 +384,7 @@ def parse():
     msg = email.message.Message()
     return msg
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     unused_import = [f for f in findings if f.rule == "unused-import"]
     flagged_names = [f.message for f in unused_import]
     assert not any("email.message" in msg for msg in flagged_names)
@@ -409,7 +398,7 @@ import os.path
 
 x = 42
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     unused_import = [f for f in findings if f.rule == "unused-import"]
     assert any("os.path" in f.message or "'os'" in f.message for f in unused_import)
 
@@ -427,7 +416,7 @@ class Foo:
         if self.data is not None:
             return self.data.strip()
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     null_deref = [f for f in findings if f.rule == "null-dereference"]
     assert not any("data" in f.message for f in null_deref)
 
@@ -444,7 +433,7 @@ class Foo:
             raise RuntimeError("no connection")
         return self.conn.execute("SELECT 1")
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     null_deref = [f for f in findings if f.rule == "null-dereference"]
     assert not any("conn" in f.message for f in null_deref)
 
@@ -464,7 +453,7 @@ def process(data):
 '''
     # This should NOT suppress the null-dereference on x.strip()
     # because the if-block sets x to a value, not raise/return
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     # We just verify the guard doesn't apply — the finding may or may not
     # appear depending on type inference, so just verify no crash
     assert isinstance(findings, list)
@@ -478,7 +467,7 @@ def process(x):
         raise ValueError("x required")
     return x.strip()
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     null_deref = [f for f in findings if f.rule == "null-dereference"]
     assert not any("'x'" in f.message for f in null_deref)
 
@@ -495,7 +484,7 @@ T = TypeVar('T')
 def identity(x: T) -> T:
     return x
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     assert not any("'T'" in f.message for f in unused_var)
 
@@ -507,7 +496,7 @@ from collections import namedtuple
 
 Point = namedtuple('Point', ['x', 'y'])
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     assert not any("'Point'" in f.message for f in unused_var)
 
@@ -519,6 +508,6 @@ def func():
     result = compute()
     return 42
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     unused_var = [f for f in findings if f.rule == "unused-variable"]
     assert any("result" in f.message for f in unused_var)
