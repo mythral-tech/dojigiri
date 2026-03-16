@@ -754,11 +754,11 @@ class TestFeatureEnvyFalsePositives:
 class TestLongMethod:
     """Functions/methods exceeding a line threshold."""
 
-    def test_function_over_50_lines(self):
-        """A standalone function >50 lines should be flagged."""
+    def test_function_over_75_lines(self):
+        """A standalone function >75 effective lines should be flagged."""
         from dojigiri.semantic.smells import check_long_method
 
-        body = "\n".join(f"    x_{i} = {i}" for i in range(60))
+        body = "\n".join(f"    x_{i} = {i}" for i in range(80))
         code = f"def long_func():\n{body}\n"
         sem = _sem(code)
         findings = check_long_method(sem, "test.py")
@@ -788,7 +788,7 @@ class TestLongMethod:
         """A long method inside a class should use 'Method' label."""
         from dojigiri.semantic.smells import check_long_method
 
-        body = "\n".join(f"        self.x_{i} = {i}" for i in range(55))
+        body = "\n".join(f"        self.x_{i} = {i}" for i in range(80))
         code = (
             "class MyClass:\n"
             f"    def long_method(self):\n{body}\n"

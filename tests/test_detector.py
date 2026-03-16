@@ -61,18 +61,6 @@ url = "http://example.com/api"  # This should match
     assert len(http_findings) >= 1
 
 
-def test_run_regex_checks_todo_in_comments():
-    """Test that TODO markers are found in comments."""
-    code = '''
-# TODO: implement this function
-def func():
-    pass  # FIXME: broken
-'''
-    findings = run_regex_checks(code, "test.py", "python")
-    
-    todo_findings = [f for f in findings if f.rule == "todo-marker"]
-    assert len(todo_findings) == 2
-
 
 # ───────────────────────────────────────────────────────────────────────────
 # PYTHON AST CHECKS
@@ -535,7 +523,12 @@ def complex_function():
                                                         if n:
                                                             if o:
                                                                 if p:
-                                                                    return True
+                                                                    if q:
+                                                                        if r:
+                                                                            if s:
+                                                                                if t:
+                                                                                    if u:
+                                                                                        return True
     return False
 '''
     findings = run_python_ast_checks(code, "test.py")
@@ -546,22 +539,25 @@ def complex_function():
 
 
 def test_python_ast_too_many_args():
-    """Test detection of functions with too many arguments."""
+    """Test detection of functions with too many arguments (threshold=12)."""
     code = '''
 def simple(a, b):
     pass
 
-def too_many(a, b, c, d, e, f, g, h, i):  # 9 args
+def too_many(a, b, c, d, e, f, g, h, i, j, k, l, m):  # 13 args
     pass
 
 class MyClass:
-    def method(self, a, b, c, d, e, f, g, h):  # 8 args + self = 9, but self is excluded
+    def method(self, a, b, c, d, e, f, g, h, i, j, k, l, m):  # 13 args + self, self excluded
+        pass
+
+    def __init__(self, a, b, c, d, e, f, g, h, i, j, k, l, m, n):  # __init__ excluded
         pass
 '''
     findings = run_python_ast_checks(code, "test.py")
-    
+
     too_many = [f for f in findings if f.rule == "too-many-args"]
-    # Should flag both: too_many has 9 args, method has 8 (self excluded) which is > 7
+    # Should flag too_many (13 args) and method (13 args), but NOT __init__
     assert len(too_many) == 2
 
 

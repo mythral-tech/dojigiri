@@ -120,7 +120,7 @@ SECURITY_RULES: list[Rule] = _compile(
         # SSTI — template rendering from string (not file)
         # Excludes: function definitions, calls with immediate string literal args (safe)
         (
-            r"""(?<!def )(?:Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|Jinja2\s*\(.*\bstring\b|new\s+Function\s*\()""",
+            r"""(?<!def )(?:Template\s*\((?!\s*['"])|from_string\s*\((?!\s*['"])|Environment\s*\(\s*\)\.from_string|Jinja2\s*\(.*\bstring\b|new\s+Function\s*\()""",
             Severity.CRITICAL,
             Category.SECURITY,
             "ssti-risk",

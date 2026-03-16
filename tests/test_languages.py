@@ -109,22 +109,6 @@ def test_universal_aws_credentials():
     assert not pattern.search('aws_key = "short"')
 
 
-def test_universal_todo_marker():
-    """Test TODO/FIXME detection in comments."""
-    rules = get_rules_for_language("python")
-    pattern = next(r for r in rules if r[3] == "todo-marker")[0]
-    
-    # Should match (with comment prefix)
-    assert pattern.search("# TODO: fix this")
-    assert pattern.search("// TODO: implement")
-    assert pattern.search("# FIXME urgent")
-    assert pattern.search("// HACK workaround")
-    assert pattern.search("# XXX check this")
-    
-    # Should NOT match (no comment prefix)
-    assert not pattern.search("TODO: not in comment")
-    assert not pattern.search("FIXME without prefix")
-
 
 def test_universal_long_line():
     """Test long line detection."""
@@ -291,31 +275,6 @@ def test_python_star_import():
     assert not pattern.search("import module")
 
 
-def test_python_assert_statement():
-    """Test assert statement detection."""
-    rules = get_rules_for_language("python")
-    pattern = next(r for r in rules if r[3] == "assert-statement")[0]
-    
-    # Should match
-    assert pattern.search("assert x > 0")
-    assert pattern.search("    assert value is not None")
-    
-    # Should NOT match (not at start of statement)
-    assert not pattern.search("# assert is dangerous")
-
-
-def test_python_fstring_no_expr():
-    """Test f-string without expression."""
-    rules = get_rules_for_language("python")
-    pattern = next(r for r in rules if r[3] == "fstring-no-expr")[0]
-    
-    # Should match (no expressions)
-    assert pattern.search('f"hello world"')
-    assert pattern.search("f'static string'")
-    
-    # Should NOT match (has expressions)
-    assert not pattern.search('f"hello {name}"')
-    assert not pattern.search("f'value: {x}'")
 
 
 def test_python_pickle_unsafe():

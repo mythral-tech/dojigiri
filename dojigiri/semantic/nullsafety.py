@@ -398,6 +398,27 @@ def _source_description(tinfo: TypeInfo) -> str:
     return ""
 
 
+def _is_assignment_lhs(source_lines: list[str] | None, line: int, var_name: str) -> bool:
+    """Return True if the reference on this line is an assignment LHS, not a dereference.
+
+    Detects patterns like `self.x = ...` or `x = ...` where the variable appears
+    on the left side of an assignment. These are not null dereferences.
+
+    Note: source_lines is 0-indexed and line numbers from the semantic extractor
+    directly index into it (line 0 = first line of source).
+    """
+    if not source_lines or line < 0 or line >= len(source_lines):
+        return False
+    stripped = source_lines[line].strip()
+    # self.x = ... (but not self.x == ...)
+    if re.match(rf"self\.{re.escape(var_name)}\s*=[^=]", stripped):
+        return True
+    # x = ... (but not x == ...)
+    if re.match(rf"{re.escape(var_name)}\s*=[^=]", stripped):
+        return True
+    return False
+
+
 def _check_nullable_attr_refs(
     semantics: FileSemantics,
     nullable_vars: dict[tuple[str, int], TypeInfo],
@@ -411,6 +432,10 @@ def _check_nullable_attr_refs(
 
     for ref in semantics.references:
         if ref.context != "attribute_access":
+            continue
+
+        # Skip assignment LHS — `self.x = value` is not a dereference
+        if _is_assignment_lhs(semantics.source_lines, ref.line, ref.name):
             continue
 
         # If there's a receiver, check if this is a non-self-assigned attr

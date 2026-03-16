@@ -33,15 +33,6 @@ UNIVERSAL_RULES: list[Rule] = _compile(
             "Possible hardcoded AWS credentials",
             "Use IAM roles or environment variables",
         ),
-        # TODO/FIXME — only in comment lines (# or //)
-        (
-            r"(?i)(?:^|\s)(?:#|//).*\b(?:TODO|FIXME|HACK|XXX)\b",
-            Severity.INFO,
-            Category.STYLE,
-            "todo-marker",
-            "TODO/FIXME marker found",
-            None,
-        ),
         # Long lines
         (
             r"^.{201,}$",

@@ -49,7 +49,7 @@ def test_function():
     return False
     print("unreachable")  # dead code
 
-def complex_function(a, b, c, d, e, f, g, h, i):  # too many args
+def complex_function(a, b, c, d, e, f, g, h, i, j, k, l, m):  # too many args (13 > 12)
     if a:
         if b:
             if c:

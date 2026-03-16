@@ -473,7 +473,7 @@ def check_shadowed_builtins(tree, source_bytes: bytes, config: LanguageConfig, f
 
 
 def check_function_complexity(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
-    """Flag functions with cyclomatic complexity > 15."""
+    """Flag functions with cyclomatic complexity > 20."""
     if not config.function_node_types:
         return []
 
@@ -488,7 +488,7 @@ def check_function_complexity(tree, source_bytes: bytes, config: LanguageConfig,
         func_name = _get_function_name(node, source_bytes)
         complexity = _count_complexity(node, branch_types, func_types)
 
-        if complexity > 15:
+        if complexity > 20:
             findings.append(
                 Finding(
                     file=filepath,
@@ -529,7 +529,7 @@ def _count_complexity(node, branch_types: set, func_types: set) -> int:
 
 
 def check_too_many_args(tree, source_bytes: bytes, config: LanguageConfig, filepath: str) -> list[Finding]:
-    """Flag functions with more than 7 parameters."""
+    """Flag functions with more than 12 parameters (skip __init__)."""
     if not config.function_node_types:
         return []
 
@@ -541,12 +541,17 @@ def check_too_many_args(tree, source_bytes: bytes, config: LanguageConfig, filep
             continue
 
         func_name = _get_function_name(node, source_bytes)
+
+        # Skip __init__ — dependency injection constructors legitimately have many params
+        if func_name == "__init__":
+            continue
+
         params = _get_parameter_names(node, source_bytes, config)
 
         # Exclude self/cls
         real_params = [(n, l) for n, l in params if n not in ("self", "cls")]
 
-        if len(real_params) > 7:
+        if len(real_params) > 12:
             findings.append(
                 Finding(
                     file=filepath,

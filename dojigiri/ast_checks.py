@@ -989,7 +989,7 @@ def _check_function(node: ast.FunctionDef, filepath: str, findings: list[Finding
     # Overly complex functions (too many branches)
     # Use _count_branches to avoid counting nested function bodies
     branch_count = _count_branches(node)
-    if branch_count > 15:
+    if branch_count > 20:
         findings.append(
             Finding(
                 file=filepath,
@@ -1003,21 +1003,22 @@ def _check_function(node: ast.FunctionDef, filepath: str, findings: list[Finding
             )
         )
 
-    # Too many arguments
-    total_args = len(node.args.args) + len(node.args.posonlyargs) + len(node.args.kwonlyargs)
-    # Don't count 'self' and 'cls'
-    if node.args.args and node.args.args[0].arg in ("self", "cls"):
-        total_args -= 1
-    if total_args > 7:
-        findings.append(
-            Finding(
-                file=filepath,
-                line=node.lineno,
-                severity=Severity.INFO,
-                category=Category.STYLE,
-                source=Source.AST,
-                rule="too-many-args",
-                message=f"Function '{node.name}' has {total_args} arguments",
-                suggestion="Consider using a dataclass or config object to group parameters",
+    # Too many arguments (skip __init__ — DI constructors legitimately have many params)
+    if node.name != "__init__":
+        total_args = len(node.args.args) + len(node.args.posonlyargs) + len(node.args.kwonlyargs)
+        # Don't count 'self' and 'cls'
+        if node.args.args and node.args.args[0].arg in ("self", "cls"):
+            total_args -= 1
+        if total_args > 12:
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=node.lineno,
+                    severity=Severity.INFO,
+                    category=Category.STYLE,
+                    source=Source.AST,
+                    rule="too-many-args",
+                    message=f"Function '{node.name}' has {total_args} arguments",
+                    suggestion="Consider using a dataclass or config object to group parameters",
+                )
             )
-        )

@@ -208,11 +208,16 @@ class TestSyntaxError:
 
 class TestTooManyArgs:
     def test_too_many_args(self):
-        code = "def foo(a, b, c, d, e, f, g, h):\n    pass\n"
+        code = "def foo(a, b, c, d, e, f, g, h, i, j, k, l, m):\n    pass\n"
         findings = run_python_ast_checks(code, "test.py")
         assert any(f.rule == "too-many-args" for f in findings)
 
     def test_self_excluded(self):
-        code = "class X:\n    def foo(self, a, b, c, d, e, f, g):\n        pass\n"
+        code = "class X:\n    def foo(self, a, b, c, d, e, f, g, h, i, j, k, l):\n        pass\n"
+        findings = run_python_ast_checks(code, "test.py")
+        assert not any(f.rule == "too-many-args" for f in findings)
+
+    def test_init_excluded(self):
+        code = "class X:\n    def __init__(self, a, b, c, d, e, f, g, h, i, j, k, l, m, n):\n        pass\n"
         findings = run_python_ast_checks(code, "test.py")
         assert not any(f.rule == "too-many-args" for f in findings)

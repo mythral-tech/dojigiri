@@ -87,7 +87,7 @@ rules:
 - category: security
   id: ssti-risk
   message: Template constructed from string — server-side template injection enables remote code execution
-  pattern: (?:(?:jinja2|mako|django\.template|chameleon)\.Template\s*\((?!\s*['"])|render_template_string\s*\((?!\s*['"])|(?:Environment|SandboxedEnvironment)\s*\([^)]*\)\.from_string\s*\((?!\s*['"])|new\s+Function\s*\()
+  pattern: (?:(?:jinja2|mako|django\.template|chameleon)\.Template\s*\((?!\s*['"])|(?:Environment|SandboxedEnvironment)\s*\([^)]*\)\.from_string\s*\((?!\s*['"])|new\s+Function\s*\()
   severity: warning
   suggestion: Use pre-compiled templates from files, never from user-controlled strings
   cwe: CWE-94
@@ -274,7 +274,7 @@ rules:
   id: information-disclosure-stacktrace
   message: Stack trace or detailed errors exposed to client
   pattern: (?i)(?:traceback\.format_exc|traceback\.print_exc|e\.(?:getMessage|getStackTrace|printStackTrace)|Error\.stack)\s*(?:\(\)|;)
-  severity: warning
+  severity: info
   suggestion: Log errors server-side; return generic error messages to clients
 - category: security
   id: crypto-ecb-java

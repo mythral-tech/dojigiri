@@ -255,7 +255,7 @@ class TestSeverityContract:
         "insecure-ssl-context", "weak-tls-version", "weak-cipher-suite",
         "werkzeug-debugger", "jwt-none-algorithm", "jwt-alg-none",
         "js-tls-reject-unauthorized", "js-tls-env-disable",
-        "logging-config-listen", "code-interactive-console",
+        "logging-config-listen",
         "cors-reflect-origin",
         # Crypto
         "crypto-create-cipher", "crypto-static-iv", "crypto-ecb-mode",

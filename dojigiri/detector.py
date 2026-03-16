@@ -37,13 +37,12 @@ if TYPE_CHECKING:
 _SECURITY_CATEGORIES = {Category.SECURITY}
 
 # Rules that specifically target comments — never skip on comment lines
-_COMMENT_RULES = {"todo-marker"}
+_COMMENT_RULES: set[str] = set()
 
 # Rules to suppress in test/example files (high FP in non-production code)
 _SKIP_IN_TEST_FILES = {
     "insecure-http",
     "console-log",
-    "assert-statement",      # tests are *supposed* to use assert
     "unused-variable",       # test fixtures, setup vars, captures
     "variable-shadowing",    # parametrize/fixtures reuse names freely
     "long-method",           # test functions are naturally long
@@ -73,7 +72,6 @@ _SKIP_IN_TEST_FILES = {
 }
 _SKIP_IN_EXAMPLE_FILES = {
     "console-log",
-    "assert-statement",      # tutorial code uses assert for illustration
     "hardcoded-secret",      # example credentials are intentional
     "hardcoded-secret-dict", # example config dicts with fake keys
     "hardcoded-password",    # example passwords are intentional

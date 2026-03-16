@@ -343,9 +343,9 @@ class TestFunctionComplexity:
         assert len(findings) == 0
 
     def test_complex_function_flagged(self):
-        # Build a function with 16+ branches
+        # Build a function with 21+ branches (threshold=20)
         branches = "\n".join(
-            f"    if x{i}:\n        pass" for i in range(17)
+            f"    if x{i}:\n        pass" for i in range(22)
         )
         code = f"def complex_func():\n{branches}\n"
         tree, src, config = _parse(code, "python")
@@ -355,9 +355,9 @@ class TestFunctionComplexity:
         assert findings[0].rule == "high-complexity"
 
     def test_threshold_boundary(self):
-        """15 branches should NOT be flagged (threshold is > 15)."""
+        """20 branches should NOT be flagged (threshold is > 20)."""
         branches = "\n".join(
-            f"    if x{i}:\n        pass" for i in range(15)
+            f"    if x{i}:\n        pass" for i in range(20)
         )
         code = f"def boundary_func():\n{branches}\n"
         tree, src, config = _parse(code, "python")
@@ -372,14 +372,20 @@ class TestFunctionComplexity:
 @needs_tree_sitter
 class TestTooManyArgs:
     def test_too_many_params_flagged(self):
-        code = "def f(a, b, c, d, e, f, g, h):\n    pass\n"
+        code = "def f(a, b, c, d, e, f, g, h, i, j, k, l, m):\n    pass\n"
         tree, src, config = _parse(code, "python")
         findings = check_too_many_args(tree, src, config, "test.py")
         assert len(findings) == 1
         assert findings[0].rule == "too-many-args"
 
-    def test_seven_params_ok(self):
-        code = "def f(a, b, c, d, e, f, g):\n    pass\n"
+    def test_twelve_params_ok(self):
+        code = "def f(a, b, c, d, e, f, g, h, i, j, k, l):\n    pass\n"
+        tree, src, config = _parse(code, "python")
+        findings = check_too_many_args(tree, src, config, "test.py")
+        assert len(findings) == 0
+
+    def test_init_excluded(self):
+        code = "class X:\n    def __init__(self, a, b, c, d, e, f, g, h, i, j, k, l, m, n):\n        pass\n"
         tree, src, config = _parse(code, "python")
         findings = check_too_many_args(tree, src, config, "test.py")
         assert len(findings) == 0

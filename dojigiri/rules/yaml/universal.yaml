@@ -19,12 +19,6 @@ rules:
   severity: critical
   suggestion: Use IAM roles or environment variables
 - category: style
-  id: todo-marker
-  message: TODO/FIXME marker found — track in issue tracker
-  pattern: (?i)(?:^|\s)(?:#|//|/\*|\*|--|;).*\b(?:TODO|FIXME|HACK|XXX)\b
-  severity: info
-  suggestion: Create a ticket and reference it in the comment
-- category: style
   id: long-line
   message: Line exceeds 200 characters
   pattern: ^.{201,}$
@@ -123,18 +117,6 @@ rules:
   pattern: (?:catch\s*\([^)]*\)\s*\{\s*\}|except[^:]*:\s*(?:pass|\.\.\.)\s*$)
   severity: warning
   suggestion: Log the error or re-raise; never silently swallow exceptions
-- category: security
-  id: env-file-committed
-  message: .env file reference — ensure .env is in .gitignore
-  pattern: (?:dotenv|load_dotenv|require\s*\(\s*['"]dotenv['"])
-  severity: info
-  suggestion: Ensure .env files are in .gitignore and never committed
-- category: style
-  id: magic-number
-  message: Magic number — consider naming as a constant
-  pattern: (?<![\w.])(?:(?:[2-9]\d{2,}|1\d{3,}))(?![\w.])(?!\s*[;:=])
-  severity: info
-  suggestion: Extract to a named constant for clarity
 - category: security
   id: hardcoded-jwt-secret
   message: Hardcoded JWT secret — signing key must not be in source

@@ -487,7 +487,7 @@ def _count_effective_lines(
 def check_long_method(
     semantics: FileSemantics,
     filepath: str,
-    threshold: int = 50,
+    threshold: int = 75,
 ) -> list[Finding]:
     """Flag functions longer than threshold effective lines.
 

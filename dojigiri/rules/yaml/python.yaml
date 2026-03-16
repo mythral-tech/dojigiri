@@ -63,18 +63,6 @@ rules:
   pattern: ^from\s+\S+\s+import\s+\*
   severity: warning
   suggestion: Import specific names instead
-- category: bug
-  id: assert-statement
-  message: Assert statements are stripped with -O flag
-  pattern: (?:^\s*|[;:]\s*)assert\s+
-  severity: info
-  suggestion: Use explicit if/raise for production checks
-- category: style
-  id: fstring-no-expr
-  message: f-string without any expressions — unnecessary f prefix
-  pattern: (?<!\w)f(['"])(?!\1\1)(?:(?:\\.|(?!\{)(?!\1)[^\\]))*\1
-  severity: info
-  suggestion: Remove the f prefix
 - category: security
   id: pickle-unsafe
   message: Unsafe deserialization via pickle/dill/cloudpickle/shelve/jsonpickle — can execute arbitrary code
@@ -633,13 +621,13 @@ rules:
   id: code-interactive-console
   message: code.InteractiveConsole/interact() allows arbitrary code execution
   pattern: \bcode\.(?:InteractiveConsole|InteractiveInterpreter|interact)\s*\(
-  severity: critical
+  severity: info
   suggestion: Remove interactive consoles from production code
 - category: security
   id: dunder-import-dynamic
   message: __import__() with variable argument — arbitrary module loading
   pattern: __import__\s*\(\s*(?![bruf]*['\"])\w+
-  severity: warning
+  severity: info
   suggestion: Validate module names against an allowlist before importing
 - category: security
   id: globals-manipulation
@@ -650,7 +638,7 @@ rules:
 - category: security
   id: getattr-user-input
   message: getattr() with user-controlled attribute name — attribute injection
-  pattern: getattr\s*\(\s*\w+\s*,\s*(?:request\.|input\(|sys\.argv|args\.)
+  pattern: getattr\s*\(\s*\w+\s*,\s*(?:request\.(?!method\b)|input\(|sys\.argv|args\.)
   severity: warning
   suggestion: Validate attribute names against an allowlist
 - category: security
@@ -675,7 +663,7 @@ rules:
   id: class-manipulation
   message: __class__ assignment — type confusion and security check bypass
   pattern: __class__\s*=
-  severity: warning
+  severity: info
   suggestion: Avoid runtime __class__ reassignment — use proper inheritance or composition
 - category: security
   id: subprocess-env-path

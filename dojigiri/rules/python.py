@@ -96,27 +96,6 @@ PYTHON_RULES: list[Rule] = _compile(
             "Star import pollutes namespace and hides dependencies",
             "Import specific names instead",
         ),
-        # assert in production
-        (
-            r"(?:^\s*|[;:]\s*)assert\s+",
-            Severity.INFO,
-            Category.BUG,
-            "assert-statement",
-            "Assert statements are stripped with -O flag",
-            "Use explicit if/raise for production checks",
-        ),
-        # f-string without expression — must match f"..." with NO { inside at all
-        # Uses negative lookahead to avoid matching strings that contain braces.
-        # Skips triple-quoted f-strings (expressions may be on later lines) and
-        # handles escaped quotes (\" inside f"...") correctly.
-        (
-            r"""(?<!\w)f(['"])(?!\1\1)(?:(?:\\.|(?!\{)(?!\1)[^\\]))*\1""",
-            Severity.INFO,
-            Category.STYLE,
-            "fstring-no-expr",
-            "f-string without any expressions — unnecessary f prefix",
-            "Remove the f prefix",
-        ),
         # Unsafe pickle deserialization
         (
             r"\bpickle\.(?:loads?\s*\(|Unpickler\s*\()",  # doji:ignore(pickle-unsafe)
