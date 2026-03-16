@@ -913,7 +913,8 @@ class TestFixCLI:
     def test_fix_apply(self, temp_dir):
         """doji fix <file> --apply creates backup and modifies file."""
         fp = temp_dir / "test.py"
-        fp.write_text('import os\nx = 1\n', encoding="utf-8")
+        # Use bare-except (not suppressed) so fixer has something to fix
+        fp.write_text('try:\n    x = 1\nexcept:\n    pass\n', encoding="utf-8")
         rc, out, err = _run_doji("fix", str(fp), "--apply")
         assert rc == 0
         backup = Path(str(fp) + ".doji.bak")
