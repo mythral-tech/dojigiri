@@ -265,7 +265,7 @@ def test_insecure_http_skipped_in_tests_dir():
 
 def test_insecure_http_flagged_in_production():
     """insecure-http should still be flagged in production code."""
-    code = 'url = "http://example.com"\n'
+    code = 'url = "http://unsafe-api.io/data"\n'
     findings = run_regex_checks(code, "/project/src/api.py", "python")
     assert any(f.rule == "insecure-http" for f in findings)
 

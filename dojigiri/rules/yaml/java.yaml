@@ -463,12 +463,6 @@ rules:
   severity: critical
   suggestion: Upgrade Log4j to 2.17.1+, set log4j2.formatMsgNoLookups=true
 - category: security
-  id: java-hardcoded-password
-  message: Hardcoded password or secret in source code
-  pattern: (?i)(?:password|passwd|pwd|secret|api_?key|token)\s*=\s*["'][^"']{4,}["']
-  severity: critical
-  suggestion: Load credentials from environment variables or a secrets manager
-- category: security
   id: java-empty-password
   message: Empty password string — authentication bypass or weak security
   pattern: (?i)(?:password|passwd|pwd)\s*=\s*["']["']

@@ -1,13 +1,5 @@
 rules:
 - category: security
-  id: go-sql-sprintf
-  message: SQL query built with fmt.Sprintf — verify interpolated values are not
-    user-controlled
-  pattern: (?i)fmt\.Sprintf\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b
-  severity: warning
-  suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
-  cwe: CWE-89
-- category: security
   id: go-sql-concat
   message: SQL query built with string concatenation — verify concatenated values
     are not user-controlled
@@ -35,13 +27,6 @@ rules:
   severity: warning
   suggestion: Validate command and arguments; never pass unsanitized user input
 - category: security
-  id: go-path-traversal
-  message: File operation with dynamic path — path traversal risk if path is user-controlled
-  pattern: (?:os\.(?:Open|OpenFile|ReadFile|Create|Remove|RemoveAll|Mkdir|MkdirAll)|ioutil\.(?:ReadFile|ReadDir|WriteFile))\s*\(\s*(?!['"])
-  severity: warning
-  suggestion: Use filepath.Clean() and validate path is within expected base directory
-  cwe: CWE-22
-- category: security
   id: go-filepath-join-dotdot
   message: filepath.Join with user input — may resolve ../ traversals
   pattern: filepath\.Join\s*\([^)]*(?:r\.|req\.|request\.|params\.|query\.)
@@ -54,12 +39,6 @@ rules:
   severity: critical
   suggestion: Use environment variables or a secrets manager
   cwe: CWE-798
-- category: security
-  id: go-hardcoded-ip
-  message: Hardcoded IP address — may break in different environments
-  pattern: '["'']\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?["'']'
-  severity: info
-  suggestion: Use configuration files or environment variables for host addresses
 - category: security
   id: go-weak-crypto-md5
   message: MD5 is cryptographically broken — collisions are trivial
@@ -179,12 +158,6 @@ rules:
   severity: warning
   suggestion: Use html/template for HTML output — it auto-escapes untrusted data
 - category: security
-  id: go-template-js-func
-  message: template.JS/template.HTML bypasses auto-escaping — XSS risk
-  pattern: template\.(?:JS|HTML|HTMLAttr|URL)\s*\(
-  severity: warning
-  suggestion: Only use template.JS/HTML with trusted, pre-sanitized data
-- category: security
   id: go-gob-decode
   message: gob.Decode on untrusted input can instantiate arbitrary types
   pattern: gob\.NewDecoder\s*\([^)]*(?:r\.|req\.|request\.|body|conn)
@@ -288,14 +261,6 @@ rules:
   suggestion: Move deferred cleanup into a separate function called from the loop
     body
 - category: bug
-  id: go-panic
-  message: panic() crashes the program — inappropriate for library code and most
-    application code
-  pattern: ^\s*panic\s*\(
-  severity: warning
-  suggestion: Return an error instead of panicking; reserve panic for truly unrecoverable
-    states
-- category: bug
   id: go-recover-all
   message: recover() catches all panics — may mask bugs
   pattern: \brecover\s*\(\s*\)
@@ -349,12 +314,6 @@ rules:
   pattern: http\.(?:Get|Post|Do|Head)\s*\([^)]*\)[\s\S]*?\.Body(?!\.Close)
   severity: warning
   suggestion: Always defer resp.Body.Close() after checking err
-- category: bug
-  id: go-rows-not-closed
-  message: sql.Rows must be closed to release database connection
-  pattern: \.Query(?:Row)?(?:Context)?\s*\([^)]*\)[\s\S]*?(?!\.Close|defer)
-  severity: info
-  suggestion: Always defer rows.Close() after checking err
 - category: bug
   id: go-file-not-closed
   message: os.Open without defer Close — file descriptor leak
@@ -441,13 +400,6 @@ rules:
   severity: info
   suggestion: Use io.ReadAll, os.ReadFile, os.WriteFile, os.ReadDir, os.MkdirTemp,
     os.CreateTemp
-- category: security
-  id: go-unvalidated-redirect-url
-  message: 'URL parsed from user input without scheme validation — may allow javascript:
-    or data: URIs'
-  pattern: url\.Parse\s*\(\s*(?!['"])
-  severity: info
-  suggestion: Validate scheme is http/https after parsing; reject unexpected schemes
 - category: security
   id: prompt-injection-go-sprintf
   message: LLM prompt built with fmt.Sprintf — prompt injection risk if arguments

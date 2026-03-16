@@ -171,12 +171,6 @@ rules:
   pattern: (?:^|[;=,(])\s*(?!return\b|await\b|yield\b|new\b)\w+\.\w+Async\s*\(
   severity: info
   suggestion: Add await if this should be awaited; rename if it's not actually async
-- category: bug
-  id: promise-no-catch
-  message: Promise .then() without .catch() — unhandled rejection risk
-  pattern: \.then\s*\([^)]*\)\s*(?!\.catch|\.finally)
-  severity: info
-  suggestion: Add .catch() handler or use async/await with try/catch
 - category: security
   id: settimeout-string
   message: setTimeout/setInterval with string argument — implicit eval()
@@ -472,12 +466,6 @@ rules:
   pattern: (?:password|secret|token|credential|auth|session|key)\s*:\s*any\b
   severity: warning
   suggestion: Use a specific type definition for security-critical values
-- category: security
-  id: ts-double-assertion
-  message: Type assertion via 'as unknown as' bypasses TypeScript safety
-  pattern: as\s+unknown\s+as\s+
-  severity: warning
-  suggestion: Fix the underlying type mismatch instead of using double assertion
 - category: security
   id: ts-non-null-assertion-chain
   message: Non-null assertion (!) on potentially unsafe value — can mask runtime

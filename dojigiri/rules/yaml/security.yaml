@@ -1,38 +1,47 @@
 rules:
 - category: security
   id: path-traversal
-  message: Path traversal via ../ in file operation — attacker can read or write arbitrary files
+  message: Path traversal via ../ in file operation — attacker can read or write
+    arbitrary files
   pattern: (?:open|read|write|include)\s*\([^)]*\.\./
   severity: warning
-  suggestion: Canonicalize paths with os.path.realpath() and verify they start within an allowed base directory
+  suggestion: Canonicalize paths with os.path.realpath() and verify they start within
+    an allowed base directory
   cwe: CWE-22
 - category: security
   id: private-key
-  message: Private key embedded in source code — credential exposure if repository is shared or leaked
+  message: Private key embedded in source code — credential exposure if repository
+    is shared or leaked
   pattern: '-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
   severity: critical
-  suggestion: Remove immediately, rotate the key, and store in a secrets manager or environment variable
+  suggestion: Remove immediately, rotate the key, and store in a secrets manager or
+    environment variable
   cwe: CWE-798
 - category: security
   id: db-connection-string
-  message: Database connection string with embedded credentials — password visible in source code
+  message: Database connection string with embedded credentials — password visible
+    in source code
   pattern: (?i)(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp|jdbc:[a-z]+)://[^:]+:[^@]+@
   severity: critical
   suggestion: Use environment variables or a secrets manager for connection strings
   cwe: CWE-798
 - category: security
   id: logging-sensitive-data
-  message: Possibly logging sensitive data (password, secret, token) — credentials may appear in log files
+  message: Possibly logging sensitive data (password, secret, token) — credentials
+    may appear in log files
   pattern: (?i)(?:log(?:ger)?\.(?:info|debug|warn|error|critical|warning)|print|console\.log|puts)\s*\(.*\b(?:password|passwd|secret_key|api_key|auth_token|credential)\b
   severity: warning
-  suggestion: Redact sensitive values before logging; use structured logging with explicit field masking
+  suggestion: Redact sensitive values before logging; use structured logging with
+    explicit field masking
   cwe: CWE-532
 - category: security
   id: logging-config-listen
-  message: logging.config.listen() accepts config over network — can load arbitrary handler classes (RCE)
+  message: logging.config.listen() accepts config over network — can load arbitrary
+    handler classes (RCE)
   pattern: logging\.config\.listen\s*\(
   severity: critical
-  suggestion: Avoid network-based logging config; use file-based or environment-based config instead
+  suggestion: Avoid network-based logging config; use file-based or environment-based
+    config instead
   cwe: CWE-94
 - category: security
   id: insecure-des
@@ -43,7 +52,8 @@ rules:
   cwe: CWE-327
 - category: security
   id: insecure-ecb-mode
-  message: ECB mode does not hide data patterns — identical plaintext blocks produce identical ciphertext
+  message: ECB mode does not hide data patterns — identical plaintext blocks produce
+    identical ciphertext
   pattern: (?i)(?:MODE_ECB|mode\s*=\s*['"]?ECB|\.ECB\b)
   severity: warning
   suggestion: Use GCM (authenticated encryption) or CBC with random IV instead
@@ -76,34 +86,40 @@ rules:
   message: HTTP request — verify URL is not constructed from user input (SSRF risk)
   pattern: (?:requests\.(?:get|post|put|delete|patch|head)\s*\(|urllib\.request\.urlopen\s*\(|http\.client\.HTTP\w*Connection\s*\(|fetch\s*\(\s*(?!['"]/)(?!url_for)|axios\.(?:get|post|put|delete)\s*\(|http\.Get\s*\(|http\.Post\s*\()(?!.*url_for\s*\()
   severity: warning
-  suggestion: Validate URLs against an allowlist of domains/schemes before making requests
+  suggestion: Validate URLs against an allowlist of domains/schemes before making
+    requests
   cwe: CWE-918
 - category: security
   id: url-scheme-audit
-  message: urlopen permits file:/ and custom schemes — verify URL scheme is restricted to https
+  message: urlopen permits file:/ and custom schemes — verify URL scheme is restricted
+    to https
   pattern: (?:urllib\.request\.urlopen\s*\(|urllib\.request\.urlretrieve\s*\(|urlopen\s*\()
   severity: warning
   suggestion: Validate URL scheme against allowlist (e.g., only https://) before opening
 - category: security
   id: ssti-risk
-  message: Template constructed from string — server-side template injection enables remote code execution
+  message: Template constructed from string — server-side template injection enables
+    remote code execution
   pattern: (?:(?:jinja2|mako|django\.template|chameleon)\.Template\s*\((?!\s*['"])|(?:Environment|SandboxedEnvironment)\s*\([^)]*\)\.from_string\s*\((?!\s*['"])|new\s+Function\s*\()
   severity: warning
   suggestion: Use pre-compiled templates from files, never from user-controlled strings
   cwe: CWE-94
 - category: security
   id: xxe-risk
-  message: XML parsing without entity protection — XXE can read local files or trigger SSRF
+  message: XML parsing without entity protection — XXE can read local files or trigger
+    SSRF
   pattern: (?:xml\.etree\.ElementTree\.(?:parse|fromstring|iterparse)\s*\(|xml\.dom\.minidom\.(?:parse|parseString)\s*\(|xml\.sax\.(?:parse|parseString)\s*\(|lxml\.etree\.(?:parse|fromstring|iterparse)\s*\(|DocumentBuilderFactory|XMLReader|SAXParser|DOMParser\s*\(\)|ET\.(?:parse|fromstring|iterparse)\s*\(|etree\.(?:parse|fromstring|iterparse)\s*\(|minidom\.(?:parse|parseString)\s*\(|sax\.(?:parse|parseString)\s*\()
   severity: warning
   suggestion: Use defusedxml (Python), disable DTDs/external entities in parser config
   cwe: CWE-611
 - category: security
   id: jwt-insecure
-  message: JWT decoded with insecure settings — disabled verification or 'none' algorithm allows token forgery
+  message: JWT decoded with insecure settings — disabled verification or 'none'
+    algorithm allows token forgery
   pattern: (?:jwt\.decode\s*\([^)]*(?:algorithms\s*=\s*\[['"]none['"]\]|verify\s*=\s*False|options\s*=\s*\{[^}]*'verify_\w+'\s*:\s*False)|\.decode\s*\(\s*token[^)]*algorithm\s*=\s*['"](?:none|HS256)['"])
   severity: critical
-  suggestion: Always verify JWT signatures with a strong algorithm (RS256/ES256) and validate claims
+  suggestion: Always verify JWT signatures with a strong algorithm (RS256/ES256) and
+    validate claims
   cwe: CWE-347
 - category: security
   id: hardcoded-ip
@@ -116,7 +132,8 @@ rules:
   message: Binding to 0.0.0.0 exposes the service to all network interfaces
   pattern: (?:\.bind|\.run|start_server|HTTPServer|TCPServer|UDPServer|SimpleXMLRPCServer|ThreadingTCPServer|ForkingTCPServer|BaseManager|SyncManager)\s*\([^)]*['"]0\.0\.0\.0['"]|=\s*['"]0\.0\.0\.0['"]
   severity: warning
-  suggestion: Bind to specific interface (127.0.0.1 for local-only, or configure via env var)
+  suggestion: Bind to specific interface (127.0.0.1 for local-only, or configure via
+    env var)
 - category: security
   id: toctou-file-check
   message: File existence check before use — potential TOCTOU race condition
@@ -160,7 +177,8 @@ rules:
   cwe: CWE-79
 - category: security
   id: deserialization-unsafe
-  message: Unsafe deserialization — can lead to remote code execution via crafted payloads
+  message: Unsafe deserialization — can lead to remote code execution via crafted
+    payloads
   pattern: (?i)(?:pickle\.loads?\s*\(|yaml\.load\s*\([^)]*(?!Loader)|marshal\.loads?\s*\(|ObjectInputStream|unserialize\s*\(|readObject\s*\()
   severity: critical
   suggestion: Use safe deserialization (yaml.safe_load, JSON) or validate input
@@ -224,14 +242,16 @@ rules:
   suggestion: Use os.makedirs(path, exist_ok=True) to handle concurrent creation
 - category: security
   id: mass-assignment
-  message: Mass assignment — all request parameters passed to model/object, attacker can set unintended fields
+  message: Mass assignment — all request parameters passed to model/object, attacker
+    can set unintended fields
   pattern: (?i)(?:\.create\s*\(\s*\*\*request\.|\.update\s*\(\s*\*\*request\.|Object\.assign\s*\(\s*\w+\s*,\s*req\.body|\.set\s*\(\s*req\.body\))
   severity: warning
   suggestion: Explicitly list allowed parameters instead of passing all request data
   cwe: CWE-915
 - category: security
   id: header-injection
-  message: HTTP header set from user input — header injection / response splitting risk
+  message: HTTP header set from user input — header injection / response splitting
+    risk
   pattern: (?i)(?:set_header|add_header|response\.headers|setHeader)\s*\([^)]*(?:request\.|req\.|params\.|query\.)
   severity: warning
   suggestion: Validate and sanitize header values; reject CR/LF characters
@@ -252,7 +272,8 @@ rules:
   cwe: CWE-643
 - category: security
   id: shell-injection
-  message: Shell command constructed from string interpolation — command injection enables remote code execution
+  message: Shell command constructed from string interpolation — command injection
+    enables remote code execution
   pattern: (?i)(?:os\.system|os\.popen|subprocess\.(?:call|run|Popen)|exec|execSync|child_process)\s*\(\s*(?:f['"]|['"].*?\+|['"].*?format\s*\(|`[^`]*\$)
   severity: warning
   suggestion: Use parameterized command execution (subprocess with list args, no shell=True)
@@ -262,7 +283,8 @@ rules:
   message: Regex with nested quantifiers — potential ReDoS vulnerability
   pattern: (?:\(\.\*\)\+|\(\.\+\)\*|\(\[.*?\]\+\)\+|\(\.\*\)\{|\(\w\+\)\+)
   severity: warning
-  suggestion: Simplify regex to avoid catastrophic backtracking; use atomic groups or possessive quantifiers
+  suggestion: Simplify regex to avoid catastrophic backtracking; use atomic groups
+    or possessive quantifiers
   cwe: CWE-1333
 - category: security
   id: generic-insecure-cookie
@@ -273,7 +295,7 @@ rules:
 - category: security
   id: information-disclosure-stacktrace
   message: Stack trace or detailed errors exposed to client
-  pattern: (?i)(?:traceback\.format_exc|traceback\.print_exc|e\.(?:getMessage|getStackTrace|printStackTrace)|Error\.stack)\s*(?:\(\)|;)
+  pattern: (?i)(?:traceback\.format_exc|traceback\.print_exc|(?<!logger\.)(?<!log\.)(?<!LOGGER\.)(?<!LOG\.)e\.(?:getStackTrace|printStackTrace)|Error\.stack)\s*(?:\(\)|;)
   severity: info
   suggestion: Log errors server-side; return generic error messages to clients
 - category: security
@@ -284,84 +306,107 @@ rules:
   suggestion: Use AES/GCM/NoPadding or AES/CBC/PKCS5Padding with random IV
 - category: security
   id: prompt-injection-fstring
-  message: Prompt string built with f-string interpolation — prompt injection risk if variables contain user input
+  message: Prompt string built with f-string interpolation — prompt injection risk
+    if variables contain user input
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*f['"]
   severity: warning
-  suggestion: Build prompts with validated, sanitized inputs; never interpolate raw user data into system prompts
+  suggestion: Build prompts with validated, sanitized inputs; never interpolate raw
+    user data into system prompts
 - category: security
   id: prompt-injection-format
-  message: Prompt string built with .format() — prompt injection risk if arguments contain user input
+  message: Prompt string built with .format() — prompt injection risk if arguments
+    contain user input
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*['"][^'"]*['"]\.format\s*\(
   severity: warning
-  suggestion: Use structured message arrays with role separation instead of string formatting
+  suggestion: Use structured message arrays with role separation instead of string
+    formatting
 - category: security
   id: prompt-injection-concat
-  message: Prompt string built with concatenation — prompt injection risk if concatenated value is user-controlled
+  message: Prompt string built with concatenation — prompt injection risk if concatenated
+    value is user-controlled
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|context_prompt)\s*=\s*['"][^'"]*['"]\s*\+
   severity: warning
-  suggestion: Separate system instructions from user content using the API's message/role structure
+  suggestion: Separate system instructions from user content using the API's message/role
+    structure
 - category: security
   id: prompt-injection-percent
   message: Prompt string built with % formatting — prompt injection risk
   pattern: (?i)(?:prompt|system_prompt|system_message|user_prompt|instructions|pre_prompt)\s*=\s*['"][^'"]*%s[^'"]*['"]\s*%
   severity: warning
-  suggestion: Use structured message arrays; never use % formatting to insert user data into prompts
+  suggestion: Use structured message arrays; never use % formatting to insert user
+    data into prompts
 - category: security
   id: prompt-injection-template-literal
-  message: Prompt built with template literal interpolation — prompt injection risk if interpolated values are user-controlled
+  message: Prompt built with template literal interpolation — prompt injection risk
+    if interpolated values are user-controlled
   pattern: (?i)(?:prompt|systemPrompt|systemMessage|userPrompt|instructions|contextPrompt)\s*=\s*`[^`]*\$\{
   severity: warning
-  suggestion: Use structured message arrays with role separation; sanitize user content before inclusion
+  suggestion: Use structured message arrays with role separation; sanitize user content
+    before inclusion
 - category: security
   id: prompt-injection-content-fstring
-  message: Message content field built with f-string — potential prompt injection if variables are user-controlled
+  message: Message content field built with f-string — potential prompt injection
+    if variables are user-controlled
   pattern: (?i)['\"]content['\"]\s*:\s*f['"]
   severity: warning
-  suggestion: Never interpolate user data into message content fields; use validated inputs only
+  suggestion: Never interpolate user data into message content fields; use validated
+    inputs only
 - category: security
   id: prompt-injection-content-template
-  message: Message content field built with template literal — prompt injection regardless of variable naming
+  message: Message content field built with template literal — prompt injection
+    regardless of variable naming
   pattern: (?i)['\"]content['\"]\s*:\s*`[^`]*\$\{
   severity: warning
-  suggestion: Never interpolate user data into message content fields; use validated inputs only
+  suggestion: Never interpolate user data into message content fields; use validated
+    inputs only
 - category: security
   id: prompt-injection-system-role-fstring
-  message: System role message with f-string content — user input in system prompt enables full prompt takeover
+  message: System role message with f-string content — user input in system prompt
+    enables full prompt takeover
   pattern: (?i)['\"]role['\"]\s*:\s*['\"]system['\"][\s\S]{0,100}['\"]content['\"]\s*:\s*f['"]
   severity: warning
-  suggestion: System prompts must contain only developer-controlled content; place user data in 'user' role messages only
+  suggestion: System prompts must contain only developer-controlled content; place
+    user data in 'user' role messages only
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-system-role-template
-  message: System role message with template literal — prompt injection via system prompt
+  message: System role message with template literal — prompt injection via system
+    prompt
   pattern: (?i)role\s*:\s*['\"]system['\"][\s\S]{0,100}content\s*:\s*`[^`]*\$\{
   severity: warning
-  suggestion: System prompts must be static strings; place user data in user role messages only
+  suggestion: System prompts must be static strings; place user data in user role
+    messages only
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-url-to-prompt
-  message: HTTP response content used in LLM prompt — indirect prompt injection via untrusted web content
+  message: HTTP response content used in LLM prompt — indirect prompt injection
+    via untrusted web content
   pattern: (?i)(?:requests\.get|httpx\.get|fetch|axios\.get|http\.Get)\s*\([^)]*\)[\s\S]{0,200}(?:prompt|messages|system_message|instruction)\s*(?:=|\+=|\.append|\.push)
   severity: warning
-  suggestion: Sanitize and validate fetched content before including in prompts; instruct the model to ignore embedded instructions
+  suggestion: Sanitize and validate fetched content before including in prompts; instruct
+    the model to ignore embedded instructions
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-file-to-prompt
-  message: File content loaded into LLM prompt — indirect prompt injection if file is user-uploaded or untrusted
+  message: File content loaded into LLM prompt — indirect prompt injection if file
+    is user-uploaded or untrusted
   pattern: (?i)(?:\.read\s*\(\)|\.read_text\s*\(\)|readFile|readFileSync)\s*[\s\S]{0,200}(?:prompt|messages|system_message|instruction)\s*(?:=|\+=|\.append|\.push)
   severity: warning
-  suggestion: Validate file content and strip potential injection payloads before including in prompts
+  suggestion: Validate file content and strip potential injection payloads before
+    including in prompts
   flags:
   - DOTALL
 - category: security
   id: prompt-injection-db-to-prompt
-  message: Database query result used in LLM prompt — indirect injection if DB contains user-generated content
+  message: Database query result used in LLM prompt — indirect injection if DB contains
+    user-generated content
   pattern: (?i)(?:\.fetchone|\.fetchall|\.find\(|\.findOne|\.query\s*\()\s*[\s\S]{0,200}(?:prompt|messages|system_message|instruction)\s*(?:=|\+=|\.append|\.push)
   severity: warning
-  suggestion: Treat database content as untrusted when building prompts; sanitize before inclusion
+  suggestion: Treat database content as untrusted when building prompts; sanitize
+    before inclusion
   flags:
   - DOTALL
 - category: security
@@ -369,7 +414,8 @@ rules:
   message: Google AI safety settings set to BLOCK_NONE — all safety filters disabled
   pattern: (?:(?:threshold|safety|harm|block)\s*[=:]\s*.*BLOCK_NONE|HarmBlockThreshold\s*\.\s*BLOCK_NONE|['\"]BLOCK_NONE['\"])
   severity: critical
-  suggestion: Use BLOCK_MEDIUM_AND_ABOVE or stricter; never disable safety filters in production
+  suggestion: Use BLOCK_MEDIUM_AND_ABOVE or stricter; never disable safety filters
+    in production
 - category: security
   id: llm-safety-disabled-cohere
   message: Cohere safety_mode set to NONE — content filtering disabled
@@ -384,40 +430,52 @@ rules:
   suggestion: Keep safe_prompt=True to enable Mistral's safety guardrails
 - category: security
   id: llm-temperature-max
-  message: LLM temperature set very high — increases unpredictability and jailbreak susceptibility
+  message: LLM temperature set very high — increases unpredictability and jailbreak
+    susceptibility
   pattern: temperature\s*[=:]\s*(?:2\.0|2(?:\.0*)?|1\.[5-9]\d*)\s*(?:[,}\)\]\s;]|$)
   severity: warning
-  suggestion: Use temperature <= 1.0 for most applications; high temperature increases attack surface
+  suggestion: Use temperature <= 1.0 for most applications; high temperature increases
+    attack surface
 - category: security
   id: llm-client-controlled-messages
-  message: Client-supplied message array passed directly to LLM — attacker can inject fake system/assistant messages
+  message: Client-supplied message array passed directly to LLM — attacker can inject
+    fake system/assistant messages
   pattern: (?i)(?:request\.json|req\.body|request\.get_json)\s*(?:\[|\.get\s*\()\s*['\"]messages['\"]
   severity: critical
-  suggestion: Never pass raw client message arrays to LLM; construct messages server-side with validated roles
+  suggestion: Never pass raw client message arrays to LLM; construct messages server-side
+    with validated roles
 - category: security
   id: llm-role-from-user-input
-  message: Message role field from user input — allows injection of fake system/assistant messages
+  message: Message role field from user input — allows injection of fake system/assistant
+    messages
   pattern: (?i)['\"]role['\"]\s*:\s*(?:request\.|req\.|params\.|body\.|input\.|data\[|user_|msg\[)
   severity: critical
-  suggestion: Always set message roles server-side; only allow 'user' role from client input
+  suggestion: Always set message roles server-side; only allow 'user' role from client
+    input
 - category: security
   id: llm-secret-in-prompt
-  message: API key or secret variable interpolated into LLM prompt — will be sent to LLM provider
+  message: API key or secret variable interpolated into LLM prompt — will be sent
+    to LLM provider
   pattern: (?i)(?:prompt|system_prompt|system_message|instructions)\s*=\s*f['\"].*\{(?:api_key|secret|password|token|credential|db_|database_|conn)
   severity: critical
-  suggestion: Never embed secrets in prompts; use tool calling to access backends securely
+  suggestion: Never embed secrets in prompts; use tool calling to access backends
+    securely
 - category: security
   id: llm-connection-string-in-prompt
-  message: Database connection string or URL in prompt template — credential exposure to LLM provider
+  message: Database connection string or URL in prompt template — credential exposure
+    to LLM provider
   pattern: (?i)(?:prompt|system|instruction|message)\s*=\s*['\"].*(?:postgres(?:ql)?|mysql|mongodb|redis)://
   severity: critical
-  suggestion: Never embed connection strings in prompts; use tool calling for database access
+  suggestion: Never embed connection strings in prompts; use tool calling for database
+    access
 - category: security
   id: llm-tool-call-to-exec
-  message: LLM tool call arguments passed to dangerous sink — code execution via tool calling
+  message: LLM tool call arguments passed to dangerous sink — code execution via
+    tool calling
   pattern: (?:function\.arguments|tool_call\w*[\[\.]\S*\.?argument|tool_result\w*\.output)[\s\S]{0,150}(?:\bexec\s*\(|\beval\s*\(|\bsystem\s*\(|\bpopen\s*\(|\bsubprocess\.\w+\s*\(|Runtime\.exec\s*\(|ProcessBuilder|os\.Command)
   severity: warning
-  suggestion: Validate and sanitize all LLM-generated tool call arguments before execution; never pass directly to shell or eval
+  suggestion: Validate and sanitize all LLM-generated tool call arguments before execution;
+    never pass directly to shell or eval
   flags:
   - DOTALL
 - category: security
@@ -425,15 +483,18 @@ rules:
   message: LLM tool call arguments used in SQL query — SQL injection via tool calling
   pattern: (?:function\.arguments|tool_call\w*[\[\.]\S*\.?argument)[\s\S]{0,100}(?:\.execute\s*\(|\.query\s*\(|\.raw\s*\(|cursor\.)
   severity: warning
-  suggestion: Parameterize SQL queries; never pass LLM-generated tool arguments directly to database queries
+  suggestion: Parameterize SQL queries; never pass LLM-generated tool arguments directly
+    to database queries
   flags:
   - DOTALL
 - category: security
   id: llm-untrusted-model-load
-  message: Model loaded from user-controlled path — supply chain attack via malicious model
+  message: Model loaded from user-controlled path — supply chain attack via malicious
+    model
   pattern: (?i)(?:from_pretrained|load_model|AutoModel|AutoTokenizer|pipeline)\s*\(\s*(?:request|req|params|body|input|user|args|sys\.argv)
   severity: critical
-  suggestion: Only load models from trusted, pinned sources; never allow user input to control model paths
+  suggestion: Only load models from trusted, pinned sources; never allow user input
+    to control model paths
 - category: security
   id: llm-model-download-url
   message: Model downloaded from dynamic URL — supply chain risk
@@ -442,16 +503,19 @@ rules:
   suggestion: Pin model URLs to trusted registries; avoid dynamic model source resolution
 - category: security
   id: llm-auto-approve-tools
-  message: LLM tool execution with auto-approval — no human oversight for potentially destructive actions
+  message: LLM tool execution with auto-approval — no human oversight for potentially
+    destructive actions
   pattern: (?i)(?:auto_approve|auto_execute|skip_confirmation)\s*[=:]\s*(?:True|true|1)
   severity: warning
-  suggestion: Require human confirmation for destructive tool actions; implement approval gates
+  suggestion: Require human confirmation for destructive tool actions; implement approval
+    gates
 - category: security
   id: llm-agent-unrestricted-tools
   message: Agent created with all tools or unrestricted tool access
   pattern: (?i)(?:tools\s*=\s*(?:get_all_tools|list_tools|ALL_TOOLS|\[.*\.\.\.\s*\])|allow_all_tools\s*=\s*True)
   severity: warning
-  suggestion: Restrict agent tool access to minimum required set; apply principle of least privilege
+  suggestion: Restrict agent tool access to minimum required set; apply principle
+    of least privilege
 - category: security
   id: llm-system-prompt-logged
   message: System prompt written to logs — information leakage risk
@@ -463,19 +527,22 @@ rules:
   message: System prompt included in API response — information leakage to client
   pattern: (?i)(?:return|jsonify|json\.dumps|res\.json|response)\s*\(.*(?:system_prompt|system_message|instructions)
   severity: warning
-  suggestion: Never return system prompts to clients; keep system instructions server-side only
+  suggestion: Never return system prompts to clients; keep system instructions server-side
+    only
 - category: security
   id: llm-langchain-python-repl
   message: LangChain PythonREPL executes arbitrary code — critical if fed LLM output
   pattern: (?:PythonREPL|PythonREPLTool)\s*\(\s*\)
   severity: critical
-  suggestion: Never use PythonREPL in production; sandbox code execution or use validated operations
+  suggestion: Never use PythonREPL in production; sandbox code execution or use validated
+    operations
 - category: security
   id: llm-langchain-bash
   message: LangChain BashProcess executes shell commands — critical if fed LLM output
   pattern: (?:BashProcess|ShellTool|Terminal)\s*\(\s*\)
   severity: critical
-  suggestion: Never expose shell execution to LLM agents; use specific, validated tool functions
+  suggestion: Never expose shell execution to LLM agents; use specific, validated
+    tool functions
 - category: security
   id: llm-agent-unbounded-loop
   message: LLM agent in unbounded loop — runaway cost and potential infinite execution
@@ -486,7 +553,8 @@ rules:
   - DOTALL
 - category: security
   id: prompt-injection-format-locals
-  message: Prompt formatted with locals()/vars() — entire namespace leaks into prompt including secrets
+  message: Prompt formatted with locals()/vars() — entire namespace leaks into prompt
+    including secrets
   pattern: (?i)(?:prompt|system|instruction|message).*\.format\s*\(\s*\*\*(?:locals|vars|globals)\s*\(\s*\)\s*\)
   severity: warning
   suggestion: Explicitly pass only intended variables to .format(); never use locals()/vars()/globals()
@@ -506,7 +574,8 @@ rules:
   - DOTALL
 - category: security
   id: prompt-injection-bedrock
-  message: AWS Bedrock invoke_model with interpolated content — prompt injection risk
+  message: AWS Bedrock invoke_model with interpolated content — prompt injection
+    risk
   pattern: (?i)(?:invoke_model|invoke_model_with_response_stream)\s*\([\s\S]{0,200}(?:f['"]|['"][^'"]*['"]\.format|\+\s*\w)
   severity: warning
   suggestion: Validate and sanitize all user input before sending to Bedrock models
@@ -522,10 +591,12 @@ rules:
   - DOTALL
 - category: security
   id: llm-untrusted-image-to-vision
-  message: User-uploaded or untrusted image passed to vision model — image-based prompt injection risk
+  message: User-uploaded or untrusted image passed to vision model — image-based
+    prompt injection risk
   pattern: (?i)(?:image_url|image_data|image_content|image_path)\s*[=:]\s*(?:request|req|params|body|input|user|upload|args)
   severity: warning
-  suggestion: Validate and filter image content before passing to vision models; do not trust embedded text in images
+  suggestion: Validate and filter image content before passing to vision models; do
+    not trust embedded text in images
 - category: security
   id: llm-base64-image-from-input
   message: Base64 image from user input sent to LLM — potential image-based injection
@@ -539,27 +610,33 @@ rules:
   message: LLM response returned to user without PII/sensitive data filtering
   pattern: (?i)(?:return|send|res\.json|jsonify|response\.write)\s*\(\s*(?:response|completion|result|output|answer|reply)\.(?:text|content|choices)
   severity: info
-  suggestion: Filter LLM responses for PII, credentials, and sensitive data before returning to users
+  suggestion: Filter LLM responses for PII, credentials, and sensitive data before
+    returning to users
 - category: security
   id: llm-training-data-leak-check
   message: LLM output used without checking for training data memorization markers
   pattern: (?i)(?:response|completion|output)\.(?:text|content|choices)[\s\S]{0,50}(?:return|send|print|write|render)(?![\s\S]{0,200}(?:filter|sanitize|redact|mask|scrub))
   severity: info
-  suggestion: Implement output filtering to detect and redact potential training data leakage
+  suggestion: Implement output filtering to detect and redact potential training data
+    leakage
   flags:
   - DOTALL
 - category: security
   id: llm-untrusted-training-data
-  message: Training data loaded from user-controlled or untrusted source — data poisoning risk
+  message: Training data loaded from user-controlled or untrusted source — data
+    poisoning risk
   pattern: (?i)(?:load_dataset|read_csv|read_json|from_pandas|from_csv)\s*\(\s*(?:request|req|params|body|input|user|upload|args|sys\.argv)
   severity: critical
-  suggestion: Validate and sanitize all training data sources; use curated datasets only
+  suggestion: Validate and sanitize all training data sources; use curated datasets
+    only
 - category: security
   id: llm-fine-tune-untrusted
-  message: Fine-tuning with user-uploaded data without validation — model poisoning risk
+  message: Fine-tuning with user-uploaded data without validation — model poisoning
+    risk
   pattern: (?i)(?:fine_tune|finetune|train|Trainer|SFTTrainer|TrainingArguments)\s*\([\s\S]{0,300}(?:request|req\.|upload|user_|input_|body\.)
   severity: critical
-  suggestion: Validate, filter, and review all fine-tuning data; implement data quality checks
+  suggestion: Validate, filter, and review all fine-tuning data; implement data quality
+    checks
   flags:
   - DOTALL
 - category: security
@@ -567,13 +644,16 @@ rules:
   message: Model loaded via pickle/joblib — arbitrary code execution on deserialization
   pattern: (?i)(?:pickle\.load|joblib\.load|torch\.load)\s*\(\s*(?:request|req|params|upload|user|input|args)
   severity: critical
-  suggestion: Use safetensors or verified model formats; never load pickled models from untrusted sources
+  suggestion: Use safetensors or verified model formats; never load pickled models
+    from untrusted sources
 - category: security
   id: llm-no-rate-limit
-  message: LLM endpoint without rate limiting — resource exhaustion and cost overrun risk
+  message: LLM endpoint without rate limiting — resource exhaustion and cost overrun
+    risk
   pattern: (?i)(?:@app\.(?:route|post|get)|@router\.(?:post|get)|app\.(?:post|get))\s*\([\s\S]{0,500}(?:chat\.completions\.create|messages\.create|generate_content|completion|\.invoke)(?![\s\S]{0,300}(?:rate_limit|ratelimit|throttle|RateLimiter|slowapi|limiter))
   severity: warning
-  suggestion: Apply rate limiting to all LLM-powered endpoints to prevent abuse and cost overruns
+  suggestion: Apply rate limiting to all LLM-powered endpoints to prevent abuse and
+    cost overruns
   flags:
   - DOTALL
 - category: security
@@ -594,98 +674,122 @@ rules:
   - DOTALL
 - category: security
   id: rag-document-to-prompt
-  message: Retrieved document/chunk content interpolated directly into LLM prompt without sanitization — RAG injection risk
+  message: Retrieved document/chunk content interpolated directly into LLM prompt
+    without sanitization — RAG injection risk
   pattern: (?i)(?:similarity_search|vector_search|\.retrieve|get_relevant_documents|as_retriever)\s*\([\s\S]{0,150}(?:prompt|system_prompt|system_message|messages|instruction)\s*(?:=|\+=|\.append|\.format|\.join|f['"])
   severity: critical
-  suggestion: Sanitize retrieved document content before including in prompts; strip potential injection payloads from chunks
+  suggestion: Sanitize retrieved document content before including in prompts; strip
+    potential injection payloads from chunks
   flags:
   - DOTALL
 - category: security
   id: rag-metadata-injection
-  message: Vector DB metadata from retrieval result used in prompt — metadata injection risk if source is user-controlled
+  message: Vector DB metadata from retrieval result used in prompt — metadata injection
+    risk if source is user-controlled
   pattern: (?i)(?:\.metadata|\.page_content|doc\.metadata|chunk\.metadata|result\.metadata)\s*\[[\s\S]{0,200}(?:prompt|system_prompt|system_message|messages|instruction|content)\s*(?:=|\+=|\.append|\.format|f['"])
   severity: warning
-  suggestion: Treat retrieval metadata as untrusted; validate and sanitize metadata fields before prompt inclusion
+  suggestion: Treat retrieval metadata as untrusted; validate and sanitize metadata
+    fields before prompt inclusion
   flags:
   - DOTALL
 - category: security
   id: rag-no-chunk-sanitization
-  message: Document chunks concatenated/joined directly into prompt string without content filtering
+  message: Document chunks concatenated/joined directly into prompt string without
+    content filtering
   pattern: (?i)(?:join|\\n\.join|"\s*\\n\s*"\.join|concat)\s*\(\s*(?:chunks|documents|docs|results|passages|contexts|retrieved|search_results)[\s\S]{0,200}(?:prompt|system_prompt|system_message|messages|instruction|content)\s*(?:=|\+=|\.append|\.format|f['"])
   severity: warning
-  suggestion: Filter and sanitize each chunk before concatenation; remove potential prompt injection patterns from retrieved content
+  suggestion: Filter and sanitize each chunk before concatenation; remove potential
+    prompt injection patterns from retrieved content
   flags:
   - DOTALL
 - category: security
   id: rag-user-query-in-system-prompt
-  message: User search query placed in system prompt — should be in user message to maintain role separation
+  message: User search query placed in system prompt — should be in user message
+    to maintain role separation
   pattern: (?i)['\"]role['\"]\s*:\s*['\"]system['\"][\s\S]{0,200}(?:query|question|user_input|user_query|search_query|user_message|user_request)
   severity: warning
-  suggestion: Place user queries in the user role message, not in system prompts; system prompts should contain only developer-controlled instructions
+  suggestion: Place user queries in the user role message, not in system prompts;
+    system prompts should contain only developer-controlled instructions
   flags:
   - DOTALL
 - category: security
   id: rag-unbounded-context
-  message: All retrieval results added to prompt without length or count limits — unbounded context window consumption
+  message: All retrieval results added to prompt without length or count limits —
+    unbounded context window consumption
   pattern: (?i)for\s+\w+\s+in\s+(?:results|documents|docs|chunks|passages|search_results|retrieved)\s*:[\s\S]{0,200}(?:prompt|context|messages)\s*(?:\+=|\.append|\.extend)(?![\s\S]{0,100}(?:\[:|\[0:|limit|max_|slice|truncat))
   severity: warning
-  suggestion: Limit the number and total length of retrieved chunks added to prompt; use top-k with a reasonable bound
+  suggestion: Limit the number and total length of retrieved chunks added to prompt;
+    use top-k with a reasonable bound
   flags:
   - DOTALL
 - category: security
   id: rag-source-trust-boundary
-  message: User-uploaded or external file content passed directly to embedding/indexing without sanitization
+  message: User-uploaded or external file content passed directly to embedding/indexing
+    without sanitization
   pattern: (?i)(?:add_documents|add_texts|from_documents|index\.upsert|index\.add|\.add_embeddings|collection\.add|vectorstore\.insert|chroma\.insert)\s*\([\s\S]{0,200}(?:request|req\.|upload|user_|input_|body\.|file\.|uploaded)
   severity: critical
-  suggestion: Sanitize and validate user-uploaded document content before indexing into vector store; strip injection payloads
+  suggestion: Sanitize and validate user-uploaded document content before indexing
+    into vector store; strip injection payloads
   flags:
   - DOTALL
 - category: security
   id: llm-json-output-to-eval
-  message: LLM JSON response parsed then passed to eval/exec — code execution via structured output
+  message: LLM JSON response parsed then passed to eval/exec — code execution via
+    structured output
   pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:eval|exec)\s*\(
   severity: warning
-  suggestion: Never pass parsed LLM JSON output to eval/exec; validate fields against an allowlist and use safe dispatch
+  suggestion: Never pass parsed LLM JSON output to eval/exec; validate fields against
+    an allowlist and use safe dispatch
   flags:
   - DOTALL
 - category: security
   id: llm-json-output-to-sql
-  message: LLM structured output used in SQL query construction — SQL injection via structured output
+  message: LLM structured output used in SQL query construction — SQL injection
+    via structured output
   pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\(\s*(?:response|completion|llm[_.]|ai_response|chat_response|generated)[\s\S]{0,100}(?:\.execute\s*\(|\.query\s*\(|\.raw\s*\(|cursor\.|SELECT\s|INSERT\s|UPDATE\s|DELETE\s)
   severity: warning
-  suggestion: Use parameterized queries; never interpolate LLM-generated JSON fields into SQL strings
+  suggestion: Use parameterized queries; never interpolate LLM-generated JSON fields
+    into SQL strings
   flags:
   - DOTALL
 - category: security
   id: llm-json-output-to-shell
-  message: LLM structured output used in shell command — command injection via structured output
+  message: LLM structured output used in shell command — command injection via structured
+    output
   pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\(\s*(?:response|completion|llm[_.]|ai_response|chat_response|generated)[\s\S]{0,100}(?:subprocess|os\.system|os\.popen|child_process|\bexec\s*\(|execSync|Runtime\.exec|ProcessBuilder)
   severity: warning
-  suggestion: Never pass LLM-generated JSON fields to shell commands; use allowlisted operations with strict argument validation
+  suggestion: Never pass LLM-generated JSON fields to shell commands; use allowlisted
+    operations with strict argument validation
   flags:
   - DOTALL
 - category: security
   id: llm-json-output-to-url
-  message: LLM structured output used to construct URL for HTTP request — SSRF risk via structured output
+  message: LLM structured output used to construct URL for HTTP request — SSRF risk
+    via structured output
   pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:requests\.get|requests\.post|fetch\(|urllib|http\.get|axios|httpx|aiohttp)
   severity: warning
-  suggestion: Validate and allowlist URLs from LLM output before making HTTP requests; block internal/private IP ranges
+  suggestion: Validate and allowlist URLs from LLM output before making HTTP requests;
+    block internal/private IP ranges
   flags:
   - DOTALL
 - category: security
   id: llm-json-output-to-template
-  message: LLM structured output injected into server-side template — SSTI risk via structured output
+  message: LLM structured output injected into server-side template — SSTI risk
+    via structured output
   pattern: (?i)(?:json\.loads|\.json\(\)|\bjson\.parse)\s*\([\s\S]{0,200}(?:response|completion|chat|llm|openai|anthropic|message|result)[\s\S]{0,300}(?:render_template_string|Template\(|render_string|Jinja2|\.render\(|template\.render|nunjucks|Handlebars\.compile|ejs\.render)
   severity: warning
-  suggestion: Never pass LLM output directly into template rendering; use pre-defined templates with auto-escaping
+  suggestion: Never pass LLM output directly into template rendering; use pre-defined
+    templates with auto-escaping
   flags:
   - DOTALL
 - category: security
   id: llm-function-call-no-validation
-  message: LLM function call name used to invoke function without allowlist validation — arbitrary function execution
+  message: LLM function call name used to invoke function without allowlist validation
+    — arbitrary function execution
   pattern: (?i)(?:function_call|function_name|tool_calls|tool_name|\.name)\s*[\[=][\s\S]{0,200}(?:getattr|globals\s*\(\s*\)\s*\[|locals\s*\(\s*\)\s*\[|eval\s*\(|__import__)
   severity: warning
-  suggestion: Validate function names against an explicit allowlist before dispatch; never use getattr/globals/eval with LLM-provided names
+  suggestion: Validate function names against an explicit allowlist before dispatch;
+    never use getattr/globals/eval with LLM-provided names
   flags:
   - DOTALL
 - category: security
@@ -693,85 +797,106 @@ rules:
   message: LLM response content used directly without validation or sanitization
   pattern: (?i)(?:response|completion|chat_result)\.(?:choices\[|content|message|text|output)[\s\S]{0,100}(?:return\s|res\.json|jsonify|send\(|response\.write|print\()(?![\s\S]{0,200}(?:sanitize|validate|filter|escape|clean|strip|check|verify|allow))
   severity: info
-  suggestion: Validate and sanitize LLM response content before using in application logic or returning to users
+  suggestion: Validate and sanitize LLM response content before using in application
+    logic or returning to users
   flags:
   - DOTALL
 - category: security
   id: llm-base64-decode-to-prompt
-  message: Base64-decoded content injected into LLM prompt — attacker can hide malicious instructions in encoded payloads
+  message: Base64-decoded content injected into LLM prompt — attacker can hide malicious
+    instructions in encoded payloads
   pattern: (?i)(?:(?:b64decode|atob|base64\.decode|base64\.b64decode|decodebytes)\s*\(|Buffer\.from\s*\([^)]*,\s*['"]base64['"]\s*\))[\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
   severity: critical
-  suggestion: Never decode base64 content directly into LLM prompts; validate and sanitize decoded content against an allowlist
+  suggestion: Never decode base64 content directly into LLM prompts; validate and
+    sanitize decoded content against an allowlist
   flags:
   - DOTALL
 - category: security
   id: llm-rot13-decode-to-prompt
-  message: ROT13-decoded content used in LLM prompt — simple encoding trick to bypass safety filters
+  message: ROT13-decoded content used in LLM prompt — simple encoding trick to bypass
+    safety filters
   pattern: (?i)(?:codecs\.decode\s*\([^)]*['"]rot.?13['"]|rot13|\.translate\s*\([^)]*maketrans)[\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
   severity: warning
-  suggestion: Do not use ROT13 or other trivial ciphers to construct prompts; use plain text with proper input validation
+  suggestion: Do not use ROT13 or other trivial ciphers to construct prompts; use
+    plain text with proper input validation
   flags:
   - DOTALL
 - category: security
   id: llm-unicode-escape-in-prompt
-  message: Unicode escape sequences in prompt string — can hide malicious instructions from human review
+  message: Unicode escape sequences in prompt string — can hide malicious instructions
+    from human review
   pattern: (?i)(?:prompt|system_prompt|system_message|instruction)\s*=\s*(?:.*\\u[0-9a-f]{4}|.*\\x[0-9a-f]{2}|.*unicode_escape)
   severity: warning
-  suggestion: Avoid unicode escape sequences in prompts; use readable plain text and validate all prompt content
+  suggestion: Avoid unicode escape sequences in prompts; use readable plain text and
+    validate all prompt content
 - category: security
   id: llm-encoded-instruction-decode
-  message: Decoded or decompressed content fed into LLM prompt — encoding can obscure malicious instructions
+  message: Decoded or decompressed content fed into LLM prompt — encoding can obscure
+    malicious instructions
   pattern: (?i)(?:zlib\.decompress|gzip\.decompress|bz2\.decompress|lzma\.decompress|\.decode\s*\(\s*['"](?:utf-8|ascii|latin|cp1252|unicode_escape)['"]|unhexlify|binascii\.unhexlify)\s*\([\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
   severity: warning
-  suggestion: Validate and sanitize all decoded or decompressed content before including in LLM prompts
+  suggestion: Validate and sanitize all decoded or decompressed content before including
+    in LLM prompts
   flags:
   - DOTALL
 - category: security
   id: llm-prompt-from-hex
-  message: Hex-decoded payload injected into LLM prompt — hex encoding can hide malicious instructions
+  message: Hex-decoded payload injected into LLM prompt — hex encoding can hide
+    malicious instructions
   pattern: (?i)(?:(?:bytes\.fromhex|bytearray\.fromhex|unhexlify|hex_decode)\s*\(|Buffer\.from\s*\([^)]*,\s*['"]hex['"]\s*\))[\s\S]{0,400}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.format|f['"])
   severity: warning
-  suggestion: Never inject hex-decoded content into LLM prompts; decode and validate against expected format first
+  suggestion: Never inject hex-decoded content into LLM prompts; decode and validate
+    against expected format first
   flags:
   - DOTALL
 - category: security
   id: llm-multiline-ascii-art-in-prompt
-  message: Large multi-line string in prompt — ASCII art injection can embed hidden instructions in visual patterns
+  message: Large multi-line string in prompt — ASCII art injection can embed hidden
+    instructions in visual patterns
   pattern: (?i)(?:prompt|system_prompt|system_message|instruction)\s*=\s*(?:"""[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?\n[\s\S]*?"""|`[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*\n[^`]*`)
   severity: info
-  suggestion: Review large multi-line prompt strings for hidden ASCII art instructions; prefer programmatic prompt construction
+  suggestion: Review large multi-line prompt strings for hidden ASCII art instructions;
+    prefer programmatic prompt construction
   flags:
   - DOTALL
 - category: security
   id: llm-prompt-char-substitution
-  message: Prompt built from character codes (chr/fromCharCode) — can hide instructions from static analysis and human review
+  message: Prompt built from character codes (chr/fromCharCode) — can hide instructions
+    from static analysis and human review
   pattern: (?i)(?:chr\s*\(\s*\d+\s*\)|String\.fromCharCode\s*\()[\s\S]{0,300}(?:prompt|system_prompt|system_message|messages|instruction|content|completion)\s*(?:=|\+=|\.append|\.join)
   severity: info
-  suggestion: Do not construct prompts from character codes; use plain text strings that can be reviewed
+  suggestion: Do not construct prompts from character codes; use plain text strings
+    that can be reviewed
   flags:
   - DOTALL
 - category: security
   id: crewai-agent-allow-code-execution
-  message: CrewAI Agent with allow_code_execution=True — enables arbitrary code execution by the agent
+  message: CrewAI Agent with allow_code_execution=True — enables arbitrary code
+    execution by the agent
   pattern: (?i)Agent\s*\([\s\S]{0,500}allow_code_execution\s*=\s*True
   severity: critical
-  suggestion: Disable allow_code_execution or sandbox code execution; agents should not run arbitrary code
+  suggestion: Disable allow_code_execution or sandbox code execution; agents should
+    not run arbitrary code
   flags:
   - DOTALL
 - category: security
   id: crewai-task-user-input-in-description
-  message: CrewAI Task description built with user input interpolation — prompt injection risk
+  message: CrewAI Task description built with user input interpolation — prompt
+    injection risk
   pattern: (?i)Task\s*\([\s\S]{0,300}description\s*=\s*(?:f['"]|['"][^'"]*['"]\.format\s*\(|['"][^'"]*['"]\s*\+\s*(?:request|req|user|input|params|body))
   severity: warning
-  suggestion: Sanitize user input before interpolating into Task descriptions; use validated templates
+  suggestion: Sanitize user input before interpolating into Task descriptions; use
+    validated templates
   flags:
   - DOTALL
 - category: security
   id: crewai-agent-delegation-unrestricted
-  message: CrewAI agent with allow_delegation=True — unrestricted delegation to other agents
+  message: CrewAI agent with allow_delegation=True — unrestricted delegation to
+    other agents
   pattern: (?i)Agent\s*\([\s\S]{0,500}allow_delegation\s*=\s*True
   severity: warning
-  suggestion: Restrict delegation scope or disable delegation; implement delegation constraints and approval gates
+  suggestion: Restrict delegation scope or disable delegation; implement delegation
+    constraints and approval gates
   flags:
   - DOTALL
 - category: security
@@ -779,13 +904,16 @@ rules:
   message: AutoGen code executor without sandboxing — enables arbitrary code execution
   pattern: (?i)(?:LocalCommandLineCodeExecutor|DockerCommandLineCodeExecutor)\s*\(
   severity: critical
-  suggestion: Use sandboxed code execution with strict resource limits; prefer DockerCommandLineCodeExecutor with restricted images
+  suggestion: Use sandboxed code execution with strict resource limits; prefer DockerCommandLineCodeExecutor
+    with restricted images
 - category: security
   id: autogen-user-proxy-auto-reply
-  message: AutoGen UserProxyAgent with human_input_mode=NEVER — fully autonomous with no human oversight
+  message: AutoGen UserProxyAgent with human_input_mode=NEVER — fully autonomous
+    with no human oversight
   pattern: (?i)UserProxyAgent\s*\([\s\S]{0,500}human_input_mode\s*=\s*['\"]NEVER['\"]
   severity: warning
-  suggestion: Use human_input_mode=ALWAYS or TERMINATE for safety-critical workflows; add human oversight checkpoints
+  suggestion: Use human_input_mode=ALWAYS or TERMINATE for safety-critical workflows;
+    add human oversight checkpoints
   flags:
   - DOTALL
 - category: security
@@ -793,15 +921,18 @@ rules:
   message: AutoGen register_function with no input validation on the registered callable
   pattern: (?i)register_function\s*\(\s*\w+\s*,[\s\S]{0,300}(?:caller|executor)\s*=
   severity: warning
-  suggestion: Validate and sanitize all inputs in registered functions; add type checking and bounds validation
+  suggestion: Validate and sanitize all inputs in registered functions; add type checking
+    and bounds validation
   flags:
   - DOTALL
 - category: security
   id: dspy-assert-bypass
-  message: DSPy assertion/suggestion bypass enabled — safety assertions will be silently ignored
+  message: DSPy assertion/suggestion bypass enabled — safety assertions will be
+    silently ignored
   pattern: (?i)(?:dspy\.settings\.configure|dspy\.configure)\s*\([\s\S]{0,300}bypass_assert\s*=\s*True
   severity: warning
-  suggestion: Do not bypass assertions in production; assertions enforce output quality and safety constraints
+  suggestion: Do not bypass assertions in production; assertions enforce output quality
+    and safety constraints
   flags:
   - DOTALL
 - category: security
@@ -809,61 +940,76 @@ rules:
   message: DSPy tool receiving user input without sanitization — injection risk
   pattern: (?i)(?:dspy\.Tool|dspy\.ReAct|dspy\.Predict)\s*\([\s\S]{0,300}(?:request\.|req\.|user_input|body\.|params\.)
   severity: warning
-  suggestion: Sanitize and validate all user input before passing to DSPy tools or modules
+  suggestion: Sanitize and validate all user input before passing to DSPy tools or
+    modules
   flags:
   - DOTALL
 - category: security
   id: langgraph-tool-node-unrestricted
-  message: LangGraph ToolNode with unrestricted tool access — no permission boundaries on agent tool use
+  message: LangGraph ToolNode with unrestricted tool access — no permission boundaries
+    on agent tool use
   pattern: (?i)ToolNode\s*\(\s*(?:tools|all_tools|\[[\s\S]{0,500}\])
   severity: critical
-  suggestion: Restrict ToolNode to minimum required tools; implement permission boundaries and tool-level access control
+  suggestion: Restrict ToolNode to minimum required tools; implement permission boundaries
+    and tool-level access control
   flags:
   - DOTALL
 - category: security
   id: langgraph-human-in-loop-disabled
-  message: LangGraph agent graph compiled without interrupt checkpoints — no human-in-the-loop oversight
+  message: LangGraph agent graph compiled without interrupt checkpoints — no human-in-the-loop
+    oversight
   pattern: (?i)(?:StateGraph|MessageGraph)\s*\([\s\S]{0,1000}\.compile\s*\(\s*(?:checkpointer\s*=\s*\w+\s*)?\)(?![\s\S]{0,100}interrupt)
   severity: warning
-  suggestion: Add interrupt_before or interrupt_after to critical nodes for human oversight; use checkpointer with interrupt points
+  suggestion: Add interrupt_before or interrupt_after to critical nodes for human
+    oversight; use checkpointer with interrupt points
   flags:
   - DOTALL
 - category: security
   id: claude-agent-sdk-unsafe-tool
-  message: Claude Agent SDK tool that executes code or shell commands from agent output — RCE risk
+  message: Claude Agent SDK tool that executes code or shell commands from agent output
+    — RCE risk
   pattern: (?i)(?:claude_agent_sdk|claude_code_sdk|anthropic\.agent)[\s\S]{0,500}(?:exec\s*\(|eval\s*\(|subprocess|os\.system|os\.popen|child_process|execSync|shell_exec)
   severity: critical
-  suggestion: Never execute agent-generated code without sandboxing; use validated operations with strict allowlists
+  suggestion: Never execute agent-generated code without sandboxing; use validated
+    operations with strict allowlists
   flags:
   - DOTALL
 - category: security
   id: claude-agent-sdk-no-guardrails
-  message: Claude Agent SDK agent without guardrail functions — no safety validation on agent outputs
+  message: Claude Agent SDK agent without guardrail functions — no safety validation
+    on agent outputs
   pattern: (?i)(?:Agent|AgentRunner|create_agent)\s*\([\s\S]{0,500}(?:tools\s*=)(?![\s\S]{0,300}(?:guardrail|guard|validator|filter|safety))
   severity: warning
-  suggestion: Configure guardrail functions to validate agent outputs before execution; implement safety boundaries
+  suggestion: Configure guardrail functions to validate agent outputs before execution;
+    implement safety boundaries
   flags:
   - DOTALL
 - category: security
   id: llm-output-to-regex-python
-  message: LLM output used as regex pattern — ReDoS risk from unvalidated model response
+  message: LLM output used as regex pattern — ReDoS risk from unvalidated model
+    response
   pattern: re\.compile\s*\(\s*(?:response|completion|result|output|generated|answer|reply|content|text)
   severity: warning
-  suggestion: Never pass raw LLM output to re.compile; validate or sanitize regex patterns first
+  suggestion: Never pass raw LLM output to re.compile; validate or sanitize regex
+    patterns first
   cwe: CWE-1333
 - category: security
   id: llm-output-to-regex-js
-  message: LLM output used as regex pattern — ReDoS risk from unvalidated model response
+  message: LLM output used as regex pattern — ReDoS risk from unvalidated model
+    response
   pattern: new\s+RegExp\s*\(\s*(?:response|completion|result|output|generated|answer|reply|content|text)
   severity: warning
-  suggestion: Never pass raw LLM output to RegExp constructor; validate or sanitize regex patterns first
+  suggestion: Never pass raw LLM output to RegExp constructor; validate or sanitize
+    regex patterns first
   cwe: CWE-1333
 - category: security
   id: llm-no-stop-reason-check-anthropic
-  message: Anthropic messages.create() response used without checking stop_reason — may process incomplete or truncated output
+  message: Anthropic messages.create() response used without checking stop_reason
+    — may process incomplete or truncated output
   pattern: messages\.create\s*\([^)]*\)[\s\S]{0,500}(?!stop_reason)
   severity: info
-  suggestion: Check response.stop_reason to ensure the model completed normally before using output
+  suggestion: Check response.stop_reason to ensure the model completed normally before
+    using output
   flags:
   - DOTALL
 - category: security
@@ -871,37 +1017,43 @@ rules:
   message: AWS access key ID found in source code
   pattern: (?:^|[^A-Za-z0-9])AKIA[0-9A-Z]{16}(?:[^A-Za-z0-9]|$)
   severity: critical
-  suggestion: Remove the key, rotate it in AWS IAM, and use environment variables or AWS Secrets Manager
+  suggestion: Remove the key, rotate it in AWS IAM, and use environment variables
+    or AWS Secrets Manager
 - category: security
   id: aws-secret-key
   message: AWS secret access key found in source code
   pattern: (?i)(?:aws|secret|access)[_\-\s]*key[\s'"]*[:=]\s*['"][A-Za-z0-9/+=]{40}['"]
   severity: critical
-  suggestion: Remove the secret key, rotate it in AWS IAM, and use environment variables or instance roles
+  suggestion: Remove the secret key, rotate it in AWS IAM, and use environment variables
+    or instance roles
 - category: security
   id: gcp-api-key
   message: Google Cloud API key found in source code
   pattern: (?:^|[^A-Za-z0-9])AIza[A-Za-z0-9_\-]{35}(?:[^A-Za-z0-9_\-]|$)
   severity: critical
-  suggestion: Remove the key, rotate it in Google Cloud Console, and use environment variables
+  suggestion: Remove the key, rotate it in Google Cloud Console, and use environment
+    variables
 - category: security
   id: gcp-service-account
   message: GCP service account private key identifier found in source code
   pattern: (?i)["']private_key_id["']\s*:\s*["'][a-f0-9]{40}["']
   severity: critical
-  suggestion: Remove the service account key file from source; use workload identity federation or environment-based credentials
+  suggestion: Remove the service account key file from source; use workload identity
+    federation or environment-based credentials
 - category: security
   id: github-token
   message: GitHub personal access token or OAuth token found in source code
   pattern: (?:^|[^A-Za-z0-9_])(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36}(?:[^A-Za-z0-9_]|$)
   severity: critical
-  suggestion: Remove the token, revoke it in GitHub settings, and use environment variables or GitHub Apps
+  suggestion: Remove the token, revoke it in GitHub settings, and use environment
+    variables or GitHub Apps
 - category: security
   id: github-fine-grained-token
   message: GitHub fine-grained personal access token found in source code
   pattern: (?:^|[^A-Za-z0-9_])github_pat_[A-Za-z0-9]{22}_[A-Za-z0-9]{59}(?:[^A-Za-z0-9_]|$)
   severity: critical
-  suggestion: Remove the token, revoke it in GitHub settings, and use environment variables
+  suggestion: Remove the token, revoke it in GitHub settings, and use environment
+    variables
 - category: security
   id: slack-token
   message: Slack API token found in source code
@@ -913,7 +1065,8 @@ rules:
   message: Slack incoming webhook URL found in source code
   pattern: https://hooks\.slack\.com/services/T[A-Z0-9]{8,}/B[A-Z0-9]{8,}/[A-Za-z0-9]{20,}
   severity: critical
-  suggestion: Remove the webhook URL and regenerate it; store webhook URLs in environment variables
+  suggestion: Remove the webhook URL and regenerate it; store webhook URLs in environment
+    variables
 - category: security
   id: stripe-secret-key
   message: Stripe secret or restricted API key found in source code
@@ -943,16 +1096,19 @@ rules:
   message: Hardcoded JWT secret string — use environment variables for signing keys
   pattern: (?i)jwt\.(?:encode|sign)\s*\([^)]*,\s*['"][^'"]{8,}['"]
   severity: critical
-  suggestion: Store JWT signing secrets in environment variables or a secrets manager, never hardcode them
+  suggestion: Store JWT signing secrets in environment variables or a secrets manager,
+    never hardcode them
 - category: security
   id: generic-api-key-assignment
   message: API key or secret appears to be hardcoded as a string literal
   pattern: (?i)(?:api[_\-]?key|api[_\-]?secret|access[_\-]?key)\s*[:=]\s*['"][A-Za-z0-9/+=_\-]{12,}['"]
   severity: warning
-  suggestion: Use environment variables or a secrets manager instead of hardcoding API keys
+  suggestion: Use environment variables or a secrets manager instead of hardcoding
+    API keys
 - category: security
   id: generic-password-assignment
   message: Password appears to be hardcoded as a string literal
   pattern: (?i)(?:^|[^_a-z])(?:password|passwd|pass_?word)\s*[:=]\s*['"][^'"]{8,}['"]
   severity: warning
-  suggestion: Use environment variables or a secrets manager instead of hardcoding passwords
+  suggestion: Use environment variables or a secrets manager instead of hardcoding
+    passwords

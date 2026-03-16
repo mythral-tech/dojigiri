@@ -665,12 +665,6 @@ rules:
   severity: warning
   suggestion: Validate attribute names against an allowlist
 - category: security
-  id: setattr-dynamic
-  message: setattr() with dynamic attribute name — can overwrite critical attributes
-  pattern: setattr\s*\(\s*\w+\s*,\s*(?![bruf]*['\"])\w+
-  severity: info
-  suggestion: Validate attribute names against an allowlist before setting
-- category: security
   id: pydantic-arbitrary-types
   message: Pydantic model with arbitrary_types_allowed — bypasses type validation
   pattern: arbitrary_types_allowed\s*=\s*True

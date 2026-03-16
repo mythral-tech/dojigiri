@@ -48,11 +48,11 @@ real_code = eval("actual problem")
 def test_run_regex_checks_skips_string_lines():
     """Test that security patterns skip string-only lines."""
     code = '''
-"http://example.com/api"
-url = "http://example.com/api"  # This should match
+"http://unsafe-api.io/data"
+url = "http://unsafe-api.io/data"  # This should match
 '''
     findings = run_regex_checks(code, "test.py", "python")
-    
+
     # Should only find the assignment, not the standalone string
     http_findings = [f for f in findings if f.rule == "insecure-http"]
     # Both might match depending on implementation, but at least the assignment should

@@ -122,14 +122,16 @@ def test_universal_insecure_http():
     pattern = next(r for r in rules if r[3] == "insecure-http")[0]
     
     # Should match (non-localhost HTTP)
-    assert pattern.search('"http://example.com"')
-    assert pattern.search("'http://api.service.com'")
-    
-    # Should NOT match (HTTPS or localhost)
+    assert pattern.search('"http://api.service.com"')
+    assert pattern.search("'http://unsafe-api.io/data'")
+
+    # Should NOT match (HTTPS, localhost, or well-known safe domains)
     assert not pattern.search('"https://example.com"')
     assert not pattern.search('"http://localhost"')
     assert not pattern.search('"http://127.0.0.1"')
     assert not pattern.search('"http://0.0.0.0"')
+    assert not pattern.search('"http://example.com"')  # RFC 2606 reserved
+    assert not pattern.search('"http://www.w3.org/2001/XMLSchema"')  # XML namespace
 
 
 def test_universal_sql_injection():

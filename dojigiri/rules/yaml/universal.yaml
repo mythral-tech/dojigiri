@@ -23,7 +23,7 @@ rules:
 - category: security
   id: insecure-http
   message: Insecure HTTP URL (not localhost) — data transmitted in cleartext
-  pattern: (?!.*(?:xmlns\s*=|data:))['"]http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0|www\.w3\.org/|schemas\.|purl\.org/|xml\.org/|relaxng\.org/|docbook\.org/|openid\.net/|ogp\.me/)
+  pattern: (?!.*(?:xmlns\s*=|data:|SOAPAction|HasPrefix|helpText|//\s))['"]http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0|\[::\]|unix/|www\.w3\.org/|schemas\.|purl\.org/|xml\.org/|relaxng\.org/|docbook\.org/|openid\.net/|ogp\.me/|oasis-open\.org/|linux\.duke\.edu/|maven\.apache\.org/|java\.sun\.com/|creativecommons\.org/|example\.com|example\.org|testserver|gravatar\.|cdn\.)
   severity: warning
   suggestion: Use HTTPS to encrypt data in transit
   cwe: CWE-319
