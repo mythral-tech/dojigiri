@@ -38,22 +38,22 @@ rules:
   suggestion: Use cookie.setSecure(true) to restrict cookies to HTTPS
 - category: security
   id: java-sql-injection
-  message: SQL injection — string concatenation passed to Java DB API
+  message: SQL string concatenation in DB API call — verify concatenated values are not user-controlled
   pattern: \.(?:prepareCall|prepareStatement|queryForObject|queryForList|batchUpdate)\s*\([^)]*\+
-  severity: critical
+  severity: warning
   suggestion: Use PreparedStatement with ? placeholders and bind parameters
   cwe: CWE-89
 - category: security
   id: java-sql-injection
-  message: SQL injection — string concatenation in SQL execute call
+  message: SQL string concatenation in execute call — verify concatenated values are not user-controlled
   pattern: \.(?:executeQuery|executeUpdate|execute)\s*\([^)]*\+
-  severity: critical
+  severity: warning
   suggestion: Use PreparedStatement with ? placeholders and bind parameters
 - category: security
   id: java-sql-injection
-  message: SQL injection — string concatenation in SQL query construction
+  message: SQL string concatenation — verify concatenated values are not user-controlled
   pattern: (?:String\s+)?sql\s*=\s*["'][^"']*["']\s*\+\s*(?!["'])\w+
-  severity: critical
+  severity: warning
   suggestion: Use PreparedStatement with ? placeholders and bind parameters
 - category: security
   id: java-xss
@@ -516,15 +516,15 @@ rules:
 # --- Hibernate / HQL ---
 - category: security
   id: java-hql-injection
-  message: HQL injection — string concatenation in Hibernate query
+  message: HQL string concatenation in query — verify concatenated values are not user-controlled
   pattern: \.createQuery\s*\(\s*["'][^"']*["']\s*\+\s*(?!["'])(\w+)
-  severity: critical
+  severity: warning
   suggestion: Use parameterized queries with .setParameter()
 - category: security
   id: java-hql-injection-var
-  message: HQL injection — variable passed directly as query string
+  message: Variable passed to createQuery — may be HQL injection if string, safe if CriteriaQuery
   pattern: \.createQuery\s*\(\s*(?!["'])([a-z]\w*)\s*\)
-  severity: critical
+  severity: warning
   suggestion: Use Criteria API or parameterized HQL with .setParameter()
 - category: security
   id: java-native-query-injection

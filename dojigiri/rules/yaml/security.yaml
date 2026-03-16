@@ -635,7 +635,7 @@ rules:
 - category: security
   id: rag-source-trust-boundary
   message: User-uploaded or external file content passed directly to embedding/indexing without sanitization
-  pattern: (?i)(?:add_documents|add_texts|from_documents|index\.upsert|index\.add|\.add_embeddings|collection\.add|\.insert)\s*\([\s\S]{0,200}(?:request|req\.|upload|user_|input_|body\.|file\.|uploaded)
+  pattern: (?i)(?:add_documents|add_texts|from_documents|index\.upsert|index\.add|\.add_embeddings|collection\.add|vectorstore\.insert|chroma\.insert)\s*\([\s\S]{0,200}(?:request|req\.|upload|user_|input_|body\.|file\.|uploaded)
   severity: critical
   suggestion: Sanitize and validate user-uploaded document content before indexing into vector store; strip injection payloads
   flags:

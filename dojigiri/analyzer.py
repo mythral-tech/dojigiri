@@ -243,6 +243,36 @@ def _detect_semantic_clones(analyses: list[FileAnalysis]) -> list[CrossFileFindi
     return cross_file_findings
 
 
+import re as _re
+
+_TEST_FILE_PATTERN = _re.compile(
+    r"(?:[\\/]tests?[\\/]|[\\/]__tests__[\\/]|[\\/]spec[\\/]|[\\/]fixtures?[\\/]"
+    r"|[\\/]conftest\.py$|_test\.(?:py|go|js|ts|tsx)$|\.test\.(?:js|ts|tsx)$"
+    r"|\.spec\.(?:js|ts|tsx)$|Test\.java$|Tests\.java$)",
+)
+
+# Rules where findings in test files are noise (fake credentials, test fixtures)
+_TEST_DOWNGRADE_RULES = {
+    "hardcoded-password", "hardcoded-secret", "hardcoded-secret-key",
+    "generic-password-assignment", "generic-password-in-url",
+    "generic-bearer-token", "private-key", "db-connection-string",
+    "base64-secret", "password-in-url", "java-hardcoded-password",
+    "java-default-credentials", "go-hardcoded-credential",
+}
+
+
+def _downgrade_test_file_findings(analyses: list[FileAnalysis]) -> None:
+    """Downgrade credential/secret findings in test files to info severity."""
+    for fa in analyses:
+        if not _TEST_FILE_PATTERN.search(fa.path):
+            continue
+        for finding in fa.findings:
+            if finding.rule in _TEST_DOWNGRADE_RULES and finding.severity in (
+                Severity.CRITICAL, Severity.WARNING,
+            ):
+                finding.severity = Severity.INFO
+
+
 def _detect_cross_file_taint(analyses: list[FileAnalysis]) -> list[CrossFileFinding]:
     """Run cross-file taint analysis on Python files. Returns findings."""
     python_files: dict[str, str] = {}
@@ -296,6 +326,9 @@ def scan_quick(
 
     cross_file_findings = _detect_semantic_clones(analyses)
     cross_file_findings.extend(_detect_cross_file_taint(analyses))
+
+    # Downgrade credential-type findings in test files to info severity
+    _downgrade_test_file_findings(analyses)
 
     # Clear semantics references to free memory (not needed after this point)
     for fa in analyses:

@@ -67,34 +67,32 @@ JAVA_RULES: list[Rule] = _compile(
             "Use cookie.setSecure(true) to restrict cookies to HTTPS",
         ),
         # ─── Java SQL Injection (CWE-89) ─────────────────────────────
-        # Java-specific: string concatenation into SQL with DB API sink calls
-        # on the same line. Complements universal sql-injection rules which
-        # catch the string-build line separately.
+        # Java-specific: string concatenation into SQL with DB API sink calls.
+        # Warning not critical — often table/column name interpolation with ?
+        # params for values. Taint analysis catches real injection at critical.
         (
             r"""\.(?:prepareCall|prepareStatement|queryForObject|queryForList|batchUpdate)\s*\([^)]*\+""",
-            Severity.CRITICAL,
+            Severity.WARNING,
             Category.SECURITY,
             "java-sql-injection",
-            "SQL injection — string concatenation passed to Java DB API",
+            "SQL string concatenation in DB API call — verify concatenated values are not user-controlled",
             "Use PreparedStatement with ? placeholders and bind parameters",
         ),
         (
             r"""\.(?:executeQuery|executeUpdate|execute)\s*\([^)]*\+""",
-            Severity.CRITICAL,
+            Severity.WARNING,
             Category.SECURITY,
             "java-sql-injection",
-            "SQL injection — string concatenation in SQL execute call",
+            "SQL string concatenation in execute call — verify concatenated values are not user-controlled",
             "Use PreparedStatement with ? placeholders and bind parameters",
         ),
-        # SQL string built with concatenation on separate line:
-        # String sql = "SELECT ... " + bar + "..."  (tainted SQL variable)
-        # Catches: "{call " + param + "}", "SELECT ... '" + bar + "'"
+        # SQL string built with concatenation on separate line
         (
             r"""(?:String\s+)?sql\s*=\s*["'][^"']*["']\s*\+\s*(?!["'])\w+""",
-            Severity.CRITICAL,
+            Severity.WARNING,
             Category.SECURITY,
             "java-sql-injection",
-            "SQL injection — string concatenation in SQL query construction",
+            "SQL string concatenation — verify concatenated values are not user-controlled",
             "Use PreparedStatement with ? placeholders and bind parameters",
         ),
         # ─── Java XSS (CWE-79) ───────────────────────────────────────

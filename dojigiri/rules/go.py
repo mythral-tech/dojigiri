@@ -9,22 +9,23 @@ GO_RULES: list[Rule] = _compile(
     [
         # ── Security ─────────────────────────────────────────────────
 
-        # SQL injection via fmt.Sprintf
+        # SQL injection via fmt.Sprintf (warning — often table-name interpolation
+        # with ? params; taint analysis catches real injection at critical)
         (
             r"""(?i)fmt\.Sprintf\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b""",
-            Severity.CRITICAL,
+            Severity.WARNING,
             Category.SECURITY,
             "go-sql-sprintf",
-            "SQL query built with fmt.Sprintf — SQL injection risk",
+            "SQL query built with fmt.Sprintf — verify interpolated values are not user-controlled",
             "Use parameterized queries with database/sql placeholder ($1, ?, @p1)",
         ),
         # SQL injection via string concatenation
         (
             r"""(?i)(?:['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*['"]\s*\+)""",
-            Severity.CRITICAL,
+            Severity.WARNING,
             Category.SECURITY,
             "go-sql-concat",
-            "SQL query built with string concatenation — SQL injection risk",
+            "SQL query built with string concatenation — verify concatenated values are not user-controlled",
             "Use parameterized queries with database/sql placeholder ($1, ?, @p1)",
         ),
         # Command injection via exec.Command with variable

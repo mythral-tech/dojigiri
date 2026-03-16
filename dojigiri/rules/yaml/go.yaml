@@ -2,16 +2,16 @@ rules:
 # ── Security: SQL Injection ──────────────────────────────────────────────
 - category: security
   id: go-sql-sprintf
-  message: SQL query built with fmt.Sprintf — SQL injection risk
+  message: SQL query built with fmt.Sprintf — verify interpolated values are not user-controlled
   pattern: (?i)fmt\.Sprintf\s*\(\s*['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b
-  severity: critical
+  severity: warning
   suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
   cwe: CWE-89
 - category: security
   id: go-sql-concat
-  message: SQL query built with string concatenation — SQL injection risk
+  message: SQL query built with string concatenation — verify concatenated values are not user-controlled
   pattern: (?i)(?:['"](?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^'"]*['"]\s*\+)
-  severity: critical
+  severity: warning
   suggestion: Use parameterized queries with database/sql placeholder ($1, ?, @p1)
   cwe: CWE-89
 - category: security

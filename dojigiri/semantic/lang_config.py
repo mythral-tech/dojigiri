@@ -458,7 +458,9 @@ LANGUAGE_CONFIGS.update(
                 ("exec.CommandContext", "system_cmd"),
                 ("db.Exec", "sql_query"),
                 ("db.Query", "sql_query"),
-                ("fmt.Fprintf", "html_output"),
+                ("template.HTML", "html_output"),
+                ("template.JS", "html_output"),
+                ("template.HTMLAttr", "html_output"),
                 # SSRF: standard http package functions
                 ("http.Get", "ssrf"),
                 ("http.Post", "ssrf"),
