@@ -24,6 +24,12 @@ import ast
 import logging
 from dataclasses import dataclass
 
+from .sanitizers import (
+    SANITIZER_CALLS as _SANITIZER_REGISTRY,
+    ORM_SAFE_METHODS as _ORM_SAFE_METHODS,
+    _BUILTIN_RECEIVERS,
+    ORM_SAFE_TYPE_ANNOTATIONS,
+)
 from .types import Category, CrossFileFinding, Finding, Severity, Source
 
 logger = logging.getLogger(__name__)
@@ -136,27 +142,8 @@ TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
     ("chat.invoke", "llm_input"),
 ]
 
-# Functions that sanitize tainted data
-SANITIZER_CALLS = frozenset({
-    "html.escape",
-    "bleach.clean",
-    "markupsafe.escape",
-    "shlex.quote",
-    "urllib.parse.quote",
-    "int",
-    "float",
-    "bool",
-    "parameterize",
-    "escape",
-    # ORM query builders — produce parameterized queries
-    "filter_by",
-    "Prefetch",
-    "Q",
-    "paginated_select",
-    "create_query",
-    "build_query",
-    "get_query",
-})
+# Functions that sanitize tainted data — imported from consolidated registry
+SANITIZER_CALLS = _SANITIZER_REGISTRY
 
 
 # ─── Data structures ─────────────────────────────────────────────────
@@ -336,23 +323,26 @@ def _call_is_sink(call_name: str) -> str | None:
     return None
 
 
-# ORM method names that sanitize SQL taint when called on query objects
-_ORM_SANITIZER_METHODS = frozenset({
-    "filter", "filter_by", "where", "exclude", "select", "values",
-    "insert", "update", "delete", "order_by", "group_by", "join",
-    "outerjoin", "subquery", "exists", "union", "intersect",
-})
+# ORM method names — imported from consolidated registry
+_ORM_SANITIZER_METHODS = _ORM_SAFE_METHODS
 
 
 def _call_is_sanitizer(call_name: str) -> bool:
-    """Check if a call is a known sanitizer."""
+    """Check if a call is a known sanitizer.
+
+    For ORM method matching, excludes Python builtin receivers (list, dict, etc.)
+    to avoid false sanitization of e.g. list.filter() or dict.update().
+    """
     if call_name in SANITIZER_CALLS:
         return True
     # Check if it's an ORM method call (e.g., "queryset.filter", "stmt.where")
     if "." in call_name:
-        method = call_name.rsplit(".", 1)[1]
+        receiver, method = call_name.rsplit(".", 1)
         if method in _ORM_SANITIZER_METHODS:
-            return True
+            # Don't treat builtins as ORM receivers
+            receiver_root = receiver.rsplit(".", 1)[-1] if "." in receiver else receiver
+            if receiver_root not in _BUILTIN_RECEIVERS:
+                return True
     return False
 
 
@@ -506,12 +496,31 @@ def analyze_taint_ast(filepath: str, content: str) -> list[Finding]:
     return findings
 
 
+def _get_annotation_name(ann: ast.expr | None) -> str | None:
+    """Extract the top-level type name from a parameter annotation AST node."""
+    if ann is None:
+        return None
+    if isinstance(ann, ast.Name):
+        return ann.id
+    if isinstance(ann, ast.Attribute):
+        return ann.attr
+    # Handle Optional[X], X | None, etc. — extract the non-None part
+    if isinstance(ann, ast.Subscript) and isinstance(ann.value, ast.Name):
+        return ann.value.id  # e.g. Optional → "Optional"
+    return None
+
+
 def _analyze_function_taint(
     func_node: ast.FunctionDef | ast.AsyncFunctionDef,
     filepath: str,
     class_attr_taint: dict[str, TaintVar] | None = None,
 ) -> list[Finding]:
-    """Analyze a single function for taint flows including parameter taint."""
+    """Analyze a single function for taint flows including parameter taint.
+
+    Source-aware: parameters with type annotations pointing to known ORM-safe
+    types (Select, Query, QuerySet, etc.) are marked as typed_safe and will
+    not fire at SQL sinks. Untyped parameters remain conservatively tainted.
+    """
     findings: list[Finding] = []
     seen: set[tuple[int, int]] = set()
 
@@ -523,17 +532,28 @@ def _analyze_function_taint(
         taint_map.update(class_attr_taint)
 
     # Treat function parameters as potential taint sources
+    # Source-aware: check type annotations against ORM_SAFE_TYPE_ANNOTATIONS
     for arg in func_node.args.args + func_node.args.posonlyargs + func_node.args.kwonlyargs:
         arg_name = arg.arg
         if arg_name == "self" or arg_name == "cls":
             continue
-        taint_map[arg_name] = TaintVar(
-            name=arg_name,
-            tainted=True,
-            source_kind="parameter",
-            source_line=func_node.lineno,
-            source_file=filepath,
-        )
+        ann_name = _get_annotation_name(arg.annotation)
+        if ann_name and ann_name in ORM_SAFE_TYPE_ANNOTATIONS:
+            taint_map[arg_name] = TaintVar(
+                name=arg_name,
+                tainted=True,
+                source_kind="typed_safe",
+                source_line=func_node.lineno,
+                source_file=filepath,
+            )
+        else:
+            taint_map[arg_name] = TaintVar(
+                name=arg_name,
+                tainted=True,
+                source_kind="parameter",
+                source_line=func_node.lineno,
+                source_file=filepath,
+            )
     if func_node.args.vararg:
         taint_map[func_node.args.vararg.arg] = TaintVar(
             name=func_node.args.vararg.arg,
@@ -658,6 +678,29 @@ def _process_aug_assign(
         _update_taint_from_expr(name, stmt.value, stmt.lineno, taint_map, filepath)
 
 
+def _get_chain_head_call(node: ast.Call) -> str | None:
+    """Extract the ORM factory call name at the head of a method chain.
+
+    For `insert(User).values(name=x)`, the outer Call's func is
+    Attribute(value=Call(func=Name("insert")), attr="values").
+    _get_call_name fails because the receiver is a Call node.
+    This function walks the chain to find the innermost (leftmost) call.
+    """
+    current = node
+    while isinstance(current, ast.Call):
+        if isinstance(current.func, ast.Attribute):
+            # Method call on something — check if the receiver is a call
+            receiver = current.func.value
+            if isinstance(receiver, ast.Call):
+                current = receiver
+                continue
+            # Receiver is a Name or other non-call — use _get_call_name
+            break
+        # Direct call (e.g. select(User))
+        return _get_call_name(current)
+    return _get_call_name(current)
+
+
 def _update_taint_from_expr(
     var_name: str,
     expr: ast.expr,
@@ -678,7 +721,7 @@ def _update_taint_from_expr(
         )
         return
 
-    # Check if expression is a sanitizer call
+    # Check if expression is a sanitizer call (direct or chain head)
     if isinstance(expr, ast.Call):
         call_name = _get_call_name(expr)
         if call_name and _call_is_sanitizer(call_name):
@@ -690,6 +733,19 @@ def _update_taint_from_expr(
                 source_file=filepath,
             )
             return
+        # Check ORM method chains: insert(User).values(name=x)
+        # _get_call_name fails on chains, so check the chain head
+        if not call_name or not _call_is_sanitizer(call_name):
+            head_name = _get_chain_head_call(expr)
+            if head_name and _call_is_sanitizer(head_name):
+                taint_map[var_name] = TaintVar(
+                    name=var_name,
+                    tainted=False,
+                    source_kind="sanitized",
+                    source_line=lineno,
+                    source_file=filepath,
+                )
+                return
 
     # Check if expression references any tainted variable
     for tvar_name, tvar in taint_map.items():
@@ -733,6 +789,9 @@ def _check_call_sink(
     for arg in call.args:
         tainted_var = _find_tainted_in_expr(arg, taint_map)
         if tainted_var:
+            # Skip SQL sinks when the tainted variable is typed as an ORM-safe type
+            if sink_kind == "sql_query" and tainted_var.source_kind == "typed_safe":
+                continue
             key = (tainted_var.source_line, call.lineno)
             if key in seen:
                 continue
@@ -767,6 +826,9 @@ def _check_call_sink(
                 continue
             tainted_var = _find_tainted_in_expr(kw.value, taint_map)
             if tainted_var:
+                # Skip SQL sinks when the tainted variable is typed as ORM-safe
+                if sink_kind == "sql_query" and tainted_var.source_kind == "typed_safe":
+                    continue
                 key = (tainted_var.source_line, call.lineno)
                 if key in seen:
                     continue

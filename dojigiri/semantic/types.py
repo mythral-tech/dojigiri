@@ -17,6 +17,7 @@ from enum import Enum
 
 from .core import FileSemantics
 from .lang_config import LanguageConfig
+from ..sanitizers import ORM_FACTORY_CALLS, ORM_SAFE_METHODS as _ORM_CHAIN_METHODS
 
 # ─── Type model ──────────────────────────────────────────────────────
 
@@ -129,6 +130,46 @@ def _infer_from_constructor(value_text: str, semantics: FileSemantics) -> TypeIn
                 class_name=name,
                 source="constructor",
             )
+    return None
+
+
+def _infer_from_orm_chain(value_text: str) -> TypeInfo | None:
+    """Rule 2b: Infer type from ORM factory calls and method chains.
+
+    Recognizes patterns like:
+    - select(User)                            → INSTANCE(Select)
+    - select(User).where(User.id == param)    → INSTANCE(Select)
+    - insert(User).values(name=x)             → INSTANCE(Insert)
+
+    Does NOT match text() — TextClause is explicitly excluded from safe types.
+    """
+    stripped = value_text.strip()
+    if "(" not in stripped:
+        return None
+
+    # Extract the chain head: the first callable before any dots
+    # For "select(User).where(...)", the head is "select"
+    # For "db.select(User)", handle dotted prefixes
+    head = stripped.split("(", 1)[0].strip()
+    # Get the last segment (handles db.select, sa.select, etc.)
+    head_name = head.rsplit(".", 1)[-1] if "." in head else head
+
+    if head_name in ORM_FACTORY_CALLS:
+        class_name = ORM_FACTORY_CALLS[head_name]
+        return TypeInfo(
+            inferred_type=InferredType.INSTANCE,
+            class_name=class_name,
+            source="constructor",
+        )
+
+    # Check if it's a method chain on a known ORM type:
+    # e.g., "something.filter(...)" — look for ORM chain methods as head
+    if head_name in _ORM_CHAIN_METHODS and "." in head:
+        # This is a chain method call — infer based on the method
+        # (preserves the receiver type, but we don't know it here,
+        # so we return None and let propagation handle it)
+        return None
+
     return None
 
 
@@ -277,7 +318,7 @@ def _extract_annotations_from_tree(semantics: FileSemantics, source_bytes: bytes
 
 
 def _infer_assignment_type(asgn, config: LanguageConfig, semantics: FileSemantics) -> TypeInfo | None:
-    """Try all assignment-based inference rules (none literal, literal, constructor, nullable call)."""
+    """Try all assignment-based inference rules (none literal, literal, constructor, ORM chain, nullable call)."""
     tinfo = _infer_none_literal(asgn.value_text, asgn.value_node_type)
     if tinfo:
         return tinfo
@@ -285,6 +326,9 @@ def _infer_assignment_type(asgn, config: LanguageConfig, semantics: FileSemantic
     if tinfo:
         return tinfo
     tinfo = _infer_from_constructor(asgn.value_text, semantics)
+    if tinfo:
+        return tinfo
+    tinfo = _infer_from_orm_chain(asgn.value_text)
     if tinfo:
         return tinfo
     return _infer_nullable_from_call(asgn.value_text, config)

@@ -540,36 +540,54 @@ def _run_semantic_checks(
 def _run_cfg_and_type_checks(
     findings: list[Finding], semantics: FileSemantics, source_bytes: bytes, config: LanguageConfig, filepath: str,
 ) -> FileTypeMap | None:
-    """Run CFG-based taint/resource checks and type inference + null safety.
+    """Run type inference first, then CFG-based taint/resource checks + null safety.
+
+    Type inference runs before taint so the type map can gate SQL sinks
+    (ORM query objects are safe for SQL execution).
 
     Returns the type_map if computed, else None. Appends findings in place.
     """
     from .semantic.cfg import build_cfg
-    from .semantic.taint import analyze_taint
 
     cfgs = build_cfg(semantics, source_bytes, config)
+
+    # Type inference FIRST — taint analysis uses the type map to gate SQL sinks
+    file_type_map = None
+    try:
+        from .semantic.types import infer_types
+
+        file_type_map = infer_types(semantics, source_bytes, config, cfgs=cfgs if config else None)
+    except (ValueError, OSError, AttributeError) as e:
+        logger.debug("Type inference skipped: %s", e)
+
+    # Taint analysis — pass type map for ORM query type gating
     if cfgs:
         from .semantic.resource import check_resource_leaks
         from .semantic.taint import analyze_taint_pathsensitive
 
-        findings.extend(analyze_taint_pathsensitive(semantics, source_bytes, config, filepath, cfgs))
+        findings.extend(analyze_taint_pathsensitive(
+            semantics, source_bytes, config, filepath, cfgs,
+            file_type_map=file_type_map,
+        ))
         findings.extend(check_resource_leaks(semantics, source_bytes, config, filepath, cfgs))
     else:
-        findings.extend(analyze_taint(semantics, source_bytes, config, filepath))
+        from .semantic.taint import analyze_taint
 
-    # Type inference + null safety
-    file_type_map = None
-    try:
-        from .semantic.nullsafety import check_null_safety
-        from .semantic.types import infer_types
+        findings.extend(analyze_taint(
+            semantics, source_bytes, config, filepath,
+            file_type_map=file_type_map,
+        ))
 
-        file_type_map = infer_types(semantics, source_bytes, config, cfgs=cfgs if config else None)
-        if file_type_map and file_type_map.types:
+    # Null safety (uses same type map)
+    if file_type_map and file_type_map.types:
+        try:
+            from .semantic.nullsafety import check_null_safety
+
             findings.extend(
                 check_null_safety(semantics, file_type_map, config, filepath, cfgs=cfgs if config else None, source_bytes=source_bytes)
             )
-    except (ValueError, OSError, AttributeError) as e:
-        logger.debug("Type inference/null safety skipped: %s", e)
+        except (ValueError, OSError, AttributeError) as e:
+            logger.debug("Null safety skipped: %s", e)
 
     return file_type_map
 

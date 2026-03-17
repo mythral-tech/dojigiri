@@ -10,6 +10,8 @@ Data in → Data out: language string → LanguageConfig
 
 from dataclasses import dataclass, field
 
+from ..sanitizers import PYTHON_SANITIZER_PATTERNS
+
 
 @dataclass
 class LanguageConfig:
@@ -202,46 +204,7 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
             ("llm.predict", "llm_input"),
             ("chat.invoke", "llm_input"),
         ],
-        taint_sanitizer_patterns=[
-            "html.escape",
-            "bleach.clean",
-            "markupsafe.escape",
-            "shlex.quote",
-            "urllib.parse.quote",
-            "urllib.parse.quote_plus",
-            "django.utils.html.escape",
-            "django.utils.html.strip_tags",
-            "cgi.escape",
-            "xml.sax.saxutils.escape",
-            "parameterized",
-            "int",
-            "float",
-            "re.sub",
-            "os.path.basename",
-            "pathlib.PurePath",
-            # ORM query builders — produce parameterized queries, not raw SQL
-            "select(",
-            ".where(",
-            ".filter(",
-            ".filter_by(",
-            ".exclude(",
-            "insert(",
-            "update(",
-            "delete(",
-            ".values(",
-            "paginated_select(",
-            # Common ORM wrapper function names
-            "create_query(",
-            "build_query(",
-            "get_query(",
-            # Django ORM
-            ".objects.get(",
-            ".objects.filter(",
-            ".objects.exclude(",
-            ".objects.create(",
-            "Prefetch(",
-            "Q(",
-        ],
+        taint_sanitizer_patterns=PYTHON_SANITIZER_PATTERNS,
         # CFG control flow
         cfg_if_node_types=["if_statement"],
         cfg_else_node_types=["elif_clause", "else_clause"],

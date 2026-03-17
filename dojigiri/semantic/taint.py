@@ -23,6 +23,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from ..sanitizers import ORM_QUERY_CLASSES
 from ..types import Category, Finding, Severity, Source
 from .core import FileSemantics, ScopeInfo
 from .lang_config import LanguageConfig
@@ -1019,6 +1020,7 @@ def _find_taint_sinks(
     tainted_vars: set[str],
     func_scope_ids: set[int],
     source_bytes: bytes,
+    file_type_map: object | None = None,
 ) -> list[TaintSink]:
     """Find sink calls where tainted variables are passed as arguments."""
     sinks = []
@@ -1040,12 +1042,20 @@ def _find_taint_sinks(
         if call.receiver:
             call_text = f"{call.receiver}.{call.name}"
 
-        _match_call_to_sink(call, call_text, config, lines, tainted_vars, assigned_on_line, sinks)
+        _match_call_to_sink(
+            call, call_text, config, lines, tainted_vars, assigned_on_line, sinks,
+            file_type_map=file_type_map, func_scope_ids=func_scope_ids,
+        )
 
     return sinks
 
 
-def _match_call_to_sink(call: object, call_text: str, config: object, lines: list[str], tainted_vars: list[str], assigned_on_line: set, sinks: list) -> None:
+def _match_call_to_sink(
+    call: object, call_text: str, config: object, lines: list[str],
+    tainted_vars: list[str], assigned_on_line: set, sinks: list,
+    file_type_map: object | None = None,
+    func_scope_ids: set[int] | None = None,
+) -> None:
     """Check if a function call matches any sink pattern with tainted args."""
     for pattern, kind in config.taint_sink_patterns:
         if not _matches_sink_pattern(call_text, pattern):
@@ -1059,6 +1069,8 @@ def _match_call_to_sink(call: object, call_text: str, config: object, lines: lis
         tvar = _find_tainted_arg_at_sink(
             tainted_vars, call, pattern, line_text, assigned_on_line,
             sink_kind=kind,
+            file_type_map=file_type_map,
+            func_scope_ids=func_scope_ids,
         )
         if tvar is not None:
             sinks.append(TaintSink(
@@ -1073,15 +1085,21 @@ _SSRF_SAFE_KWARGS = re.compile(
     r"|allow_redirects|params|files|json)\s*=\s*"
 )
 
-# Variable names that indicate ORM query objects (parameterized, safe for SQL sinks)
-_ORM_QUERY_VAR_RE = re.compile(
-    r"(?:_select$|_select_filter$|select_filter$|_stmt$|^select_stmt$"
-    r"|_query$|^base_query$|^qs$|^queryset$|_qs$)",
-)
+# Dead code removed: _ORM_QUERY_VAR_RE was defined but never used.
+# Replaced by type-based ORM detection via FileTypeMap + ORM_QUERY_CLASSES.
 
 
-def _find_tainted_arg_at_sink(tainted_vars: list[str], call: object, pattern: str, line_text: str, assigned_on_line: set, sink_kind: str = "") -> str | None:
-    """Find the first tainted variable that appears as an argument at a sink call."""
+def _find_tainted_arg_at_sink(
+    tainted_vars: list[str], call: object, pattern: str, line_text: str,
+    assigned_on_line: set, sink_kind: str = "",
+    file_type_map: object | None = None,
+    func_scope_ids: set[int] | None = None,
+) -> str | None:
+    """Find the first tainted variable that appears as an argument at a sink call.
+
+    Type-aware (v1.2): if file_type_map is provided and the variable has a
+    known ORM query type (Select, Insert, etc.), it is skipped for SQL sinks.
+    """
     for tvar in tainted_vars:
         if (tvar, call.line) in assigned_on_line:
             continue
@@ -1090,6 +1108,19 @@ def _find_tainted_arg_at_sink(tainted_vars: list[str], call: object, pattern: st
             if tvar == receiver_root:
                 continue
         if re.search(r"\b" + re.escape(tvar) + r"\b", line_text):
+            # Type gate: skip SQL sinks when variable is typed as ORM query
+            if sink_kind == "sql_query" and file_type_map is not None and func_scope_ids:
+                from .types import FileTypeMap
+                if isinstance(file_type_map, FileTypeMap):
+                    for scope_id in func_scope_ids:
+                        var_type = file_type_map.types.get((tvar, scope_id))
+                        if var_type and var_type.class_name in ORM_QUERY_CLASSES:
+                            break
+                    else:
+                        var_type = None
+                    if var_type and var_type.class_name in ORM_QUERY_CLASSES:
+                        continue
+
             # For SSRF sinks, only flag if tainted var is the URL (not a kwarg
             # like headers=, auth=, timeout=).
             if sink_kind == "ssrf":
@@ -1628,6 +1659,7 @@ def analyze_taint(
     source_bytes: bytes,
     config: LanguageConfig,
     filepath: str,
+    file_type_map: object | None = None,
 ) -> list[Finding]:
     """Run taint analysis with inter-procedural method summaries.
 
@@ -1673,7 +1705,10 @@ def analyze_taint(
         if not tainted_vars:
             continue
 
-        sinks = _find_taint_sinks(semantics, config, tainted_vars, func_scope_ids, source_bytes)
+        sinks = _find_taint_sinks(
+            semantics, config, tainted_vars, func_scope_ids, source_bytes,
+            file_type_map=file_type_map,
+        )
 
         for sink in sinks:
             if _is_sanitized(
@@ -1889,6 +1924,7 @@ def analyze_taint_pathsensitive(
     config: LanguageConfig,
     filepath: str,
     cfgs: dict,  # dict[int, FunctionCFG] — avoid circular import
+    file_type_map: object | None = None,
 ) -> list[Finding]:
     """Path-sensitive taint analysis using CFG-based forward dataflow.
 
