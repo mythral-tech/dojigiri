@@ -88,6 +88,20 @@ _SKIP_IN_EXAMPLE_FILES = {
     "unused-variable",       # snippets often declare without using
 }
 
+# Rules to suppress in CLI/management command files — developer-facing tools
+# where eval/exec/stacktraces are expected and not attack surface.
+_SKIP_IN_CLI_FILES = {
+    "eval-usage",            # CLI shells/REPLs use eval by design
+    "exec-usage",            # config loading in CLI context is standard
+    "code-interactive-console",  # interactive shells ARE the feature
+    "information-disclosure-stacktrace",  # CLI stderr is not user-facing
+    "sys-path-modify",       # CLI path setup for project discovery
+    "toctou-file-check",     # CLI file ops are local, not concurrent
+    "global-keyword",        # CLI modules cache state via globals
+    "dunder-import-dynamic",  # CLI plugin loading uses __import__
+    "class-manipulation",    # CLI debug helpers use __class__ swap
+}
+
 # Style/linter rules suppressed by default — every IDE already catches these.
 # SAST should focus on security and bugs, not duplicate linter output.
 _DEFAULT_SKIP_RULES = {
@@ -109,6 +123,10 @@ _DEFAULT_SKIP_RULES = {
 _TEST_PATH_SEGMENTS = ("/test/", "/tests/", "test_", "_test.", ".test.", ".spec.", "/spec/", "/specs/", "/__tests__/", "/__mocks__/")
 _TEST_FILENAMES = ("conftest.py",)  # exact filenames that are always test infra
 _EXAMPLE_PATH_SEGMENTS = ("/examples/", "/example/", "/docs_src/", "/doc/", "/scripts/")
+
+# Path segments and filenames identifying CLI/management command files
+_CLI_PATH_SEGMENTS = ("/cli/", "/cli.", "/management/commands/", "/management/")
+_CLI_FILENAMES = ("cli.py", "manage.py", "__main__.py", "console.py", "shell.py")
 
 # File-level LLM context: llm-* rules only fire in files that mention LLM frameworks
 _HAS_LLM_CONTEXT_RE = re.compile(
@@ -151,6 +169,14 @@ def _is_test_path(fp_lower: str) -> bool:
     # Check exact filenames (e.g. conftest.py at any level)
     basename = fp_lower.rsplit("/", 1)[-1]
     return basename in _TEST_FILENAMES
+
+
+def _is_cli_path(fp_lower: str) -> bool:
+    """Return True if the path looks like a CLI/management command file."""
+    if any(seg in fp_lower for seg in _CLI_PATH_SEGMENTS):
+        return True
+    basename = fp_lower.rsplit("/", 1)[-1]
+    return basename in _CLI_FILENAMES
 
 
 def _get_comment_style(language: str) -> str | None:
@@ -403,15 +429,18 @@ def run_regex_checks(content: str, filepath: str, language: str, custom_rules: l
     findings = []
     rules = get_rules_for_language(language)
 
-    # Detect test/example files for rule suppression
+    # Detect test/example/CLI files for rule suppression
     fp_lower = filepath.lower().replace("\\", "/")
     is_test_file = _is_test_path(fp_lower)
     is_example_file = any(seg in fp_lower for seg in _EXAMPLE_PATH_SEGMENTS)
+    is_cli_file = _is_cli_path(fp_lower)
 
     # Rules to skip for this file based on path
     skip_rules: set[str] = set()
     if is_test_file:
         skip_rules |= _SKIP_IN_TEST_FILES
+    if is_cli_file:
+        skip_rules |= _SKIP_IN_CLI_FILES
     if is_example_file:
         skip_rules |= _SKIP_IN_EXAMPLE_FILES
 
@@ -715,11 +744,12 @@ def _merge_overlap_findings(unique: list[Finding]) -> list[Finding]:
 
 
 def _filter_test_example_rules(findings: list[Finding], filepath: str) -> list[Finding]:
-    """Suppress rules not applicable in test/example files."""
+    """Suppress rules not applicable in test/example/CLI files."""
     fp_lower = filepath.lower().replace("\\", "/")
     is_test = _is_test_path(fp_lower)
     is_example = any(seg in fp_lower for seg in _EXAMPLE_PATH_SEGMENTS)
-    if not is_test and not is_example:
+    is_cli = _is_cli_path(fp_lower)
+    if not is_test and not is_example and not is_cli:
         return findings
 
     post_skip: set[str] = set()
@@ -727,6 +757,8 @@ def _filter_test_example_rules(findings: list[Finding], filepath: str) -> list[F
         post_skip |= _SKIP_IN_TEST_FILES
     if is_example:
         post_skip |= _SKIP_IN_EXAMPLE_FILES
+    if is_cli:
+        post_skip |= _SKIP_IN_CLI_FILES
     return [f for f in findings if f.rule not in post_skip]
 
 

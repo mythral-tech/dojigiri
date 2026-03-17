@@ -1,10 +1,203 @@
 {
   "notes": "Flask benchmark annotations. Baseline from SUMMARY.md (2026-03-03). TPs/FPs verified during Mag7 review.",
   "true_positives": [
-    {"file": "src/flask/config.py", "line": 0, "rule": "exec-usage", "note": "Intentional exec() for config loading — TP but acceptable risk"},
-    {"file": "src/flask/config.py", "line": 0, "rule": "eval-usage", "note": "Intentional eval() for config loading — TP but acceptable risk"}
+    {
+      "file": "src/flask/config.py",
+      "line": 0,
+      "rule": "exec-usage",
+      "note": "Intentional exec() for config loading \u2014 TP but acceptable risk"
+    },
+    {
+      "file": "src/flask/config.py",
+      "line": 0,
+      "rule": "eval-usage",
+      "note": "Intentional eval() for config loading \u2014 TP but acceptable risk"
+    },
+    {
+      "file": "src\\flask\\app.py",
+      "line": 1601,
+      "rule": "bare-except",
+      "note": "Bare except intentionally catches BaseException (including SystemExit/KeyboardInterrupt) to record error before re-raising \u2014 deliberate but genuinely catches too broadly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\sansio\\app.py",
+      "line": 59,
+      "rule": "god-class",
+      "note": "Flask's App class is genuinely large by design \u2014 valid code smell even if it's an accepted architectural choice",
+      "confidence": "HIGH"
+    }
   ],
-  "false_positives": [],
+  "false_positives": [
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 331,
+      "rule": "null-dereference",
+      "note": "This is just an initializer; load_app() checks for None before returning and sets it via the loader path",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\ctx.py",
+      "line": 331,
+      "rule": "null-dereference",
+      "note": "Initialization to None is intentional; _cv_token is set in push() and checked before use in pop()",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\ctx.py",
+      "line": 315,
+      "rule": "null-dereference",
+      "note": "Docstring explicitly documents it may be None; callers are expected to check \u2014 this is intentional API design",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 757,
+      "rule": "null-dereference",
+      "note": "data is initialized as {} on line 745 and only updated via |= \u2014 it is always a dict, never None",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\ctx.py",
+      "line": 322,
+      "rule": "null-dereference",
+      "note": "None means 'not yet loaded from session'; callers check for None before use \u2014 this is a lazy-load sentinel",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 252,
+      "rule": "information-disclosure-stacktrace",
+      "note": "This is CLI-only code (flask command); traceback goes to the developer's terminal, not to HTTP clients",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 960,
+      "rule": "information-disclosure-stacktrace",
+      "note": "CLI run command during reloader \u2014 prints to developer's stderr, not exposed to HTTP clients",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 653,
+      "rule": "information-disclosure-stacktrace",
+      "note": "CLI error output (err=True goes to stderr) shown to developer, not to HTTP clients",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 1023,
+      "rule": "taint-flow",
+      "note": "PYTHONSTARTUP is a standard Python env var; Flask mirrors CPython's own behavior \u2014 if env is compromised, game is already over",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 1022,
+      "rule": "taint-flow",
+      "note": "PYTHONSTARTUP is standard CPython behavior; env vars are trusted in this context (developer's own shell session)",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 1098,
+      "rule": "exception-swallowed",
+      "note": "ValueError means invalid sort key was passed; graceful fallback to unsorted output is intentional CLI UX",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\config.py",
+      "line": 163,
+      "rule": "exception-swallowed",
+      "note": "Intentional fallback: try to parse env var as JSON, keep as string if it fails \u2014 comment documents the intent",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 245,
+      "rule": "dunder-import-dynamic",
+      "note": "module_name comes from the developer's CLI --app argument, not from untrusted input; this is core app-loading logic",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\helpers.py",
+      "line": 623,
+      "rule": "dunder-import-dynamic",
+      "note": "import_name is the app's own package name \u2014 developer-controlled, used to resolve resource paths",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 754,
+      "rule": "toctou-file-check",
+      "note": "CLI startup loading .env files \u2014 no security boundary; race is theoretical and inconsequential here",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 1021,
+      "rule": "toctou-file-check",
+      "note": "Developer-local PYTHONSTARTUP check; TOCTOU race is not exploitable since env is already trusted",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 1023,
+      "rule": "eval-usage",
+      "note": "Mirrors CPython's own PYTHONSTARTUP handling in the interactive shell \u2014 input is developer-controlled, not user-controlled",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 1036,
+      "rule": "empty-exception-handler",
+      "note": "Standard pattern for optional imports \u2014 readline may not be available on all platforms (e.g., Windows)",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 224,
+      "rule": "sys-path-modify",
+      "note": "Adds the project directory to sys.path for app discovery \u2014 standard Flask CLI behavior, path is the developer's own project",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 413,
+      "rule": "feature-envy",
+      "note": "This is a decorator override that delegates to super().command() \u2014 forwarding args/kwargs is inherent to the pattern, not feature envy",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\cli.py",
+      "line": 1045,
+      "rule": "code-interactive-console",
+      "note": "This IS the flask shell command \u2014 an interactive REPL is the entire purpose of this function",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\debughelpers.py",
+      "line": 104,
+      "rule": "class-manipulation",
+      "note": "Debug helper that swaps in an enhanced dict subclass for better error messages \u2014 only active in debug mode, not a security issue",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\templating.py",
+      "line": 94,
+      "rule": "exception-swallowed-continue",
+      "note": "Standard template loader chain pattern \u2014 try each loader, continue to next on miss, raise after all exhausted",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\flask\\testing.py",
+      "line": 101,
+      "rule": "global-keyword",
+      "note": "Standard module-level caching pattern for a version string \u2014 no mutation risk, simple lazy initialization",
+      "confidence": "HIGH"
+    }
+  ],
   "expected_counts": {
     "total": 287,
     "bare-except": 1,

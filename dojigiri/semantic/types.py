@@ -357,6 +357,61 @@ def _apply_annotations(
                 type_map.types[(name, scope_id)] = tinfo
 
 
+def _narrow_nullable_types(
+    type_map: FileTypeMap, semantics: FileSemantics, config: LanguageConfig,
+) -> None:
+    """Narrow nullable types when a later assignment proves non-None.
+
+    Handles the common pattern where a field is initialized as None in __init__
+    but always assigned a real value before use:
+        self.x: T | None = None       → nullable=True (from annotation)
+        self.x = SomeClass()          → narrows to nullable=False
+
+    Only narrows when ALL non-init assignments are non-None. If any assignment
+    is None or nullable, the type stays nullable (conservative).
+    """
+    # Group assignments by (name, scope_id) — track all assignments per variable
+    var_assignments: dict[tuple[str, int], list] = {}
+    for asgn in semantics.assignments:
+        if asgn.is_parameter:
+            continue
+        key = (asgn.name, asgn.scope_id)
+        var_assignments.setdefault(key, []).append(asgn)
+
+    for key, existing_type in list(type_map.types.items()):
+        if not existing_type.nullable:
+            continue
+
+        assignments = var_assignments.get(key, [])
+        if len(assignments) <= 1:
+            continue  # Only one assignment — can't narrow
+
+        # Check if any subsequent assignment (after the first) is non-None
+        has_non_none_reassignment = False
+        all_reassignments_non_none = True
+
+        for asgn in assignments[1:]:  # Skip the first (init) assignment
+            val = asgn.value_text.strip()
+            if val in ("None", "null", "nil", "undefined", ""):
+                all_reassignments_non_none = False
+            else:
+                # Check if the value is a None literal type
+                none_info = _infer_none_literal(val, asgn.value_node_type)
+                if none_info and none_info.inferred_type == InferredType.NONE:
+                    all_reassignments_non_none = False
+                else:
+                    has_non_none_reassignment = True
+
+        if has_non_none_reassignment and all_reassignments_non_none:
+            # All re-assignments are non-None — narrow the type
+            type_map.types[key] = TypeInfo(
+                inferred_type=existing_type.inferred_type if existing_type.inferred_type != InferredType.NONE else InferredType.UNKNOWN,
+                class_name=existing_type.class_name,
+                nullable=False,
+                source=existing_type.source,
+            )
+
+
 def _propagate_types(type_map: FileTypeMap, semantics: FileSemantics) -> None:
     """Rule 6: Propagate types through simple identifier assignments (y = x)."""
     for asgn in semantics.assignments:
@@ -426,6 +481,13 @@ def infer_types(
         tinfo = _infer_assignment_type(asgn, config, semantics)
         if tinfo:
             type_map.types[key] = tinfo
+
+    # Narrowing pass: if a variable was typed as nullable (from annotation or
+    # initial None assignment) but has a later assignment to a non-None value,
+    # clear the nullable flag. This handles the common pattern:
+    #   self.x: T | None = None   (init)
+    #   self.x = RealValue()      (later assignment narrows to non-None)
+    _narrow_nullable_types(type_map, semantics, config)
 
     _propagate_types(type_map, semantics)
 

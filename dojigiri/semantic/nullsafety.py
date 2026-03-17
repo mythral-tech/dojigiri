@@ -120,7 +120,9 @@ _REASSIGN_PATTERNS = [
 # on the attribute name appearing as attribute_access context
 _ASSIGNMENT_LHS_PATTERNS = [
     re.compile(r"self\.(\w+)\s*="),  # self.x = ...
+    re.compile(r"self\.(\w+)\s*:"),  # self.x: Type = ... (annotated assignment)
     re.compile(r"(\w+)\s*=(?!=)"),  # x = ... (but not x == ...)
+    re.compile(r"(\w+)\s*:"),  # x: Type = ... (annotated assignment)
 ]
 
 
@@ -361,6 +363,35 @@ def _find_self_assigned_attrs(
     return self_assigned_attrs
 
 
+def _find_class_narrowed_attrs(
+    semantics: FileSemantics,
+    nullable_vars: dict[tuple[str, int], TypeInfo],
+) -> set[str]:
+    """Find attribute names that are assigned non-None values in ANY method of the same class.
+
+    For self.x attributes initialized as None in __init__, if ANY other method
+    assigns self.x = <non-None>, the attribute is considered "class-narrowed"
+    and should not be flagged for null-dereference.
+
+    Returns a set of attribute names (not keyed by scope — applies across all methods).
+    """
+    # Collect all self.x assignments with non-None values across all scopes
+    non_none_attrs: set[str] = set()
+    none_attrs: set[str] = set()
+
+    for a in semantics.assignments:
+        vt = getattr(a, "value_text", "").strip()
+        if vt in ("None", "null", "nil", ""):
+            none_attrs.add(a.name)
+        else:
+            non_none_attrs.add(a.name)
+
+    # An attribute is class-narrowed if it has both a None init AND a non-None assignment
+    # Only consider attributes that are in nullable_vars
+    nullable_names = {name for name, _ in nullable_vars}
+    return non_none_attrs & none_attrs & nullable_names
+
+
 def _resolve_key_in_scope_chain(
     name: str,
     scope_id: int,
@@ -401,8 +432,9 @@ def _source_description(tinfo: TypeInfo) -> str:
 def _is_assignment_lhs(source_lines: list[str] | None, line: int, var_name: str) -> bool:
     """Return True if the reference on this line is an assignment LHS, not a dereference.
 
-    Detects patterns like `self.x = ...` or `x = ...` where the variable appears
-    on the left side of an assignment. These are not null dereferences.
+    Detects patterns like `self.x = ...`, `self.x: T = ...`, or `x = ...`
+    where the variable appears on the left side of an assignment.
+    These are not null dereferences.
 
     Note: source_lines is 0-indexed and line numbers from the semantic extractor
     directly index into it (line 0 = first line of source).
@@ -410,11 +442,18 @@ def _is_assignment_lhs(source_lines: list[str] | None, line: int, var_name: str)
     if not source_lines or line < 0 or line >= len(source_lines):
         return False
     stripped = source_lines[line].strip()
+    esc = re.escape(var_name)
     # self.x = ... (but not self.x == ...)
-    if re.match(rf"self\.{re.escape(var_name)}\s*=[^=]", stripped):
+    if re.match(rf"self\.{esc}\s*=[^=]", stripped):
+        return True
+    # self.x: Type = ... (annotated assignment)
+    if re.match(rf"self\.{esc}\s*:", stripped):
         return True
     # x = ... (but not x == ...)
-    if re.match(rf"{re.escape(var_name)}\s*=[^=]", stripped):
+    if re.match(rf"{esc}\s*=[^=]", stripped):
+        return True
+    # x: Type = ... (annotated assignment)
+    if re.match(rf"{esc}\s*:", stripped):
         return True
     return False
 
@@ -426,6 +465,7 @@ def _check_nullable_attr_refs(
     guarded_lines: dict,
     filepath: str,
     seen: set,
+    class_narrowed_attrs: set[str] | None = None,
 ) -> list[Finding]:
     """Check attribute-access references on nullable variables."""
     findings = []
@@ -436,6 +476,11 @@ def _check_nullable_attr_refs(
 
         # Skip assignment LHS — `self.x = value` is not a dereference
         if _is_assignment_lhs(semantics.source_lines, ref.line, ref.name):
+            continue
+
+        # Skip class-narrowed attrs: initialized as None but assigned non-None
+        # in another method of the same class
+        if class_narrowed_attrs and ref.name in class_narrowed_attrs:
             continue
 
         # If there's a receiver, check if this is a non-self-assigned attr
@@ -483,12 +528,17 @@ def _check_nullable_call_refs(
     guarded_lines: dict,
     filepath: str,
     seen: set,
+    class_narrowed_attrs: set[str] | None = None,
 ) -> list[Finding]:
     """Check method calls on nullable receiver variables."""
     findings = []
 
     for call in semantics.function_calls:
         if call.receiver is None:
+            continue
+
+        # Skip class-narrowed attrs
+        if class_narrowed_attrs and call.receiver in class_narrowed_attrs:
             continue
 
         tinfo = _resolve_nullable_in_scope(call.receiver, call.scope_id, nullable_vars, semantics)  # type: ignore[assignment]  # None handled on next line
@@ -552,6 +602,7 @@ def check_null_safety(
         return []
 
     self_assigned_attrs = _find_self_assigned_attrs(semantics, nullable_vars)
+    class_narrowed_attrs = _find_class_narrowed_attrs(semantics, nullable_vars)
 
     # Use provided source bytes, fall back to disk read
     if source_bytes is None:
@@ -566,9 +617,11 @@ def check_null_safety(
 
     findings = _check_nullable_attr_refs(
         semantics, nullable_vars, self_assigned_attrs, guarded_lines, filepath, seen,
+        class_narrowed_attrs=class_narrowed_attrs,
     )
     findings.extend(_check_nullable_call_refs(
         semantics, nullable_vars, guarded_lines, filepath, seen,
+        class_narrowed_attrs=class_narrowed_attrs,
     ))
 
     return findings
