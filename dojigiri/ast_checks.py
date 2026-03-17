@@ -342,28 +342,21 @@ def _is_stop_iteration_pattern(handler: ast.ExceptHandler) -> bool:
 def _report_swallowed_pass(
     node: ast.ExceptHandler, filepath: str, findings: list[Finding], source_lines: list[str],
 ) -> None:
-    """Report a swallowed exception with pass, adjusting severity based on comment presence."""
+    """Report a swallowed exception with pass. Suppressed entirely when a comment explains intent."""
     has_comment = _has_explanatory_comment(node, source_lines)
     if has_comment:
-        findings.append(
-            Finding(
-                file=filepath, line=node.lineno,
-                severity=Severity.INFO, category=Category.BUG, source=Source.AST,
-                rule="exception-swallowed",
-                message="Exception caught and silently ignored (except: pass) — comment explains intent",
-                suggestion="Acknowledged via comment; consider logging for observability",
-            )
+        # Developer acknowledged the pattern with a comment — suppress entirely.
+        # Available in full audit mode via suppress_noise=False.
+        return
+    findings.append(
+        Finding(
+            file=filepath, line=node.lineno,
+            severity=Severity.WARNING, category=Category.BUG, source=Source.AST,
+            rule="exception-swallowed",
+            message="Exception caught and silently ignored (except: pass)",
+            suggestion="Log the exception or handle it explicitly",
         )
-    else:
-        findings.append(
-            Finding(
-                file=filepath, line=node.lineno,
-                severity=Severity.WARNING, category=Category.BUG, source=Source.AST,
-                rule="exception-swallowed",
-                message="Exception caught and silently ignored (except: pass)",
-                suggestion="Log the exception or handle it explicitly",
-            )
-        )
+    )
 
 
 def _continue_msg_suffix(has_comment: bool, is_specific: bool) -> str:
@@ -380,30 +373,21 @@ def _continue_msg_suffix(has_comment: bool, is_specific: bool) -> str:
 def _report_swallowed_continue(
     node: ast.ExceptHandler, filepath: str, findings: list[Finding], source_lines: list[str],
 ) -> None:
-    """Report a swallowed exception with continue, adjusting severity based on context."""
+    """Report a swallowed exception with continue. Suppressed when comment or specific exception."""
     has_comment = _has_explanatory_comment(node, source_lines)
     is_specific = not _is_broad_exception(node)
     if has_comment or is_specific:
-        msg_suffix = _continue_msg_suffix(has_comment, is_specific)
-        findings.append(
-            Finding(
-                file=filepath, line=node.lineno,
-                severity=Severity.INFO, category=Category.BUG, source=Source.AST,
-                rule="exception-swallowed-continue",
-                message=f"Exception caught and silently continued (except: continue){msg_suffix}",
-                suggestion="Acknowledged; consider logging for observability",
-            )
+        # Developer acknowledged (comment) or uses specific exception (fallback pattern) — suppress.
+        return
+    findings.append(
+        Finding(
+            file=filepath, line=node.lineno,
+            severity=Severity.WARNING, category=Category.BUG, source=Source.AST,
+            rule="exception-swallowed-continue",
+            message="Exception caught and silently continued (except: continue)",
+            suggestion="Log the exception before continuing, or handle it explicitly",
         )
-    else:
-        findings.append(
-            Finding(
-                file=filepath, line=node.lineno,
-                severity=Severity.WARNING, category=Category.BUG, source=Source.AST,
-                rule="exception-swallowed-continue",
-                message="Exception caught and silently continued (except: continue)",
-                suggestion="Log the exception before continuing, or handle it explicitly",
-            )
-        )
+    )
 
 
 def _check_exception_handling(

@@ -117,6 +117,8 @@ _DEFAULT_SKIP_RULES = {
     "high-complexity",       # code-smell, not security
     "unchecked-error",       # Go/general — too noisy, not security-critical
     "possibly-uninitialized",  # high FP in conditional assignment patterns
+    "null-dereference",      # ~90% FP without path-sensitive null tracking; needs rework
+    "exception-swallowed-continue",  # almost always intentional fallback patterns
 }
 
 # Path segments identifying test and example files

@@ -127,7 +127,7 @@ except ValueError:
 
 
 def test_python_ast_exception_swallowed_with_inline_comment():
-    """Exception swallowed with an inline comment should downgrade to INFO."""
+    """Exception swallowed with an inline comment should be suppressed entirely."""
     code = '''
 try:
     value = int(raw)
@@ -137,9 +137,7 @@ except ValueError:
     findings = run_python_ast_checks(code, "test.py")
 
     swallowed = [f for f in findings if f.rule == "exception-swallowed"]
-    assert len(swallowed) == 1
-    assert swallowed[0].severity == Severity.INFO
-    assert "comment explains intent" in swallowed[0].message
+    assert len(swallowed) == 0  # comment explains intent — suppressed
 
 
 def test_python_ast_exception_swallowed_with_comment_line():
@@ -188,7 +186,7 @@ except Exception:
 
 
 def test_python_ast_exception_swallowed_continue_with_comment():
-    """Exception swallowed via continue with comment should downgrade to INFO."""
+    """Exception swallowed via continue with comment should be suppressed entirely."""
     code = '''
 for item in items:
     try:
@@ -199,12 +197,11 @@ for item in items:
     findings = run_python_ast_checks(code, "test.py")
 
     swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
-    assert len(swallowed) == 1
-    assert swallowed[0].severity == Severity.INFO
+    assert len(swallowed) == 0  # comment + specific exception — suppressed
 
 
 def test_python_ast_exception_swallowed_continue_specific_exception_no_comment():
-    """Specific exception with continue (no comment) is a fallback pattern — downgrade to INFO."""
+    """Specific exception with continue (no comment) is a fallback pattern — suppressed."""
     code = '''
 for loader in loaders:
     try:
@@ -215,9 +212,7 @@ for loader in loaders:
     findings = run_python_ast_checks(code, "test.py")
 
     swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
-    assert len(swallowed) == 1
-    assert swallowed[0].severity == Severity.INFO
-    assert "fallback pattern" in swallowed[0].message
+    assert len(swallowed) == 0  # specific exception fallback — suppressed
 
 
 def test_python_ast_exception_swallowed_continue_broad_exception_stays_warning():
@@ -242,8 +237,8 @@ for item in items:
     assert all(f.severity == Severity.WARNING for f in swallowed)
 
 
-def test_python_ast_exception_swallowed_continue_broad_with_comment_downgrades():
-    """Broad except with continue BUT with comment should still downgrade to INFO."""
+def test_python_ast_exception_swallowed_continue_broad_with_comment_suppressed():
+    """Broad except with continue BUT with comment should be suppressed entirely."""
     code = '''
 for item in items:
     try:
@@ -254,12 +249,11 @@ for item in items:
     findings = run_python_ast_checks(code, "test.py")
 
     swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
-    assert len(swallowed) == 1
-    assert swallowed[0].severity == Severity.INFO
+    assert len(swallowed) == 0  # comment present — suppressed
 
 
 def test_python_ast_exception_swallowed_continue_tuple_specific():
-    """Tuple of specific exceptions with continue should downgrade to INFO."""
+    """Tuple of specific exceptions with continue — suppressed as fallback pattern."""
     code = '''
 for item in items:
     try:
@@ -270,8 +264,7 @@ for item in items:
     findings = run_python_ast_checks(code, "test.py")
 
     swallowed = [f for f in findings if f.rule == "exception-swallowed-continue"]
-    assert len(swallowed) == 1
-    assert swallowed[0].severity == Severity.INFO
+    assert len(swallowed) == 0  # specific exception fallback — suppressed
 
 
 def test_python_ast_exception_swallowed_continue_tuple_with_broad():

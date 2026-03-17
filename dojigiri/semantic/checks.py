@@ -388,34 +388,22 @@ def check_empty_catch(tree, source_bytes: bytes, config: LanguageConfig, filepat
             is_empty = True
 
         if is_empty:
-            # If the handler has explanatory comments, downgrade to INFO
-            # (the developer acknowledged the empty handler)
+            # If the handler has explanatory comments, suppress entirely —
+            # the developer acknowledged the empty handler.
             if comments:
-                findings.append(
-                    Finding(
-                        file=filepath,
-                        line=_node_line(node),
-                        severity=Severity.INFO,
-                        category=Category.BUG,
-                        source=Source.AST,
-                        rule="empty-exception-handler",
-                        message="Exception caught and silently ignored — comment explains intent",
-                        suggestion="Acknowledged via comment; consider logging for observability",
-                    )
+                continue
+            findings.append(
+                Finding(
+                    file=filepath,
+                    line=_node_line(node),
+                    severity=Severity.WARNING,
+                    category=Category.BUG,
+                    source=Source.AST,
+                    rule="empty-exception-handler",
+                    message="Exception caught and silently ignored",
+                    suggestion="Log the exception or handle it explicitly",
                 )
-            else:
-                findings.append(
-                    Finding(
-                        file=filepath,
-                        line=_node_line(node),
-                        severity=Severity.WARNING,
-                        category=Category.BUG,
-                        source=Source.AST,
-                        rule="empty-exception-handler",
-                        message="Exception caught and silently ignored",
-                        suggestion="Log the exception or handle it explicitly",
-                    )
-                )
+            )
 
     return findings
 
