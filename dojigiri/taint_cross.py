@@ -30,26 +30,21 @@ from .sanitizers import (
     _BUILTIN_RECEIVERS,
     ORM_SAFE_TYPE_ANNOTATIONS,
 )
+from .taint_cross_base import (  # noqa: F401 — re-export for backward compatibility
+    FunctionTaintSummary,
+    ImportInfo,
+    _taint_severity,
+    _CRITICAL_SINK_KINDS,
+)
 from .types import Category, CrossFileFinding, Finding, Severity, Source
 
 logger = logging.getLogger(__name__)
-
-_CRITICAL_SINK_KINDS = {"sql_query", "system_cmd", "eval", "llm_input", "ssrf"}
 
 # Keyword arguments that are safe for SSRF sinks — only the URL matters
 _SSRF_SAFE_KWARGS = {"headers", "auth", "cookies", "timeout", "verify",
                      "cert", "proxies", "hooks", "stream",
                      "allow_redirects", "params", "files", "json"}
 
-
-def _taint_severity(sink_kind: str, source_kind: str = "") -> Severity:
-    """Critical for dangerous sinks with confirmed taint flow, warning otherwise.
-
-    Parameter-sourced taint stays WARNING — speculative without caller analysis.
-    """
-    if source_kind == "parameter":
-        return Severity.WARNING
-    return Severity.CRITICAL if sink_kind in _CRITICAL_SINK_KINDS else Severity.WARNING
 
 # ─── Taint sources / sinks (AST-based, mirrors semantic/lang_config.py) ────
 
@@ -210,33 +205,6 @@ class TaintVar:
     source_kind: str  # "user_input", "env_var", "parameter", "propagated"
     source_line: int
     source_file: str
-
-
-@dataclass
-class FunctionTaintSummary:
-    """Summary of a function's taint behavior for cross-file analysis."""
-
-    name: str
-    qualified_name: str  # module.function or module.Class.method
-    filepath: str
-    line: int
-    params: list[str]
-    # Which parameters flow to sinks (index → sink kind)
-    param_flows_to_sink: dict[int, str]
-    # Whether the function returns tainted data based on parameters
-    returns_tainted_param: bool
-    # Which parameter indices are returned (potentially tainted)
-    returned_param_indices: set[int]
-
-
-@dataclass
-class ImportInfo:
-    """Resolved import information."""
-
-    local_name: str  # name as used in the importing file
-    module: str  # source module path
-    original_name: str  # name in the source module
-    line: int
 
 
 # ─── AST helpers ──────────────────────────────────────────────────────
