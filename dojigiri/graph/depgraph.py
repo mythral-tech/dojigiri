@@ -359,6 +359,116 @@ def _resolve_js_ts_imports(filepath: str, content: str, project_root: str) -> se
     return resolved
 
 
+# ─── Java import resolution ──────────────────────────────────────────
+
+_JAVA_PACKAGE_RE = re.compile(r"^\s*package\s+([\w.]+)\s*;", re.MULTILINE)
+_JAVA_IMPORT_RE = re.compile(
+    r"^\s*import\s+(?:static\s+)?([\w.]+)\s*;", re.MULTILINE,
+)
+
+
+def _build_java_package_map(
+    files: dict[str, str], project_root: str,
+) -> dict[str, str]:
+    """Build package name → directory mapping from Java files.
+
+    Scans all Java files for `package com.example;` declarations and maps
+    the package name to the directory containing that file.
+    """
+    root_path = Path(project_root)
+    pkg_to_dir: dict[str, str] = {}
+    for filepath, content in files.items():
+        m = _JAVA_PACKAGE_RE.search(content)
+        if m:
+            pkg_name = m.group(1)
+            abs_dir = str(Path(filepath).parent)
+            try:
+                rel_dir = str(Path(abs_dir).relative_to(root_path)).replace("\\", "/")
+            except ValueError:
+                rel_dir = abs_dir.replace("\\", "/")
+            pkg_to_dir[pkg_name] = rel_dir
+    return pkg_to_dir
+
+
+def _resolve_java_imports(
+    filepath: str, content: str, project_root: str,
+    pkg_map: dict[str, str] | None = None,
+    java_files: dict[str, str] | None = None,
+) -> set[str]:
+    """Parse Java imports and resolve to project file paths.
+
+    Handles:
+    - `import com.example.UserService;` → resolves via package map
+    - `import static com.example.Utils.method;` → resolves containing class
+
+    Args:
+        filepath: Path to the Java file being analyzed.
+        content: Source code of the file.
+        project_root: Project root directory.
+        pkg_map: Pre-built package→directory map (avoids rebuilding per file).
+        java_files: All Java files {path: content} for building pkg_map if needed.
+    """
+    root_path = Path(project_root)
+    resolved: set[str] = set()
+
+    if pkg_map is None and java_files is not None:
+        pkg_map = _build_java_package_map(java_files, project_root)
+    if pkg_map is None:
+        pkg_map = {}
+
+    for match in _JAVA_IMPORT_RE.finditer(content):
+        import_path = match.group(1)  # e.g. "com.example.UserService"
+        parts = import_path.split(".")
+        if len(parts) < 2:
+            continue
+
+        # The last part is the class name (or method for static imports)
+        class_name = parts[-1]
+        pkg_parts = parts[:-1]
+
+        # For static imports, the second-to-last is the class
+        if class_name[0].islower() and len(parts) >= 3:
+            class_name = parts[-2]
+            pkg_parts = parts[:-2]
+
+        pkg_name = ".".join(pkg_parts)
+
+        # Look up the package directory
+        pkg_dir = pkg_map.get(pkg_name)
+        if pkg_dir is None:
+            # Try parent packages (for nested packages not fully mapped)
+            for i in range(len(pkg_parts) - 1, 0, -1):
+                parent_pkg = ".".join(pkg_parts[:i])
+                parent_dir = pkg_map.get(parent_pkg)
+                if parent_dir is not None:
+                    sub_path = "/".join(pkg_parts[i:])
+                    pkg_dir = f"{parent_dir}/{sub_path}"
+                    break
+            if pkg_dir is None:
+                continue
+
+        # Try to find ClassNamee.java in the package directory
+        candidate = f"{pkg_dir}/{class_name}.java"
+        abs_candidate = root_path / candidate
+        if abs_candidate.is_file():
+            resolved.add(candidate)
+            continue
+
+        # Fallback: scan all known files for matching class name
+        if java_files:
+            for jf_path in java_files:
+                jf_name = Path(jf_path).stem
+                if jf_name == class_name:
+                    try:
+                        rel = str(Path(jf_path).relative_to(root_path)).replace("\\", "/")
+                        resolved.add(rel)
+                    except ValueError:
+                        pass
+                    break
+
+    return resolved
+
+
 # ─── Graph construction ──────────────────────────────────────────────
 
 
@@ -404,6 +514,19 @@ def build_dependency_graph(
             continue
         graph.nodes[rel] = FileNode(path=rel, language=lang)
 
+    # Pre-read Java files for package map building
+    java_file_contents: dict[str, str] = {}
+    for rel, node in graph.nodes.items():
+        if node.language == "java":
+            abs_path = root_path / rel
+            try:
+                java_file_contents[str(abs_path)] = abs_path.read_text(
+                    encoding="utf-8", errors="replace",
+                )
+            except OSError:
+                pass
+    java_pkg_map = _build_java_package_map(java_file_contents, str(root_path)) if java_file_contents else {}
+
     # Resolve imports for each file
     for rel, node in list(graph.nodes.items()):
         abs_path = root_path / rel
@@ -416,6 +539,11 @@ def build_dependency_graph(
             raw_imports = _resolve_python_imports(str(abs_path), content, str(root_path))
         elif node.language in ("javascript", "typescript"):
             raw_imports = _resolve_js_ts_imports(str(abs_path), content, str(root_path))
+        elif node.language == "java":
+            raw_imports = _resolve_java_imports(
+                str(abs_path), content, str(root_path),
+                pkg_map=java_pkg_map, java_files=java_file_contents,
+            )
         else:
             continue
 
