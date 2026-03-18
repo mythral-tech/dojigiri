@@ -55,6 +55,7 @@ def _taint_severity(sink_kind: str, source_kind: str = "") -> Severity:
 
 # Attribute chains that produce tainted data
 TAINT_SOURCE_ATTRS = {
+    # Flask
     ("request", "args"): "user_input",
     ("request", "form"): "user_input",
     ("request", "json"): "user_input",
@@ -62,8 +63,26 @@ TAINT_SOURCE_ATTRS = {
     ("request", "values"): "user_input",
     ("request", "cookies"): "user_input",
     ("request", "headers"): "user_input",
+    ("request", "files"): "user_input",
+    # Django
+    ("request", "GET"): "user_input",
+    ("request", "POST"): "user_input",
+    ("request", "FILES"): "user_input",
+    ("request", "body"): "user_input",
+    ("request", "META"): "user_input",
+    ("request", "COOKIES"): "user_input",
+    ("request", "content_type"): "user_input",
+    ("request", "path"): "user_input",
+    ("request", "path_info"): "user_input",
+    # FastAPI
+    ("request", "query_params"): "user_input",
+    # Environment
     ("os", "environ"): "env_var",
     ("sys", "argv"): "user_input",
+    # Database results (second-order injection)
+    ("cursor", "fetchone"): "db_input",
+    ("cursor", "fetchall"): "db_input",
+    ("cursor", "fetchmany"): "db_input",
     # LLM response outputs — tainted because model output is untrusted
     ("response", "choices"): "llm_output",
     ("completion", "choices"): "llm_output",
@@ -76,12 +95,18 @@ TAINT_SOURCE_ATTRS = {
 # Function calls that produce tainted data
 TAINT_SOURCE_CALLS = {
     "input": "user_input",
+    # Django request methods
+    "request.get_full_path": "user_input",
+    # Environment
+    "os.getenv": "env_var",
+    "os.environ.get": "env_var",
     # LangChain call patterns that return LLM output
     "invoke": "llm_output",
 }
 
 # Method/function calls that are dangerous sinks
 TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
+    # SQL — generic
     ("cursor.execute", "sql_query"),
     ("conn.execute", "sql_query"),
     ("connection.execute", "sql_query"),
@@ -92,17 +117,44 @@ TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
     ("cursor.executemany", "sql_query"),
     ("conn.executemany", "sql_query"),
     ("connection.executemany", "sql_query"),
+    # SQL — Django raw queries (bypass ORM safety)
+    ("raw", "sql_query"),
+    ("extra", "sql_query"),
+    ("RawSQL", "sql_query"),
+    # SQL — SQLAlchemy raw text
+    ("text", "sql_query"),
+    # Command injection
     ("os.system", "system_cmd"),
     ("os.popen", "system_cmd"),
     ("subprocess.run", "system_cmd"),
     ("subprocess.call", "system_cmd"),
     ("subprocess.Popen", "system_cmd"),
+    ("subprocess.check_output", "system_cmd"),
+    ("subprocess.check_call", "system_cmd"),
+    # Eval/exec
     ("eval", "eval"),
     ("exec", "eval"),
+    ("compile", "eval"),
+    # Deserialization
     ("pickle.loads", "deserialization"),
+    ("pickle.load", "deserialization"),
     ("yaml.load", "deserialization"),
+    ("yaml.unsafe_load", "deserialization"),
+    ("marshal.loads", "deserialization"),
+    ("shelve.open", "deserialization"),
+    # SSTI
     ("Template", "ssti"),
     ("render_template_string", "ssti"),
+    ("from_string", "ssti"),
+    # XSS — Django
+    ("mark_safe", "html_output"),
+    ("SafeString", "html_output"),
+    # Path traversal
+    ("=open", "path_traversal"),
+    ("send_file", "path_traversal"),
+    ("shutil.copy", "path_traversal"),
+    ("shutil.move", "path_traversal"),
+    # SSRF
     ("requests.get", "ssrf"),
     ("requests.post", "ssrf"),
     ("requests.put", "ssrf"),
@@ -121,6 +173,13 @@ TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
     ("urlopen", "ssrf"),
     ("aiohttp.ClientSession.get", "ssrf"),
     ("aiohttp.ClientSession.post", "ssrf"),
+    # Log injection
+    ("logging.info", "log_injection"),
+    ("logging.warning", "log_injection"),
+    ("logging.error", "log_injection"),
+    ("logger.info", "log_injection"),
+    ("logger.warning", "log_injection"),
+    ("logger.error", "log_injection"),
     # LLM API calls — user input flowing here is prompt injection
     ("client.chat.completions.create", "llm_input"),
     ("openai.ChatCompletion.create", "llm_input"),

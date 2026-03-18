@@ -39,6 +39,13 @@ _GENERIC_SINK_RULES: dict[str, str] = {
     "html_output": "xss",
     "ssrf": "ssrf",
     "llm_input": "llm-prompt-injection",
+    "ssti": "ssti",
+    "deserialization": "insecure-deserialization",
+    "log_injection": "log-injection",
+    "open_redirect": "open-redirect",
+    "http_header": "header-injection",
+    "path_traversal": "path-traversal",
+    "xxe": "xxe",
 }
 _JAVA_SINK_RULES: dict[str, str] = {
     "sql_query": "java-sql-injection",
@@ -51,6 +58,10 @@ _JAVA_SINK_RULES: dict[str, str] = {
     "http_header": "java-xss",
     "http_cookie": "java-insecure-cookie",
     "trust_boundary": "java-trust-boundary",
+    "xxe": "java-xxe",
+    "ssrf": "java-ssrf",
+    "log_injection": "java-log-injection",
+    "open_redirect": "java-open-redirect",
 }
 _LANG_SINK_RULES: dict[str, dict[str, str]] = {
     "java": _JAVA_SINK_RULES,

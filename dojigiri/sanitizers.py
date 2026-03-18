@@ -20,7 +20,12 @@ ORM_SAFE_CALLS = frozenset({
     # Common ORM wrapper function names
     "paginated_select", "create_query", "build_query", "get_query",
     # Django ORM
-    "Prefetch", "Q",
+    "Prefetch", "Q", "F", "Value", "When", "Case",
+    "annotate", "aggregate", "values_list",
+    # Django model methods (parameterized by default)
+    "get_or_create", "update_or_create", "bulk_create", "bulk_update",
+    # SQLAlchemy session (parameterized)
+    "add", "add_all", "merge",
 })
 
 ORM_SAFE_METHODS = frozenset({
@@ -62,13 +67,39 @@ ORM_SAFE_PATTERNS = [
     "create_query(",
     "build_query(",
     "get_query(",
-    # Django ORM
+    # Django ORM — all parameterized by default
     ".objects.get(",
     ".objects.filter(",
     ".objects.exclude(",
     ".objects.create(",
+    ".objects.get_or_create(",
+    ".objects.update_or_create(",
+    ".objects.bulk_create(",
+    ".objects.values(",
+    ".objects.values_list(",
+    ".objects.annotate(",
+    ".objects.aggregate(",
+    ".objects.all(",
+    ".objects.count(",
+    ".objects.exists(",
     "Prefetch(",
     "Q(",
+    "F(",
+    "Value(",
+    "When(",
+    "Case(",
+    # SQLAlchemy ORM session — parameterized
+    "session.add(",
+    "session.merge(",
+    "session.query(",
+    # Peewee ORM
+    ".select(",
+    ".insert(",
+    ".update(",
+    ".delete(",
+    # Tortoise ORM
+    ".create(",
+    ".get_or_none(",
 ]
 
 # ─── General sanitizer calls ─────────────────────────────────────────
@@ -91,22 +122,50 @@ SANITIZER_CALLS = frozenset({
 # Non-ORM sanitizer patterns used in lang_config taint_sanitizer_patterns.
 
 GENERAL_SANITIZER_PATTERNS = [
+    # HTML escaping
     "html.escape",
     "bleach.clean",
+    "bleach.linkify",
     "markupsafe.escape",
-    "shlex.quote",
-    "urllib.parse.quote",
-    "urllib.parse.quote_plus",
-    "django.utils.html.escape",
-    "django.utils.html.strip_tags",
+    "markupsafe.Markup.escape",
     "cgi.escape",
     "xml.sax.saxutils.escape",
-    "parameterized",
+    # Django escaping and validation
+    "django.utils.html.escape",
+    "django.utils.html.strip_tags",
+    "django.utils.html.format_html",
+    "django.utils.html.conditional_escape",
+    "django.utils.http.urlencode",
+    "django.core.validators",
+    # Shell/command escaping
+    "shlex.quote",
+    "shlex.split",
+    # URL encoding
+    "urllib.parse.quote",
+    "urllib.parse.quote_plus",
+    "urllib.parse.urlencode",
+    # Type conversion (to non-injectable types)
     "int",
     "float",
-    "re.sub",
+    "bool",
+    "str.isdigit",
+    "str.isalpha",
+    "str.isalnum",
+    # Path sanitization
     "os.path.basename",
+    "os.path.normpath",
+    "os.path.realpath",
     "pathlib.PurePath",
+    "pathlib.Path.resolve",
+    "werkzeug.utils.secure_filename",
+    # Regex validation
+    "re.sub",
+    "re.match",
+    "re.fullmatch",
+    # Parameterized queries
+    "parameterized",
+    # SQLAlchemy safe binding
+    "bindparam",
 ]
 
 # Combined list for lang_config (general + ORM patterns)

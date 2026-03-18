@@ -137,13 +137,38 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
         # Taint analysis
         taint_source_patterns=[
             ("input", "user_input"),
+            # Flask
             ("request.form", "user_input"),
             ("request.args", "user_input"),
             ("request.json", "user_input"),
+            ("request.data", "user_input"),
+            ("request.values", "user_input"),
+            ("request.files", "user_input"),
+            ("request.headers", "user_input"),
+            ("request.cookies", "user_input"),
+            # Django
+            ("request.GET", "user_input"),
+            ("request.POST", "user_input"),
+            ("request.FILES", "user_input"),
+            ("request.body", "user_input"),
+            ("request.META", "user_input"),
+            ("request.COOKIES", "user_input"),
+            ("request.content_type", "user_input"),
+            ("request.path", "user_input"),
+            ("request.path_info", "user_input"),
+            ("request.get_full_path", "user_input"),
+            # FastAPI (path/query params come via function args, but request object too)
+            ("request.query_params", "user_input"),
+            # Environment
             ("os.environ.get", "env_var"),
             ("os.environ", "env_var"),
+            ("os.getenv", "env_var"),
             ("sys.argv", "user_input"),
             (".read", "file_read"),
+            # Database results (second-order injection)
+            ("cursor.fetchone", "db_input"),
+            ("cursor.fetchall", "db_input"),
+            ("cursor.fetchmany", "db_input"),
             # LLM response outputs — tainted because model output is untrusted
             ("response.choices", "llm_output"),
             ("completion.choices", "llm_output"),
@@ -156,6 +181,7 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
             (".predict", "llm_output"),
         ],
         taint_sink_patterns=[
+            # SQL — generic
             ("cursor.execute", "sql_query"),
             ("session.execute", "sql_query"),
             ("session.exec", "sql_query"),
@@ -163,27 +189,67 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
             ("connection.execute", "sql_query"),
             ("db.execute", "sql_query"),
             ("engine.execute", "sql_query"),
+            # SQL — Django raw queries (bypass ORM safety)
+            (".raw", "sql_query"),
+            (".extra", "sql_query"),
+            ("RawSQL", "sql_query"),
+            ("connection.cursor", "sql_query"),
+            # SQL — SQLAlchemy raw text (bypass parameterization)
+            ("text", "sql_query"),
+            # Eval/exec
             ("eval", "eval"),
             ("exec", "eval"),
+            ("compile", "eval"),
+            # OS command injection
             ("os.system", "system_cmd"),
+            ("os.popen", "system_cmd"),
             ("subprocess.run", "system_cmd"),
             ("subprocess.call", "system_cmd"),
             ("subprocess.Popen", "system_cmd"),
+            ("subprocess.check_output", "system_cmd"),
+            ("subprocess.check_call", "system_cmd"),
+            # SSRF
             ("requests.get", "ssrf"),
             ("requests.post", "ssrf"),
+            ("requests.put", "ssrf"),
+            ("requests.delete", "ssrf"),
+            ("requests.patch", "ssrf"),
+            ("requests.head", "ssrf"),
             ("urllib.request.urlopen", "ssrf"),
             ("httpx.get", "ssrf"),
+            ("httpx.post", "ssrf"),
+            ("httpx.AsyncClient", "ssrf"),
+            ("aiohttp.ClientSession", "ssrf"),
+            # SSTI
             ("Template", "ssti"),
             ("render_template_string", "ssti"),
             ("from_string", "ssti"),
+            ("Jinja2Templates", "ssti"),
+            # Path traversal
             ("=open", "path_traversal"),
             ("os.open", "path_traversal"),
             ("io.open", "path_traversal"),
             ("send_file", "path_traversal"),
             ("shutil.copy", "path_traversal"),
             ("shutil.move", "path_traversal"),
+            ("pathlib.Path", "path_traversal"),
+            # Deserialization
             ("pickle.loads", "deserialization"),
+            ("pickle.load", "deserialization"),
             ("yaml.load", "deserialization"),
+            ("yaml.unsafe_load", "deserialization"),
+            ("marshal.loads", "deserialization"),
+            ("shelve.open", "deserialization"),
+            # XSS — Django
+            ("mark_safe", "html_output"),
+            ("SafeString", "html_output"),
+            # Log injection
+            ("logging.info", "log_injection"),
+            ("logging.warning", "log_injection"),
+            ("logging.error", "log_injection"),
+            ("logger.info", "log_injection"),
+            ("logger.warning", "log_injection"),
+            ("logger.error", "log_injection"),
             # LLM API calls — user input flowing here is prompt injection
             ("client.chat.completions.create", "llm_input"),
             ("openai.ChatCompletion.create", "llm_input"),
@@ -323,21 +389,41 @@ _JS_BASE = dict(
         ("req.query", "user_input"),
         ("req.headers", "user_input"),
         ("req.cookies", "user_input"),
+        ("req.file", "user_input"),
+        ("req.files", "user_input"),
+        ("req.hostname", "user_input"),
+        ("req.ip", "user_input"),
+        ("req.path", "user_input"),
+        ("req.url", "user_input"),
         # Koa
         ("ctx.request.body", "user_input"),
         ("ctx.params", "user_input"),
         ("ctx.query", "user_input"),
-        # Fastify
+        ("ctx.request.files", "user_input"),
+        # Fastify / Hapi (request.* patterns)
         ("request.body", "user_input"),
         ("request.params", "user_input"),
         ("request.query", "user_input"),
+        ("request.headers", "user_input"),
+        # Hapi-specific
+        ("request.payload", "user_input"),
         # Browser
         ("document.getElementById", "user_input"),
         ("window.location", "user_input"),
         ("location.search", "user_input"),
         ("location.hash", "user_input"),
+        ("location.href", "user_input"),
+        ("document.referrer", "user_input"),
+        ("document.cookie", "user_input"),
+        ("postMessage", "user_input"),
+        # URL API
+        ("URL.searchParams", "user_input"),
+        ("URLSearchParams", "user_input"),
         # Environment
         ("process.env", "env_var"),
+        # Database results (second-order injection)
+        (".findOne", "db_input"),
+        (".findById", "db_input"),
         # LLM response outputs — tainted because model output is untrusted
         ("response.choices", "llm_output"),
         ("completion.choices", "llm_output"),
@@ -348,34 +434,71 @@ _JS_BASE = dict(
     taint_sink_patterns=[
         ("eval", "eval"),
         ("Function", "eval"),
+        ("setTimeout", "eval"),
+        ("setInterval", "eval"),
+        # XSS — DOM
         (".innerHTML", "html_output"),
+        (".outerHTML", "html_output"),
         ("document.write", "html_output"),
+        ("document.writeln", "html_output"),
+        ("$.html", "html_output"),
+        # XSS — Express response
+        ("res.send", "html_output"),
+        ("res.render", "html_output"),
+        ("res.write", "html_output"),
+        # Command injection
         ("child_process.exec", "system_cmd"),
         ("child_process.execSync", "system_cmd"),
         ("child_process.spawn", "system_cmd"),
+        ("child_process.execFile", "system_cmd"),
         ("execSync", "system_cmd"),
+        ("spawnSync", "system_cmd"),
         # SQL — raw queries
         ("sql.raw", "sql_query"),
         (".raw", "sql_query"),
         ("sequelize.query", "sql_query"),
         ("knex.raw", "sql_query"),
+        ("pool.query", "sql_query"),
+        ("client.query", "sql_query"),
+        ("connection.query", "sql_query"),
+        ("mysql.query", "sql_query"),
+        ("pg.query", "sql_query"),
+        ("$queryRaw", "sql_query"),
+        ("$executeRaw", "sql_query"),
         # SSRF
         ("fetch", "ssrf"),
         ("axios.get", "ssrf"),
         ("axios.post", "ssrf"),
+        ("axios.put", "ssrf"),
+        ("axios.delete", "ssrf"),
         ("axios.request", "ssrf"),
         ("http.get", "ssrf"),
         ("http.request", "ssrf"),
         ("https.get", "ssrf"),
         ("https.request", "ssrf"),
+        ("got", "ssrf"),
+        ("needle", "ssrf"),
+        ("superagent", "ssrf"),
         # Path traversal
         ("fs.readFile", "path_traversal"),
         ("fs.readFileSync", "path_traversal"),
         ("fs.writeFile", "path_traversal"),
         ("fs.writeFileSync", "path_traversal"),
         ("fs.createReadStream", "path_traversal"),
+        ("fs.createWriteStream", "path_traversal"),
+        ("fs.access", "path_traversal"),
+        ("fs.stat", "path_traversal"),
+        ("fs.unlink", "path_traversal"),
+        ("path.join", "path_traversal"),
+        ("path.resolve", "path_traversal"),
         # Deserialization
         ("JSON.parse", "deserialization"),
+        ("vm.runInNewContext", "eval"),
+        ("vm.runInThisContext", "eval"),
+        # Open redirect
+        ("res.redirect", "open_redirect"),
+        # Header injection
+        ("res.setHeader", "http_header"),
         # LLM API calls — user input flowing here is prompt injection
         ("openai.chat.completions.create", "llm_input"),
         ("openai.completions.create", "llm_input"),
@@ -392,8 +515,20 @@ _JS_BASE = dict(
         "parseInt",
         "Number",
         "validator.escape",
+        "validator.isEmail",
+        "validator.isURL",
+        "validator.isAlphanumeric",
+        "validator.whitelist",
         "xss-filters",
         "he.encode",
+        "he.escape",
+        # ORM/query builder sanitizers (parameterized by default)
+        "sequelize.escape",
+        "knex.where",
+        "knex.select",
+        # Path sanitization
+        "path.basename",
+        "path.normalize",
     ],
     cfg_if_node_types=["if_statement"],
     cfg_else_node_types=["else_clause"],
@@ -476,33 +611,78 @@ LANGUAGE_CONFIGS.update(
             block_scoped=True,
             # Taint analysis
             taint_source_patterns=[
+                # net/http
                 ("r.FormValue", "user_input"),
                 ("r.URL.Query", "user_input"),
+                ("r.PostFormValue", "user_input"),
+                ("r.Header.Get", "user_input"),
+                ("r.Body", "user_input"),
+                ("r.URL.Path", "user_input"),
+                ("r.RequestURI", "user_input"),
+                # Gin / Echo / Fiber (shared context patterns)
+                ("c.Query", "user_input"),
+                ("c.Param", "user_input"),
+                ("c.PostForm", "user_input"),
+                ("c.GetHeader", "user_input"),
+                ("c.BindJSON", "user_input"),
+                ("c.ShouldBindJSON", "user_input"),
+                # Echo-specific
+                ("c.QueryParam", "user_input"),
+                ("c.FormValue", "user_input"),
+                # Fiber-specific
+                ("c.Params", "user_input"),
+                ("c.Body", "user_input"),
+                # Environment
                 ("os.Getenv", "env_var"),
+                # Database results
+                ("rows.Scan", "db_input"),
             ],
             taint_sink_patterns=[
                 ("exec.Command", "system_cmd"),
                 ("exec.CommandContext", "system_cmd"),
+                # SQL — database/sql
                 ("db.Exec", "sql_query"),
                 ("db.Query", "sql_query"),
+                ("db.QueryRow", "sql_query"),
+                ("db.ExecContext", "sql_query"),
+                ("db.QueryContext", "sql_query"),
+                ("db.QueryRowContext", "sql_query"),
+                ("tx.Exec", "sql_query"),
+                ("tx.Query", "sql_query"),
+                # SQL — GORM raw (bypass ORM safety)
+                ("db.Raw", "sql_query"),
+                # XSS — template output
                 ("template.HTML", "html_output"),
                 ("template.JS", "html_output"),
                 ("template.HTMLAttr", "html_output"),
+                # XSS — Gin response
+                ("c.HTML", "html_output"),
+                ("c.String", "html_output"),
+                # File operations
+                ("os.Open", "file_path"),
+                ("os.Create", "file_path"),
+                ("os.ReadFile", "file_path"),
+                ("os.WriteFile", "file_path"),
+                ("ioutil.ReadFile", "file_path"),
+                ("filepath.Join", "file_path"),
                 # SSRF: standard http package functions
                 ("http.Get", "ssrf"),
                 ("http.Post", "ssrf"),
                 ("http.PostForm", "ssrf"),
                 ("http.Head", "ssrf"),
                 ("http.NewRequest", "ssrf"),
-                # SSRF: method calls on any http.Client instance (custom clients)
-                # Matches receiver.Get/Post/Do/Head/PostForm — the taint engine
-                # only flags when a tainted variable appears as an argument,
-                # not when it's on the LHS of an assignment.
+                # SSRF: method calls on any http.Client instance
                 (".Get", "ssrf"),
                 (".Post", "ssrf"),
                 (".Do", "ssrf"),
                 (".PostForm", "ssrf"),
                 (".Head", "ssrf"),
+                # Open redirect
+                ("http.Redirect", "open_redirect"),
+                ("c.Redirect", "open_redirect"),
+                # Log injection
+                ("log.Printf", "log_injection"),
+                ("log.Println", "log_injection"),
             ],
             taint_sanitizer_patterns=[
                 "html.EscapeString",
@@ -511,8 +691,21 @@ LANGUAGE_CONFIGS.update(
                 "url.PathEscape",
                 "strconv.Atoi",
                 "strconv.ParseInt",
+                "strconv.ParseFloat",
                 "filepath.Base",
                 "filepath.Clean",
+                "filepath.Abs",
+                # GORM ORM (parameterized by default)
+                "db.Where",
+                "db.Find",
+                "db.First",
+                "db.Create",
+                "db.Save",
+                "db.Delete",
+                "db.Model",
+                # sqlx named params
+                "sqlx.Named",
+                "db.NamedExec",
             ],
             # CFG control flow
             cfg_if_node_types=["if_statement"],
@@ -672,28 +865,42 @@ LANGUAGE_CONFIGS.update(
                 # HTTP request parameters (Servlet API)
                 ("request.getParameter", "user_input"),
                 ("request.getParameterValues", "user_input"),
+                ("request.getParameterMap", "user_input"),
                 ("request.getHeader", "user_input"),
+                ("request.getHeaders", "user_input"),
                 ("request.getCookies", "user_input"),
                 ("request.getQueryString", "user_input"),
                 ("request.getRequestURI", "user_input"),
+                ("request.getRequestURL", "user_input"),
                 ("request.getPathInfo", "user_input"),
                 ("request.getInputStream", "user_input"),
                 ("request.getReader", "user_input"),
+                ("request.getPart", "user_input"),
+                ("request.getParts", "user_input"),
+                # Spring MVC (annotation-based — params come via method args)
+                # These methods read from the request object directly
+                ("request.getAttribute", "user_input"),
+                ("model.getAttribute", "user_input"),
+                # Spring multipart
+                ("multipartFile.getOriginalFilename", "user_input"),
+                ("multipartFile.getInputStream", "user_input"),
                 # Console/file input
                 ("Scanner.nextLine", "user_input"),
                 ("Scanner.next", "user_input"),
                 ("BufferedReader.readLine", "file_read"),
                 ("Files.readString", "file_read"),
                 ("Files.readAllLines", "file_read"),
+                ("Files.readAllBytes", "file_read"),
                 # Environment
                 ("System.getenv", "env_var"),
                 ("System.getProperty", "env_var"),
-                # Database results (tainted data from DB)
+                # Database results (second-order injection)
                 ("ResultSet.getString", "db_input"),
                 ("ResultSet.getObject", "db_input"),
+                ("ResultSet.getInt", "db_input"),
             ],
             taint_sink_patterns=[
-                # SQL Injection (CWE-89)
+                # SQL Injection (CWE-89) — JDBC
                 ("Statement.execute", "sql_query"),
                 ("Statement.executeQuery", "sql_query"),
                 ("Statement.executeUpdate", "sql_query"),
@@ -703,6 +910,21 @@ LANGUAGE_CONFIGS.update(
                 ("prepareStatement", "sql_query"),
                 ("executeQuery", "sql_query"),
                 ("executeUpdate", "sql_query"),
+                # SQL — Spring JdbcTemplate
+                ("JdbcTemplate.query", "sql_query"),
+                ("JdbcTemplate.queryForObject", "sql_query"),
+                ("JdbcTemplate.queryForList", "sql_query"),
+                ("JdbcTemplate.queryForMap", "sql_query"),
+                ("JdbcTemplate.update", "sql_query"),
+                ("JdbcTemplate.execute", "sql_query"),
+                ("JdbcTemplate.batchUpdate", "sql_query"),
+                ("NamedParameterJdbcTemplate.query", "sql_query"),
+                ("NamedParameterJdbcTemplate.update", "sql_query"),
+                # SQL — JPA/Hibernate native queries (bypass parameterization)
+                ("EntityManager.createNativeQuery", "sql_query"),
+                ("entityManager.createNativeQuery", "sql_query"),
+                ("Session.createSQLQuery", "sql_query"),
+                ("session.createSQLQuery", "sql_query"),
                 # Command Injection (CWE-78)
                 ("Runtime.exec", "system_cmd"),
                 ("runtime.exec", "system_cmd"),
@@ -713,7 +935,7 @@ LANGUAGE_CONFIGS.update(
                 ("InitialDirContext.search", "ldap_query"),
                 ("ctx.search", "ldap_query"),
                 ("dirContext.search", "ldap_query"),
-                # XPath Injection (CWE-643) — variable names vary (xp, xpath, etc.)
+                # XPath Injection (CWE-643)
                 ("XPath.evaluate", "xpath_query"),
                 ("XPath.compile", "xpath_query"),
                 ("XPathExpression.evaluate", "xpath_query"),
@@ -721,6 +943,10 @@ LANGUAGE_CONFIGS.update(
                 ("xpath.compile", "xpath_query"),
                 ("xp.evaluate", "xpath_query"),
                 ("xp.compile", "xpath_query"),
+                # XXE (CWE-611)
+                ("DocumentBuilderFactory.newInstance", "xxe"),
+                ("SAXParserFactory.newInstance", "xxe"),
+                ("XMLInputFactory.newInstance", "xxe"),
                 # Path Traversal (CWE-22)
                 ("new File(", "file_path"),
                 ("new FileInputStream(", "file_path"),
@@ -729,6 +955,8 @@ LANGUAGE_CONFIGS.update(
                 ("new FileWriter(", "file_path"),
                 ("Paths.get", "file_path"),
                 ("Files.newInputStream", "file_path"),
+                ("Files.copy", "file_path"),
+                ("Files.move", "file_path"),
                 # XSS (CWE-79) — output sinks
                 ("response.getWriter", "http_response"),
                 ("response.getOutputStream", "http_response"),
@@ -742,10 +970,30 @@ LANGUAGE_CONFIGS.update(
                 ("response.setHeader", "http_header"),
                 ("response.addHeader", "http_header"),
                 ("response.sendRedirect", "http_redirect"),
+                # Log injection
+                ("Logger.info", "log_injection"),
+                ("Logger.warning", "log_injection"),
+                ("Logger.severe", "log_injection"),
+                ("logger.info", "log_injection"),
+                ("logger.warn", "log_injection"),
+                ("logger.error", "log_injection"),
+                ("log.info", "log_injection"),
+                ("log.warn", "log_injection"),
+                ("log.error", "log_injection"),
                 # Trust Boundary (CWE-501)
                 ("session.setAttribute", "trust_boundary"),
                 ("session.putValue", "trust_boundary"),
                 ("request.getSession().setAttribute", "trust_boundary"),
+                # SSRF
+                ("URL.openConnection", "ssrf"),
+                ("URL.openStream", "ssrf"),
+                ("HttpURLConnection.connect", "ssrf"),
+                ("HttpClient.send", "ssrf"),
+                ("RestTemplate.getForObject", "ssrf"),
+                ("RestTemplate.postForObject", "ssrf"),
+                ("RestTemplate.exchange", "ssrf"),
+                ("WebClient.get", "ssrf"),
+                ("WebClient.post", "ssrf"),
             ],
             taint_sanitizer_patterns=[
                 # Encoding/escaping
@@ -783,6 +1031,23 @@ LANGUAGE_CONFIGS.update(
                 # LDAP encoding
                 "LdapEncoder.filterEncode",
                 "LdapNameBuilder",
+                # JPA/Hibernate parameterized queries (safe by default)
+                "EntityManager.createQuery",
+                "entityManager.createQuery",
+                "CriteriaBuilder",
+                "CriteriaQuery",
+                "Session.createQuery",
+                "session.createQuery",
+                # Spring Data (parameterized by default)
+                "findById",
+                "findAll",
+                "findBy",
+                "save",
+                "saveAll",
+                "deleteById",
+                # XXE protection
+                "setFeature",
+                "setAttribute",
             ],
             # CFG control flow
             cfg_if_node_types=["if_statement"],
