@@ -105,12 +105,19 @@ def clone_or_update(repo_name: str, repo_info: dict) -> Path:
 
 
 def scan_repo(repo_dir: Path, repo_info: dict) -> list[dict]:
-    """Run doji scan on the repo paths and collect findings."""
+    """Run doji scan on the repo paths and collect findings.
+
+    Runs per-file static analysis + cross-file taint analysis.
+    """
     from dojigiri.discovery import collect_files, detect_language
     from dojigiri.detector import analyze_file_static
+    from dojigiri.types import FileAnalysis
 
     all_findings = []
     scan_paths = [repo_dir / p for p in repo_info["paths"]]
+
+    # Collect FileAnalysis objects for cross-file analysis
+    file_analyses = []
 
     for scan_path in scan_paths:
         if not scan_path.exists():
@@ -128,6 +135,14 @@ def scan_repo(repo_dir: Path, repo_info: dict) -> list[dict]:
                 continue
 
             result = analyze_file_static(str(filepath), content, lang, suppress_noise=False)
+            # Build FileAnalysis for cross-file taint
+            fa = FileAnalysis(
+                path=str(filepath),
+                language=lang,
+                lines=content.count("\n") + 1,
+                findings=result.findings,
+            )
+            file_analyses.append(fa)
             for f in result.findings:
                 # Normalize file path relative to repo root
                 rel_path = str(filepath.relative_to(repo_dir))
@@ -138,6 +153,24 @@ def scan_repo(repo_dir: Path, repo_info: dict) -> list[dict]:
                     "severity": f.severity.value,
                     "message": f.message,
                 })
+
+    # Cross-file taint analysis
+    try:
+        from dojigiri.analyzer import _detect_cross_file_taint
+        cross_findings = _detect_cross_file_taint(file_analyses)
+        for cf in cross_findings:
+            rel_source = str(Path(cf.source_file).relative_to(repo_dir))
+            all_findings.append({
+                "file": rel_source,
+                "line": cf.line,
+                "rule": cf.rule,
+                "severity": cf.severity.value,
+                "message": cf.message,
+            })
+        if cross_findings:
+            print(f"  Cross-file taint: {len(cross_findings)} findings")
+    except Exception as e:
+        print(f"  Cross-file taint skipped: {e}")
 
     return all_findings
 
