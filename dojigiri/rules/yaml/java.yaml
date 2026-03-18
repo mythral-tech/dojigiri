@@ -27,7 +27,7 @@ rules:
 - category: security
   id: java-trust-boundary
   message: Potential trust boundary violation — untrusted data stored in session
-  pattern: (?:session|getSession\(\))\.(?:setAttribute|putValue)\s*\(
+  pattern: (?:session|getSession\(\))\.(?:setAttribute|putValue)\s*\(\s*["'][^"']*["']\s*,\s*(?!\s*["'][^"']*["']\s*\)|\s*true\s*\)|\s*false\s*\)|\s*null\s*\)|\s*\d+\s*\))
   severity: warning
   suggestion: Validate and sanitize input before storing in HttpSession
 - category: security

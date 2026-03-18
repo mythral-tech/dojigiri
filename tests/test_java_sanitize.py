@@ -414,3 +414,91 @@ def test_filter_java_fps_multiple_findings_mixed():
     result = filter_java_fps(findings, code)
     rules_remaining = {f.rule for f in result}
     assert rules_remaining == {"some-other-rule"}
+
+
+# ─── Path traversal FP filters (keycloak-style) ─────────────────────
+
+
+def test_path_traversal_suppressed_system_getproperty():
+    """java-path-traversal suppressed when file path comes from System.getProperty."""
+    code = (
+        'String dir = System.getProperty("jboss.server.config.dir");\n'
+        'File configFile = new File(dir, "keycloak-server.json");\n'
+    )
+    findings = [MockFinding(rule="java-path-traversal")]
+    result = filter_java_fps(findings, code)
+    assert len(result) == 0
+
+
+def test_path_traversal_suppressed_system_getenv():
+    """java-path-traversal suppressed when path comes from System.getenv."""
+    code = (
+        'String home = System.getenv("HOME");\n'
+        'File f = new File(home);\n'
+    )
+    findings = [MockFinding(rule="java-path-traversal")]
+    result = filter_java_fps(findings, code)
+    assert len(result) == 0
+
+
+def test_path_traversal_suppressed_safe_varname():
+    """java-path-traversal suppressed for known config directory variable names."""
+    code = (
+        'String baseDir = config.getBaseDir();\n'
+        'File f = new File(baseDir, "data.txt");\n'
+    )
+    findings = [MockFinding(rule="java-path-traversal")]
+    result = filter_java_fps(findings, code)
+    assert len(result) == 0
+
+
+def test_path_traversal_preserved_user_input():
+    """java-path-traversal preserved when source is user input."""
+    code = (
+        'String filename = request.getParameter("file");\n'
+        'File f = new File(filename);\n'
+    )
+    findings = [MockFinding(rule="java-path-traversal")]
+    result = filter_java_fps(findings, code)
+    assert len(result) == 1
+
+
+# ─── Private key variable name FP filters ────────────────────────────
+
+
+def test_private_key_varname_no_pem_suppressed():
+    """hardcoded-secret suppressed when privateKey is a variable name without PEM."""
+    code = (
+        'PrivateKey privateKey = keyPair.getPrivate();\n'
+        'signer.initSign(privateKey);\n'
+    )
+    findings = [MockFinding(rule="hardcoded-secret")]
+    result = filter_java_fps(findings, code)
+    assert len(result) == 0
+
+
+def test_private_key_with_pem_preserved():
+    """hardcoded-secret preserved when actual PEM content is present."""
+    code = (
+        'String privateKey = "-----BEGIN RSA PRIVATE KEY-----\\n'
+        'MIIEow...\\n-----END RSA PRIVATE KEY-----";\n'
+    )
+    findings = [MockFinding(rule="hardcoded-secret")]
+    result = filter_java_fps(findings, code)
+    assert len(result) == 1
+
+
+# ─── Trust boundary with constant values ─────────────────────────────
+
+
+def test_trust_boundary_constant_value_pattern():
+    """Trust boundary pattern should not match when value is a string literal."""
+    import re
+    # The updated pattern requires non-literal second arg
+    pattern = r'(?:session|getSession\(\))\.(?:setAttribute|putValue)\s*\(\s*["\'][^"\']*["\']\s*,\s*(?!\s*["\'][^"\']*["\']\s*\)|\s*true\s*\)|\s*false\s*\)|\s*null\s*\)|\s*\d+\s*\))'
+    # Constant string value — should NOT match
+    assert not re.search(pattern, 'session.setAttribute("role", "admin")')
+    # Constant boolean — should NOT match
+    assert not re.search(pattern, 'session.setAttribute("key", true)')
+    # Variable value — should match
+    assert re.search(pattern, 'session.setAttribute("data", userInput)')

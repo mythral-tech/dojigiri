@@ -689,7 +689,7 @@ subprocess.run(cmd, shell=True)
 # Line 10: another critical
 password = "hardcoded_secret_12345"
 '''
-    findings = analyze_file_static("test.py", code, "python").findings
+    findings = analyze_file_static("test.py", code, "python", suppress_noise=False).findings
     # Critical should come first, then warnings, then info
     assert findings[0].severity == Severity.CRITICAL
     assert findings[-1].severity in (Severity.INFO, Severity.WARNING)

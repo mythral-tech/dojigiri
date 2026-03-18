@@ -1,0 +1,1134 @@
+{
+  "true_positives": [
+    {
+      "file": "src\\documents\\workflows\\utils.py",
+      "line": 14,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 1337,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\classifier.py",
+      "line": 195,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 2854,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tasks.py",
+      "line": 298,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 718,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 473,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\mail.py",
+      "line": 787,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_exporter.py",
+      "line": 355,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_retagger.py",
+      "line": 230,
+      "rule": "long-method",
+      "note": "Method exceeds 75-line threshold as reported; genuine code quality finding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\parsers.py",
+      "line": 37,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\filters.py",
+      "line": 596,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 2859,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 3367,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_consumer.py",
+      "line": 388,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 1174,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 2143,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 830,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\paperless_mail\\parsers.py",
+      "line": 396,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\base.py",
+      "line": 81,
+      "rule": "feature-envy",
+      "note": "Method accesses more external than internal attributes, though common in Django serializers/views",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 2950,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_exporter.py",
+      "line": 355,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 723,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\workflows\\mutations.py",
+      "line": 281,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\workflows\\mutations.py",
+      "line": 200,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\matching.py",
+      "line": 359,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\signals\\handlers.py",
+      "line": 821,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\signals\\handlers.py",
+      "line": 423,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 354,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 4009,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as measured",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 2397,
+      "rule": "exception-swallowed",
+      "note": "Broad Exception caught and silently ignored",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\models.py",
+      "line": 954,
+      "rule": "exception-swallowed",
+      "note": "Silently ignoring OSError during cleanup; common pattern but exception is genuinely swallowed",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\tasks.py",
+      "line": 776,
+      "rule": "exception-swallowed",
+      "note": "Silently ignoring OSError during cleanup; common pattern but exception is genuinely swallowed",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\paperless\\views.py",
+      "line": 84,
+      "rule": "exception-swallowed",
+      "note": "Broad Exception caught and silently ignored",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 1160,
+      "rule": "exception-swallowed",
+      "note": "Broad Exception catch with pass; language detection failure silently ignored",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\utils.py",
+      "line": 35,
+      "rule": "exception-swallowed",
+      "note": "Silently ignoring PermissionError on utime; acceptable best-effort but genuinely swallowed",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\tasks.py",
+      "line": 770,
+      "rule": "exception-swallowed",
+      "note": "Silently ignoring OSError during cleanup; common pattern but exception is genuinely swallowed",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\paperless\\checks.py",
+      "line": 53,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently ignored during cleanup; intentional but genuinely empty handler",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 920,
+      "rule": "empty-exception-handler",
+      "note": "Best-effort stat copy with silenced exception; intentional but genuinely empty handler",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\signals\\handlers.py",
+      "line": 594,
+      "rule": "empty-exception-handler",
+      "note": "Broad Exception caught with comment explaining rationale, but handler is empty",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\templating\\filepath.py",
+      "line": 400,
+      "rule": "empty-exception-handler",
+      "note": "Comment says undefined class logs already, but handler is genuinely empty",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\paperless_mail\\tests\\test_preprocessor.py",
+      "line": 56,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently ignored with comment explaining why; intentional but genuinely empty",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\paperless\\parsers\\registry.py",
+      "line": 86,
+      "rule": "global-keyword",
+      "note": "Global keyword genuinely used; common in Django settings and singleton patterns but flagged correctly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\parsers\\registry.py",
+      "line": 114,
+      "rule": "global-keyword",
+      "note": "Global keyword genuinely used; common in Django settings and singleton patterns but flagged correctly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\parsers\\registry.py",
+      "line": 136,
+      "rule": "global-keyword",
+      "note": "Global keyword genuinely used; common in Django settings and singleton patterns but flagged correctly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\settings\\__init__.py",
+      "line": 437,
+      "rule": "global-keyword",
+      "note": "Global keyword genuinely used; common in Django settings and singleton patterns but flagged correctly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\settings\\__init__.py",
+      "line": 378,
+      "rule": "global-keyword",
+      "note": "Global keyword genuinely used; common in Django settings and singleton patterns but flagged correctly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_exporter.py",
+      "line": 138,
+      "rule": "shadowed-builtin",
+      "note": "Parameter name genuinely shadows a Python builtin",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\parsers.py",
+      "line": 144,
+      "rule": "shadowed-builtin",
+      "note": "Parameter name genuinely shadows a Python builtin",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 213,
+      "rule": "shadowed-builtin",
+      "note": "Parameter name genuinely shadows a Python builtin",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\permissions.py",
+      "line": 75,
+      "rule": "shadowed-builtin",
+      "note": "Parameter name genuinely shadows a Python builtin",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_exporter.py",
+      "line": 50,
+      "rule": "god-class",
+      "note": "Test class is large as reported; common in Django test suites but genuinely oversized",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\tests\\test_classifier.py",
+      "line": 33,
+      "rule": "god-class",
+      "note": "Test class is large as reported; common in Django test suites but genuinely oversized",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_bulk_edit.py",
+      "line": 21,
+      "rule": "god-class",
+      "note": "Test class is large as reported; common in Django test suites but genuinely oversized",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\tests\\test_bulk_edit.py",
+      "line": 524,
+      "rule": "god-class",
+      "note": "Test class is large as reported; common in Django test suites but genuinely oversized",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\signals\\handlers.py",
+      "line": 433,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from enclosing scope",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\classifier.py",
+      "line": 306,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from enclosing scope",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_tesseract\\parsers.py",
+      "line": 64,
+      "rule": "resource-leak",
+      "note": "pikepdf.open() without context manager; PDF handle may leak if exception occurs",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 432,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit/KeyboardInterrupt; should use except Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_importer.py",
+      "line": 243,
+      "rule": "archive-slip",
+      "note": "ZipFile.extractall() without path validation; classic zip slip vulnerability on import data",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\parsers.py",
+      "line": 135,
+      "rule": "too-many-args",
+      "note": "Function genuinely has 13 arguments, exceeding reasonable thresholds",
+      "confidence": "HIGH"
+    }
+  ],
+  "false_positives": [
+    {
+      "file": "src\\documents\\signals\\handlers.py",
+      "line": 314,
+      "rule": "taint-flow",
+      "note": "potential_count is an integer from internal counting, not user-controlled string data",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\signals\\handlers.py",
+      "line": 188,
+      "rule": "taint-flow",
+      "note": "potential_count is an integer from internal counting, not user-controlled string data",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\index.py",
+      "line": 180,
+      "rule": "taint-flow",
+      "note": "ASN is an integer from database, logged with doc.pk context - no injection risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 902,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 874,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 871,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 867,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 862,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 865,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 910,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 856,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 906,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_search.py",
+      "line": 880,
+      "rule": "sql-injection-execute",
+      "note": "String concatenation builds test query parameters for search_query(), not SQL queries",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_caching.py",
+      "line": 45,
+      "rule": "deserialization-unsafe",
+      "note": "Test code deserializing known test data, not untrusted input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 650,
+      "rule": "regex-injection",
+      "note": "Regex pattern is a hardcoded literal, not user-controlled",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\parsers.py",
+      "line": 409,
+      "rule": "regex-injection",
+      "note": "Pattern is escaped with re.escape(), preventing injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\templating\\utils.py",
+      "line": 22,
+      "rule": "regex-injection",
+      "note": "Pattern variable is constructed internally for format conversion, not from user input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_consumer.py",
+      "line": 393,
+      "rule": "regex-injection",
+      "note": "Test code compiling known constant patterns from DEFAULT_IGNORE_PATTERNS",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\parsers.py",
+      "line": 406,
+      "rule": "regex-injection",
+      "note": "Pattern is escaped with re.escape(), preventing injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tasks.py",
+      "line": 331,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\sanity_checker.py",
+      "line": 258,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_exporter.py",
+      "line": 696,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\sanity_checker.py",
+      "line": 221,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_exporter.py",
+      "line": 242,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file checksum comparison in tests, not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_exporter.py",
+      "line": 256,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file checksum comparison in tests, not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 691,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 834,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 954,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 217,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 2345,
+      "rule": "exception-swallowed",
+      "note": "Catching specific expected exception (KeyError/DoesNotExist) and continuing is intentional control flow",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\auth.py",
+      "line": 28,
+      "rule": "exception-swallowed",
+      "note": "Catching specific expected exception (KeyError/DoesNotExist) and continuing is intentional control flow",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\serialisers.py",
+      "line": 277,
+      "rule": "exception-swallowed",
+      "note": "Catching specific expected exception (KeyError/DoesNotExist) and continuing is intentional control flow",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\views.py",
+      "line": 458,
+      "rule": "null-dereference",
+      "note": "account from .get() raises DoesNotExist (caught below), never returns None",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\admin.py",
+      "line": 33,
+      "rule": "null-dereference",
+      "note": "request.user is guaranteed non-None in admin views (requires authentication)",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_thumbnails.py",
+      "line": 29,
+      "rule": "null-dereference",
+      "note": "document is from queryset iteration, not a nullable lookup",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\filters.py",
+      "line": 1025,
+      "rule": "null-dereference",
+      "note": "param is guarded by truthiness check before use in the surrounding code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 187,
+      "rule": "null-dereference",
+      "note": "Tag.objects.get() raises DoesNotExist, never returns None",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\filters.py",
+      "line": 902,
+      "rule": "null-dereference",
+      "note": "param is guarded by truthiness check before use in the surrounding code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 161,
+      "rule": "null-dereference",
+      "note": "Tag.objects.get() raises DoesNotExist, never returns None",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\mail.py",
+      "line": 670,
+      "rule": "null-dereference",
+      "note": "rule_seen_messages likely initialized before this loop; need broader context to confirm",
+      "confidence": "LOW"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_importer.py",
+      "line": 417,
+      "rule": "null-dereference",
+      "note": "document is from queryset/creation, not a nullable return",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\indexing.py",
+      "line": 221,
+      "rule": "possibly-uninitialized",
+      "note": "Variable is the loop iterator in a dict comprehension, always assigned before use",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\views.py",
+      "line": 4034,
+      "rule": "possibly-uninitialized",
+      "note": "Variable e is bound by the except clause, always assigned when except block executes",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\base.py",
+      "line": 539,
+      "rule": "possibly-uninitialized",
+      "note": "Variable is the loop iterator in a dict comprehension, always assigned before use",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\filters.py",
+      "line": 558,
+      "rule": "possibly-uninitialized",
+      "note": "Starred assignment unpacking always assigns prefix; reassigned on next line",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 486,
+      "rule": "possibly-uninitialized",
+      "note": "Variable is the loop iterator in a comprehension, always assigned before use",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 415,
+      "rule": "possibly-uninitialized",
+      "note": "Variable is the loop iterator in a comprehension, always assigned before use",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\chat.py",
+      "line": 26,
+      "rule": "possibly-uninitialized",
+      "note": "Variable is the loop iterator in a comprehension, always assigned before use",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\tests\\test_mail.py",
+      "line": 1782,
+      "rule": "possibly-uninitialized",
+      "note": "account is a lambda parameter, not the variable assigned later on line 1784",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 217,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\sanity_checker.py",
+      "line": 258,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tasks.py",
+      "line": 331,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 691,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\management\\commands\\document_exporter.py",
+      "line": 696,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 834,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 954,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\sanity_checker.py",
+      "line": 221,
+      "rule": "weak-hash",
+      "note": "MD5 used for file integrity checksums (deduplication/change detection), not for cryptographic security",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\tests\\test_checks.py",
+      "line": 203,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_importer.py",
+      "line": 163,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_importer.py",
+      "line": 194,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\tests\\test_registry.py",
+      "line": 90,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_management_exporter.py",
+      "line": 571,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\tests\\settings\\test_environment_parsers.py",
+      "line": 350,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_status.py",
+      "line": 183,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_api_status.py",
+      "line": 201,
+      "rule": "hardcoded-tmp",
+      "note": "Hardcoded /tmp path in test code for testing error handling or mock paths, not production code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\parsers\\tika.py",
+      "line": 170,
+      "rule": "file-mkdtemp-ignore",
+      "note": "mkdtemp() return value IS captured (assigned to Path variable); scanner missed the assignment",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\parsers\\text.py",
+      "line": 139,
+      "rule": "file-mkdtemp-ignore",
+      "note": "mkdtemp() return value IS captured (assigned to Path variable); scanner missed the assignment",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 613,
+      "rule": "file-mkdtemp-ignore",
+      "note": "mkdtemp() return value IS captured (assigned to Path variable); scanner missed the assignment",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\mail.py",
+      "line": 852,
+      "rule": "file-mkdtemp-ignore",
+      "note": "mkdtemp() return value IS captured (assigned to Path variable); scanner missed the assignment",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\barcodes.py",
+      "line": 185,
+      "rule": "file-mkdtemp-ignore",
+      "note": "mkdtemp() return value IS captured (assigned to Path variable); scanner missed the assignment",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 526,
+      "rule": "file-mkdtemp-ignore",
+      "note": "mkdtemp() return value IS captured (assigned to Path variable); scanner missed the assignment",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\parsers.py",
+      "line": 284,
+      "rule": "file-mkdtemp-ignore",
+      "note": "mkdtemp() return value IS captured (assigned to Path variable); scanner missed the assignment",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 531,
+      "rule": "file-upload-unrestricted",
+      "note": "These are pikepdf.save() calls writing processed PDFs to internal temp paths, not file upload endpoints",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 696,
+      "rule": "file-upload-unrestricted",
+      "note": "These are pikepdf.save() calls writing processed PDFs to internal temp paths, not file upload endpoints",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 449,
+      "rule": "file-upload-unrestricted",
+      "note": "These are pikepdf.save() calls writing processed PDFs to internal temp paths, not file upload endpoints",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 618,
+      "rule": "file-upload-unrestricted",
+      "note": "These are pikepdf.save() calls writing processed PDFs to internal temp paths, not file upload endpoints",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 878,
+      "rule": "file-upload-unrestricted",
+      "note": "These are pikepdf.save() calls writing processed PDFs to internal temp paths, not file upload endpoints",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\bulk_edit.py",
+      "line": 775,
+      "rule": "file-upload-unrestricted",
+      "note": "These are pikepdf.save() calls writing processed PDFs to internal temp paths, not file upload endpoints",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\filters.py",
+      "line": 295,
+      "rule": "empty-exception-handler",
+      "note": "StopIteration from next() is expected control flow, falls through to super().to_internal_value()",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\tests\\test_client.py",
+      "line": 66,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture using obvious placeholder \"test_api_key\", not a real credential",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\tests\\test_client.py",
+      "line": 58,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture using obvious placeholder \"test_api_key\", not a real credential",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\tests\\test_client.py",
+      "line": 50,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture using obvious placeholder \"test_api_key\", not a real credential",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\tests\\test_embedding.py",
+      "line": 86,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture using obvious placeholder \"test_api_key\", not a real credential",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\tests\\test_embedding.py",
+      "line": 75,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture using obvious placeholder \"test_api_key\", not a real credential",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\tests\\test_embedding.py",
+      "line": 68,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture using obvious placeholder \"test_api_key\", not a real credential",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_ai\\indexing.py",
+      "line": 64,
+      "rule": "rmtree-audit",
+      "note": "Path is from Django settings (admin-controlled), not user input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\parsers.py",
+      "line": 340,
+      "rule": "rmtree-audit",
+      "note": "Cleaning up internally-created temp directory from mkdtemp()",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\parsers\\text.py",
+      "line": 153,
+      "rule": "rmtree-audit",
+      "note": "Cleaning up internally-created temp directory from mkdtemp()",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\parsers\\tika.py",
+      "line": 202,
+      "rule": "rmtree-audit",
+      "note": "Cleaning up internally-created temp directory from mkdtemp()",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\tests\\test_adapter.py",
+      "line": 52,
+      "rule": "django-allowed-hosts-wildcard",
+      "note": "ALLOWED_HOSTS wildcard is in test code to test adapter behavior, not in production settings",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\tests\\test_adapter.py",
+      "line": 42,
+      "rule": "django-allowed-hosts-wildcard",
+      "note": "ALLOWED_HOSTS wildcard is in test code to test adapter behavior, not in production settings",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\barcodes.py",
+      "line": 211,
+      "rule": "log-injection",
+      "note": "task.id is an integer and new_document.name is from internal document creation, not direct user input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\consumer.py",
+      "line": 127,
+      "rule": "unused-import",
+      "note": "Import is inside TYPE_CHECKING block, used only for type annotations at static analysis time",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\documents\\tests\\test_matchables.py",
+      "line": 258,
+      "rule": "regex-dos",
+      "note": "ReDoS pattern (a+)+$ is intentional test data to test timeout protection in regex matching",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\parsers\\__init__.py",
+      "line": 64,
+      "rule": "insecure-http",
+      "note": "HTTP URL is a namespace URI string in a docstring example, not an actual network request",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless\\validators.py",
+      "line": 189,
+      "rule": "xxe-risk",
+      "note": "XMLParser is created with resolve_entities=False, which explicitly disables XXE",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\mail.py",
+      "line": 645,
+      "rule": "ssrf-risk",
+      "note": "M.fetch() is IMAP message fetch on already-connected mail session, not HTTP request to user-controlled URL",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\tests\\samples\\sample.html",
+      "line": 16,
+      "rule": "xss-innerhtml",
+      "note": "Static HTML test sample with hardcoded string literal, not user input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_mail\\tests\\test_parsers.py",
+      "line": 224,
+      "rule": "generic-weak-tls-version",
+      "note": "Test assertion checking for TLSv1.3 string in metadata, not configuring weak TLS",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "src\\paperless_tesseract\\checks.py",
+      "line": 11,
+      "rule": "subprocess-audit",
+      "note": "subprocess.run with hardcoded command args, no user input in arguments",
+      "confidence": "HIGH"
+    }
+  ],
+  "notes": ""
+}

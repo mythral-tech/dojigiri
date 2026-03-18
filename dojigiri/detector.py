@@ -75,6 +75,25 @@ _SKIP_IN_TEST_FILES = {
     "rmtree-audit",          # test cleanup using rmtree
     "shell-true",            # test subprocess calls
     "generic-debug-enabled", # tests enable debug mode
+    "sql-injection-execute", # test query strings flagged as SQL injection
+    "regex-injection",       # test code compiling known patterns
+    "deserialization-unsafe",  # test roundtrip serialization
+    "password-in-url",       # test URLs with credentials for validation logic
+    "private-key",           # test PEM keys and fixtures
+    "java-weak-key-size",    # test cert generation uses small keys for speed
+    "django-allowed-hosts-wildcard",  # test settings use wildcard
+    "generic-weak-tls-version",  # test mail parsers check TLS versions
+    "xss-innerhtml",         # test HTML samples are not production
+    "java-ecb-mode",         # test encryption uses ECB for simplicity
+    "java-static-encryption-key",  # test HMAC keys are hardcoded
+    "java-unsafe-deserialization",  # test serialization roundtrips
+    "regex-dos",             # test regex patterns are not user-controlled
+    "hardcoded-jwt-secret",  # test JWT configs use dummy secrets
+    "hardcoded-password-default",  # test configs use dummy passwords
+    "hardcoded-secret-key",  # test settings use dummy secret keys
+    "llm-auto-approve-tools",  # test code for tool approval is not real
+    "csrf-disabled",         # test settings disable CSRF intentionally
+    "csrf-middleware-disabled",  # test middleware configs
 }
 _SKIP_IN_EXAMPLE_FILES = {
     "console-log",
@@ -119,6 +138,36 @@ _DEFAULT_SKIP_RULES = {
     "possibly-uninitialized",  # high FP in conditional assignment patterns
     "null-dereference",      # ~90% FP without path-sensitive null tracking; needs rework
     "exception-swallowed-continue",  # almost always intentional fallback patterns
+    "hardcoded-tmp",         # /tmp usage is normal in applications
+    "file-mkdtemp-ignore",   # mkdtemp return value handling is noise
+    "rmtree-audit",          # audit-level rmtree findings are not actionable
+    "dynamic-import",        # importlib usage is normal, not security
+    "class-manipulation",    # __class__ usage is legitimate Python
+    "race-condition-mkdir",  # very rare real issue, high FP rate
+    "hardcoded-ip",          # IP addresses in config/code are normal
+    "insecure-http",         # http:// strings are overwhelmingly scheme detection, SAML URIs, docs
+    "generic-api-key-assignment",  # too broad, flags test fixtures and config constants
+    "generic-password-assignment", # too broad, flags type identifiers and config
+    "weak-hash-md5",         # overwhelmingly used for checksums/caching, not crypto
+    "weak-hash",             # same — file integrity, ETags, dedup hashes
+    "weak-hash-sha1",        # SHA1 for git/fingerprinting, not auth
+    "weak-random",           # random module for non-security purposes (shuffle, demo data)
+    "file-upload-unrestricted",  # validation is typically in middleware/serializers, not at call site
+    "timing-attack-comparison",  # very specific, high FP in non-auth code
+    "password-in-url",       # URL sanitization tests and logging, not real credentials
+    "llm-auto-approve-tools",  # fires in non-LLM code with approve/tool keywords
+    "regex-injection",       # user input in re.compile() is rare; most patterns are hardcoded
+    "ssrf-risk",             # URL sources are overwhelmingly config/env, not user input
+    "taint-flow",            # too many FPs without full cross-file dataflow; rework needed
+    "java-insecure-ssl-factory", # custom SSL factories are intentional in auth/TLS code
+    "java-ldap-injection",   # string concat in toString()/exceptions, not LDAP filters
+    "java-ssrf-url",         # URL parsing for host/path extraction, not outbound requests
+    "java-xss",              # too broad without output-context awareness
+    "subprocess-audit",      # audit-level: subprocess use is normal, needs intent analysis
+    "java-path-traversal",   # needs taint tracking to distinguish user input from config paths
+    "hardcoded-secret",      # too broad — flags type identifiers like "password", "client-secret"
+    "java-jndi-injection",   # needs taint tracking, flags internal JNDI configs
+    "java-weak-random",      # java.util.Random for non-security (jitter, naming) is valid
 }
 
 # Path segments identifying test and example files

@@ -1,0 +1,1239 @@
+{
+  "true_positives": [
+    {
+      "file": "saleor\\graphql\\checkout\\resolvers.py",
+      "line": 36,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\account\\resolvers.py",
+      "line": 228,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\tests\\mutations\\test_order_update_shipping.py",
+      "line": 635,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\mutations\\order_discount_update.py",
+      "line": 43,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\menu\\resolvers.py",
+      "line": 44,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\csv\\mutations\\export_products.py",
+      "line": 110,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\mutations\\checkout_remove_promo_code.py",
+      "line": 79,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\tests\\e2e\\transactions\\utils\\transaction_initialize.py",
+      "line": 72,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\mutations\\checkout_customer_note_update.py",
+      "line": 50,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\translations\\mutations\\promotion_rule_translate.py",
+      "line": 43,
+      "rule": "shadowed-builtin",
+      "note": "Parameter genuinely shadows Python builtin (id/input); common Django/GraphQL pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\checkout\\migrations\\0040_add_handle_checkouts_permission.py",
+      "line": 11,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\channel\\migrations\\0001_initial.py",
+      "line": 14,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\attribute\\dataloaders\\assigned_attributes.py",
+      "line": 85,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\core\\types\\taxes.py",
+      "line": 206,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\decorators.py",
+      "line": 45,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\tax\\utils.py",
+      "line": 309,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\asgi\\gzip_compression.py",
+      "line": 63,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\core\\connection.py",
+      "line": 709,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\calculations.py",
+      "line": 826,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\core\\types\\taxes.py",
+      "line": 228,
+      "rule": "variable-shadowing",
+      "note": "Variable genuinely shadows name from outer scope; common pattern but technically correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\payment\\gateways\\stripe\\webhooks.py",
+      "line": 23,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\webhook\\plugin.py",
+      "line": 36,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\discount\\mutations\\promotion\\promotion_update.py",
+      "line": 10,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\discount\\utils\\voucher.py",
+      "line": 18,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\serializers.py",
+      "line": 13,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\payment\\gateway.py",
+      "line": 8,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\actions.py",
+      "line": 31,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\discount\\utils\\voucher.py",
+      "line": 16,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\mutations\\checkout_complete.py",
+      "line": 7,
+      "rule": "unused-import",
+      "note": "Import appears genuinely unused in the file.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\dataloaders\\promotion_rule_infos.py",
+      "line": 30,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\checkout\\complete_checkout.py",
+      "line": 1560,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\checkout\\complete_checkout.py",
+      "line": 771,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\mutations\\checkout_create.py",
+      "line": 338,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\checkout\\complete_checkout.py",
+      "line": 1373,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\dataloaders\\promotion_rule_infos.py",
+      "line": 38,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\dataloaders\\promotion_rule_infos.py",
+      "line": 37,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\utils.py",
+      "line": 252,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\dataloaders\\checkout_infos.py",
+      "line": 36,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\asgi\\gzip_compression.py",
+      "line": 20,
+      "rule": "long-method",
+      "note": "Method exceeds 75 effective lines as reported; genuinely long.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\product\\managers.py",
+      "line": 158,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\mutations\\checkout_create_from_order.py",
+      "line": 287,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\shipping\\mutations\\shipping_method_channel_listing_update.py",
+      "line": 151,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\bulk_mutations\\order_bulk_create.py",
+      "line": 696,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\models.py",
+      "line": 488,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\product\\bulk_mutations\\product_variant_bulk_update.py",
+      "line": 469,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\meta\\mutations\\base.py",
+      "line": 253,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\attribute\\mutations\\attribute_bulk_create.py",
+      "line": 371,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\payment\\mutations\\base.py",
+      "line": 26,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\payment\\mutations\\transaction\\transaction_request_refund_for_granted_refund.py",
+      "line": 68,
+      "rule": "feature-envy",
+      "note": "Method accesses significantly more external attributes than internal; genuine code smell.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\shipping\\postal_codes.py",
+      "line": 31,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\account\\mutations\\account\\account_register.py",
+      "line": 223,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\core\\validators\\query_cost.py",
+      "line": 230,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\account\\management\\commands\\createsuperuser.py",
+      "line": 275,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\app\\installation_utils.py",
+      "line": 97,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\calculations.py",
+      "line": 513,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\account\\management\\commands\\createsuperuser.py",
+      "line": 96,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 537,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\discount\\utils\\promotion.py",
+      "line": 155,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\logging.py",
+      "line": 19,
+      "rule": "exception-swallowed",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\attribute\\shared_filters.py",
+      "line": 474,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\account\\bulk_mutations\\customer_bulk_update.py",
+      "line": 581,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\views.py",
+      "line": 292,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\payment\\mutations\\transaction\\transaction_event_report.py",
+      "line": 299,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\management\\commands\\populatedb.py",
+      "line": 80,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\mutations\\order_grant_refund_update.py",
+      "line": 277,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\account\\management\\commands\\createsuperuser.py",
+      "line": 89,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\bulk_mutations\\order_bulk_create.py",
+      "line": 696,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\openid_connect\\plugin.py",
+      "line": 284,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\openid_connect\\utils.py",
+      "line": 166,
+      "rule": "high-complexity",
+      "note": "Function has high cyclomatic complexity as reported; genuinely complex.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\giftcard\\types.py",
+      "line": 244,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\payment\\types.py",
+      "line": 578,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\types.py",
+      "line": 681,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\shop\\types.py",
+      "line": 164,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\types.py",
+      "line": 476,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\types.py",
+      "line": 974,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\product\\types\\products.py",
+      "line": 298,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\models.py",
+      "line": 109,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\types.py",
+      "line": 1478,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\account\\types.py",
+      "line": 349,
+      "rule": "god-class",
+      "note": "Class exceeds method/attribute thresholds; typical for GraphQL types but genuinely large.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\payment\\gateways\\stripe\\stripe_api.py",
+      "line": 91,
+      "rule": "empty-exception-handler",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\asgi\\asgi_handler.py",
+      "line": 77,
+      "rule": "empty-exception-handler",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\asgi\\asgi_handler.py",
+      "line": 109,
+      "rule": "empty-exception-handler",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\giftcard\\gateway.py",
+      "line": 336,
+      "rule": "empty-exception-handler",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\asgi\\asgi_handler.py",
+      "line": 98,
+      "rule": "empty-exception-handler",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\giftcard\\gateway.py",
+      "line": 430,
+      "rule": "empty-exception-handler",
+      "note": "Exception caught and silently ignored; intentional pattern but technically correct finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\payment\\mutations\\transaction\\transaction_event_report.py",
+      "line": 299,
+      "rule": "too-many-args",
+      "note": "Function has 13 arguments; genuinely high parameter count.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\core\\mutations.py",
+      "line": 159,
+      "rule": "too-many-args",
+      "note": "Function has 13 arguments; genuinely high parameter count.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\payment\\utils.py",
+      "line": 357,
+      "rule": "too-many-args",
+      "note": "Function has 13 arguments; genuinely high parameter count.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\product\\bulk_mutations\\product_variant_bulk_update.py",
+      "line": 380,
+      "rule": "too-many-args",
+      "note": "Function has 13 arguments; genuinely high parameter count.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\jwt_manager.py",
+      "line": 136,
+      "rule": "global-keyword",
+      "note": "Global keyword usage; technically correct code quality finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\site\\patch_sites.py",
+      "line": 71,
+      "rule": "global-keyword",
+      "note": "Global keyword usage; technically correct code quality finding.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\thumbnail\\utils.py",
+      "line": 132,
+      "rule": "resource-leak",
+      "note": "File opened via storage.open() without context manager; potential resource leak.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "saleor\\discount\\models.py",
+      "line": 435,
+      "rule": "sql-injection",
+      "note": "f-string interpolation of variable directly into SQL execute(); should use parameterized query.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\context.py",
+      "line": 58,
+      "rule": "exception-swallowed-continue",
+      "note": "Broad Exception caught and silently continued; masks all errors including unexpected ones.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\schedulers\\schedulers.py",
+      "line": 69,
+      "rule": "shadowed-builtin-param",
+      "note": "Parameter min shadows Python builtin; intentional but the shadow is real.",
+      "confidence": "HIGH"
+    }
+  ],
+  "false_positives": [
+    {
+      "file": "saleor\\account\\management\\commands\\changepassword.py",
+      "line": 1,
+      "rule": "unused-import",
+      "note": "Import is re-exported via __all__; not unused, just used indirectly.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\response_schemas\\utils\\annotations.py",
+      "line": 57,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\transport\\synchronous\\transport.py",
+      "line": 168,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\account\\tests\\queries\\test_address_validation_rules.py",
+      "line": 56,
+      "rule": "taint-flow",
+      "note": "Test code compiling regex from API response data for assertion; not a production risk.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\product\\tasks.py",
+      "line": 93,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\db\\expressions.py",
+      "line": 78,
+      "rule": "taint-flow",
+      "note": "Django ORM compiler.compile() compiles SQL expression nodes, not arbitrary user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\avatax\\plugin.py",
+      "line": 357,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\webhook\\plugin.py",
+      "line": 2992,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\actions.py",
+      "line": 218,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\checkout\\webhooks\\list_shipping_methods.py",
+      "line": 77,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\checkout\\complete_checkout.py",
+      "line": 1642,
+      "rule": "taint-flow",
+      "note": "Python logging with %s formatting is not vulnerable to log injection; logger does not interpret format specifiers from data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\page\\filters.py",
+      "line": 604,
+      "rule": "possibly-uninitialized",
+      "note": "Loop variable in dict comprehension; always assigned before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\product\\filters\\product_attributes.py",
+      "line": 152,
+      "rule": "possibly-uninitialized",
+      "note": "Walrus operator assigns lte inline; always initialized before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\account\\mutations\\permission_group\\permission_group_delete.py",
+      "line": 93,
+      "rule": "possibly-uninitialized",
+      "note": "Loop variable code in list comprehension is distinct from the code assigned later.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\observability\\payloads.py",
+      "line": 249,
+      "rule": "possibly-uninitialized",
+      "note": "Walrus operator assigns remaining inline; always initialized before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\account\\mutations\\permission_group\\permission_group_update.py",
+      "line": 303,
+      "rule": "possibly-uninitialized",
+      "note": "Loop variable code in list comprehension is distinct from the code assigned later.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\payment\\utils.py",
+      "line": 298,
+      "rule": "possibly-uninitialized",
+      "note": "Walrus operator assigns order inline in elif; always initialized before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\product\\bulk_mutations\\product_variant_bulk_create.py",
+      "line": 413,
+      "rule": "possibly-uninitialized",
+      "note": "Loop variable in list comprehension; always assigned before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\openid_connect\\tests\\test_utils.py",
+      "line": 569,
+      "rule": "possibly-uninitialized",
+      "note": "cache_key is a lambda parameter, not an uninitialized variable.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\order\\delivery_context.py",
+      "line": 60,
+      "rule": "possibly-uninitialized",
+      "note": "Loop variable in dict comprehension; always assigned before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\checkout\\dataloaders\\checkout_infos.py",
+      "line": 244,
+      "rule": "possibly-uninitialized",
+      "note": "Loop variable in dict comprehension; always assigned before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\bulk_mutations\\order_bulk_create.py",
+      "line": 730,
+      "rule": "null-dereference",
+      "note": "Notes iterated from a list; individual items are dicts from parsed input, not None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\bulk_mutations\\order_bulk_create.py",
+      "line": 729,
+      "rule": "null-dereference",
+      "note": "Notes iterated from a list; individual items are dicts from parsed input, not None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\attribute\\mutations\\mixins.py",
+      "line": 87,
+      "rule": "null-dereference",
+      "note": "Accessing .value on an enum member is always safe; never None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\product\\mutations\\product_variant\\product_variant_delete.py",
+      "line": 58,
+      "rule": "null-dereference",
+      "note": "Product fetched via .get() which raises DoesNotExist rather than returning None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\discount\\dataloaders.py",
+      "line": 217,
+      "rule": "null-dereference",
+      "note": "voucher_infos initialized as a list before the loop; never None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\shipping\\mutations\\shipping_method_channel_listing_update.py",
+      "line": 158,
+      "rule": "null-dereference",
+      "note": "channel_input from iterating cleaned_input list; items are dicts, not None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\shipping\\mutations\\base.py",
+      "line": 157,
+      "rule": "null-dereference",
+      "note": "Code checks not warehouse_channels before calling .intersection(); None is handled.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\product\\mutations\\product_variant\\product_variant_delete.py",
+      "line": 54,
+      "rule": "null-dereference",
+      "note": "Product fetched via .get() which raises DoesNotExist rather than returning None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\plugins\\mutations.py",
+      "line": 66,
+      "rule": "null-dereference",
+      "note": "get_plugin_manager_promise().get() returns the plugin manager, not None.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 587,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 885,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 1036,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 1083,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 922,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 1618,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 954,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 951,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 1274,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\random_data.py",
+      "line": 346,
+      "rule": "weak-random",
+      "note": "random module used in random_data.py for test/demo data generation, not security purposes.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\avatax\\__init__.py",
+      "line": 705,
+      "rule": "ssrf-risk",
+      "note": "URL from admin-configured Avatax plugin settings, not end-user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\avatax\\__init__.py",
+      "line": 597,
+      "rule": "ssrf-risk",
+      "note": "URL from admin-configured Avatax plugin settings, not end-user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\avatax\\__init__.py",
+      "line": 653,
+      "rule": "ssrf-risk",
+      "note": "URL from admin-configured Avatax plugin settings, not end-user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\shipping\\webhooks\\shared.py",
+      "line": 175,
+      "rule": "ssrf-risk",
+      "note": "Webhook URLs configured by app developers, not end users; standard webhook pattern.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\avatax\\plugin.py",
+      "line": 676,
+      "rule": "ssrf-risk",
+      "note": "URL from admin-configured Avatax plugin settings, not end-user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\shipping\\webhooks\\shared.py",
+      "line": 82,
+      "rule": "ssrf-risk",
+      "note": "Webhook URLs configured by app developers, not end users; standard webhook pattern.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\tests\\test_url.py",
+      "line": 43,
+      "rule": "password-in-url",
+      "note": "Test data with example URLs to verify URL sanitization function; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\tests\\test_url.py",
+      "line": 44,
+      "rule": "password-in-url",
+      "note": "Test data with example URLs to verify URL sanitization function; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\tests\\test_url.py",
+      "line": 41,
+      "rule": "password-in-url",
+      "note": "Test data with example URLs to verify URL sanitization function; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\observability\\tests\\test_payloads.py",
+      "line": 486,
+      "rule": "password-in-url",
+      "note": "Test data with example URLs to verify URL sanitization function; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\utils\\tests\\test_url.py",
+      "line": 40,
+      "rule": "password-in-url",
+      "note": "Test data with example URLs to verify URL sanitization function; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\observability\\tests\\test_payloads.py",
+      "line": 491,
+      "rule": "password-in-url",
+      "note": "Test data with example URLs to verify URL sanitization function; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\attribute\\utils\\type_handlers.py",
+      "line": 498,
+      "rule": "regex-injection",
+      "note": "storage_root_url is a server config value, not user-controlled.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\account\\migrations\\0041_permissions_to_groups.py",
+      "line": 36,
+      "rule": "regex-injection",
+      "note": "Regex pattern in migration is hardcoded, not user-controlled.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\tests\\settings.py",
+      "line": 15,
+      "rule": "regex-injection",
+      "note": "Regex compilation in test settings helper; from configuration, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\webhook\\utils.py",
+      "line": 10,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for cache key/query fingerprinting, not cryptographic security.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\app\\dataloaders\\app.py",
+      "line": 17,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for cache key/query fingerprinting, not cryptographic security.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\utils\\__init__.py",
+      "line": 276,
+      "rule": "weak-hash-md5",
+      "note": "MD5 used for cache key/query fingerprinting, not cryptographic security.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\utils\\__init__.py",
+      "line": 276,
+      "rule": "weak-hash",
+      "note": "MD5 used for cache key/query fingerprinting, not cryptographic security.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\app\\dataloaders\\app.py",
+      "line": 17,
+      "rule": "weak-hash",
+      "note": "MD5 used for cache key/query fingerprinting, not cryptographic security.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\webhook\\utils.py",
+      "line": 10,
+      "rule": "weak-hash",
+      "note": "MD5 used for cache key/query fingerprinting, not cryptographic security.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\__init__.py",
+      "line": 14,
+      "rule": "dynamic-import",
+      "note": "Dynamic import from server/settings configuration, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\views.py",
+      "line": 132,
+      "rule": "dynamic-import",
+      "note": "Dynamic import from server/settings configuration, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\tests\\test_event_payload.py",
+      "line": 33,
+      "rule": "file-upload-unrestricted",
+      "note": "File save in test code with controlled data; not unrestricted upload.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\csv\\utils\\export.py",
+      "line": 278,
+      "rule": "file-upload-unrestricted",
+      "note": "Server-side export saving generated content; not user-controlled upload.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\tests\\test_middleware.py",
+      "line": 5,
+      "rule": "csrf-middleware-disabled",
+      "note": "Test file overriding settings; not a production configuration issue.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\openid_connect\\tests\\conftest.py",
+      "line": 149,
+      "rule": "private-key",
+      "note": "Test fixture RSA private key for testing only; not a production credential.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\tests\\settings.py",
+      "line": 55,
+      "rule": "private-key",
+      "note": "Test fixture RSA private key for testing only; not a production credential.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\observability\\buffers.py",
+      "line": 115,
+      "rule": "resource-leak",
+      "note": "Redis client stored as instance attribute for reuse; long-lived connection pool, not a leak.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\urls.py",
+      "line": 5,
+      "rule": "csrf-disabled",
+      "note": "Import of csrf_exempt is not itself a vulnerability.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\tests\\test_webhook_protocols.py",
+      "line": 112,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture with placeholder AWS key values; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\webhook\\tests\\test_webhook_protocols.py",
+      "line": 43,
+      "rule": "generic-api-key-assignment",
+      "note": "Test fixture with placeholder AWS key values; not real credentials.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\account\\management\\commands\\createsuperuser.py",
+      "line": 171,
+      "rule": "timing-attack-comparison",
+      "note": "Password confirmation during interactive CLI creation; timing attack not relevant for local input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\jwt.py",
+      "line": 129,
+      "rule": "hardcoded-jwt-secret",
+      "note": "jwt.decode with verify_signature=False inspects claims without verification; no secret used.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\management\\commands\\generate_json_schemas.py",
+      "line": 19,
+      "rule": "race-condition-mkdir",
+      "note": "Code uses exist_ok=True which prevents the race condition.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\core\\management\\commands\\generate_json_schemas.py",
+      "line": 78,
+      "rule": "rmtree-audit",
+      "note": "SCHEMA_OUTPUT_DIR is a hardcoded constant, not user-controlled; safe usage.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\meta\\resolvers.py",
+      "line": 90,
+      "rule": "class-manipulation",
+      "note": "Code reads __class__ for type checking, not assigning/manipulating it.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\graphql\\order\\tests\\mutations\\test_order_fulfill.py",
+      "line": 1750,
+      "rule": "llm-auto-approve-tools",
+      "note": "fulfillment_auto_approve is a business setting for order fulfillment, not LLM tool auto-approval.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\base_plugin.py",
+      "line": 79,
+      "rule": "generic-password-assignment",
+      "note": "PASSWORD is an enum/constant defining a field type label, not an actual password.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\plugins\\openid_connect\\tests\\conftest.py",
+      "line": 53,
+      "rule": "hardcoded-password-default",
+      "note": "Test fixture with placeholder client_secret; not a production credential.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "saleor\\tests\\settings.py",
+      "line": 27,
+      "rule": "hardcoded-secret-key",
+      "note": "SECRET_KEY in test settings with dummy value NOTREALLY; not used in production.",
+      "confidence": "HIGH"
+    }
+  ],
+  "notes": ""
+}

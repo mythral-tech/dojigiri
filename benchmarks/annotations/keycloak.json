@@ -1,0 +1,1281 @@
+{
+  "true_positives": [
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\endpoints\\LogoutEndpoint.java",
+      "line": 196,
+      "rule": "unused-variable",
+      "note": "Variable assigned false but may not be read afterward in this branch.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\credential\\PasswordCredentialProvider.java",
+      "line": 121,
+      "rule": "unused-variable",
+      "note": "Return value captured but never used; only the side effect matters.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\forms\\login\\freemarker\\FreeMarkerLoginFormsProvider.java",
+      "line": 295,
+      "rule": "null-dereference",
+      "note": "brokerContext could be null; no explicit null check before getIdpConfig().",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\provider\\ProviderManager.java",
+      "line": 120,
+      "rule": "null-dereference",
+      "note": "currentFactory could be null if no prior factory registered for same ID.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\resources\\ResourcesService.java",
+      "line": 132,
+      "rule": "null-dereference",
+      "note": "ticket.getScope() may return null for tickets without specific scope.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\broker\\provider\\BrokeredIdentityContext.java",
+      "line": 224,
+      "rule": "null-dereference",
+      "note": "List could be empty causing IndexOutOfBoundsException on get(0).",
+      "confidence": "LOW"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\authorization\\UserManagedPermissionUtil.java",
+      "line": 54,
+      "rule": "null-dereference",
+      "note": "find() could return null, causing NPE on isEmpty().",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\resources\\ResourceService.java",
+      "line": 95,
+      "rule": "null-dereference",
+      "note": "resources could be null depending on upstream contract.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\managers\\AuthenticationManager.java",
+      "line": 1527,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\grants\\ciba\\clientpolicy\\executor\\SecureCibaSignedAuthenticationRequestExecutor.java",
+      "line": 111,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\RealmAdminResource.java",
+      "line": 454,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\OIDCLoginProtocol.java",
+      "line": 219,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\AuthenticationProcessor.java",
+      "line": 822,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\forms\\login\\freemarker\\FreeMarkerLoginFormsProvider.java",
+      "line": 486,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\managers\\RealmManager.java",
+      "line": 577,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\saml\\EntityDescriptorDescriptionConverter.java",
+      "line": 153,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\models\\utils\\DefaultAuthenticationFlows.java",
+      "line": 296,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\forms\\login\\freemarker\\FreeMarkerLoginFormsProvider.java",
+      "line": 226,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds the 75-line threshold.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authorization\\admin\\ResourceServerService.java",
+      "line": 138,
+      "rule": "possibly-uninitialized",
+      "note": "resourceServer used at line 138 before assignment at line 142.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\forms\\login\\freemarker\\FreeMarkerLoginFormsProvider.java",
+      "line": 486,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidator.java",
+      "line": 705,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\utils\\SearchQueryUtils.java",
+      "line": 28,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\saml\\SamlService.java",
+      "line": 449,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\managers\\DefaultBruteForceProtector.java",
+      "line": 70,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authorization\\authorization\\AuthorizationTokenService.java",
+      "line": 617,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\TokenManager.java",
+      "line": 908,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authorization\\admin\\PolicyService.java",
+      "line": 196,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\managers\\RealmManager.java",
+      "line": 577,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\endpoints\\LogoutEndpoint.java",
+      "line": 152,
+      "rule": "high-complexity",
+      "note": "Function genuinely has high cyclomatic complexity as reported.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\tokenexchange\\V1TokenExchangeProvider.java",
+      "line": 198,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently swallowed; should at least log.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\grants\\PermissionGrantType.java",
+      "line": 76,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently swallowed; should at least log.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\mappers\\OIDCAttributeMapperHelper.java",
+      "line": 268,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently swallowed; should at least log.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\oidc\\mappers\\AbstractClaimMapper.java",
+      "line": 139,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently swallowed; should at least log.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\connections\\httpclient\\DefaultHttpClientFactory.java",
+      "line": 157,
+      "rule": "empty-exception-handler",
+      "note": "Ignoring IOException on close is common but still empty catch.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\mappers\\OIDCAttributeMapperHelper.java",
+      "line": 119,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently swallowed; should at least log.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\utils\\SecureContextResolver.java",
+      "line": 89,
+      "rule": "empty-exception-handler",
+      "note": "Exception silently swallowed; should at least log.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\social\\twitter\\TwitterIdentityProvider.java",
+      "line": 110,
+      "rule": "deserialization-unsafe",
+      "note": "ObjectInputStream.readObject() on OAuth callback data without serialization filter; RCE risk.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\social\\twitter\\TwitterIdentityProvider.java",
+      "line": 111,
+      "rule": "deserialization-unsafe",
+      "note": "ObjectInputStream.readObject() on OAuth callback data without serialization filter; RCE risk.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\policy\\BlacklistPasswordPolicyProviderFactory.java",
+      "line": 389,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\vault\\FilesPlainTextVaultProviderFactory.java",
+      "line": 48,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\vault\\FilesPlainTextVaultProvider.java",
+      "line": 54,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\vault\\FilesKeystoreVaultProviderFactory.java",
+      "line": 43,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\vault\\FilesKeystoreVaultProvider.java",
+      "line": 51,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\exportimport\\ExportImportManager.java",
+      "line": 135,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\policy\\BlacklistPasswordPolicyProviderFactory.java",
+      "line": 273,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\policy\\BlacklistPasswordPolicyProviderFactory.java",
+      "line": 401,
+      "rule": "java-toctou-file-check-then-act",
+      "note": "TOCTOU between existence check and file operation; low practical exploitation risk in server context.",
+      "confidence": "LOW"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\SessionCodeChecks.java",
+      "line": 87,
+      "rule": "too-many-args",
+      "note": "Function genuinely has excessive number of parameters.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\models\\OAuth2DeviceCodeModel.java",
+      "line": 84,
+      "rule": "too-many-args",
+      "note": "Function genuinely has excessive number of parameters.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidator.java",
+      "line": 429,
+      "rule": "too-many-args",
+      "note": "Function genuinely has excessive number of parameters.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\UsersResource.java",
+      "line": 267,
+      "rule": "too-many-args",
+      "note": "Function genuinely has excessive number of parameters.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oid4vc\\issuance\\keybinding\\JwtCNonceHandler.java",
+      "line": 86,
+      "rule": "java-weak-random",
+      "note": "java.util.Random for nonce length in security-sensitive JWT c_nonce generation.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\credential\\WebAuthnCredentialProvider.java",
+      "line": 258,
+      "rule": "java-printstacktrace",
+      "note": "Production code using printStackTrace() instead of proper logging.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\LinkedAccountsResource.java",
+      "line": 279,
+      "rule": "java-printstacktrace",
+      "note": "Production code using printStackTrace() instead of proper logging.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\error\\KeycloakErrorHandler.java",
+      "line": 222,
+      "rule": "java-printstacktrace",
+      "note": "Production code using printStackTrace() instead of proper logging.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\credential\\WebAuthnCredentialProvider.java",
+      "line": 258,
+      "rule": "information-disclosure-stacktrace",
+      "note": "printStackTrace() in production code; should use proper logging framework.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\LinkedAccountsResource.java",
+      "line": 279,
+      "rule": "information-disclosure-stacktrace",
+      "note": "printStackTrace() in production code; should use proper logging framework.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\error\\KeycloakErrorHandler.java",
+      "line": 222,
+      "rule": "information-disclosure-stacktrace",
+      "note": "printStackTrace() in production code; should use proper logging framework.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\AccountLoader.java",
+      "line": 173,
+      "rule": "empty-catch",
+      "note": "IOException silently swallowed; error hidden.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\util\\MtlsHoKTokenUtil.java",
+      "line": 131,
+      "rule": "empty-catch",
+      "note": "Broad Exception silently swallowed in cert thumbprint computation.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\AccountLoader.java",
+      "line": 173,
+      "rule": "java-empty-catch-block",
+      "note": "IOException silently swallowed; error hidden.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\util\\MtlsHoKTokenUtil.java",
+      "line": 131,
+      "rule": "java-empty-catch-block",
+      "note": "Broad Exception silently swallowed in cert thumbprint computation.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\social\\twitter\\TwitterIdentityProvider.java",
+      "line": 111,
+      "rule": "java-unsafe-deserialization",
+      "note": "ObjectInputStream.readObject() on OAuth data without serialization filter; RCE risk.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\resources\\org\\keycloak\\protocol\\oidc\\endpoints\\3p-cookies-step1.html",
+      "line": 52,
+      "rule": "generic-insecure-cookie",
+      "note": "Test cookie set without Secure/HttpOnly; intentional for 3p cookie detection but insecure.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\ComponentResource.java",
+      "line": 249,
+      "rule": "java-unsafe-reflection",
+      "note": "Class.forName() with subtype from admin API request; could allow arbitrary class instantiation.",
+      "confidence": "HIGH"
+    }
+  ],
+  "false_positives": [
+    {
+      "file": "server-spi\\src\\main\\java\\org\\keycloak\\models\\KeycloakUriInfo.java",
+      "line": 71,
+      "rule": "unused-variable",
+      "note": "Variable is returned on the next line; lazy-init pattern, not unused.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\saml\\SAMLEndpoint.java",
+      "line": 293,
+      "rule": "unused-variable",
+      "note": "Field assignment initializes instance variable used elsewhere in the class.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\resetcred\\ResetCredentialChooseUser.java",
+      "line": 116,
+      "rule": "unused-variable",
+      "note": "Variable reassigned in if-block and used after; scanner missed subsequent usage.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\models\\utils\\SessionExpirationUtils.java",
+      "line": 184,
+      "rule": "unused-variable",
+      "note": "Variable is returned on the next line; lazy-init pattern, not unused.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\installation\\KeycloakOIDCClientInstallation.java",
+      "line": 79,
+      "rule": "unused-variable",
+      "note": "Variable json is likely returned after try-catch; scanner missed usage beyond snippet.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oid4vc\\issuance\\keybinding\\AttestationValidatorUtil.java",
+      "line": 116,
+      "rule": "unused-variable",
+      "note": "Variable assigned from deserialization and likely used after try block.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\models\\utils\\SessionExpirationUtils.java",
+      "line": 105,
+      "rule": "unused-variable",
+      "note": "Variable reassigned in multi-branch fallback and used after conditional blocks.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\oidc\\OIDCIdentityProvider.java",
+      "line": 711,
+      "rule": "unused-variable",
+      "note": "Variable assigned in both if/else branches and used after; scanner missed subsequent usage.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\broker\\provider\\util\\IdentityProviderTypeUtil.java",
+      "line": 61,
+      "rule": "variable-shadowing",
+      "note": "Reassignment via Stream.concat, not shadowing a different variable.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\services\\cors\\Cors.java",
+      "line": 105,
+      "rule": "variable-shadowing",
+      "note": "Method parameter; standard interface method signature, not meaningful shadowing.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\util\\UserSessionUtil.java",
+      "line": 121,
+      "rule": "variable-shadowing",
+      "note": "Reassignment of the same variable, not introduction of a shadowing declaration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\oidc\\AbstractOAuth2IdentityProvider.java",
+      "line": 604,
+      "rule": "variable-shadowing",
+      "note": "Reassignment of the same variable in inner block, not a new declaration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\truststore\\TruststoreBuilder.java",
+      "line": 234,
+      "rule": "variable-shadowing",
+      "note": "Reassignment of the same variable, not introduction of a shadowing declaration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\managers\\ResourceAdminManager.java",
+      "line": 209,
+      "rule": "variable-shadowing",
+      "note": "Reassignment of the same variable, not introduction of a shadowing declaration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidator.java",
+      "line": 685,
+      "rule": "variable-shadowing",
+      "note": "Reassignment of the same variable, not introduction of a shadowing declaration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidator.java",
+      "line": 319,
+      "rule": "variable-shadowing",
+      "note": "Reassignment of the same variable, not introduction of a shadowing declaration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\oidc\\KeycloakOIDCIdentityProvider.java",
+      "line": 91,
+      "rule": "variable-shadowing",
+      "note": "Reassignment of the same variable, not introduction of a shadowing declaration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\endpoints\\AuthorizationEndpoint.java",
+      "line": 177,
+      "rule": "variable-shadowing",
+      "note": "Reassignment in else branch, not a new shadowing variable.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\theme\\beans\\MessagesPerFieldBean.java",
+      "line": 43,
+      "rule": "null-dereference",
+      "note": "Else branch implies fm was found in map and is non-null.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\ClientAuthenticationFlow.java",
+      "line": 129,
+      "rule": "null-dereference",
+      "note": "requiredExecution is Optional from findFirst(); .map() on Optional is null-safe.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\credential\\RecoveryAuthnCodesCredentialProvider.java",
+      "line": 110,
+      "rule": "null-dereference",
+      "note": "credential.get() guarded by if(credential.isPresent()); safe.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi\\src\\main\\java\\org\\keycloak\\component\\JsonConfigComponentModel.java",
+      "line": 100,
+      "rule": "null-dereference",
+      "note": "Ternary explicitly checks sub == null before calling sub.asInt().",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\endpoints\\AuthorizationEndpoint.java",
+      "line": 279,
+      "rule": "possibly-uninitialized",
+      "note": "event.client() takes clientId string, not the client variable; client initialized next line.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\authorization\\AuthorizationProvider.java",
+      "line": 123,
+      "rule": "possibly-uninitialized",
+      "note": "Standard lazy-init pattern; null check guards field before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\AuthenticationManagementResource.java",
+      "line": 1166,
+      "rule": "possibly-uninitialized",
+      "note": "Flagged line is an annotation, not usage of the variable.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\saml\\SAMLEndpoint.java",
+      "line": 922,
+      "rule": "possibly-uninitialized",
+      "note": "Standard lazy-init pattern; null check guards field before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\fgap\\MgmtPermissions.java",
+      "line": 240,
+      "rule": "possibly-uninitialized",
+      "note": "Standard lazy-init pattern; null check guards field before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\test\\java\\org\\keycloak\\connections\\jpa\\support\\EntityManagerProxyTest.java",
+      "line": 35,
+      "rule": "possibly-uninitialized",
+      "note": "Lambda parameter proxy is different from local variable proxy at line 36.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\fgap\\MgmtPermissions.java",
+      "line": 226,
+      "rule": "possibly-uninitialized",
+      "note": "Standard lazy-init pattern; null check guards field before use.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\RSAVerifierTest.java",
+      "line": 81,
+      "rule": "possibly-uninitialized",
+      "note": "Token is a test class field initialized in @Before setup method.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\theme\\beans\\MessageBean.java",
+      "line": 42,
+      "rule": "possibly-uninitialized",
+      "note": "Null check at line 42 explicitly handles the uninitialized case.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\policy\\BlacklistPasswordPolicyProviderFactory.java",
+      "line": 376,
+      "rule": "java-path-traversal",
+      "note": "Path from System.getProperty() or server config, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\vault\\Scenario.java",
+      "line": 19,
+      "rule": "java-path-traversal",
+      "note": "Test code; path controlled by test fixtures, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\truststore\\TruststoreBuilder.java",
+      "line": 196,
+      "rule": "java-path-traversal",
+      "note": "Path from System.getProperty() or server config, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\services\\resteasy\\PropertiesFileProfileConfigResolver.java",
+      "line": 25,
+      "rule": "java-path-traversal",
+      "note": "Test code; path controlled by test fixtures, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\encoding\\GzipResourceEncodingProviderFactory.java",
+      "line": 71,
+      "rule": "java-path-traversal",
+      "note": "Path from internal constants (tmp dir + version), not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\encoding\\GzipResourceEncodingProvider.java",
+      "line": 39,
+      "rule": "java-path-traversal",
+      "note": "Path from internal constants (tmp dir + version), not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\theme\\FolderThemeProviderFactory.java",
+      "line": 43,
+      "rule": "java-path-traversal",
+      "note": "Path from System.getProperty() or server config, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\truststore\\TruststoreBuilder.java",
+      "line": 93,
+      "rule": "java-path-traversal",
+      "note": "Path from System.getProperty() or server config, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\exportimport\\ExportImportManager.java",
+      "line": 130,
+      "rule": "java-path-traversal",
+      "note": "Path from System.getProperty() or server config, not user input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\clientpolicy\\executor\\RegistrationAccessTokenRotationDisabledExecutor.java",
+      "line": 46,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\authorization\\fgap\\AdminPermissionsSchema.java",
+      "line": 505,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\organization\\protocol\\mappers\\oidc\\OrganizationScope.java",
+      "line": 308,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\clientpolicy\\executor\\ClientSecretRotationExecutor.java",
+      "line": 64,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\FrontChannelLogoutHandler.java",
+      "line": 44,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\transaction\\RequestContextHelper.java",
+      "line": 62,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\ClientResource.java",
+      "line": 300,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\clientpolicy\\executor\\ClientSecretRotationExecutor.java",
+      "line": 57,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\organization\\protocol\\mappers\\oidc\\OrganizationScope.java",
+      "line": 407,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\util\\DefaultClientSessionContext.java",
+      "line": 84,
+      "rule": "java-trust-boundary",
+      "note": "Setting internal server-side session attribute with controlled value; no untrusted data crosses trust boundary.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\RSAVerifierTest.java",
+      "line": 151,
+      "rule": "empty-exception-handler",
+      "note": "Test expects exception after Assert.fail(); standard expected-exception pattern.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\test\\ResponseTypeTest.java",
+      "line": 91,
+      "rule": "empty-exception-handler",
+      "note": "Test expects exception after Assert.fail(); standard expected-exception pattern.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\theme\\KeycloakSanitizerTest.java",
+      "line": 57,
+      "rule": "empty-exception-handler",
+      "note": "Test expects exception after Assert.fail(); standard expected-exception pattern.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\UserResource.java",
+      "line": 784,
+      "rule": "logging-sensitive-data",
+      "note": "Logs metadata about credential operations, not actual secret values.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\admin\\RealmsAdminResource.java",
+      "line": 179,
+      "rule": "logging-sensitive-data",
+      "note": "Logs metadata about credential operations, not actual secret values.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\credential\\PasswordCredentialProvider.java",
+      "line": 300,
+      "rule": "logging-sensitive-data",
+      "note": "Logs metadata about credential operations, not actual secret values.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\vault\\FilesKeystoreVaultProviderFactory.java",
+      "line": 49,
+      "rule": "logging-sensitive-data",
+      "note": "Logs static message about missing config; no actual password logged.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\requiredactions\\UpdatePassword.java",
+      "line": 82,
+      "rule": "logging-sensitive-data",
+      "note": "Static log message about password update requirement; no actual password logged.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\requiredactions\\UpdatePassword.java",
+      "line": 89,
+      "rule": "logging-sensitive-data",
+      "note": "Static log message about password update requirement; no actual password logged.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oid4vc\\model\\DisplayObject.java",
+      "line": 100,
+      "rule": "logging-sensitive-data",
+      "note": "Logs credential scope name and parse error, not sensitive data.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\main\\java\\org\\keycloak\\KeycloakSecurityContext.java",
+      "line": 21,
+      "rule": "deserialization-unsafe",
+      "note": "Import statement only, not actual deserialization.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\main\\java\\org\\keycloak\\KeycloakPrincipal.java",
+      "line": 21,
+      "rule": "deserialization-unsafe",
+      "note": "Import statement only, not actual deserialization.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\SkeletonKeyTokenTest.java",
+      "line": 22,
+      "rule": "deserialization-unsafe",
+      "note": "Import statement only, not actual deserialization.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\SkeletonKeyTokenTest.java",
+      "line": 104,
+      "rule": "deserialization-unsafe",
+      "note": "Test code deserializing self-serialized data; no untrusted input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\SkeletonKeyTokenTest.java",
+      "line": 103,
+      "rule": "deserialization-unsafe",
+      "note": "Test code deserializing self-serialized data; no untrusted input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\url\\HostnameV2ProviderFactory.java",
+      "line": 66,
+      "rule": "insecure-http",
+      "note": "String comparison for URL scheme detection, not an actual HTTP connection.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\clientpolicy\\executor\\SecureRedirectUrisEnforcerExecutorFactory.java",
+      "line": 101,
+      "rule": "insecure-http",
+      "note": "Example URL in help text documentation, not a connection.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\clientpolicy\\executor\\IntentClientBindCheckExecutor.java",
+      "line": 179,
+      "rule": "insecure-http",
+      "note": "String comparison for URL scheme detection, not an actual HTTP connection.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\grants\\ciba\\channel\\HttpAuthenticationChannelProvider.java",
+      "line": 118,
+      "rule": "insecure-http",
+      "note": "String comparison for URL scheme detection, not an actual HTTP connection.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\saml\\SAMLIdentityProviderFactory.java",
+      "line": 52,
+      "rule": "insecure-http",
+      "note": "Standard SAML/REFEDS entity category URIs as identifiers, not HTTP connections.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\saml\\SAMLIdentityProviderFactory.java",
+      "line": 53,
+      "rule": "insecure-http",
+      "note": "Standard SAML/REFEDS entity category URIs as identifiers, not HTTP connections.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\broker\\saml\\mappers\\XPathAttributeMapper.java",
+      "line": 84,
+      "rule": "insecure-http",
+      "note": "Example XML namespace URI in help text, not an actual connection.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\url\\HostnameV2ProviderFactory.java",
+      "line": 94,
+      "rule": "insecure-http",
+      "note": "Temporary URI for hostname validation, not an insecure connection.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\oidc\\utils\\WebOriginsUtils.java",
+      "line": 41,
+      "rule": "insecure-http",
+      "note": "String comparison for URL scheme detection, not an actual HTTP connection.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidator.java",
+      "line": 512,
+      "rule": "hardcoded-ip",
+      "note": "X.509/X.500 OID strings (dot-separated numbers), not IP addresses.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\browser\\ConditionalOtpFormAuthenticatorFactory.java",
+      "line": 143,
+      "rule": "hardcoded-ip",
+      "note": "Example IPs in help text documentation, not hardcoded configuration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidator.java",
+      "line": 475,
+      "rule": "hardcoded-ip",
+      "note": "X.509/X.500 OID strings (dot-separated numbers), not IP addresses.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\browser\\ConditionalOtpFormAuthenticatorFactory.java",
+      "line": 144,
+      "rule": "hardcoded-ip",
+      "note": "Example IPs in help text documentation, not hardcoded configuration.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\client\\X509ClientAuthenticator.java",
+      "line": 47,
+      "rule": "hardcoded-ip",
+      "note": "X.509/X.500 OID strings (dot-separated numbers), not IP addresses.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\client\\X509ClientAuthenticator.java",
+      "line": 49,
+      "rule": "hardcoded-ip",
+      "note": "X.509/X.500 OID strings (dot-separated numbers), not IP addresses.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\authenticators\\client\\X509ClientAuthenticator.java",
+      "line": 48,
+      "rule": "hardcoded-ip",
+      "note": "X.509/X.500 OID strings (dot-separated numbers), not IP addresses.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\util\\PemUtilsTest.java",
+      "line": 124,
+      "rule": "private-key",
+      "note": "Test fixture key for unit testing; not a production credential.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\protocol\\docker\\installation\\compose\\DockerCertFileUtils.java",
+      "line": 14,
+      "rule": "private-key",
+      "note": "PEM header/footer format constants, not actual private key content.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\KeyPairVerifierTest.java",
+      "line": 40,
+      "rule": "private-key",
+      "note": "Test fixture key for unit testing; not a production credential.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\util\\PemUtilsTest.java",
+      "line": 74,
+      "rule": "private-key",
+      "note": "Test fixture key for unit testing; not a production credential.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\util\\PemUtilsTest.java",
+      "line": 100,
+      "rule": "private-key",
+      "note": "Test fixture key for unit testing; not a production credential.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\executors\\DefaultExecutorsProviderFactory.java",
+      "line": 202,
+      "rule": "java-weak-random",
+      "note": "Random for thread group naming, not security purpose.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\connections\\httpclient\\DefaultHttpClientFactory.java",
+      "line": 292,
+      "rule": "java-weak-random",
+      "note": "Math.random() for retry jitter timing, not security tokens.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidatorTest.java",
+      "line": 54,
+      "rule": "java-printstacktrace",
+      "note": "Test code; printStackTrace() acceptable in tests.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidatorTest.java",
+      "line": 39,
+      "rule": "java-weak-key-size",
+      "note": "Test code using 512-bit keys for faster execution; not production.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidatorTest.java",
+      "line": 92,
+      "rule": "java-weak-key-size",
+      "note": "Test code using 512-bit keys for faster execution; not production.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidatorTest.java",
+      "line": 65,
+      "rule": "java-weak-key-size",
+      "note": "Test code using 512-bit keys for faster execution; not production.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\authentication\\authenticators\\x509\\CertificateValidatorTest.java",
+      "line": 335,
+      "rule": "java-weak-key-size",
+      "note": "Test code using 512-bit keys for faster execution; not production.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\authorization\\fgap\\AdminPermissionsSchema.java",
+      "line": 100,
+      "rule": "hardcoded-secret",
+      "note": "String constant is a type/scope identifier name, not an actual secret value.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\main\\java\\org\\keycloak\\util\\TokenUtil.java",
+      "line": 53,
+      "rule": "hardcoded-secret",
+      "note": "String constant is a type/scope identifier name, not an actual secret value.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi\\src\\main\\java\\org\\keycloak\\credential\\CredentialModel.java",
+      "line": 46,
+      "rule": "hardcoded-secret",
+      "note": "String constant is a type/scope identifier name, not an actual secret value.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi-private\\src\\main\\java\\org\\keycloak\\models\\utils\\KeycloakModelUtils.java",
+      "line": 112,
+      "rule": "hardcoded-secret",
+      "note": "String constant is a type/scope identifier name, not an actual secret value.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\main\\java\\org\\keycloak\\OAuth2Constants.java",
+      "line": 76,
+      "rule": "generic-password-assignment",
+      "note": "Assigns string \"password\" as OAuth2 grant type or credential type name, not an actual password.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi\\src\\main\\java\\org\\keycloak\\provider\\ProviderConfigProperty.java",
+      "line": 70,
+      "rule": "generic-password-assignment",
+      "note": "Assigns string \"password\" as OAuth2 grant type or credential type name, not an actual password.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "server-spi\\src\\main\\java\\org\\keycloak\\credential\\CredentialModel.java",
+      "line": 40,
+      "rule": "generic-password-assignment",
+      "note": "Assigns string \"password\" as OAuth2 grant type or credential type name, not an actual password.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\main\\java\\org\\keycloak\\representations\\idm\\CredentialRepresentation.java",
+      "line": 28,
+      "rule": "generic-password-assignment",
+      "note": "Assigns string \"password\" as OAuth2 grant type or credential type name, not an actual password.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\truststore\\FileTruststoreProvider.java",
+      "line": 47,
+      "rule": "java-insecure-ssl-factory",
+      "note": "Uses JVM default or truststore-configured SSLSocketFactory; not bypassing validation.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\truststore\\SSLSocketFactory.java",
+      "line": 62,
+      "rule": "java-insecure-ssl-factory",
+      "note": "Uses JVM default or truststore-configured SSLSocketFactory; not bypassing validation.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\connections\\httpclient\\HttpClientBuilder.java",
+      "line": 277,
+      "rule": "java-insecure-ssl-factory",
+      "note": "Uses JVM default or truststore-configured SSLSocketFactory; not bypassing validation.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\theme\\KeycloakSanitizerTest.java",
+      "line": 57,
+      "rule": "empty-catch",
+      "note": "Test expects exception after fail(); standard expected-exception pattern.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\theme\\KeycloakSanitizerTest.java",
+      "line": 57,
+      "rule": "java-empty-catch-block",
+      "note": "Test expects exception after fail(); standard expected-exception pattern.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\forms\\login\\freemarker\\DetachedInfoStateCookie.java",
+      "line": 125,
+      "rule": "java-ldap-injection",
+      "note": "String concatenation in toString()/exception message, not LDAP filter construction.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\authentication\\requiredactions\\WebAuthnRegister.java",
+      "line": 422,
+      "rule": "java-ldap-injection",
+      "note": "String concatenation in toString()/exception message, not LDAP filter construction.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\social\\stackoverflow\\StackoverflowIdentityProvider.java",
+      "line": 114,
+      "rule": "java-ssrf-url",
+      "note": "URL parsed to extract path for username; no outbound request made.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\clientregistration\\policy\\impl\\TrustedHostClientRegistrationPolicy.java",
+      "line": 255,
+      "rule": "java-ssrf-url",
+      "note": "URL parsed to extract hostname for validation; no outbound request.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\resources\\ResourcesService.java",
+      "line": 224,
+      "rule": "sql-injection-execute",
+      "note": "URI template building for pagination links, not SQL query construction.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\services\\resources\\account\\resources\\ResourcesService.java",
+      "line": 231,
+      "rule": "sql-injection-execute",
+      "note": "URI template building for pagination links, not SQL query construction.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\SkeletonKeyTokenTest.java",
+      "line": 104,
+      "rule": "java-unsafe-deserialization",
+      "note": "Test code deserializing self-serialized data; no untrusted input.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\resources\\org\\keycloak\\protocol\\oidc\\endpoints\\3p-cookies-step2.html",
+      "line": 14,
+      "rule": "generic-insecure-cookie",
+      "note": "Cookie deleted with Max-Age=0; security flags irrelevant for deletion.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\main\\java\\org\\keycloak\\executors\\DefaultExecutorsProviderFactory.java",
+      "line": 139,
+      "rule": "java-jndi-injection",
+      "note": "JNDI name from hardcoded prefix + constant \"default\"; not user-controlled.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "services\\src\\test\\java\\org\\keycloak\\protocol\\saml\\SamlEncryptionTest.java",
+      "line": 91,
+      "rule": "java-ecb-mode",
+      "note": "RSA/ECB/OAEPPadding is standard RSA with OAEP; ECB in RSA means single-block, not insecure ECB mode.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\main\\java\\org\\keycloak\\util\\DIDUtils.java",
+      "line": 238,
+      "rule": "java-xss",
+      "note": "CBOR/varint encoding writing bytes to OutputStream, not HTTP response.",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "core\\src\\test\\java\\org\\keycloak\\jose\\HmacTest.java",
+      "line": 53,
+      "rule": "java-static-encryption-key",
+      "note": "Test code with hardcoded key for HMAC testing; not production.",
+      "confidence": "HIGH"
+    }
+  ],
+  "notes": ""
+}

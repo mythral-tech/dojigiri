@@ -103,6 +103,35 @@ _BAR_REASSIGN_NONLITERAL = re.compile(r'(?<!String\s)\bbar\s*=\s*(?!")[^;]+;')
 _SAFE_HASH_PROPERTY = re.compile(r'getProperty\(\s*"hashAlg2"')
 _PROPERTIES_CONTEXT = re.compile(r'\bjava\.util\.Properties\b')
 
+# ─── Safe system sources for path traversal ──────────────────────────
+
+# System.getProperty(), System.getenv(), getServletContext().getRealPath()
+# are server-config sources, not user input.  When a variable used in a
+# File/Paths constructor is assigned from one of these, it's not a path
+# traversal finding.
+_SAFE_PATH_SOURCES = re.compile(
+    r'(?:System\.getProperty|System\.getenv|getServletContext\(\)\.getRealPath|'
+    r'getClass\(\)\.getResource|getClassLoader\(\)\.getResource|'
+    r'ManagementFactory\.|Runtime\.getRuntime|System\.(?:lineSeparator|nanoTime|currentTimeMillis))\s*\('
+)
+
+# Variable name patterns that indicate config/server paths, not user input
+_SAFE_PATH_VARNAMES = re.compile(
+    r'\b(?:home|baseDir|configDir|installDir|rootDir|tmpDir|tempDir|'
+    r'jbossHome|catalinaHome|catalinaBase|serverHome|dataDir|logDir|'
+    r'JBOSS_HOME|CATALINA_HOME|CATALINA_BASE)\b'
+)
+
+# ─── Private key variable name vs PEM content ────────────────────────
+
+# Variable/field named privateKey without actual PEM content is not a secret.
+_PRIVATE_KEY_VARNAME = re.compile(
+    r'(?:private_key|privateKey|private-key)\s*[:=]'
+)
+_PEM_CONTENT = re.compile(
+    r'-----BEGIN\s+(?:RSA\s+|EC\s+|DSA\s+|OPENSSH\s+)?PRIVATE\s+KEY-----'
+)
+
 # ─── Rules that can be suppressed ────────────────────────────────────
 
 # Injection rules suppressed by ANY sanitization (data-flow OR output encoding)
@@ -431,6 +460,16 @@ def filter_java_fps(
             general-only OWASP Benchmark score.
     """
     result = findings
+
+    # ── General-purpose Java FP filters (apply always) ──────────────
+
+    # Path traversal: suppress when file path comes from system/server config
+    if _SAFE_PATH_SOURCES.search(content) or _SAFE_PATH_VARNAMES.search(content):
+        result = [f for f in result if f.rule != "java-path-traversal"]
+
+    # Private key variable names without PEM content are not secrets
+    if _PRIVATE_KEY_VARNAME.search(content) and not _PEM_CONTENT.search(content):
+        result = [f for f in result if f.rule != "hardcoded-secret"]
 
     if skip_benchmark_filters:
         # General-purpose only: explicit sanitizer (ESAPI, Spring, Commons)

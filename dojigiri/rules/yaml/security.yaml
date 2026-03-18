@@ -29,7 +29,7 @@ rules:
   id: logging-sensitive-data
   message: Possibly logging sensitive data (password, secret, token) — credentials
     may appear in log files
-  pattern: (?i)(?:log(?:ger)?\.(?:info|debug|warn|error|critical|warning)|print|console\.log|puts)\s*\(.*\b(?:password|passwd|secret_key|api_key|auth_token|credential)\b
+  pattern: (?i)(?:log(?:ger)?\.(?:info|debug|warn|error|critical|warning)|print|console\.log|puts)\s*\(.*(?:\+\s*(?:password|passwd|secret_key|api_key|auth_token|credential)\b|,\s*(?:password|passwd|secret_key|api_key|auth_token|credential)\s*[,)]|['"]\s*\+\s*\w*(?:password|passwd|secret_key|api_key|auth_token|credential)\w*\s*\+|(?:password|passwd|secret_key|api_key|auth_token|credential)\s*=\s*\w+[^=])
   severity: warning
   suggestion: Redact sensitive values before logging; use structured logging with
     explicit field masking

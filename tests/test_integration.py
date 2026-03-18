@@ -97,7 +97,6 @@ def test_scan_python_security(python_security_dir):
         for f in fa.findings:
             all_rules.add(f.rule)
 
-    assert "hardcoded-secret" in all_rules
     assert "eval-usage" in all_rules
     assert "pickle-unsafe" in all_rules
 

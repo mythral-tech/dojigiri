@@ -173,13 +173,6 @@ TAINT_SINK_PATTERNS: list[tuple[str, str]] = [
     ("urlopen", "ssrf"),
     ("aiohttp.ClientSession.get", "ssrf"),
     ("aiohttp.ClientSession.post", "ssrf"),
-    # Log injection
-    ("logging.info", "log_injection"),
-    ("logging.warning", "log_injection"),
-    ("logging.error", "log_injection"),
-    ("logger.info", "log_injection"),
-    ("logger.warning", "log_injection"),
-    ("logger.error", "log_injection"),
     # LLM API calls — user input flowing here is prompt injection
     ("client.chat.completions.create", "llm_input"),
     ("openai.ChatCompletion.create", "llm_input"),

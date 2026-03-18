@@ -773,7 +773,7 @@ class TestNewFixerIntegration:
         fp.write_text('import hashlib\nh = hashlib.md5(data)\n', encoding="utf-8")
         content = fp.read_text(encoding="utf-8")
         from dojigiri.detector import analyze_file_static
-        findings = analyze_file_static(str(fp), content, "python").findings
+        findings = analyze_file_static(str(fp), content, "python", suppress_noise=False).findings
         hash_findings = [f for f in findings if f.rule == "weak-hash"]
         assert len(hash_findings) >= 1
         report = fix_file(str(fp), content, "python", hash_findings, dry_run=True)
