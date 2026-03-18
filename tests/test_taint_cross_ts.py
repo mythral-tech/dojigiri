@@ -411,3 +411,211 @@ class TestCrossFileEdgeCases:
         # Should not crash
         findings = analyze_taint_cross_file_ts(files, "javascript")
         assert isinstance(findings, list)
+
+
+# ─── Fold 7: Edge cases ──────────────────────────────────────────────
+
+
+class TestEdgeCasesJS:
+    """JS-specific edge cases."""
+
+    def test_arrow_function_export(self):
+        """Arrow function exported via module.exports."""
+        lib_code = """\
+const doQuery = (input) => {
+    const sql = "SELECT * FROM t WHERE x = '" + input + "'";
+    pool.query(sql);
+};
+module.exports = { doQuery };
+"""
+        caller_code = """\
+const { doQuery } = require('./lib');
+
+function handler(req, res) {
+    const data = req.body.search;
+    doQuery(data);
+}
+"""
+        files = {"lib.js": lib_code, "handler.js": caller_code}
+        findings = analyze_taint_cross_file_ts(files, "javascript")
+        assert len(findings) > 0
+        assert any("doQuery" in f.message for f in findings)
+
+    def test_default_export(self):
+        """Default export function."""
+        lib_code = """\
+export default function runSQL(query) {
+    pool.query(query);
+}
+"""
+        caller_code = """\
+import runSQL from './lib';
+
+function handler(req, res) {
+    const q = req.query.q;
+    runSQL(q);
+}
+"""
+        files = {"lib.js": lib_code, "handler.js": caller_code}
+        findings = analyze_taint_cross_file_ts(files, "javascript")
+        assert len(findings) > 0
+
+    def test_multiple_params_only_tainted_one_detected(self):
+        """Only the tainted parameter triggers a finding."""
+        util_code = """\
+export function buildQuery(table, userInput) {
+    const sql = "SELECT * FROM " + table + " WHERE name = '" + userInput + "'";
+    pool.query(sql);
+}
+"""
+        caller_code = """\
+import { buildQuery } from './util';
+
+function handler(req, res) {
+    const name = req.query.name;
+    buildQuery("users", name);
+}
+"""
+        files = {"util.js": util_code, "handler.js": caller_code}
+        findings = analyze_taint_cross_file_ts(files, "javascript")
+        assert len(findings) > 0
+
+    def test_no_finding_sanitized_before_call(self):
+        """Sanitizer applied before cross-file call → no finding."""
+        util_code = """\
+export function doQuery(id) {
+    pool.query("SELECT * FROM users WHERE id = " + id);
+}
+"""
+        caller_code = """\
+import { doQuery } from './util';
+
+function handler(req, res) {
+    const id = parseInt(req.query.id);
+    doQuery(id);
+}
+"""
+        files = {"util.js": util_code, "handler.js": caller_code}
+        findings = analyze_taint_cross_file_ts(files, "javascript")
+        assert len(findings) == 0
+
+
+class TestEdgeCasesJava:
+    """Java-specific edge cases."""
+
+    def test_static_method_call(self):
+        """Static method call via class name."""
+        service_code = """\
+package com.example;
+
+public class DbUtils {
+    public static void executeSQL(String query) {
+        statement.executeQuery(query);
+    }
+}
+"""
+        controller_code = """\
+package com.example;
+
+import com.example.DbUtils;
+
+public class Controller {
+    public void handle() {
+        String input = request.getParameter("q");
+        DbUtils.executeSQL(input);
+    }
+}
+"""
+        files = {"DbUtils.java": service_code, "Controller.java": controller_code}
+        findings = analyze_taint_cross_file_ts(files, "java")
+        assert len(findings) > 0
+        assert any("executeSQL" in f.message for f in findings)
+
+    def test_constructor_injection(self):
+        """Constructor call with tainted data."""
+        model_code = """\
+package com.example;
+
+public class Query {
+    public Query(String sql) {
+        statement.executeQuery(sql);
+    }
+}
+"""
+        controller_code = """\
+package com.example;
+
+import com.example.Query;
+
+public class Controller {
+    public void handle() {
+        String input = request.getParameter("q");
+        Query query = new Query(input);
+    }
+}
+"""
+        files = {"Query.java": model_code, "Controller.java": controller_code}
+        # Constructor calls may or may not be detected depending on
+        # tree-sitter's handling — this tests that it doesn't crash
+        findings = analyze_taint_cross_file_ts(files, "java")
+        assert isinstance(findings, list)
+
+    def test_sanitized_java_no_finding(self):
+        """URLEncoder.encode sanitizes input → no finding."""
+        service_code = """\
+package com.example;
+
+public class UserService {
+    public static void findByName(String name) {
+        String sql = "SELECT * FROM users WHERE name = '" + name + "'";
+        statement.executeQuery(sql);
+    }
+}
+"""
+        controller_code = """\
+package com.example;
+
+import com.example.UserService;
+
+public class Controller {
+    public void handle() {
+        String input = request.getParameter("name");
+        String safe = URLEncoder.encode(input);
+        UserService.findByName(safe);
+    }
+}
+"""
+        files = {"UserService.java": service_code, "Controller.java": controller_code}
+        findings = analyze_taint_cross_file_ts(files, "java")
+        assert len(findings) == 0
+
+
+class TestCrossFileFindingProperties:
+    """Verify finding properties are correct."""
+
+    def test_finding_has_correct_fields(self):
+        route_code = """\
+import { doQuery } from './db';
+
+function handler(req, res) {
+    const name = req.body.name;
+    doQuery(name);
+}
+"""
+        db_code = """\
+export function doQuery(input) {
+    const sql = "SELECT * FROM t WHERE x = '" + input + "'";
+    pool.query(sql);
+}
+"""
+        files = {"app.js": route_code, "db.js": db_code}
+        findings = analyze_taint_cross_file_ts(files, "javascript")
+        assert len(findings) > 0
+        f = findings[0]
+        assert f.source_file == "app.js"
+        assert f.target_file == "db.js"
+        assert f.rule == "taint-flow-cross-file"
+        assert f.category.value == "security"
+        assert f.severity.value in ("critical", "warning")
+        assert f.suggestion is not None
+        assert "doQuery" in f.message

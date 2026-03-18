@@ -123,7 +123,15 @@ def _build_function_summaries_ts(
     for filepath, sem in semantics_map.items():
         content = file_contents.get(filepath, "")
         source_bytes = content.encode("utf-8")
+        lines = content.splitlines()
         file_summaries: dict[str, FunctionTaintSummary] = {}
+
+        # Build arrow function name map: line → assigned name
+        # Handles: const doQuery = (input) => { ... }
+        arrow_names: dict[int, str] = {}
+        for asgn in sem.assignments:
+            if not asgn.is_parameter and ("=>" in asgn.value_text or "function" in asgn.value_text):
+                arrow_names[asgn.line] = asgn.name
 
         scope_children = _build_scope_children(sem)
 
@@ -182,14 +190,23 @@ def _build_function_summaries_ts(
             )
             param_flows: dict[int, str] = {}
             for sink in sinks:
-                # Trace back to original param
-                for i, p in enumerate(params):
-                    if p in tainted_vars and _var_reaches_sink_var(
-                        p, sink.variable, taint_chains,
-                    ):
-                        if i not in param_flows:
-                            param_flows[i] = sink.kind
+                # For each param, check if it contributes to the sink variable
+                # Use line text analysis since chain walking only tracks one path
+                sink_rhs = ""
+                for a in sem.assignments:
+                    if a.scope_id in func_scope_ids and a.name == sink.variable:
+                        sink_rhs = a.value_text
                         break
+                for i, p in enumerate(params):
+                    if i in param_flows:
+                        continue
+                    if p not in tainted_vars:
+                        continue
+                    # Check: does this param appear in the sink variable's RHS
+                    # or does it transitively reach the sink via chain walking
+                    if (re.search(r"\b" + re.escape(p) + r"\b", sink_rhs)
+                            or _var_reaches_sink_var(p, sink.variable, taint_chains)):
+                        param_flows[i] = sink.kind
 
             # Check if any param flows to return
             returns_tainted = False
@@ -220,8 +237,13 @@ def _build_function_summaries_ts(
                                             returns_tainted = True
                                             returned_indices.add(idx)
 
-            file_summaries[func_def.name] = FunctionTaintSummary(
-                name=func_def.name,
+            # Resolve arrow function names: const doQuery = () => { ... }
+            func_name = func_def.name
+            if func_name == "<anonymous>":
+                func_name = arrow_names.get(func_def.line, func_name)
+
+            summary = FunctionTaintSummary(
+                name=func_name,
                 qualified_name=func_def.qualified_name,
                 filepath=filepath,
                 line=func_def.line,
@@ -230,6 +252,10 @@ def _build_function_summaries_ts(
                 returns_tainted_param=returns_tainted,
                 returned_param_indices=returned_indices,
             )
+            file_summaries[func_name] = summary
+            # Also register under original name for fallback
+            if func_name != func_def.name:
+                file_summaries[func_def.name] = summary
 
         all_summaries[filepath] = file_summaries
 
