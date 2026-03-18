@@ -274,7 +274,10 @@ def _downgrade_test_file_findings(analyses: list[FileAnalysis]) -> None:
 
 
 def _detect_cross_file_taint(analyses: list[FileAnalysis]) -> list[CrossFileFinding]:
-    """Run cross-file taint analysis on Python files. Returns findings."""
+    """Run cross-file taint analysis on Python, JS/TS, and Java files."""
+    findings: list[CrossFileFinding] = []
+
+    # ── Python (ast-based) ──
     python_files: dict[str, str] = {}
     for fa in analyses:
         if fa.language == "python":
@@ -283,14 +286,46 @@ def _detect_cross_file_taint(analyses: list[FileAnalysis]) -> list[CrossFileFind
                 python_files[fa.path] = content
             except OSError:
                 logger.debug("Could not read %s for cross-file taint analysis", fa.path)
-    if len(python_files) < 2:
-        return []
-    try:
-        from .taint_cross import analyze_taint_cross_file
-        return list(analyze_taint_cross_file(python_files))
-    except Exception as e:
-        logger.debug("Cross-file taint analysis skipped: %s", e)
-        return []
+    if len(python_files) >= 2:
+        try:
+            from .taint_cross import analyze_taint_cross_file
+            findings.extend(analyze_taint_cross_file(python_files))
+        except Exception as e:
+            logger.debug("Cross-file taint analysis (Python) skipped: %s", e)
+
+    # ── JS/TS (tree-sitter-based) ──
+    js_files: dict[str, str] = {}
+    for fa in analyses:
+        if fa.language in ("javascript", "typescript"):
+            try:
+                content = Path(fa.path).read_text(encoding="utf-8", errors="replace")
+                js_files[fa.path] = content
+            except OSError:
+                logger.debug("Could not read %s for cross-file taint analysis", fa.path)
+    if len(js_files) >= 2:
+        try:
+            from .taint_cross_ts import analyze_taint_cross_file_ts
+            findings.extend(analyze_taint_cross_file_ts(js_files, "javascript"))
+        except Exception as e:
+            logger.debug("Cross-file taint analysis (JS/TS) skipped: %s", e)
+
+    # ── Java (tree-sitter-based) ──
+    java_files: dict[str, str] = {}
+    for fa in analyses:
+        if fa.language == "java":
+            try:
+                content = Path(fa.path).read_text(encoding="utf-8", errors="replace")
+                java_files[fa.path] = content
+            except OSError:
+                logger.debug("Could not read %s for cross-file taint analysis", fa.path)
+    if len(java_files) >= 2:
+        try:
+            from .taint_cross_ts import analyze_taint_cross_file_ts
+            findings.extend(analyze_taint_cross_file_ts(java_files, "java"))
+        except Exception as e:
+            logger.debug("Cross-file taint analysis (Java) skipped: %s", e)
+
+    return findings
 
 
 def scan_quick(
