@@ -1,0 +1,40 @@
+name: False Positive
+description: Report a finding that shouldn't be flagged
+labels: ["false-positive"]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Rule ID
+      placeholder: "e.g. sql-injection, hardcoded-secret"
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Code being flagged
+      description: The code that triggers the false positive.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this is a false positive
+      description: Explain why this code is safe.
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: "e.g. Python, Java, TypeScript"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Dojigiri version
+      placeholder: "doji --version"
+    validations:
+      required: true
