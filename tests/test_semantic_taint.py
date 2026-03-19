@@ -7,7 +7,7 @@ taint propagation, sanitization, end-to-end scenarios, and cross-language suppor
 import pytest
 
 from dojigiri.semantic.core import extract_semantics
-from dojigiri.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath, _matches_sink_pattern
+from dojigiri.semantic.taint import analyze_taint, TaintSource, TaintSink, TaintPath, _matches_sink_pattern, _expand_call_lines
 from dojigiri.semantic.lang_config import get_config, LanguageConfig
 from dojigiri.types import Severity, Category, Source
 
@@ -952,3 +952,158 @@ class TestMatchesSinkPattern:
 
     def test_dot_prefix_rejects_non_suffix(self):
         assert _matches_sink_pattern("w.Header().Set", ".Head") is False
+
+    # Case-insensitive receiver matching (Fold 2)
+    def test_case_insensitive_receiver_jdbc(self):
+        """JDBCtemplate should match JdbcTemplate (casing mismatch in OWASP benchmark)."""
+        assert _matches_sink_pattern("JDBCtemplate.execute", "JdbcTemplate.execute") is True
+
+    def test_case_insensitive_receiver_query_for_row_set(self):
+        assert _matches_sink_pattern("JDBCtemplate.queryForRowSet", "JdbcTemplate.queryForRowSet") is True
+
+    def test_case_insensitive_receiver_with_prefix(self):
+        assert _matches_sink_pattern("DatabaseHelper.JDBCtemplate.execute", "JdbcTemplate.execute") is True
+
+    def test_case_insensitive_method_name_exact(self):
+        """Method name must still be exact — Execute != execute."""
+        assert _matches_sink_pattern("foo.bar.Execute", "JdbcTemplate.execute") is False
+
+    def test_bare_pattern_unchanged(self):
+        """Bare patterns (no dot) should still work unchanged."""
+        assert _matches_sink_pattern("connection.prepareStatement", "prepareStatement") is True
+
+
+# ─── Multiline Call Expansion (Fold 1) ────────────────────────────────────────
+
+class TestExpandCallLines:
+    def test_single_line_complete(self):
+        lines = ["connection.prepareCall(sql);"]
+        assert _expand_call_lines(lines, 0) == "connection.prepareCall(sql);"
+
+    def test_multiline_expansion(self):
+        lines = [
+            "connection.prepareStatement(",
+            "        sql,",
+            "        ResultSet.TYPE_FORWARD_ONLY);",
+        ]
+        expanded = _expand_call_lines(lines, 0)
+        assert "sql" in expanded
+        assert "ResultSet" in expanded
+
+    def test_multiline_python(self):
+        lines = [
+            "cursor.execute(",
+            "    query)",
+        ]
+        expanded = _expand_call_lines(lines, 0)
+        assert "query" in expanded
+
+    def test_no_expansion_needed(self):
+        lines = ["x = 42;"]
+        assert _expand_call_lines(lines, 0) == "x = 42;"
+
+    def test_empty_lines(self):
+        assert _expand_call_lines([], 0) == ""
+
+    def test_out_of_bounds(self):
+        lines = ["foo()"]
+        assert _expand_call_lines(lines, 5) == ""
+
+
+# ─── Multiline Sink E2E (Fold 1) ─────────────────────────────────────────────
+
+def _analyze_java(code: str):
+    """Extract semantics and run taint analysis on Java code."""
+    config = get_config("java")
+    sem = extract_semantics(code, "Test.java", "java")
+    if sem is None:
+        return []
+    source_bytes = code.encode("utf-8")
+    return analyze_taint(sem, source_bytes, config, "Test.java")
+
+
+@needs_tree_sitter
+class TestMultilineSinkE2E:
+    def test_multiline_prepare_statement(self):
+        """Multiline prepareStatement with tainted arg on continuation line."""
+        code = '''
+public class Test {
+    public void doGet(HttpServletRequest request) {
+        String param = request.getParameter("input");
+        String sql = "SELECT * FROM users WHERE id=" + param;
+        Connection conn = getConnection();
+        PreparedStatement stmt = conn.prepareStatement(
+                sql,
+                ResultSet.TYPE_FORWARD_ONLY);
+    }
+}
+'''
+        findings = _analyze_java(code)
+        assert len(findings) > 0
+        assert any("sql" in f.rule.lower() or "sql" in f.message.lower() for f in findings)
+
+    def test_single_line_still_works(self):
+        """Single-line prepareCall should still detect tainted arg."""
+        code = '''
+public class Test {
+    public void doGet(HttpServletRequest request) {
+        String param = request.getParameter("input");
+        String sql = "SELECT * FROM users WHERE id=" + param;
+        CallableStatement cs = conn.prepareCall(sql);
+    }
+}
+'''
+        findings = _analyze_java(code)
+        assert len(findings) > 0
+        assert any("sql" in f.rule.lower() or "sql" in f.message.lower() for f in findings)
+
+    def test_multiline_literal_no_false_positive(self):
+        """Literal string args on continuation lines shouldn't trigger."""
+        code = '''
+public class Test {
+    public void doGet(HttpServletRequest request) {
+        Connection conn = getConnection();
+        PreparedStatement stmt = conn.prepareStatement(
+                "SELECT 1",
+                ResultSet.TYPE_FORWARD_ONLY);
+    }
+}
+'''
+        findings = _analyze_java(code)
+        sql_findings = [f for f in findings if "sql" in f.rule.lower()]
+        assert len(sql_findings) == 0
+
+
+# ─── Case-Insensitive Receiver E2E (Fold 2) ──────────────────────────────────
+
+@needs_tree_sitter
+class TestCaseInsensitiveReceiverE2E:
+    def test_jdbctemplate_casing_mismatch(self):
+        """JDBCtemplate.execute should match JdbcTemplate.execute sink."""
+        code = '''
+public class Test {
+    public void doGet(HttpServletRequest request) {
+        String param = request.getParameter("input");
+        String sql = "SELECT * FROM users WHERE id=" + param;
+        JDBCtemplate.execute(sql);
+    }
+}
+'''
+        findings = _analyze_java(code)
+        assert len(findings) > 0
+        assert any("sql" in f.rule.lower() or "sql" in f.message.lower() for f in findings)
+
+    def test_query_for_row_set(self):
+        """JdbcTemplate.queryForRowSet should be detected as SQL sink."""
+        code = '''
+public class Test {
+    public void doGet(HttpServletRequest request) {
+        String param = request.getParameter("input");
+        String sql = "SELECT * FROM users WHERE id=" + param;
+        JdbcTemplate.queryForRowSet(sql);
+    }
+}
+'''
+        findings = _analyze_java(code)
+        assert len(findings) > 0
+        assert any("sql" in f.rule.lower() or "sql" in f.message.lower() for f in findings)

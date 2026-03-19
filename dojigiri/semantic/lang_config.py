@@ -911,6 +911,7 @@ LANGUAGE_CONFIGS.update(
                 ("JdbcTemplate.update", "sql_query"),
                 ("JdbcTemplate.execute", "sql_query"),
                 ("JdbcTemplate.batchUpdate", "sql_query"),
+                ("JdbcTemplate.queryForRowSet", "sql_query"),
                 ("NamedParameterJdbcTemplate.query", "sql_query"),
                 ("NamedParameterJdbcTemplate.update", "sql_query"),
                 # SQL — JPA/Hibernate native queries (bypass parameterization)

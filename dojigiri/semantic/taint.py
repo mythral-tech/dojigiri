@@ -812,7 +812,18 @@ def _matches_sink_pattern(call_text: str, pattern: str) -> bool:
         return call_text.endswith(pattern)
     if "." in pattern:
         # Dotted pattern: exact match or call_text ends with ".pattern"
-        return call_text == pattern or call_text.endswith("." + pattern)
+        if call_text == pattern or call_text.endswith("." + pattern):
+            return True
+        # Case-insensitive receiver, exact method name
+        p_parts = pattern.rsplit(".", 1)
+        ct_parts = call_text.rsplit(".", 1)
+        if len(p_parts) == 2 and len(ct_parts) == 2:
+            if ct_parts[1] == p_parts[1]:
+                # Match receiver: last dot-component of call receiver vs pattern receiver
+                ct_receiver_last = ct_parts[0].rsplit(".", 1)[-1]
+                if ct_receiver_last.lower() == p_parts[0].lower():
+                    return True
+        return False
     # Bare pattern: must be the method name (part after last dot), or exact match
     if call_text == pattern:
         return True
@@ -1061,6 +1072,25 @@ def _find_taint_sinks(
     return sinks
 
 
+def _expand_call_lines(lines: list[str], start_idx: int, max_extra: int = 8) -> str:
+    """Expand a function call to include continuation lines until closing paren."""
+    if start_idx >= len(lines):
+        return ""
+    result = lines[start_idx]
+    depth = result.count("(") - result.count(")")
+    if depth <= 0:
+        return result
+    for i in range(1, max_extra + 1):
+        idx = start_idx + i
+        if idx >= len(lines):
+            break
+        result += " " + lines[idx].strip()
+        depth += lines[idx].count("(") - lines[idx].count(")")
+        if depth <= 0:
+            break
+    return result
+
+
 def _match_call_to_sink(
     call: object, call_text: str, config: object, lines: list[str],
     tainted_vars: list[str], assigned_on_line: set, sinks: list,
@@ -1076,7 +1106,7 @@ def _match_call_to_sink(
         if not (0 <= line_idx < len(lines)):
             break
 
-        line_text = lines[line_idx]
+        line_text = _expand_call_lines(lines, line_idx)
         tvar = _find_tainted_arg_at_sink(
             tainted_vars, call, pattern, line_text, assigned_on_line,
             sink_kind=kind,
