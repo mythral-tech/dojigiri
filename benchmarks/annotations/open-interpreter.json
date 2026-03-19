@@ -1,0 +1,1883 @@
+{
+  "true_positives": [
+    {
+      "file": "interpreter\\terminal_interface\\conversation_navigator.py",
+      "line": 17,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 2,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 38,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\skills\\skills.py",
+      "line": 3,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 14,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 9,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 3,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 24,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 4,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_2.py",
+      "line": 23,
+      "rule": "unused-import",
+      "note": "Import is genuinely unused in this file",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\utils\\count_tokens.py",
+      "line": 4,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\utils\\parse_partial_json.py",
+      "line": 58,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 25,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 36,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 297,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\jupyter_language.py",
+      "line": 120,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\jupyter_language.py",
+      "line": 129,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 56,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\utils\\count_tokens.py",
+      "line": 28,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\sms\\sms.py",
+      "line": 25,
+      "rule": "bare-except",
+      "note": "Bare except catches SystemExit and KeyboardInterrupt, should use Exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 420,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\run_text_llm.py",
+      "line": 30,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\vision\\vision.py",
+      "line": 35,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\run_tool_calling_llm.py",
+      "line": 218,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\llm.py",
+      "line": 130,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 106,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\mouse\\mouse.py",
+      "line": 56,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\run_tool_calling_llm.py",
+      "line": 208,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 284,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 60,
+      "rule": "none-comparison",
+      "note": "Should use is None / is not None for identity comparison",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 297,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 438,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 216,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 52,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 110,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_1.py",
+      "line": 11,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\mouse\\mouse.py",
+      "line": 44,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 15,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 551,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\run_function_calling_llm.py",
+      "line": 24,
+      "rule": "long-method",
+      "note": "Method genuinely exceeds length threshold, needs decomposition",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\calendar\\calendar.py",
+      "line": 178,
+      "rule": "unused-variable",
+      "note": "Variable assigned but never used in the AppleScript string",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 484,
+      "rule": "unused-variable",
+      "note": "Variable assigned but never used",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\tools\\computer.py",
+      "line": 74,
+      "rule": "unused-variable",
+      "note": "Variable computed but never referenced afterward",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\mouse\\mouse.py",
+      "line": 283,
+      "rule": "unused-variable",
+      "note": "Variable computed but never referenced afterward",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\telemetry.py",
+      "line": 60,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 291,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\unused_markdown.py",
+      "line": 204,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 484,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\llm.py",
+      "line": 379,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\browser\\browser.py",
+      "line": 32,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\contributing_conversations.py",
+      "line": 190,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\browser\\browser.py",
+      "line": 48,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\screenpipe.py",
+      "line": 33,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 350,
+      "rule": "requests-no-timeout",
+      "note": "HTTP request without timeout can hang the process indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 820,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\run_tool_calling_llm.py",
+      "line": 101,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\core.py",
+      "line": 297,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\terminal.py",
+      "line": 82,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\run_function_calling_llm.py",
+      "line": 24,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\mouse\\mouse.py",
+      "line": 44,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 726,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\start_terminal_interface.py",
+      "line": 19,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\utils\\convert_to_openai_messages.py",
+      "line": 9,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\terminal_interface.py",
+      "line": 47,
+      "rule": "high-complexity",
+      "note": "Genuinely high cyclomatic complexity, maintenance risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 906,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 515,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 481,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 570,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 562,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 709,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 560,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 60,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 858,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 726,
+      "rule": "variable-shadowing",
+      "note": "Variable shadows outer scope, minor readability concern",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 111,
+      "rule": "ssrf-risk",
+      "note": "User-supplied URL fetched without validation, could target internal services",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 79,
+      "rule": "ssrf-risk",
+      "note": "User-supplied URL fetched without validation, could target internal services",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\scan_code.py",
+      "line": 38,
+      "rule": "subprocess-audit",
+      "note": "shell=True with f-string path interpolation, command injection risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\system_debug_info.py",
+      "line": 85,
+      "rule": "subprocess-audit",
+      "note": "User-configurable api_base passed to shell via f-string, command injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\llm.py",
+      "line": 415,
+      "rule": "exception-swallowed",
+      "note": "Silent exception swallowing can hide unexpected errors",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 221,
+      "rule": "exception-swallowed",
+      "note": "Silent exception swallowing can hide unexpected errors",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\keyboard\\keyboard.py",
+      "line": 28,
+      "rule": "exception-swallowed",
+      "note": "Bare except swallows all errors during clipboard ops",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 206,
+      "rule": "exception-swallowed",
+      "note": "Silent exception swallowing can hide unexpected errors",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\keyboard\\keyboard.py",
+      "line": 54,
+      "rule": "exception-swallowed",
+      "note": "Bare except swallows all errors during clipboard ops",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 193,
+      "rule": "exception-swallowed",
+      "note": "Silent exception swallowing can hide unexpected errors",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 621,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Full stack trace sent to client over network, leaks internal info",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 491,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Full stack trace sent to client over network, leaks internal info",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 535,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Full stack trace sent to client over network, leaks internal info",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 495,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Full stack trace sent to client over network, leaks internal info",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_2.py",
+      "line": 250,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Full stack trace sent to client over network, leaks internal info",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\telemetry.py",
+      "line": 31,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 458,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\java.py",
+      "line": 125,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 397,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 91,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\java.py",
+      "line": 122,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 154,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 556,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\utils\\find_image_path.py",
+      "line": 9,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 48,
+      "rule": "toctou-file-check",
+      "note": "TOCTOU race between check and use, low exploitability in CLI context",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 148,
+      "rule": "taint-flow",
+      "note": "Profile start_script exec from URL-fetched content, RCE if source compromised",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\scan_code.py",
+      "line": 38,
+      "rule": "taint-flow",
+      "note": "shell=True with user-influenced path in f-string, injection risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 111,
+      "rule": "taint-flow",
+      "note": "User-supplied URL fetched without validation in profile loading",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 79,
+      "rule": "taint-flow",
+      "note": "User-supplied URL fetched without validation in profile loading",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\system_debug_info.py",
+      "line": 71,
+      "rule": "null-dereference",
+      "note": "installed_version could be None, startswith would raise AttributeError",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 273,
+      "rule": "type-comparison",
+      "note": "Should use isinstance() for type checking, fails with subclasses",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 868,
+      "rule": "type-comparison",
+      "note": "Should use isinstance() for type checking, fails with subclasses",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\jupyter_language.py",
+      "line": 185,
+      "rule": "type-comparison",
+      "note": "Should use isinstance() for type checking, fails with subclasses",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 859,
+      "rule": "type-comparison",
+      "note": "Should use isinstance() for type checking, fails with subclasses",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 213,
+      "rule": "type-comparison",
+      "note": "Should use isinstance() for type checking, fails with subclasses",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\utils\\convert_to_openai_messages.py",
+      "line": 86,
+      "rule": "type-comparison",
+      "note": "Should use isinstance() for type checking, fails with subclasses",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 216,
+      "rule": "type-comparison",
+      "note": "Should use isinstance() for type checking, fails with subclasses",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_2.py",
+      "line": 130,
+      "rule": "llm-streaming-no-timeout",
+      "note": "LLM streaming without timeout can hang indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\terminal_interface.py",
+      "line": 162,
+      "rule": "llm-streaming-no-timeout",
+      "note": "LLM streaming without timeout can hang indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 159,
+      "rule": "llm-streaming-no-timeout",
+      "note": "LLM streaming without timeout can hang indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\core.py",
+      "line": 219,
+      "rule": "llm-streaming-no-timeout",
+      "note": "LLM streaming without timeout can hang indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 770,
+      "rule": "llm-streaming-no-timeout",
+      "note": "LLM streaming without timeout can hang indefinitely",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 70,
+      "rule": "possibly-uninitialized",
+      "note": "loop_message used at line 70 but only assigned later, NameError risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 557,
+      "rule": "race-condition-mkdir",
+      "note": "Should use os.makedirs(exist_ok=True) to avoid race condition",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 155,
+      "rule": "race-condition-mkdir",
+      "note": "Should use os.makedirs(exist_ok=True) to avoid race condition",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 398,
+      "rule": "race-condition-mkdir",
+      "note": "Should use os.makedirs(exist_ok=True) to avoid race condition",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\magic_commands.py",
+      "line": 224,
+      "rule": "race-condition-mkdir",
+      "note": "Should use os.makedirs(exist_ok=True) to avoid race condition",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\core.py",
+      "line": 282,
+      "rule": "race-condition-mkdir",
+      "note": "Should use os.makedirs(exist_ok=True) to avoid race condition",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 364,
+      "rule": "global-keyword",
+      "note": "Global mutable state makes code harder to test and reason about",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 821,
+      "rule": "global-keyword",
+      "note": "Global mutable state makes code harder to test and reason about",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 545,
+      "rule": "global-keyword",
+      "note": "Global mutable state makes code harder to test and reason about",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 331,
+      "rule": "global-keyword",
+      "note": "Global mutable state makes code harder to test and reason about",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\utils\\scan_code.py",
+      "line": 38,
+      "rule": "shell-true",
+      "note": "shell=True with f-string path interpolation, command injection risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 431,
+      "rule": "shell-true",
+      "note": "shell=True with model_path from filesystem, minor injection risk",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 137,
+      "rule": "llm-agent-unbounded-loop",
+      "note": "Unbounded loop with LLM calls, no iteration limit guard",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 23,
+      "rule": "llm-agent-unbounded-loop",
+      "note": "Unbounded loop with LLM calls, no iteration limit guard",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 819,
+      "rule": "llm-no-rate-limit",
+      "note": "LLM chat endpoint without rate limiting, cost/abuse risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 353,
+      "rule": "llm-no-rate-limit",
+      "note": "LLM chat endpoint without rate limiting, cost/abuse risk",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_1.py",
+      "line": 11,
+      "rule": "generic-bind-all-interfaces",
+      "note": "Default 0.0.0.0 binding exposes code execution to entire network",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_2.py",
+      "line": 254,
+      "rule": "generic-bind-all-interfaces",
+      "note": "Default 0.0.0.0 binding exposes code execution to entire network",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_1.py",
+      "line": 159,
+      "rule": "insecure-http",
+      "note": "HTTP URL for server, no TLS",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\browser\\browser_next.py",
+      "line": 39,
+      "rule": "insecure-http",
+      "note": "HTTP to google.com should use HTTPS",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\computer\\ai\\ai.py",
+      "line": 140,
+      "rule": "unreachable-code",
+      "note": "Dead code after return/raise, indicates bug or leftover code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 180,
+      "rule": "unreachable-code",
+      "note": "Dead code after return/raise, indicates bug or leftover code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\mouse\\mouse.py",
+      "line": 71,
+      "rule": "unreachable-code",
+      "note": "Dead code after return/raise, indicates bug or leftover code",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\sms\\sms.py",
+      "line": 52,
+      "rule": "resource-leak",
+      "note": "SQLite cursor opened without context manager, may leak on exception",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\vision\\vision.py",
+      "line": 165,
+      "rule": "resource-leak",
+      "note": "PIL Image opened without context manager, minor leak risk",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\core\\llm\\utils\\convert_to_openai_messages.py",
+      "line": 168,
+      "rule": "resource-leak",
+      "note": "PIL Image opened without context manager, minor leak risk",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 114,
+      "rule": "llm-structured-output-trusted",
+      "note": "URL-fetched content used directly as profile/code, no validation",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\aws-docs.py",
+      "line": 57,
+      "rule": "llm-structured-output-trusted",
+      "note": "URL-fetched content used directly as profile/code, no validation",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 116,
+      "rule": "llm-structured-output-trusted",
+      "note": "URL-fetched content used directly as profile/code, no validation",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 393,
+      "rule": "xss-innerhtml",
+      "note": "User input in innerHTML without escaping, XSS vulnerability",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\utils\\count_tokens.py",
+      "line": 47,
+      "rule": "mutable-default",
+      "note": "Mutable default list shared across calls, classic Python bug",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 367,
+      "rule": "llm-role-from-user-input",
+      "note": "Message role from request allows injection of system/assistant messages",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 151,
+      "rule": "llm-no-token-budget",
+      "note": "No cumulative token/cost tracking in unbounded agent loop",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 151,
+      "rule": "llm-no-stop-reason-check-anthropic",
+      "note": "Stop reason not checked, may process truncated output as complete",
+      "confidence": "LOW"
+    },
+    {
+      "file": "interpreter\\computer_use\\tools\\computer.py",
+      "line": 22,
+      "rule": "hardcoded-tmp",
+      "note": "Predictable /tmp/outputs path, symlink attack risk on shared systems",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\magic_commands.py",
+      "line": 255,
+      "rule": "globals-manipulation",
+      "note": "globals() injection from user package name, could overwrite module vars",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 148,
+      "rule": "exec-usage",
+      "note": "exec() runs URL-fetched profile script, RCE if source compromised",
+      "confidence": "HIGH"
+    }
+  ],
+  "false_positives": [
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 301,
+      "rule": "unused-variable",
+      "note": "FastAPI route handler registered via decorator; variable used by framework",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 696,
+      "rule": "unused-variable",
+      "note": "FastAPI route handler registered via decorator; variable used by framework",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 962,
+      "rule": "unused-variable",
+      "note": "FastAPI route handler registered via decorator; variable used by framework",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_1.py",
+      "line": 23,
+      "rule": "unused-variable",
+      "note": "FastAPI route handler registered via decorator; variable used by framework",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 643,
+      "rule": "unused-variable",
+      "note": "FastAPI route handler registered via decorator; variable used by framework",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_1.py",
+      "line": 57,
+      "rule": "unused-variable",
+      "note": "FastAPI route handler registered via decorator; variable used by framework",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\llm.py",
+      "line": 375,
+      "rule": "ssrf-risk",
+      "note": "api_base is intentionally user-configured to point at their LLM provider",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\telemetry.py",
+      "line": 60,
+      "rule": "ssrf-risk",
+      "note": "URL is hardcoded posthog endpoint, not user-controlled",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 350,
+      "rule": "ssrf-risk",
+      "note": "api_base is intentionally user-configured to point at their LLM provider",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\utils\\check_for_update.py",
+      "line": 8,
+      "rule": "ssrf-risk",
+      "note": "URL is hardcoded to pypi.org, not user-controlled",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\browser\\browser.py",
+      "line": 48,
+      "rule": "ssrf-risk",
+      "note": "api_base is intentionally user-configured to point at their LLM provider",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 291,
+      "rule": "ssrf-risk",
+      "note": "api_base is intentionally user-configured to point at their LLM provider",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\__init__.py",
+      "line": 37,
+      "rule": "ssrf-risk",
+      "note": "URL is hardcoded to pypi.org, not user-controlled",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\display.py",
+      "line": 323,
+      "rule": "ssrf-risk",
+      "note": "api_base is intentionally user-configured to point at their LLM provider",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\java.py",
+      "line": 53,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\magic_commands.py",
+      "line": 246,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\system_debug_info.py",
+      "line": 24,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\utils\\run_applescript.py",
+      "line": 25,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\java.py",
+      "line": 71,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\utils\\run_applescript.py",
+      "line": 13,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 18,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 381,
+      "rule": "subprocess-audit",
+      "note": "Executing system commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\utils\\parse_partial_json.py",
+      "line": 9,
+      "rule": "exception-swallowed",
+      "note": "Intentional fallback for partial JSON parsing",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\start_terminal_interface.py",
+      "line": 658,
+      "rule": "exception-swallowed",
+      "note": "Catching KeyboardInterrupt to exit gracefully is correct",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_1.py",
+      "line": 118,
+      "rule": "exception-swallowed",
+      "note": "JSON parse fallback is intentional",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\tools\\run.py",
+      "line": 38,
+      "rule": "exception-swallowed",
+      "note": "Process already dead, safe to ignore",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\subprocess_language.py",
+      "line": 86,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Traceback shown to local user as code execution output, expected REPL behavior",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\java.py",
+      "line": 118,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Traceback shown to local user as code execution output, expected REPL behavior",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\jupyter_language.py",
+      "line": 130,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Traceback shown to local user as code execution output, expected REPL behavior",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 406,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Traceback shown to local user as code execution output, expected REPL behavior",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\subprocess_language.py",
+      "line": 108,
+      "rule": "information-disclosure-stacktrace",
+      "note": "Traceback shown to local user as code execution output, expected REPL behavior",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\gemma2.py",
+      "line": 7,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 49,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\assistant.py",
+      "line": 27,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\local-os.py",
+      "line": 12,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 65,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\llama3-os.py",
+      "line": 9,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral.py",
+      "line": 9,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-vision.py",
+      "line": 9,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 115,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\llama3.py",
+      "line": 9,
+      "rule": "llm-multiline-ascii-art-in-prompt",
+      "note": "Developer-authored system prompts with few-shot examples, not ASCII art injection",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\llama3-vision.py",
+      "line": 15,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\qwen.py",
+      "line": 13,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\local-os.py",
+      "line": 18,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\llama3.py",
+      "line": 15,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\gemma2.py",
+      "line": 13,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\local-assistant.py",
+      "line": 15,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 299,
+      "rule": "webbrowser-open",
+      "note": "Opens hardcoded URL, not user-controlled",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\llama3-os.py",
+      "line": 15,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-vision.py",
+      "line": 15,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral.py",
+      "line": 15,
+      "rule": "webbrowser-open",
+      "note": "Code inside a few-shot example string, not executed directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\terminal_interface.py",
+      "line": 42,
+      "rule": "empty-exception-handler",
+      "note": "readline unavailable on Windows, graceful fallback",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\terminal_interface.py",
+      "line": 8,
+      "rule": "empty-exception-handler",
+      "note": "Optional dependency import, graceful degradation is correct",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\scan_code.py",
+      "line": 9,
+      "rule": "empty-exception-handler",
+      "note": "Optional dependency import, graceful degradation is correct",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\terminal_interface.py",
+      "line": 109,
+      "rule": "empty-exception-handler",
+      "note": "readline unavailable on Windows, graceful fallback",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 36,
+      "rule": "empty-exception-handler",
+      "note": "Optional server dependencies, graceful degradation",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\keyboard\\keyboard.py",
+      "line": 112,
+      "rule": "taint-flow",
+      "note": "Executing commands is the core purpose of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\telemetry.py",
+      "line": 60,
+      "rule": "taint-flow",
+      "note": "Data posted to hardcoded posthog URL, not SSRF",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\utils\\run_applescript.py",
+      "line": 25,
+      "rule": "taint-flow",
+      "note": "Running AppleScript commands is the product purpose",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\subprocess_language.py",
+      "line": 50,
+      "rule": "taint-flow",
+      "note": "Subprocess execution is the core feature",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 350,
+      "rule": "taint-flow",
+      "note": "api_base is user-configured LLM endpoint, fetching models is expected",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\llm\\llm.py",
+      "line": 358,
+      "rule": "null-dereference",
+      "note": "requests.get/post never returns None, raises on failure",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\__init__.py",
+      "line": 38,
+      "rule": "null-dereference",
+      "note": "requests.get/post never returns None, raises on failure",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\utils\\check_for_update.py",
+      "line": 9,
+      "rule": "null-dereference",
+      "note": "requests.get/post never returns None, raises on failure",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 112,
+      "rule": "null-dereference",
+      "note": "requests.get/post never returns None, raises on failure",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\local_setup.py",
+      "line": 351,
+      "rule": "null-dereference",
+      "note": "requests.get/post never returns None, raises on failure",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 80,
+      "rule": "null-dereference",
+      "note": "requests.get/post never returns None, raises on failure",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\terminal_interface.py",
+      "line": 38,
+      "rule": "weak-random",
+      "note": "Used for UI/image processing randomization, not security-sensitive",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 664,
+      "rule": "weak-random",
+      "note": "Used for UI/image processing randomization, not security-sensitive",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 654,
+      "rule": "weak-random",
+      "note": "Used for UI/image processing randomization, not security-sensitive",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 667,
+      "rule": "weak-random",
+      "note": "Used for UI/image processing randomization, not security-sensitive",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 657,
+      "rule": "weak-random",
+      "note": "Used for UI/image processing randomization, not security-sensitive",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 661,
+      "rule": "weak-random",
+      "note": "Used for UI/image processing randomization, not security-sensitive",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 450,
+      "rule": "weak-random",
+      "note": "Used for UI/image processing randomization, not security-sensitive",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\llama31-database.py",
+      "line": 41,
+      "rule": "prompt-injection-fstring",
+      "note": "Interpolated values are system metadata (OS, date), not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\cerebras.py",
+      "line": 30,
+      "rule": "prompt-injection-fstring",
+      "note": "Interpolated values are system metadata (OS, date), not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\template_profile.py",
+      "line": 42,
+      "rule": "prompt-injection-fstring",
+      "note": "Interpolated values are system metadata (OS, date), not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\obsidian.py",
+      "line": 22,
+      "rule": "prompt-injection-fstring",
+      "note": "Interpolated values are system metadata (OS, date), not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\default_system_message.py",
+      "line": 4,
+      "rule": "prompt-injection-fstring",
+      "note": "Interpolated values are system metadata (OS, date), not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 99,
+      "rule": "prompt-injection-fstring",
+      "note": "Interpolated values are system metadata (OS, date), not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\respond.py",
+      "line": 359,
+      "rule": "llm-streaming-no-timeout",
+      "note": "Local code execution streaming, not an LLM network call",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\conversation_navigator.py",
+      "line": 35,
+      "rule": "possibly-uninitialized",
+      "note": "List comprehension variable is local to comprehension, not uninitialized",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 545,
+      "rule": "possibly-uninitialized",
+      "note": "Global variable declared at module scope, global keyword just references it",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\loop.py",
+      "line": 364,
+      "rule": "possibly-uninitialized",
+      "note": "Global variable declared at module scope, global keyword just references it",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 821,
+      "rule": "possibly-uninitialized",
+      "note": "Global variable declared at module scope, global keyword just references it",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\tools\\run.py",
+      "line": 24,
+      "rule": "shell-true",
+      "note": "Shell execution is the intended functionality",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\tools\\bash.py",
+      "line": 29,
+      "rule": "shell-true",
+      "note": "Shell execution is the intended functionality",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 363,
+      "rule": "prompt-injection-content-fstring",
+      "note": "Few-shot example messages with system metadata, not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 284,
+      "rule": "prompt-injection-content-fstring",
+      "note": "Few-shot example messages with system metadata, not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 279,
+      "rule": "prompt-injection-content-fstring",
+      "note": "Few-shot example messages with system metadata, not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\codestral-few-shot.py",
+      "line": 358,
+      "rule": "prompt-injection-content-fstring",
+      "note": "Few-shot example messages with system metadata, not user chat input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\archived_server_2.py",
+      "line": 238,
+      "rule": "llm-agent-unbounded-loop",
+      "note": "Event loop for async output streaming, not an LLM retry loop",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 704,
+      "rule": "llm-no-rate-limit",
+      "note": "File download endpoint, not an LLM endpoint",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 1008,
+      "rule": "generic-bind-all-interfaces",
+      "note": "Warning message about 0.0.0.0, not the actual binding",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 69,
+      "rule": "insecure-http",
+      "note": "URL shortcut string replaced with HTTPS, not used directly",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\tools\\run.py",
+      "line": 24,
+      "rule": "async-subprocess-shell",
+      "note": "Shell execution is the intended functionality of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\computer_use\\tools\\bash.py",
+      "line": 29,
+      "rule": "async-subprocess-shell",
+      "note": "Shell execution is the intended functionality of open-interpreter",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 352,
+      "rule": "xss-innerhtml",
+      "note": "Static HTML string, no user input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 156,
+      "rule": "file-upload-unrestricted",
+      "note": "Saving debug images to desktop, not a file upload endpoint",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\display\\point\\point.py",
+      "line": 425,
+      "rule": "file-upload-unrestricted",
+      "note": "Saving debug images to desktop, not a file upload endpoint",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\core.py",
+      "line": 42,
+      "rule": "mutable-default",
+      "note": "Default is None not mutable, safe pattern",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\utils\\telemetry.py",
+      "line": 55,
+      "rule": "hardcoded-secret-dict",
+      "note": "PostHog client-side analytics key, designed to be public",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 228,
+      "rule": "hardcoded-secret-dict",
+      "note": "Config mapping key name, not an actual secret value",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\magic_commands.py",
+      "line": 242,
+      "rule": "dunder-import-dynamic",
+      "note": "Dynamic import after pip install of user-requested package, intentional",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\magic_commands.py",
+      "line": 230,
+      "rule": "dunder-import-dynamic",
+      "note": "Dynamic import after pip install of user-requested package, intentional",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 116,
+      "rule": "llm-training-data-leak-check",
+      "note": "HTTP API responses, not LLM outputs",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\aws-docs.py",
+      "line": 57,
+      "rule": "llm-training-data-leak-check",
+      "note": "HTTP API responses, not LLM outputs",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\async_core.py",
+      "line": 1013,
+      "rule": "hardcoded-ip",
+      "note": "8.8.8.8 for local IP detection trick, common pattern",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\core\\computer\\terminal\\languages\\shell.py",
+      "line": 91,
+      "rule": "regex-injection",
+      "note": "Patterns are hardcoded list, not user input",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\magic_commands.py",
+      "line": 118,
+      "rule": "generic-debug-enabled",
+      "note": "User explicitly enables verbose mode via CLI, intentional",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\aws-docs.py",
+      "line": 30,
+      "rule": "rag-user-query-in-system-prompt",
+      "note": "Static system prompt, no user query in system role",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\llama31-database.py",
+      "line": 19,
+      "rule": "db-connection-string",
+      "note": "Credentials from env vars, f-string assembles at runtime",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\defaults\\template_profile.py",
+      "line": 24,
+      "rule": "generic-api-key-assignment",
+      "note": "Template placeholder in example profile, not a real key",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\profiles\\profiles.py",
+      "line": 478,
+      "rule": "llm-rot13-decode-to-prompt",
+      "note": "str.translate for punctuation stripping, not ROT13",
+      "confidence": "HIGH"
+    },
+    {
+      "file": "interpreter\\terminal_interface\\utils\\display_output.py",
+      "line": 78,
+      "rule": "os-startfile",
+      "note": "Opening files with default handler is intended functionality",
+      "confidence": "HIGH"
+    }
+  ],
+  "notes": ""
+}
