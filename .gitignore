@@ -53,9 +53,13 @@ COLLAB.md
 IMPROVEMENTS.md
 RELEASE_CHECKLIST.md
 INCIDENT.md
+FORGING.md
 dojigiri/HANDOFF.md
 dojigiri-target-list.md
 .internal/
+docs/pricing.md
+docs/gap-analysis.md
+docs/PYPI_READINESS.md
 reviews/
 
 # Build/tool caches

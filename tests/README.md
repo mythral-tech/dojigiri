@@ -4,7 +4,7 @@ Comprehensive test suite for the Dojigiri static analysis tool.
 
 ## Test Coverage
 
-The test suite includes 1426 tests covering:
+The test suite includes 2,655+ tests covering:
 
 ### Core Modules (High Priority)
 - **test_config.py** - Data structures, enums, and utility functions
@@ -80,9 +80,9 @@ These should be removed as they are no longer called after the analyzer.py refac
 
 ## Test Statistics
 
-- **Total Tests**: 1426
+- **Total Tests**: 2,655+
 - **Pass Rate**: 100% (2 skipped on Windows due to Unix-specific permission checks)
-- **Execution Time**: ~55s
+- **Execution Time**: ~90s
 
 ## Completed Improvements
 

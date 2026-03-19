@@ -3,7 +3,7 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-2657-brightgreen.svg)]()
-[![Rules](https://img.shields.io/badge/rules-780-brightgreen.svg)]()
+[![Rules](https://img.shields.io/badge/rules-2179-brightgreen.svg)]()
 [![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-100%25%20(with%20tuned%20filters)-brightgreen.svg)]()
 [![Languages](https://img.shields.io/badge/languages-18-blue.svg)]()
 
@@ -45,7 +45,7 @@ pip install dojigiri
 ```
 
 ```bash
-doji scan .                    # SAST scan (780 rules, 18 languages)
+doji scan .                    # SAST scan (2,179 rules, 18 languages)
 doji sca .                     # dependency vulnerability scan
 doji fix . --apply             # auto-fix findings
 doji explain <file>            # plain-language walkthrough of findings
@@ -57,7 +57,7 @@ No API key required for core scanning. Deep scan mode (`--deep`) uses an LLM for
 
 ## Features
 
-### SAST Engine -- 780 Rules, 18 Languages
+### SAST Engine -- 2,179 Rules, 18 Languages
 
 Python, JavaScript/TypeScript, Java, Go, Rust, C/C++, Ruby, PHP, C#, Swift, Kotlin, Pine Script, Bash, SQL, HTML, CSS.
 
@@ -126,7 +126,7 @@ AI agents can call `scan`, `sca`, `fix`, and `explain` as MCP tools -- no CLI wr
               +-----+-----+   +-----+-----+   +------+------+
               |   Tier 1   |   |   Tier 2   |   |   Tier 3    |
               |   Regex    |   |  AST/Sem   |   |    LLM      |
-              |  780 rules  |   | Tree-sitter|   |  Deep scan  |
+              |  2,179 rules  |   | Tree-sitter|   |  Deep scan  |
               +-----+------+   +-----+------+   +------+------+
                     |                |                  |
                     |          +-----+------+           |

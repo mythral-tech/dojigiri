@@ -155,4 +155,4 @@ The OWASP Benchmark results are fully reproducible. Clone the [OWASP Benchmark v
 
 ---
 
-*Dojigiri is an open-source SAST tool licensed under BUSL-1.1. It supports Python, Java, JavaScript, TypeScript, Go, Rust, C#, PHP, and universal security rules. 711 rules, tree-sitter semantic analysis, path-sensitive taint tracking, and optional LLM augmentation for deep scanning.*
+*Dojigiri is an open-source SAST tool licensed under AGPL v3. It supports Python, Java, JavaScript, TypeScript, Go, Rust, C#, PHP, and 10 more languages. 2,179 rules, tree-sitter semantic analysis, path-sensitive taint tracking, and optional LLM augmentation for deep scanning.*

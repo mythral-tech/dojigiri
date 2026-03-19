@@ -45,7 +45,7 @@ For commercial license holders, the same data handling applies:
 - **No telemetry.** Dojigiri does not phone home, collect usage metrics, or transmit any data to Dojigiri's maintainers. There is no license server.
 - **Scan results** remain on the customer's infrastructure. Dojigiri has no access to customer findings, reports, or scan history.
 
-For enterprise data processing agreements, contact licensing@dojigiri.com.
+For enterprise data processing agreements, open an issue at [github.com/mythral-tech/dojigiri](https://github.com/mythral-tech/dojigiri/issues).
 
 ## Privacy flag
 
