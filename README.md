@@ -1,8 +1,8 @@
 # Dojigiri
 
-[![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-2258-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-2657-brightgreen.svg)]()
 [![Rules](https://img.shields.io/badge/rules-780-brightgreen.svg)]()
 [![OWASP Benchmark](https://img.shields.io/badge/OWASP%20Benchmark%20v1.2-100%25%20(with%20tuned%20filters)-brightgreen.svg)]()
 [![Languages](https://img.shields.io/badge/languages-18-blue.svg)]()
@@ -15,26 +15,26 @@
 
 ```
 With benchmark-tuned filters:   Youden +100.0%  (TPR 100.0%, FPR 0.0%)
-General-purpose rules only:     Youden  +36.3%  (TPR  98.7%, FPR 62.3%)
+General-purpose rules only:     Youden  +50.1%  (TPR  77.6%, FPR 27.5%)
 Perfect categories:             11/11 (tuned) · 3/11 (general)
 ```
 
 Tested against [OWASP Benchmark v1.2](https://owasp.org/www-project-benchmark/) -- 2,740 test cases across 11 vulnerability categories in internal testing. Youden Index = TPR - FPR; a perfect tool scores +100%, random guessing scores 0%. Results are reproducible using the included scoring script (`benchmarks/owasp_scorecard.py`).
 
-**Disclosure:** The 100% Youden Index includes 8 benchmark-specific filters in `java_sanitize.py` tuned to synthetic test patterns (arithmetic conditionals, collection misdirection, static reflection, switch/charAt on literals, doSomething() cross-method patterns, SeparateClassRequest safe source, safe bar literals, and hashAlg2 property lookups). These patterns appear in the OWASP Benchmark suite but are uncommon in production Java code. Our general-purpose rules alone score **Youden +36.3%** (TPR 98.7%, FPR 62.3%) -- the benchmark-tuned pipeline adds **+63.7 percentage points**. Only one filter (`_has_explicit_sanitizer`, covering ESAPI/Spring/Apache Commons encoding) is general-purpose. Reproducible via `python benchmarks/owasp_general_score.py`.
+**Disclosure:** The 100% Youden Index includes 8 benchmark-specific filters in `java_sanitize.py` tuned to synthetic test patterns (arithmetic conditionals, collection misdirection, static reflection, switch/charAt on literals, doSomething() cross-method patterns, SeparateClassRequest safe source, safe bar literals, and hashAlg2 property lookups). These patterns appear in the OWASP Benchmark suite but are uncommon in production Java code. Our general-purpose rules alone score **Youden +50.1%** (TPR 77.6%, FPR 27.5%) -- the benchmark-tuned pipeline adds **+49.9 percentage points**. Only one filter (`_has_explicit_sanitizer`, covering ESAPI/Spring/Apache Commons encoding) is general-purpose. Reproducible via `python benchmarks/owasp_general_score.py`.
 
 #### Weak Categories (General Mode)
 
 | Category | CWE | Youden | FPR | Why |
 |---|---|---|---|---|
-| SQL Injection | 89 | +0.0% | 100% | Flags every SQL-adjacent call; cannot distinguish parameterized queries from string concatenation without interprocedural taint tracking |
-| LDAP Injection | 90 | +0.0% | 100% | Same pattern — no way to tell safe `DirContext` lookups from tainted ones at the regex/shallow-AST level |
-| Trust Boundary | 501 | +0.0% | 100% | `HttpSession.setAttribute` always flagged; determining whether stored data is validated requires cross-method dataflow |
-| XPath Injection | 643 | +0.0% | 100% | Every `XPath.evaluate` call flagged; safe-literal vs. user-controlled input requires source-to-sink taint resolution |
-| Command Injection | 78 | −0.7% | 92% | FPR exceeds TPR — fires on nearly all `Runtime.exec` calls, slightly biased toward safe patterns in this test set |
-| Path Traversal | 22 | +1.4% | 93% | Marginally above random; sanitization via `normalize()`/`startsWith()` checks invisible to pattern matching |
+| XPath Injection | 643 | +0.0% | 0% | No matching rules — returns zero findings (no FPs, but no TPs either) |
+| Command Injection | 78 | +6.3% | 0% | High precision but low recall — taint tracking catches some `Runtime.exec` paths but misses most |
+| LDAP Injection | 90 | +13.2% | 31% | Taint tracking improved from blind-flag; still cannot resolve all safe `DirContext` lookups |
+| Trust Boundary | 501 | +15.3% | 23% | `HttpSession.setAttribute` partially resolved via cross-method dataflow |
+| Path Traversal | 22 | +17.5% | 66% | Taint tracking from source to `File` constructors; sanitization via `normalize()`/`startsWith()` partially recognized |
+| SQL Injection | 89 | +28.7% | 55% | Cross-file taint tracking resolves parameterized queries; remaining FPs from complex sanitizer chains |
 
-The 0% Youden categories share a root cause: general-mode rules correctly identify *all* dangerous sinks (100% TPR) but cannot recognize sanitization, so they also flag every safe case (100% FPR). Improving these requires interprocedural taint tracking with sanitizer recognition — exactly what the benchmark-tuned filters provide. The general score represents Dojigiri's realistic detection baseline on unknown codebases where specific sanitization patterns aren't pre-mapped.
+Cross-file taint tracking (added in v1.1) significantly improved the weak categories. SQL injection went from 0% to +28.7% Youden, and the overall general-purpose score rose from +36.3% to +50.1%. The remaining gaps are in categories where sanitizer recognition requires deeper interprocedural analysis — exactly what the benchmark-tuned filters provide. The general score represents Dojigiri's realistic detection baseline on unknown codebases where specific sanitization patterns aren't pre-mapped.
 
 ---
 
@@ -237,7 +237,7 @@ x = eval(user_input)  # doji:ignore(dangerous-eval)
 | **SARIF output** | Yes | Yes (plugin) | Yes | No (plugin available) |
 | **OWASP Benchmark** | Youden +100.0% (with tuned filters) | Not published | Not published (OSS) | Varies by language |
 | **Self-hosted** | CLI / pip | CLI / pip | CLI / Docker | Server (JVM) |
-| **License** | BSL 1.1 | Apache 2.0 | LGPL 2.1 | LGPL 3.0 |
+| **License** | AGPL v3 | Apache 2.0 | LGPL 2.1 | LGPL 3.0 |
 
 Comparison based on publicly available documentation as of March 2026. Semgrep Pro and SonarQube commercial editions offer additional features not reflected here.
 
@@ -270,6 +270,6 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full system map.
 
 ## License
 
-BSL 1.1 (Business Source License) -- see [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md) for details.
+AGPL v3 -- see [LICENSE](LICENSE) and [LICENSING.md](LICENSING.md) for details.
 
-Free for development, testing, personal projects, and education. Production use in commercial products requires a commercial license. Converts to Apache 2.0 on 2030-03-09.
+Free to use, modify, and distribute. Modifications must be shared under AGPL v3. Network use (SaaS) triggers source disclosure. Commercial dual-licensing available from [Mythral Technologies](https://github.com/mythral-tech/dojigiri/issues) for organizations that cannot comply with AGPL.

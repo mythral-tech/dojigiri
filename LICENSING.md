@@ -1,42 +1,41 @@
 # Dojigiri Licensing
 
-Dojigiri is licensed under the **Business Source License 1.1 (BSL 1.1)**.
+Dojigiri is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0-only).
 
-## What's Free
+## Your Rights
 
-- Development and testing
-- Personal projects
-- Educational use
-- Contributing to Dojigiri itself
-- Evaluating for potential purchase
-- CI/CD on open-source projects
+- **Use** Dojigiri for any purpose -- personal, commercial, internal, educational
+- **Modify** the source code to suit your needs
+- **Distribute** copies of Dojigiri, modified or unmodified
+- **Run** Dojigiri as part of a service, including SaaS and CI/CD pipelines
 
-## What Needs a Commercial License
+## Your Obligations
 
-Production use in a commercial product or service. Examples:
+- **Share modifications.** If you distribute a modified version of Dojigiri, you must make the modified source code available under the AGPL v3.
+- **Network use counts as distribution.** If you run a modified version of Dojigiri as a network service (e.g., a SaaS scanning platform), users of that service must be able to obtain the corresponding source code. This is what distinguishes AGPL from GPL.
+- **Preserve license notices.** Keep the LICENSE file and copyright notices intact in all copies and derivative works.
+- **State changes.** If you modify the source, note what you changed and when.
 
-- Embedding Dojigiri in a SaaS platform
-- Running Dojigiri as part of a commercial CI/CD pipeline
-- Bundling Dojigiri in a product you sell
-- Offering Dojigiri as a managed service
+## What This Means in Practice
 
-## Change Date
+| Use Case | AGPL Requirement |
+|----------|-----------------|
+| Scan your own code (any org size) | None -- internal use is unrestricted |
+| Use in CI/CD pipeline | None -- running the tool doesn't trigger disclosure |
+| Fork and modify for internal use | None -- no distribution, no obligation |
+| Distribute a modified version | Must share your modifications under AGPL v3 |
+| Offer as a hosted/SaaS service | Must provide source of your modified version to users |
+| Embed in a proprietary product | Not permitted under AGPL -- see dual licensing below |
 
-On **2030-03-09**, the current version of Dojigiri automatically converts to the **Apache License 2.0**, making it fully permissive.
+## Commercial Dual Licensing
 
-Every version follows the same pattern: BSL 1.1 for 4 years from release, then Apache 2.0 forever.
+Organizations that cannot comply with the AGPL v3 -- for example, those embedding Dojigiri in proprietary products or offering it as a white-label service -- can obtain a commercial license from Mythral Technologies Inc.
 
-## Commercial Licensing
+Commercial licensing inquiries: [github.com/mythral-tech/dojigiri/issues](https://github.com/mythral-tech/dojigiri/issues)
 
-For commercial license inquiries:
+## Why AGPL v3?
 
-- Email: licensing@dojigiri.com
-- Volume discounts available for multi-team deployments
-- White-label licensing available for integration into third-party tools
-
-## Why BSL 1.1?
-
-BSL 1.1 is used by MariaDB, CockroachDB, Sentry, HashiCorp (Terraform), and Couchbase. It keeps the source code open and available while protecting the commercial value of the work. You can read, audit, modify, and contribute — you just need a license for production commercial use.
+AGPL v3 keeps Dojigiri fully open-source while ensuring that improvements to the tool benefit the community. The "network use" clause prevents SaaS providers from wrapping Dojigiri without contributing back. Companies that need different terms can use the commercial dual-license.
 
 ## Full License Text
 

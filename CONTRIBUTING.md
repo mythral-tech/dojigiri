@@ -86,4 +86,4 @@ When filing an issue, include:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the BSL 1.1.
+By contributing, you agree that your contributions will be licensed under the AGPL v3.

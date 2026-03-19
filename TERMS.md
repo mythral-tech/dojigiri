@@ -12,11 +12,9 @@ By downloading, installing, or using Dojigiri in any capacity — including as a
 
 ## 2. License
 
-Dojigiri is distributed under the Business Source License 1.1 (BSL 1.1). See the `LICENSE` file in the project repository for full license text. These Terms supplement but do not replace the BSL 1.1 License.
+Dojigiri is distributed under the GNU Affero General Public License v3.0 (AGPL-3.0-only). See the `LICENSE` file in the project repository for full license text. These Terms supplement but do not replace the AGPL v3.
 
-Use of Dojigiri is free for development, testing, personal projects, education, evaluation, and CI/CD on open-source projects. Production use in commercial products or services requires a commercial license. See [LICENSING.md](LICENSING.md) for details.
-
-On 2030-03-09, the current version automatically converts to the Apache License 2.0.
+You are free to use, modify, and distribute Dojigiri under the terms of the AGPL v3. If you modify Dojigiri or use it to provide a network service, you must make the corresponding source code available under the same license. See [LICENSING.md](LICENSING.md) for details, including commercial dual-licensing options.
 
 ## 3. Disclaimer of Warranties
 
