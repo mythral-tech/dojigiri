@@ -13,7 +13,7 @@ If you discover a security vulnerability in Dojigiri, please report it responsib
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Instead, email: **security@dojigiri.com** (or open a private security advisory on GitHub via the "Security" tab).
+Instead, email: **tattoo.laforge@gmail.com** (or open a private security advisory on GitHub via the "Security" tab).
 
 Please include:
 - Description of the vulnerability
